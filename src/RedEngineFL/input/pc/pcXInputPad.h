@@ -131,6 +131,18 @@ int GuiStickStep(float fAxisY, bool& rbHeld);
 // iCur moved by iStep within [0, iCount), wrapping; iCur if iCount < 1.
 int WrapIndex(int iCur, int iStep, int iCount);
 
+// Roll on the pad: a second press of crouch (B) within kRollTapMs of the
+// first, while the move stick is pushed at least kRollStick (the soldier's own
+// roll check, CheckMoveControlForRoll, needs 0.9). True for that one press.
+const unsigned int kRollTapMs = 300;
+const float kRollStick = 0.9f;
+struct RollTap
+{
+    bool bArmed;
+    unsigned int uiTapMs;
+};
+bool RollDoubleTap(RollTap& rState, bool bPressed, unsigned int uiNowMs, float fMoveMagnitude);
+
 // Left stick as the menu axes (eGUIINPUT_xAxis / yAxis, right and up
 // positive), which the GUI manager turns into repeating Left/Right/Up/Down.
 void GuiAxes(const float* afAxis, float& fX, float& fY);
@@ -167,6 +179,7 @@ enum Action
     kActPrimaryNext = 13,
     kActSecondaryNext = 15,
     kActPlayerList = 17,
+    kActRoll = 29, // ePROCESSEDINPUT_TakeScreenshot: the PC "Roll" key (special move)
     kActStrafeAxis = 30,
     kActMoveAxis = 31,
     kActTurnAxis = 32,

@@ -37,7 +37,8 @@ static_assert(XInputPad::kActionCount == ePROCESSEDINPUT_NUM_KEY_ACTIONS &&
               XInputPad::kActStrafeAxis == ePROCESSEDINPUT_STRAFE_AXIS &&
               XInputPad::kActMoveAxis == ePROCESSEDINPUT_MOVE_AXIS &&
               XInputPad::kActTurnAxis == ePROCESSEDINPUT_TURN_AXIS &&
-              XInputPad::kActPitchAxis == ePROCESSEDINPUT_PITCH_AXIS,
+              XInputPad::kActPitchAxis == ePROCESSEDINPUT_PITCH_AXIS &&
+              XInputPad::kActRoll == ePROCESSEDINPUT_TakeScreenshot,
               "XInputPad actions mirror ePROCESSEDINPUT_TYPE");
 static_assert(XInputPad::kGuiAccept == eGUIINPUT_Accept && XInputPad::kGuiBack == eGUIINPUT_Back &&
               XInputPad::kGuiStart == eGUIINPUT_Start && XInputPad::kGuiSelect == eGUIINPUT_Select &&
@@ -1131,6 +1132,25 @@ void RawControllerInputs::PadDefaultsProcess()
             if (iSlot >= 0)
             {
                 ProcessRawAction(iAction, (unsigned char)iPort, iSlot);
+            }
+        }
+
+        // On foot, double-tapping B (crouch) while moving rolls: the PC Roll
+        // key has no pad default. The first tap still crouches; the soldier
+        // checks the roll before crouch, so the second tap rolls out of it.
+        // Not in vehicles: flyers use the same input for their tricks.
+        static XInputPad::RollTap sRollTap[10];
+        if (mMode == 0 || mMode == 3)
+        {
+            const bool bCrouchPressed = mRawInputFloat[iPort][XInputPad::kBitB] >= 0.5f &&
+                                        mLastRawInputFloat[iPort][XInputPad::kBitB] < 0.5f;
+            const float fMoveX = mRawInputFloat[iPort][XInputPad::kSlotLeftRight];
+            const float fMoveY = mRawInputFloat[iPort][XInputPad::kSlotLeftDown];
+            if (XInputPad::RollDoubleTap(sRollTap[iPort], bCrouchPressed, GetTickCount(),
+                                         sqrtf(fMoveX * fMoveX + fMoveY * fMoveY)))
+            {
+                bool bLocked = false;
+                mProcessDestination->Set(ePROCESSEDINPUT_TakeScreenshot, bLocked, 1.0f, 0.0f);
             }
         }
     }

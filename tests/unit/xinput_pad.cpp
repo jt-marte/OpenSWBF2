@@ -426,3 +426,27 @@ TEST_CASE("xinput menu index wraps" * doctest::test_suite("unit"))
     CHECK(WrapIndex(0, 1, 1) == 0);
     CHECK(WrapIndex(2, 1, 0) == 2); // nothing to pick
 }
+
+TEST_CASE("xinput double tap crouch while moving rolls" * doctest::test_suite("unit"))
+{
+    RollTap tap = {};
+    // tap, tap within the window while moving: rolls on the second tap only
+    CHECK(!RollDoubleTap(tap, true, 1000, 1.0f));
+    CHECK(!RollDoubleTap(tap, false, 1100, 1.0f));
+    CHECK(RollDoubleTap(tap, true, 1200, 1.0f));
+    // a third quick tap starts over instead of rolling again
+    CHECK(!RollDoubleTap(tap, true, 1300, 1.0f));
+
+    // too slow: the second tap is a new first tap
+    RollTap slow = {};
+    CHECK(!RollDoubleTap(slow, true, 0, 1.0f));
+    CHECK(!RollDoubleTap(slow, true, kRollTapMs + 1, 1.0f));
+    CHECK(RollDoubleTap(slow, true, kRollTapMs + 100, 1.0f));
+
+    // standing still (or barely moving): crouch taps never roll
+    RollTap still = {};
+    CHECK(!RollDoubleTap(still, true, 0, 0.0f));
+    CHECK(!RollDoubleTap(still, true, 100, 0.5f));
+    CHECK(!RollDoubleTap(still, true, 200, kRollStick - 0.01f));
+    CHECK(RollDoubleTap(still, true, 300, kRollStick));
+}
