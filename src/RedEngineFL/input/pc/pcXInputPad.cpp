@@ -246,6 +246,31 @@ bool GuiTriggerDown(float fValue, bool bWasDown)
     return bWasDown ? fValue > 0.25f : fValue >= 0.5f;
 }
 
+int GuiStickStep(float fAxisY, bool& rbHeld)
+{
+    if (fabsf(fAxisY) < 0.3f)
+    {
+        rbHeld = false;
+        return 0;
+    }
+    if (rbHeld || fabsf(fAxisY) < 0.5f)
+    {
+        return 0;
+    }
+    rbHeld = true;
+    return fAxisY > 0.0f ? -1 : 1;
+}
+
+int WrapIndex(int iCur, int iStep, int iCount)
+{
+    if (iCount < 1)
+    {
+        return iCur;
+    }
+    int iNew = (iCur + iStep) % iCount;
+    return iNew < 0 ? iNew + iCount : iNew;
+}
+
 void GuiAxes(const float* afAxis, float& fX, float& fY)
 {
     fX = afAxis[0];

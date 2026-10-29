@@ -42,6 +42,7 @@
 #include "RedEngineFL/Graphics/RedAmbientLight.h"
 #include "RedEngineFL/Graphics/RedDirectionalLight.h"
 #include "RedEngineFL/input/pc/pcRedInputManager.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/input/RedKeyboard.h"
 #include "PebbleFL/Common/PblMath.h"
 #include "RedEngineFL/Interface/RedBitmapElement.h"
@@ -1537,11 +1538,43 @@ void SpawnDisplay::UpdateInput()
         }
     }
 
+    // OpenSWBF2: this screen is mouse hotspots only. While a pad drives the
+    // menus (cursor hidden) it works like console instead: up/down (D-pad or
+    // left stick) pick the class, A spawns, B goes back.
+    const bool bPad = XInputPad::gPadOwnsCursor;
+    static bool sbPadStickHeld;
     int iClass;
+    if (bPad)
+    {
+        int iStep = XInputPad::GuiStickStep(pInputs->mProcessedGUIInputs[eGUIINPUT_yAxis], sbPadStickHeld);
+        if (pInputs->IsDPadUpPressed())
+        {
+            iStep = -1;
+        }
+        else if (pInputs->IsDPadDownPressed())
+        {
+            iStep = 1;
+        }
+        if (iStep != 0)
+        {
+            Team* pTeam = Team::sTeams[mTeamNumber];
+            int iCount = pTeam->GetClassCount();
+            if (!CanShowHeroes())
+            {
+                iCount -= pTeam->GetSpecialClassCount();
+            }
+            iClass = XInputPad::WrapIndex(mClassIndex, iStep, iCount);
+            if (iClass != mClassIndex)
+            {
+                goto select_class;
+            }
+        }
+    }
+
     if (pInputs->IsAcceptPressed())
     {
         const int iSide = mTeamNumber % 2;
-        if (m_pSideIcon[iSide]->TestHotSpot(fMouseX, fMouseY) && GameLoop::GetCanSwitchSides() &&
+        if (!bPad && m_pSideIcon[iSide]->TestHotSpot(fMouseX, fMouseY) && GameLoop::GetCanSwitchSides() &&
             mMode != eCHANGECLASS)
         {
             SelectTeam(iSide + 1);
@@ -1562,13 +1595,13 @@ void SpawnDisplay::UpdateInput()
             }
 
             RedGroupElement* pBorder = m_pSlotBorder[iClass];
-            if (pBorder->IsEnabled() && pBorder->TestHotSpot(fMouseX, fMouseY))
+            if (!bPad && pBorder->IsEnabled() && pBorder->TestHotSpot(fMouseX, fMouseY))
             {
                 goto select_class;
             }
         }
 
-        if (m_AcceptBox->TestHotSpot(fMouseX, fMouseY))
+        if (bPad || m_AcceptBox->TestHotSpot(fMouseX, fMouseY))
         {
             Character* pCharacter = Character::FindPlayer(NetGame::GetLocalIndex(mPlayerIdx));
             if ((mMode == eCHANGECLASS || mMode == eSPAWNDISPLAY) &&
