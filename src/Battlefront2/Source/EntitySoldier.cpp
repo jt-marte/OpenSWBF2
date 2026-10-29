@@ -7107,7 +7107,14 @@ bool EntitySoldier::Update(float fDeltaTime)
             fForward = (fOverrideForward - fForward) * fOverrideBlend + fForward;
             fSide = (fOverrideStrafe - fSide) * fOverrideBlend + fSide;
         }
-        float fOmega = GetOmega(mPlayerId >= 0 ? pClass->mTurnFactor[3] * fTurn : fTurn);
+        // OpenSWBF2: the local XInput pad player keeps full turn speed while
+        // sprinting (XInputPad::PadTurnFactor).
+        float fSprintTurn = pClass->mTurnFactor[3];
+        if (IsLocalPadLook(mPlayerId))
+        {
+            fSprintTurn = XInputPad::PadTurnFactor(fSprintTurn);
+        }
+        float fOmega = GetOmega(mPlayerId >= 0 ? fSprintTurn * fTurn : fTurn);
         float fAccelScale = 1.0f;
         if (mInputLockTime > 0.0f && (m_uiInputLockMask & INPUTLOCK_MOVEMENT))
         {
@@ -7175,7 +7182,14 @@ bool EntitySoldier::Update(float fDeltaTime)
         {
             int iFactor = mState == SoldierState::FLY ? 7 : 4;
             bCanJetJump = mState != SoldierState::FLY;
-            float fOmega = GetOmega(mClass->mTurnFactor[iFactor] * fTurn);
+            // OpenSWBF2: and while jumping or falling (not when blasted into
+            // the air, FLY).
+            float fAirTurn = mClass->mTurnFactor[iFactor];
+            if (iFactor == 4 && IsLocalPadLook(mPlayerId))
+            {
+                fAirTurn = XInputPad::PadTurnFactor(fAirTurn);
+            }
+            float fOmega = GetOmega(fAirTurn * fTurn);
             float fForward;
             float fSide;
             if (fOverrideBlend > 0.0f)

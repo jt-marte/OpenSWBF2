@@ -121,8 +121,9 @@ const float kBoostFull = 0.9f;
 float TurnBoost(float fLookMag);
 
 // A soldier state's turn factor for the local pad player. Mouse turn input
-// runs to +-16, so the class's per-state factors (roll 0.6 by default) barely
-// slow a mouse; a pad tops out at 1 and was crippled mid-roll. Never below 1.
+// runs to +-16, so the class's per-state factors (roll 0.6, sprint 0.2, jump
+// 0.5 by default) barely slow a mouse; a pad tops out at 1 and was crippled.
+// Never below 1.
 float PadTurnFactor(float fClassFactor);
 
 // Soldier look speeds for the local pad player (rad/s, before the zoom
