@@ -159,14 +159,14 @@ gPCMainTabsLayout = {
 	xPos = 710,
 		-- callback is used when you just need to do something, without going to
 		-- another screen at the end
-	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Minimize, 
+	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Minimize, bNoPadCycle = 1, 
 	--hotspot_x = 40, hotspot_width = 40,
 	},
 	{ tag = "_tab_quit",	string = "X",					screen = "ifs_login",			
 	xPos = 770,
 		-- callback is used when you just need to do something, without going to
 		-- another screen at the end
-	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Quit, 
+	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Quit, bNoPadCycle = 1, 
 	  --hotspot_x = 40, hotspot_width = 40,
 	},
 }
@@ -177,14 +177,14 @@ gPCMinimizeQuitTabsLayout = {
 	xPos = 710,
 		-- callback is used when you just need to do something, without going to
 		-- another screen at the end
-	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Minimize, 
+	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Minimize, bNoPadCycle = 1, 
 	--hotspot_x = 40, hotspot_width = 40,
 	},
 	{ tag = "_tab_quit",	string = "X",					screen = "ifs_login",			
 	xPos = 770,
 		-- callback is used when you just need to do something, without going to
 		-- another screen at the end
-	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Quit, 
+	  width = 60,	yPos = main_tab_ypos, callback = fnPCMainTabs_Quit, bNoPadCycle = 1, 
 	  --hotspot_x = 40, hotspot_width = 40,
 	},
 }
