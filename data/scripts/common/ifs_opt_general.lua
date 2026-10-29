@@ -143,6 +143,9 @@ function ifs_opt_general_fnApplySettings(this)
 	generalForm.elements["subtitles"].selValue = ifs_opt_general_fnBoolToSelValue(this.GeneralOpts.bMovieSubtitles)
 	--generalForm.elements["hero"].selValue = ifs_opt_general_fnBoolToSelValue(this.GeneralOpts.bHeroes)
 	generalForm.elements["ttstate"].selValue = tt
+	if ( ScriptCB_GetPadLayout ) then
+		generalForm.elements["padlayout"].selValue = ScriptCB_GetPadLayout() + 1
+	end
 	--generalForm.elements["ttreset"].selValue = 1
 end
 
@@ -357,6 +360,11 @@ ifs_opt_general = NewIFShellScreen {
 			this.GeneralOpts.iDifficulty = btnNum + 1
 		elseif ( buttongroup.tag == "ttstate" ) then
 			ScriptCB_SetToolTipState(btnNum)
+		elseif ( buttongroup.tag == "padlayout" ) then
+			-- applies at once and saves to display.ini (1 Modern, 2 Legacy)
+			if ( ScriptCB_SetPadLayout ) then
+				ScriptCB_SetPadLayout(btnNum - 1)
+			end
 		end
 
 		generalForm.elements[buttongroup.tag].selValue = btnNum
@@ -496,6 +504,8 @@ ifs_opt_general_layout = {
 		{ tag = "ttstate", title = "ifs.gameopt.ttstate", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.GameOpt.tt_off", "ifs.GameOpt.tt_auto", "ifs.GameOpt.tt_on"}},
         --{ tag = "lightingquality", title = "ifs.videoopt.lightingquality", selValue = 1, control = "dropdown", values = {"ifs.VideoOpt.low", "ifs.VideoOpt.med", "ifs.VideoOpt.high"} },
         { tag = "subtitles", title = "ifs.gameopt.moviesubtitles", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"}, },
+		-- OpenSWBF2: built-in controller layouts (an XInput pad ignores the PC bindings)
+		{ tag = "padlayout", title = "Controller layout", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"Modern", "Legacy"}, },
 		--{ tag = "ttreset", title = "", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.select", "common.change"}},
         --{ tag = "viewdistance", title = "ifs.VideoOpt.viewdistance", selValue = 0.5, control = "slider", minValue = 0.0, maxValue = 1.0 },
 		{ tag = "reticulealpha", title = "ifs.gameopt.reticulealpha", fnChanged = ifs_opt_general.OnElementChanged, selValue = 1.0, control = "slider", minValue = 0.0, maxValue = 1.0},

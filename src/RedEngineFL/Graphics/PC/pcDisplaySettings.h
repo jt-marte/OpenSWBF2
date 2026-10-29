@@ -13,6 +13,7 @@ const unsigned int kNoDpi = 64;
 const unsigned int kDisplayIni = 128;
 const unsigned int kAdapterName = 256;
 const unsigned int kSoftwareCursor = 512;
+const unsigned int kPadLayout = 1024; // OpenSWBF2: controller layout, 0 modern / 1 legacy
 
 const unsigned int kAdapterMax = 15;
 const unsigned int kRefreshMax = 1000;
@@ -50,6 +51,7 @@ struct DisplaySettings
     bool bNoWaitQuery;
     bool bNoDpi;
     bool bSoftwareCursor;
+    unsigned int uiPadLayout;
     char acDisplayIni[260];
     unsigned int uiSet;
     unsigned int uiCliMask;
@@ -82,6 +84,7 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath);
 bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFrame);
 bool DisplayIniPath(char* pcPath, unsigned int uiSize);
 bool SaveAdapter(unsigned int uiIndex, const char* pcName);
+bool SavePadLayout(unsigned int uiLayout);
 void SetPendingAdapter(unsigned int uiIndex, const char* pcName);
 void ClearPendingAdapter();
 const PendingAdapter& GetPendingAdapter();

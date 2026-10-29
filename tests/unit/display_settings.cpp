@@ -478,6 +478,49 @@ TEST_CASE("display settings save adapter ignores cli mask" * doctest::test_suite
     SetDefaults(gDisplay);
 }
 
+TEST_CASE("display settings pad layout" * doctest::test_suite("unit"))
+{
+    // Modern unless the ini says otherwise
+    DisplaySettings kSettings;
+    SetDefaults(kSettings);
+    CHECK(kSettings.uiPadLayout == 0);
+    CHECK(SetFromText(kSettings, kPadLayout, "Legacy", "test"));
+    CHECK(kSettings.uiPadLayout == 1);
+    CHECK(SetFromText(kSettings, kPadLayout, "modern", "test"));
+    CHECK(kSettings.uiPadLayout == 0);
+    CHECK(SetFromText(kSettings, kPadLayout, "1", "test"));
+    CHECK(kSettings.uiPadLayout == 1);
+    {
+        LogCapture capture;
+        CHECK_FALSE(SetFromText(kSettings, kPadLayout, "classic", "test"));
+    }
+    CHECK(kSettings.uiPadLayout == 1);
+
+    // saved on its own, next to the other keys
+    Cleanup();
+    WriteText("[Display]\r\nBorderless=1\r\nFps=144\r\n");
+    SetDefaults(gCliDisplay);
+    SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
+    Init();
+    CHECK(gDisplay.uiPadLayout == 0);
+    CHECK(SavePadLayout(1));
+    CHECK(gDisplay.uiPadLayout == 1);
+    DisplaySettings kLoaded;
+    SetDefaults(kLoaded);
+    LoadIni(kLoaded, IniPath());
+    char acText[512];
+    ReadText(acText, sizeof(acText));
+    Cleanup();
+    CHECK(kLoaded.uiPadLayout == 1);
+    CHECK(kLoaded.bBorderless);
+    CHECK(kLoaded.uiFps == 144);
+    const bool bWritten = strstr(acText, "PadLayout=legacy") != 0;
+    CHECK(bWritten);
+    SetDefaults(gCliDisplay);
+    SetDefaults(gIniDisplay);
+    SetDefaults(gDisplay);
+}
+
 TEST_CASE("display settings pending adapter" * doctest::test_suite("unit"))
 {
     Cleanup();

@@ -19,6 +19,7 @@
 #include "Weapon.h"
 #include "WeaponCannonInstance.h"
 #include "RedEngineFL/Graphics/RedModel.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "Aimer.h"
 #include "CollisionModel.h"
 #include "EntityGeometry.h"
@@ -479,7 +480,21 @@ void PlayerController::Update(float dt)
 
     mOwner->mControlSpecialMove.Update(dt, (mJoystick->bits.mBoolInputs & 0x20000000) != 0);
     mOwner->mControlSprint.Update(dt, mJoystick->IsSprintButtonDown());
-    mOwner->mControlZoom.Update(dt, mJoystick->IsZoomButtonDown());
+    bool bZoom = mJoystick->IsZoomButtonDown();
+    // OpenSWBF2: the Modern pad layout aims while LT is held (the soldier's
+    // zoom is a toggle), RS steps two-level scopes. See XInputPad::AimZoomPress.
+    if (XInputPad::gPadAimActive && !bMouseMode && bIsSoldier)
+    {
+        EntitySoldier* pSoldier = static_cast<EntitySoldier*>(mOwner->GetEntity());
+        const Weapon* pWeapon =
+            pSoldier->mActiveIndex >= 0 ? pSoldier->mWeapon[pSoldier->mActiveIndex] : 0;
+        const bool bTwoLevel = pWeapon && pWeapon->mClass->mZoomMin != pWeapon->mClass->mZoomMax &&
+                               pWeapon->mClass->mZoomRate == 0.0f;
+        static XInputPad::AimZoom sAimZoom;
+        bZoom = XInputPad::AimZoomPress(sAimZoom, XInputPad::gPadAimHeld, XInputPad::gPadSecondZoom,
+                                        mOwner->mTargetInfo.mIsAiming, bTwoLevel);
+    }
+    mOwner->mControlZoom.Update(dt, bZoom);
     mOwner->mControlView.Update(dt, mJoystick->IsViewButtonDown());
     mOwner->mControlSquadCommand.Update(dt, mJoystick->IsSquadCommandButtonDown());
     mOwner->mControlLockTarget.Update(dt, mJoystick->IsLockTargetButtonPressed());

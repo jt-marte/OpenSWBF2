@@ -37,6 +37,8 @@ static const char* KeyName(unsigned int uiKey)
         return "AdapterName";
     case kSoftwareCursor:
         return "SoftwareCursor";
+    case kPadLayout:
+        return "PadLayout";
     }
     return "?";
 }
@@ -203,6 +205,18 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
             kSettings.bSoftwareCursor = bBool;
         }
         break;
+    case kPadLayout:
+        if (pcValue != 0 && (_stricmp(pcValue, "modern") == 0 || strcmp(pcValue, "0") == 0))
+        {
+            kSettings.uiPadLayout = 0;
+            bValid = true;
+        }
+        else if (pcValue != 0 && (_stricmp(pcValue, "legacy") == 0 || strcmp(pcValue, "1") == 0))
+        {
+            kSettings.uiPadLayout = 1;
+            bValid = true;
+        }
+        break;
     case kDisplayIni:
         bValid = pcValue != 0 && pcValue[0] != '\0' && strlen(pcValue) < sizeof(kSettings.acDisplayIni);
         if (bValid)
@@ -288,6 +302,10 @@ void Merge(DisplaySettings& dst, const DisplaySettings& cli)
     {
         dst.bSoftwareCursor = cli.bSoftwareCursor;
     }
+    if (cli.uiSet & kPadLayout)
+    {
+        dst.uiPadLayout = cli.uiPadLayout;
+    }
     if (cli.uiSet & kDisplayIni)
     {
         strcpy(dst.acDisplayIni, cli.acDisplayIni);
@@ -305,7 +323,7 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath)
     }
     static const unsigned int auiKeys[] = {kAdapter, kAdapterName, kBorderless, kRefresh,
                                            kVsync,   kFps,         kNoWaitQuery, kNoDpi,
-                                           kSoftwareCursor};
+                                           kSoftwareCursor, kPadLayout};
     for (unsigned int i = 0; i < sizeof(auiKeys) / sizeof(auiKeys[0]); ++i)
     {
         char acValue[256];
@@ -378,6 +396,10 @@ bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFra
     {
         bOk = PutKey("SoftwareCursor", kSettings.bSoftwareCursor ? "1" : "0", acTemp) && bOk;
     }
+    if (ShouldWrite(kSettings, kPadLayout))
+    {
+        bOk = PutKey("PadLayout", kSettings.uiPadLayout ? "legacy" : "modern", acTemp) && bOk;
+    }
     WritePrivateProfileStringA(0, 0, 0, acTemp);
     if (bOk)
     {
@@ -449,6 +471,29 @@ bool SaveAdapter(unsigned int uiIndex, const char* pcName)
     gIniDisplay.uiAdapter = kSave.uiAdapter;
     strcpy(gIniDisplay.acAdapterName, kSave.acAdapterName);
     gIniDisplay.uiSet |= kAdapter | kAdapterName;
+    return true;
+}
+
+// OpenSWBF2: the controller layout chosen in Options -> Game, written on its
+// own like the adapter.
+bool SavePadLayout(unsigned int uiLayout)
+{
+    char acPath[MAX_PATH];
+    if (!DisplayIniPath(acPath, sizeof(acPath)))
+    {
+        return false;
+    }
+    DisplaySettings kSave;
+    SetDefaults(kSave);
+    if (!SetFromText(kSave, kPadLayout, uiLayout ? "legacy" : "modern", "lua") ||
+        !SaveIni(kSave, acPath, true))
+    {
+        return false;
+    }
+    gIniDisplay.uiPadLayout = kSave.uiPadLayout;
+    gIniDisplay.uiSet |= kPadLayout;
+    gDisplay.uiPadLayout = kSave.uiPadLayout;
+    gDisplay.uiSet |= kPadLayout;
     return true;
 }
 

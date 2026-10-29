@@ -460,8 +460,32 @@ static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
     return 2;
 }
 
+// Controller layout for Options -> Game: 0 Modern, 1 Legacy.
+static int ScriptCB_GetPadLayout(lua_State*)
+{
+    lua_pushnumber(LuaHelper::mState, (float)XInputPad::gPadLayout);
+    return 1;
+}
+
+// Applies at once and saves to display.ini.
+static int ScriptCB_SetPadLayout(lua_State*)
+{
+    const int iLayout = (int)luaL_checknumber(LuaHelper::mState, 1) == XInputPad::kLayoutLegacy
+                            ? XInputPad::kLayoutLegacy
+                            : XInputPad::kLayoutModern;
+    if (iLayout != XInputPad::gPadLayout)
+    {
+        XInputPad::gPadLayout = iLayout;
+        if (!DisplayCfg::SavePadLayout((unsigned int)iLayout))
+        {
+            LOG(LogCore, Warning, "OPENSWBF2 PAD layout %d not saved", iLayout);
+        }
+    }
+    return 0;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[47] =
+static const CallbackEntryT sPCCallbacks[49] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -510,6 +534,8 @@ static const CallbackEntryT sPCCallbacks[47] =
     { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
     { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
     { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
+    { "ScriptCB_GetPadLayout", ScriptCB_GetPadLayout },
+    { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -1001,7 +1027,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 47; ++i)
+    for (int i = 0; i < 49; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }

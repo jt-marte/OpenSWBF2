@@ -31,11 +31,6 @@ bool HasBit(const Mapped& m, int iBit)
     return (m.uiButtons & ((unsigned __int64)1 << iBit)) != 0;
 }
 
-unsigned short Encode(int iRaw)
-{
-    return (unsigned short)((iRaw + 1) << 8);
-}
-
 }
 
 TEST_CASE("xinput neutral pad maps to nothing" * doctest::test_suite("unit"))
@@ -198,78 +193,156 @@ TEST_CASE("xinput vid and pid are parsed from a device path" * doctest::test_sui
     CHECK(!ParseVidPid(0, usVid, usPid));
 }
 
-TEST_CASE("xinput soldier default layout" * doctest::test_suite("unit"))
+TEST_CASE("xinput legacy layout is the original console style" * doctest::test_suite("unit"))
 {
-    CHECK(DefaultSlot(0, kActPrimaryFire) == kSlotRightTrigger);
-    CHECK(DefaultSlot(0, kActSecondaryFire) == kSlotLeftTrigger);
-    CHECK(DefaultSlot(0, kActJump) == kBitA);
-    CHECK(DefaultSlot(0, kActCrouch) == kBitB);
-    CHECK(DefaultSlot(0, kActReload) == kBitX);
-    CHECK(DefaultSlot(0, kActUse) == kBitY);
-    CHECK(DefaultSlot(0, kActSprint) == kBitLS);
-    CHECK(DefaultSlot(0, kActZoom) == kBitRS);
-    CHECK(DefaultSlot(0, kActStrafeAxis) == kSlotLeftRight);
-    CHECK(DefaultSlot(0, kActMoveAxis) == kSlotLeftUp);
-    CHECK(DefaultSlot(0, kActTurnAxis) == kSlotRightRight);
-    CHECK(DefaultSlot(0, kActPitchAxis) == kSlotRightUp);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActPrimaryFire) == kSlotRightTrigger);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActSecondaryFire) == kSlotLeftTrigger);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActJump) == kBitA);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActCrouch) == kBitB);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActReload) == kBitX);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActUse) == kBitY);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActSprint) == kBitLS);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActZoom) == kBitRS);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActPrimaryNext) == kBitRB);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActSecondaryNext) == kBitLB);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActStrafeAxis) == kSlotLeftRight);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActMoveAxis) == kSlotLeftUp);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActTurnAxis) == kSlotRightRight);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActPitchAxis) == kSlotRightUp);
 }
 
-TEST_CASE("xinput every mode can move aim and fire" * doctest::test_suite("unit"))
+TEST_CASE("xinput modern layout aims on LT and throws on RB" * doctest::test_suite("unit"))
 {
-    for (int iMode = 0; iMode < kModeCount; ++iMode)
-    {
-        CHECK(DefaultSlot(iMode, kActMoveAxis) >= 0);
-        CHECK(DefaultSlot(iMode, kActTurnAxis) >= 0);
-        CHECK(DefaultSlot(iMode, kActPitchAxis) >= 0);
-        CHECK(DefaultSlot(iMode, kActPrimaryFire) >= 0);
-        CHECK(DefaultSlot(iMode, kActUse) >= 0);
-    }
-    CHECK(DefaultSlot(3, kActZoom) == -1);
-    CHECK(DefaultSlot(-1, kActJump) == -1);
-    CHECK(DefaultSlot(kModeCount, kActJump) == -1);
-    CHECK(DefaultSlot(0, kActionCount) == -1);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActPrimaryFire) == kSlotRightTrigger);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActZoom) == kSlotLeftTrigger);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActSecondaryFire) == kBitRB);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActSecondaryNext) == kBitLB);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActPrimaryNext) == kBitY);
+    // reload and use come from X's tap/hold, not a slot
+    CHECK(DefaultSlot(kLayoutModern, 0, kActReload) == -1);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActUse) == -1);
+    // the rest matches Legacy
+    CHECK(DefaultSlot(kLayoutModern, 0, kActJump) == kBitA);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActCrouch) == kBitB);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActSprint) == kBitLS);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActView) == kBitDPadDown);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActSquadCommand) == kBitDPadUp);
+    CHECK(DefaultSlot(kLayoutModern, 0, kActPlayerList) == kBitBack);
+    // heroes keep their exclusions
+    CHECK(DefaultSlot(kLayoutModern, 3, kActZoom) == -1);
+    CHECK(DefaultSlot(kLayoutModern, 3, kActPrimaryNext) == -1);
+    // vehicles get the same buttons
+    CHECK(DefaultSlot(kLayoutModern, 1, kActSecondaryFire) == kBitRB);
+    CHECK(DefaultSlot(kLayoutModern, 2, kActZoom) == kSlotLeftTrigger);
 }
 
-TEST_CASE("xinput default layout never binds one input twice in a mode" * doctest::test_suite("unit"))
+TEST_CASE("xinput every layout and mode can move aim and fire" * doctest::test_suite("unit"))
 {
-    for (int iMode = 0; iMode < kModeCount; ++iMode)
+    for (int iLayout = 0; iLayout < kLayoutCount; ++iLayout)
     {
-        bool abUsed[kSlotCount];
-        memset(abUsed, 0, sizeof(abUsed));
-        for (int iAction = 0; iAction < kActionCount; ++iAction)
+        for (int iMode = 0; iMode < kModeCount; ++iMode)
         {
-            const int iSlot = DefaultSlot(iMode, iAction);
-            if (iSlot < 0)
+            CHECK(DefaultSlot(iLayout, iMode, kActMoveAxis) >= 0);
+            CHECK(DefaultSlot(iLayout, iMode, kActTurnAxis) >= 0);
+            CHECK(DefaultSlot(iLayout, iMode, kActPitchAxis) >= 0);
+            CHECK(DefaultSlot(iLayout, iMode, kActPrimaryFire) >= 0);
+            CHECK(DefaultSlot(iLayout, iMode, kActSecondaryFire) >= 0);
+        }
+        CHECK(DefaultSlot(iLayout, 3, kActZoom) == -1);
+        CHECK(DefaultSlot(iLayout, -1, kActJump) == -1);
+        CHECK(DefaultSlot(iLayout, kModeCount, kActJump) == -1);
+        CHECK(DefaultSlot(iLayout, 0, kActionCount) == -1);
+    }
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActUse) == kBitY);
+    CHECK(DefaultSlot(-1, 0, kActJump) == -1);
+    CHECK(DefaultSlot(kLayoutCount, 0, kActJump) == -1);
+}
+
+TEST_CASE("xinput layouts never bind one input twice in a mode" * doctest::test_suite("unit"))
+{
+    for (int iLayout = 0; iLayout < kLayoutCount; ++iLayout)
+    {
+        for (int iMode = 0; iMode < kModeCount; ++iMode)
+        {
+            bool abUsed[kSlotCount];
+            memset(abUsed, 0, sizeof(abUsed));
+            // Modern's X is the tap/hold reload/use
+            if (iLayout == kLayoutModern)
             {
-                continue;
+                abUsed[kBitX] = true;
             }
-            REQUIRE(iSlot < kSlotCount);
-            CHECK(!abUsed[iSlot]);
-            abUsed[iSlot] = true;
+            for (int iAction = 0; iAction < kActionCount; ++iAction)
+            {
+                const int iSlot = DefaultSlot(iLayout, iMode, iAction);
+                if (iSlot < 0)
+                {
+                    continue;
+                }
+                REQUIRE(iSlot < kSlotCount);
+                CHECK(!abUsed[iSlot]);
+                abUsed[iSlot] = true;
+            }
         }
     }
 }
 
-TEST_CASE("xinput player pad bindings switch the defaults off" * doctest::test_suite("unit"))
+TEST_CASE("xinput modern x taps reload and holds use" * doctest::test_suite("unit"))
 {
-    unsigned short aKeys[kActionCount][3];
-    memset(aKeys, 0, sizeof(aKeys));
-    CHECK(!HasPadBindings(aKeys));
+    HoldTap x = {};
+    // quick tap: reload on release, never use
+    CHECK(HoldTapStep(x, true, 1000) == kHoldNone);
+    CHECK(HoldTapStep(x, true, 1200) == kHoldNone);
+    CHECK(HoldTapStep(x, false, 1250) == kHoldTap);
+    CHECK(HoldTapStep(x, false, 1300) == kHoldNone);
 
-    aKeys[kActJump][0] = 0x39;
-    aKeys[kActPrimaryFire][0] = Encode(66);
-    aKeys[kActTurnAxis][1] = Encode(64);
-    CHECK(!HasPadBindings(aKeys));
+    // hold: use once at the hold time, and no reload on release
+    CHECK(HoldTapStep(x, true, 2000) == kHoldNone);
+    CHECK(HoldTapStep(x, true, 2000 + kUseHoldMs - 1) == kHoldNone);
+    CHECK(HoldTapStep(x, true, 2000 + kUseHoldMs) == kHoldHeld);
+    CHECK(HoldTapStep(x, true, 2000 + kUseHoldMs + 400) == kHoldNone);
+    CHECK(HoldTapStep(x, false, 3000) == kHoldNone);
+    CHECK(kUseHoldMs == 500);
+}
 
-    aKeys[kActCrouch][1] = Encode(0);
-    CHECK(HasPadBindings(aKeys));
+TEST_CASE("xinput modern hold to aim drives the zoom toggle" * doctest::test_suite("unit"))
+{
+    AimZoom s = {};
+    // nothing held, not aiming: no presses
+    CHECK(!AimZoomPress(s, false, false, false, true));
+    // LT down: one press to aim, then a gap frame
+    CHECK(AimZoomPress(s, true, false, false, true));
+    CHECK(!AimZoomPress(s, true, false, false, true));
+    // aiming and held: steady, no presses
+    CHECK(!AimZoomPress(s, true, false, true, true));
+    CHECK(!AimZoomPress(s, true, false, true, true));
+    // RS on a two-level scope: one press to step the level
+    CHECK(AimZoomPress(s, true, true, true, true));
+    CHECK(!AimZoomPress(s, true, false, true, true));
+    CHECK(!AimZoomPress(s, true, false, true, true));
+    // LT released while aiming: press out (twice if the first went min -> max)
+    CHECK(AimZoomPress(s, false, false, true, true));
+    CHECK(!AimZoomPress(s, false, false, true, true));
+    CHECK(AimZoomPress(s, false, false, true, true));
+    CHECK(!AimZoomPress(s, false, false, false, true));
+    CHECK(!AimZoomPress(s, false, false, false, true));
 
-    aKeys[kActCrouch][1] = Encode(63);
-    CHECK(HasPadBindings(aKeys));
+    // single-level scope: RS does nothing
+    AimZoom one = {};
+    CHECK(AimZoomPress(one, true, false, false, false));
+    CHECK(!AimZoomPress(one, true, false, false, false));
+    CHECK(!AimZoomPress(one, true, true, true, false));
+    CHECK(!AimZoomPress(one, true, false, true, false));
 
-    aKeys[kActCrouch][1] = 0;
-    aKeys[kActCrouch][2] = Encode(0);
-    CHECK(!HasPadBindings(aKeys));
+    // an RS click during the gap frame is kept for the next one
+    AimZoom gap = {};
+    CHECK(AimZoomPress(gap, true, false, false, true));
+    CHECK(!AimZoomPress(gap, true, true, true, true));
+    CHECK(AimZoomPress(gap, true, false, true, true));
+
+    // RS without LT is ignored
+    AimZoom free = {};
+    CHECK(!AimZoomPress(free, false, true, false, true));
+    CHECK(!AimZoomPress(free, false, false, false, true));
 }
 
 TEST_CASE("xinput menu navigation" * doctest::test_suite("unit"))

@@ -105,16 +105,58 @@ bool IsXInputDevicePath(const char* pcPath);
 
 bool ParseVidPid(const char* pcPath, unsigned short& usVid, unsigned short& usPid);
 
-// Default pad layout: raw slot for an action (ePROCESSEDINPUT value) in an
-// input mode (0 soldier, 1 vehicle, 2 flyer, 3 jedi, 4 turret), or -1.
+// Built-in pad layouts. While an XInput pad is connected it always plays with
+// one of these; the PC bindings screen is for keyboard and mouse only.
+enum PadLayout
+{
+    kLayoutModern = 0,
+    kLayoutLegacy = 1,
+    kLayoutCount = 2
+};
+extern int gPadLayout;
+
+// Raw slot for an action (ePROCESSEDINPUT value) in an input mode (0 soldier,
+// 1 vehicle, 2 flyer, 3 jedi, 4 turret) for a layout, or -1. Legacy is the
+// original console-style layout; Modern aims on LT, throws on RB, swaps on Y,
+// and takes reload and use from X (HoldTapStep) instead of a slot.
 const int kModeCount = 5;
 const int kActionCount = 43;
-int DefaultSlot(int iMode, int iAction);
+int DefaultSlot(int iLayout, int iMode, int iAction);
 
-// True when the player's bindings for a mode already use joystick inputs, in
-// which case their own layout wins over the defaults. pKeys is
-// ActionKey[kActionCount] viewed as its three shorts.
-bool HasPadBindings(const unsigned short (*pKeys)[3]);
+// Modern X: a tap (released within kUseHoldMs) reloads, a hold uses (get in
+// or out of a vehicle). Each press gives one result.
+const unsigned int kUseHoldMs = 500;
+enum HoldTapResult
+{
+    kHoldNone = 0,
+    kHoldTap = 1,
+    kHoldHeld = 2
+};
+struct HoldTap
+{
+    bool bDown;
+    bool bFired;
+    unsigned int uiDownMs;
+};
+int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs);
+
+// Modern hold-to-aim on top of the game's zoom toggle (Weapon::CycleZoom:
+// off -> min -> max on two-level scopes -> off). Gives one zoom press, never
+// two frames running, whenever the aim state should change: in while LT is
+// held, out once it is released; RS while aiming on a two-level scope steps
+// to the other level (max -> off, and the held LT brings it back to min).
+struct AimZoom
+{
+    bool bPressedLast;
+    bool bSecondPending;
+};
+bool AimZoomPress(AimZoom& rState, bool bAimHeld, bool bSecondPressed, bool bAiming, bool bTwoLevel);
+
+// Published by the input layer each frame for PlayerController: Modern is in
+// effect on a connected XInput pad, LT is held, RS was pressed this frame.
+extern bool gPadAimActive;
+extern bool gPadAimHeld;
+extern bool gPadSecondZoom;
 
 // Menu (eGUIINPUT value) for a raw pad slot, or -1.
 int GuiForSlot(int iSlot);
