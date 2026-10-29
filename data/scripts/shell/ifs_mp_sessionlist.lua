@@ -3363,4 +3363,6 @@ end
 ifs_mp_sessionlist_fnBuildScreen(ifs_mp_sessionlist)
 ifs_mp_sessionlist_fnBuildScreen = nil
 
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_mp_sessionlist.bPadSnap = 1
 AddIFScreen(ifs_mp_sessionlist,"ifs_mp_sessionlist")

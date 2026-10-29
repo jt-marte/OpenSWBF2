@@ -388,4 +388,6 @@ function ifs_mpgs_login_fnBuildScreen(this)
 end
 ifs_mpgs_login_fnBuildScreen(ifs_mpgs_login)
 ifs_mpgs_login_fnBuildScreen = nil
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_mpgs_login.bPadSnap = 1
 AddIFScreen(ifs_mpgs_login, "ifs_mpgs_login")

@@ -787,6 +787,19 @@ void GuiManager::CollectInputs(int iJoystick, GUIInputs* pInputs, int iControlle
     // cursor before anything else is queued, so a click that hands control
     // back to the mouse lands where the mouse points, not on the pad's
     // highlight.
+    // The pad just took the menus. Whatever the hidden cursor was resting on
+    // (often a PC tab) still holds the highlight; hand it back to the screen's
+    // own buttons.
+    static bool sbPadOwned;
+    if (XInputPad::gPadOwnsCursor != sbPadOwned && mInstances->mJoystickIndex == iController)
+    {
+        sbPadOwned = XInputPad::gPadOwnsCursor;
+        if (sbPadOwned)
+        {
+            LuaHelper::CallGlobalProc("gIFShellScreenTemplate_fnPadTookMenus");
+        }
+    }
+
     if (XInputPad::gMouseResync && mInstances->mJoystickIndex == iController)
     {
         XInputPad::gMouseResync = false;
@@ -844,7 +857,12 @@ void GuiManager::CollectInputs(int iJoystick, GUIInputs* pInputs, int iControlle
     {
         mMouseX = pInputs->mMouseCoords.mPosX;
         mMouseY = pInputs->mMouseCoords.mPosY;
-        CreateInputEvent(eInputCode_Coords, iController);
+        // A hidden cursor must not hover anything (it would steal the pad's
+        // highlight, e.g. onto a tab); gMouseResync re-hit-tests on hand-back.
+        if (!XInputPad::gPadOwnsCursor)
+        {
+            CreateInputEvent(eInputCode_Coords, iController);
+        }
     }
 
     if (!bEventCreated && pInputs->IsLeftTriggerPressed())

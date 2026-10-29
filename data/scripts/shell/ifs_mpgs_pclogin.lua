@@ -1162,4 +1162,7 @@ end
 ifs_mpgs_login_fnBuildScreen(ifs_mpgs_login)
 ifs_mpgs_login_fnBuildScreen = nil
 
+-- OpenSWBF2: its console button list misses most of the page, so a pad uses
+-- snap navigation (ifelem_tabmanager.lua)
+ifs_mpgs_login.bPadSnap = 1
 AddIFScreen(ifs_mpgs_login,"ifs_mpgs_login")

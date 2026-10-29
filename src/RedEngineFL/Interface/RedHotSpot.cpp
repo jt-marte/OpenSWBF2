@@ -125,3 +125,23 @@ bool RedHotSpot::GetLocalScaledCoordinates(float fX, float fY, float& rfLocalX, 
     rfLocalY = (fLocalY - m_fTop) / (m_fBottom - m_fTop);
     return bInside;
 }
+
+// OpenSWBF2: screen position (mouse pixels) of the rect's centre as last
+// rendered; the inverse of GetLocalCoordinates. Lets a pad hop between the
+// mouse-only PC widgets. False when never rendered or off screen.
+bool RedHotSpot::GetScreenCenter(float& rfX, float& rfY) const
+{
+    const float fLX = (m_fLeft + m_fRight) * 0.5f;
+    const float fLY = (m_fTop + m_fBottom) * 0.5f;
+    const float fW = m_mWorld[0][2] * fLX + m_mWorld[1][2] * fLY + m_mWorld[2][2];
+    if ((float)fabs((double)fW) < 0.0001f)
+    {
+        return false;
+    }
+
+    const float fNX = -(m_mWorld[0][0] * fLX + m_mWorld[1][0] * fLY + m_mWorld[2][0]) / fW;
+    const float fNY = -(m_mWorld[0][1] * fLX + m_mWorld[1][1] * fLY + m_mWorld[2][1]) / fW;
+    rfX = (fNX + 1.0f) * 0.5f * (float)RedInterfaceScreen::GetScreenWidth();
+    rfY = (1.0f - fNY) * 0.5f * (float)RedInterfaceScreen::GetScreenHeight();
+    return IsPointInside(rfX, rfY);
+}

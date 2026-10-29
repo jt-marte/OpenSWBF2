@@ -11,6 +11,7 @@ bool gDisabled;
 bool gNoRumble;
 bool gPadOwnsCursor;
 bool gMouseResync;
+bool gStickCursor;
 
 static const float kStickMax = 32767.0f;
 
@@ -238,6 +239,11 @@ int GuiForSlot(int iSlot)
     case kSlotRightTrigger: return kGuiRightTrigger2;
     default:            return -1;
     }
+}
+
+bool GuiTriggerDown(float fValue, bool bWasDown)
+{
+    return bWasDown ? fValue > 0.25f : fValue >= 0.5f;
 }
 
 void GuiAxes(const float* afAxis, float& fX, float& fY)

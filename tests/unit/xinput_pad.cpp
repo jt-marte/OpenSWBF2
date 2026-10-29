@@ -380,3 +380,24 @@ TEST_CASE("xinput pad and mouse hand the menus back and forth" * doctest::test_s
     MouseTookMenus();
     CHECK(!gMouseResync);
 }
+
+TEST_CASE("xinput menu trigger is a steady on off with hysteresis" * doctest::test_suite("unit"))
+{
+    CHECK(!GuiTriggerDown(0.0f, false));
+    CHECK(!GuiTriggerDown(0.49f, false));
+    CHECK(GuiTriggerDown(0.5f, false));
+    CHECK(GuiTriggerDown(1.0f, false));
+
+    // Held and wobbling: stays down until it is clearly released.
+    bool bDown = false;
+    const float afHeld[] = { 0.6f, 0.93f, 0.91f, 0.95f, 0.4f, 0.3f, 0.26f };
+    for (int i = 0; i < (int)(sizeof(afHeld) / sizeof(afHeld[0])); ++i)
+    {
+        bDown = GuiTriggerDown(afHeld[i], bDown);
+        CHECK(bDown);
+    }
+    bDown = GuiTriggerDown(0.25f, bDown);
+    CHECK(!bDown);
+    bDown = GuiTriggerDown(0.45f, bDown);
+    CHECK(!bDown);
+}

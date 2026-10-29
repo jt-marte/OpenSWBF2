@@ -2045,4 +2045,6 @@ end
 ifs_instant_options_fnBuildScreen( ifs_instant_options )
 ifs_instant_options_fnBuildScreen = nil
 
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_instant_options.bPadSnap = 1
 AddIFScreen(ifs_instant_options,"ifs_instant_options")

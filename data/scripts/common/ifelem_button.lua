@@ -81,6 +81,11 @@ function FollowButtonLink(container,CurrentStr,DirStr)
 	-- tab the mouse last hovered); start from the first button then instead
 	-- of indexing nil.
 	if((not CurrentStr) or (not container[CurrentStr])) then
+		-- ...and un-hilight that tab, or it stays lit next to the new button.
+		if(CurrentStr and gCurHiliteButton and gCurHiliteButton.tag == CurrentStr) then
+			IFButton_fnSelect(gCurHiliteButton,nil)
+			IFButton_fnHilight(gCurHiliteButton,nil,0)
+		end
 		NewBtnStr = container.TagOfFirst
 		EntrySelectedTable  = container[container.TagOfFirst]
 	else

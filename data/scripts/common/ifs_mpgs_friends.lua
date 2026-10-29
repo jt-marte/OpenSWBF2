@@ -915,4 +915,7 @@ end
 ifs_mpgs_friends_fnBuildScreen(ifs_mpgs_friends)
 ifs_mpgs_friends_fnBuildScreen = nil
 
+-- OpenSWBF2: its console button list misses most of the page, so a pad uses
+-- snap navigation (ifelem_tabmanager.lua)
+ifs_mpgs_friends.bPadSnap = 1
 AddIFScreen(ifs_mpgs_friends,"ifs_mpgs_friends")
