@@ -685,8 +685,10 @@ bool GuiManager::CallLuaFunctionOfScope(const char* pcFunc, const unsigned short
 // FUNCTION: SWBF2 0x00528f60
 void GuiManager::UpdateCursor()
 {
+    // OpenSWBF2: Lua menus work in UI pixels (RedInterfaceScreen::GetUiScale).
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
     LuaHelper::CallTableProcWThis(Instance()->GetCurrentFocus(), "HandleMouse",
-                                  (float)mMouseX, (float)mMouseY);
+                                  (float)mMouseX / fUiScale, (float)mMouseY / fUiScale);
 }
 
 // FUNCTION: SWBF2 0x00528fb0

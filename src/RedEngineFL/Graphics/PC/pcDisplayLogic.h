@@ -398,4 +398,8 @@ void CursorMaskFromBgra(const unsigned int* puiBgra, unsigned int uiW, unsigned 
 // 1.0 at 1080 and below.
 float UiScale(unsigned int uiScreenH);
 
+// The screen size Lua menus lay out in: the real size divided by UiScale,
+// rounded (1920x1080 at 3840x2160 and at 2560x1440).
+void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, unsigned int& uiH);
+
 }

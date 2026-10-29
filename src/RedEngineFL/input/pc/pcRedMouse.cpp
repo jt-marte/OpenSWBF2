@@ -123,8 +123,9 @@ static void WantedSize(unsigned int& uiW, unsigned int& uiH)
     {
         GetClientRect(hGlobalWnd, &kRc);
     }
-    DisplayLogic::CursorSize(suiSrcW, suiSrcH, RedInterfaceScreen::GetScreenWidth(),
-                             RedInterfaceScreen::GetScreenHeight(), (unsigned int)kRc.right,
+    // Sized against the UI size, so above 1080p the cursor grows with the menus.
+    DisplayLogic::CursorSize(suiSrcW, suiSrcH, RedInterfaceScreen::GetUiWidth(),
+                             RedInterfaceScreen::GetUiHeight(), (unsigned int)kRc.right,
                              (unsigned int)kRc.bottom, uiW, uiH);
 }
 

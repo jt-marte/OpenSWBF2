@@ -39,6 +39,7 @@
 #include "TriggerRegionManager.h"
 #include "WeaponCannonInstance.h"
 #include "Weapon.h"
+#include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Memory/RedMemoryPool.h"
 #include "CombatUtil.h"
 #include "AIGoalManager.h"
@@ -3925,8 +3926,10 @@ int GetScreenPosition(lua_State* L)
     const PblVector3& position = pEntity->GetCollisionCenter();
     const PblVector3 screen = RedRenderer::TransformProjectionPointToScreenSpace(
         RedRenderer::TransformWorldPointToProjectionSpace(position));
-    lua_pushnumber(LuaHelper::mState, screen.x);
-    lua_pushnumber(LuaHelper::mState, screen.y);
+    // OpenSWBF2: Lua works in UI pixels (RedInterfaceScreen::GetUiScale).
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
+    lua_pushnumber(LuaHelper::mState, screen.x / fUiScale);
+    lua_pushnumber(LuaHelper::mState, screen.y / fUiScale);
     lua_pushnumber(LuaHelper::mState, screen.z);
     return 3;
 }

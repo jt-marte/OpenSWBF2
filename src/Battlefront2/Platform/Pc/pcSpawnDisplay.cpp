@@ -1309,12 +1309,15 @@ void SpawnDisplay::Initialize()
     unsigned int uiWidth, uiHeight;
     m_pInfoBoxText[0]->GetTextBox(uiWidth, uiHeight);
 
-    float fScreenScale = (float)RedInterfaceScreen::GetScreenWidth() / 800.0f;
+    // OpenSWBF2: the unit model sits in a Lua group, which lays out in UI
+    // pixels (RedInterfaceScreen::GetUiScale), so place it in those too.
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
+    float fScreenScale = (float)RedInterfaceScreen::GetUiWidth() / 800.0f;
     float fDepth = 0.006f / fScreenScale;
     m_pEntityElement->SetDepth(fDepth);
     float fLeft, fTop, fRight, fBottom;
     RedInterfaceScreen::s_screenFull.GetSafeArea(fLeft, fTop, fRight, fBottom);
-    m_pEntityElement->SetPosition((fRight - fLeft) * 0.5f, (fBottom - fTop) * 0.85f);
+    m_pEntityElement->SetPosition((fRight - fLeft) * 0.5f / fUiScale, (fBottom - fTop) * 0.85f / fUiScale);
     m_pEntityElement->Enable(true);
     m_pEntityElement->Visible(true);
     m_pEntityElement->SetZOrder(0);
@@ -1324,7 +1327,7 @@ void SpawnDisplay::Initialize()
     static_cast<RedGroupElement*>(RedInterfaceElement::Find(acBuffer))->AddElement(m_pEntityElement);
 
     m_DroidekaElement.SetDepth(fDepth * 1.2f);
-    m_DroidekaElement.SetPosition((fRight - fLeft) * 0.5f, (fBottom - fTop) * 0.85f);
+    m_DroidekaElement.SetPosition((fRight - fLeft) * 0.5f / fUiScale, (fBottom - fTop) * 0.85f / fUiScale);
     m_DroidekaElement.Enable(false);
     m_DroidekaElement.Visible(false);
     m_DroidekaElement.SetZOrder(0);

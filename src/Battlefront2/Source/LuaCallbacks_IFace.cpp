@@ -798,6 +798,7 @@ bool Util_AddToHierarchy(RedInterfaceElement* pElement, const char* pcName)
     {
         RedScreenGroupElement* pGroup = new RedScreenGroupElement(pcName);
         pGroup->SetUseSafezone(true);
+        pGroup->SetScaleUi(true);
         pCurCreateScreenGroup = pGroup;
         pGroup->AddElement(pCurCreateObject);
         pScreen->AddToScreen(pCurCreateScreenGroup);
@@ -825,6 +826,7 @@ bool Util_CreateGroupInHierarchy(const char* pcName)
     {
         RedScreenGroupElement* pGroup = new RedScreenGroupElement(pcName);
         pGroup->SetUseSafezone(true);
+        pGroup->SetScaleUi(true);
         pCurCreateScreenGroup = pGroup;
         pCurCreateObject = pGroup;
     }
@@ -844,6 +846,7 @@ bool Util_CreateGroupInHierarchy(const char* pcName)
         {
             RedScreenGroupElement* pGroup = new RedScreenGroupElement(pcName);
             pGroup->SetUseSafezone(true);
+            pGroup->SetScaleUi(true);
             pCurCreateScreenGroup = pGroup;
             pCurCreateObject = pGroup;
             pScreen->AddToScreen(pGroup);
@@ -1285,8 +1288,11 @@ int ScriptCB_IFObj_MouseOver(lua_State* L)
     }
 
     RedInterfaceElement* pElement = (RedInterfaceElement*)lua_topointer(LuaHelper::mState, 1);
-    float fX = (float)luaL_checknumber(LuaHelper::mState, 2);
-    float fY = (float)luaL_checknumber(LuaHelper::mState, 3);
+    // OpenSWBF2: Lua's mouse coordinates are in UI pixels; hotspots are in
+    // screen pixels.
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
+    float fX = (float)luaL_checknumber(LuaHelper::mState, 2) * fUiScale;
+    float fY = (float)luaL_checknumber(LuaHelper::mState, 3) * fUiScale;
     float fLocalX = 0.0f;
     float fLocalY = 0.0f;
     bool bOver = pElement->m_pHotSpot && pElement->m_pHotSpot->GetLocalScaledCoordinates(fX, fY, fLocalX, fLocalY);
@@ -2339,11 +2345,14 @@ int ScriptCB_PlayMovie(lua_State* L)
     const char* pcAtEnd = strlen(luaL_checklstring(LuaHelper::mState, 3, 0))
                               ? luaL_checklstring(LuaHelper::mState, 3, 0)
                               : 0;
+    // OpenSWBF2: the movie rect comes in UI pixels; the movie draws in screen
+    // pixels.
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
     GameMovie::Play(luaL_checklstring(LuaHelper::mState, 1, 0), pcAtEnd,
-                    (unsigned int)luaL_checknumber(LuaHelper::mState, 4),
-                    (unsigned int)luaL_checknumber(LuaHelper::mState, 5),
-                    (unsigned int)luaL_checknumber(LuaHelper::mState, 6),
-                    (unsigned int)luaL_checknumber(LuaHelper::mState, 7),
+                    (unsigned int)((float)luaL_checknumber(LuaHelper::mState, 4) * fUiScale + 0.5f),
+                    (unsigned int)((float)luaL_checknumber(LuaHelper::mState, 5) * fUiScale + 0.5f),
+                    (unsigned int)((float)luaL_checknumber(LuaHelper::mState, 6) * fUiScale + 0.5f),
+                    (unsigned int)((float)luaL_checknumber(LuaHelper::mState, 7) * fUiScale + 0.5f),
                     (int)(float)luaL_checknumber(LuaHelper::mState, 2) > 0);
     return 0;
 }
@@ -2386,8 +2395,9 @@ int ScriptCB_SetMovieAudioBus(lua_State* L)
 int ScriptCB_GetScreenInfo(lua_State* L)
 {
     lua_gettop(LuaHelper::mState);
-    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetScreenWidth());
-    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetScreenHeight());
+    // OpenSWBF2: menus lay out in the UI size (1080p-sized above 1080p).
+    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetUiWidth());
+    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetUiHeight());
     lua_pushnumber(LuaHelper::mState, RedInterfaceScreen::GetScreenBottomV());
     lua_pushnumber(LuaHelper::mState, 0.75f / RedRenderer::GetScreenAspectRatio());
     return 4;
@@ -2398,8 +2408,8 @@ int ScriptCB_GetSafeScreenInfo(lua_State* L)
 {
     lua_gettop(LuaHelper::mState);
     float fSafeZone = RedInterfaceScreen::GetScreenSafeZone();
-    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetScreenWidth() * fSafeZone);
-    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetScreenHeight() * fSafeZone);
+    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetUiWidth() * fSafeZone);
+    lua_pushnumber(LuaHelper::mState, (float)RedInterfaceScreen::GetUiHeight() * fSafeZone);
     lua_pushnumber(LuaHelper::mState, 1.0f);
     return 3;
 }
