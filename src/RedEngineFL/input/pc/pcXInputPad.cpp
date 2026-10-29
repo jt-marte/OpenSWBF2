@@ -42,10 +42,41 @@ void ApplyStickDeadzone(short sX, short sY, float fDeadZone, float& fX, float& f
     }
 
     // Radial: the dead area is a circle and the live range is rescaled so the
-    // first step past it starts at zero instead of jumping to the deadzone.
-    float fScaled = ((fMag < kStickMax ? fMag : kStickMax) - fInner) / (kStickMax - fInner);
+    // first step past it starts at zero instead of jumping to the deadzone,
+    // and ends at full deflection a little before the stick's travel does.
+    const float fOuter = (1.0f - kOuterDeadZone) * kStickMax;
+    float fScaled = ((fMag < fOuter ? fMag : fOuter) - fInner) / (fOuter - fInner);
     fX = fRawX / fMag * fScaled;
     fY = fRawY / fMag * fScaled;
+}
+
+int gDeadZoneLevel = 5;
+
+void StickDeadZones(int iLevel, float& fMove, float& fLook)
+{
+    if (iLevel < 0)
+    {
+        iLevel = 0;
+    }
+    else if (iLevel > 10)
+    {
+        iLevel = 10;
+    }
+    fMove = 0.02f * (float)iLevel;
+    fLook = 0.8f * fMove;
+}
+
+float LookCurve(float fMagnitude)
+{
+    if (!(fMagnitude > 0.0f))
+    {
+        return 0.0f;
+    }
+    if (fMagnitude >= 1.0f)
+    {
+        return 1.0f;
+    }
+    return powf(fMagnitude, kLookExponent);
 }
 
 float TriggerValue(unsigned char bTrigger)
@@ -57,7 +88,7 @@ float TriggerValue(unsigned char bTrigger)
     return (float)(bTrigger - kTriggerThreshold) / (float)(255 - kTriggerThreshold);
 }
 
-void Map(const Pad& pad, float fDeadZone, Mapped& out)
+void Map(const Pad& pad, float fMoveDeadZone, float fLookDeadZone, Mapped& out)
 {
     static const struct { unsigned short wPad; int iBit; } kButtons[] =
     {
@@ -79,8 +110,17 @@ void Map(const Pad& pad, float fDeadZone, Mapped& out)
     }
 
     float fLX, fLY, fRX, fRY;
-    ApplyStickDeadzone(pad.sThumbLX, pad.sThumbLY, fDeadZone, fLX, fLY);
-    ApplyStickDeadzone(pad.sThumbRX, pad.sThumbRY, fDeadZone, fRX, fRY);
+    ApplyStickDeadzone(pad.sThumbLX, pad.sThumbLY, fMoveDeadZone, fLX, fLY);
+    ApplyStickDeadzone(pad.sThumbRX, pad.sThumbRY, fLookDeadZone, fRX, fRY);
+    // Look gets the response curve, radially so diagonals keep their angle;
+    // movement stays linear.
+    const float fLookMag = sqrtf(fRX * fRX + fRY * fRY);
+    if (fLookMag > 0.0f)
+    {
+        const float fCurve = LookCurve(fLookMag) / fLookMag;
+        fRX *= fCurve;
+        fRY *= fCurve;
+    }
     const float fLT = TriggerValue(pad.bLeftTrigger);
     const float fRT = TriggerValue(pad.bRightTrigger);
 

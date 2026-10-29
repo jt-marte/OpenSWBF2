@@ -31,6 +31,7 @@
 #include "GameVoiceChatNode.h"
 #include "NetMatch.h"
 #include "RedEngineFL/input/RedJoystick.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 
 BOOL CALLBACK EnumObjectsCallback(DIDEVICEOBJECTINSTANCEA const* pObject, void* pvRef);
 
@@ -1793,6 +1794,8 @@ void RawControllerInputs::ApplyDeadZone(int iLevel)
     {
         iLevel = 10;
     }
+    // OpenSWBF2: XInput pads read the same slider as per-stick deadzones.
+    XInputPad::gDeadZoneLevel = iLevel;
 
     float fValue = sDeadZoneScaleByLevel[iLevel];
     RedJoystick** ppObjects = _redJoystick;

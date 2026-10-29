@@ -22,7 +22,7 @@ Pad Neutral()
 Mapped MapPad(const Pad& pad, float fDeadZone = 0.2f)
 {
     Mapped out;
-    Map(pad, fDeadZone, out);
+    Map(pad, fDeadZone, fDeadZone, out);
     return out;
 }
 
@@ -132,15 +132,93 @@ TEST_CASE("xinput sticks are rescaled past the deadzone" * doctest::test_suite("
 
 TEST_CASE("xinput deadzone follows the option scale and is clamped" * doctest::test_suite("unit"))
 {
+    const float fOuter = (1.0f - kOuterDeadZone) * 32767.0f;
     float fX, fY;
     ApplyStickDeadzone(1000, 0, 0.0f, fX, fY);
-    CHECK(fX == doctest::Approx(1000.0f / 32767.0f));
+    CHECK(fX == doctest::Approx(1000.0f / fOuter));
 
     ApplyStickDeadzone(1000, 0, -1.0f, fX, fY);
-    CHECK(fX == doctest::Approx(1000.0f / 32767.0f));
+    CHECK(fX == doctest::Approx(1000.0f / fOuter));
 
     ApplyStickDeadzone(32000, 0, 5.0f, fX, fY);
     CHECK(fX > 0.0f);
+}
+
+TEST_CASE("xinput outer deadzone reaches full deflection early" * doctest::test_suite("unit"))
+{
+    float fX, fY;
+    // 95% of travel is already full, and it never goes past 1
+    ApplyStickDeadzone((short)(0.95f * 32767.0f) + 1, 0, 0.1f, fX, fY);
+    CHECK(fX == doctest::Approx(1.0f));
+    ApplyStickDeadzone(32767, 0, 0.1f, fX, fY);
+    CHECK(fX == doctest::Approx(1.0f));
+    // a diagonal that tops out short of the corner still reaches full speed
+    ApplyStickDeadzone(23000, 23000, 0.1f, fX, fY); // 99% of the corner
+    CHECK(sqrtf(fX * fX + fY * fY) == doctest::Approx(1.0f));
+    CHECK(fX == doctest::Approx(fY));
+    // halfway is still below full
+    ApplyStickDeadzone(16384, 0, 0.1f, fX, fY);
+    CHECK(fX > 0.4f);
+    CHECK(fX < 0.6f);
+}
+
+TEST_CASE("xinput deadzone slider maps to per-stick deadzones" * doctest::test_suite("unit"))
+{
+    float fMove, fLook;
+    StickDeadZones(5, fMove, fLook); // default
+    CHECK(fMove == doctest::Approx(0.10f));
+    CHECK(fLook == doctest::Approx(0.08f));
+    StickDeadZones(0, fMove, fLook);
+    CHECK(fMove == 0.0f);
+    CHECK(fLook == 0.0f);
+    StickDeadZones(10, fMove, fLook);
+    CHECK(fMove == doctest::Approx(0.20f));
+    CHECK(fLook == doctest::Approx(0.16f));
+    StickDeadZones(-3, fMove, fLook);
+    CHECK(fMove == 0.0f);
+    StickDeadZones(99, fMove, fLook);
+    CHECK(fMove == doctest::Approx(0.20f));
+    CHECK(gDeadZoneLevel == 5);
+}
+
+TEST_CASE("xinput look curve is finer near the centre" * doctest::test_suite("unit"))
+{
+    CHECK(LookCurve(0.0f) == 0.0f);
+    CHECK(LookCurve(-0.5f) == 0.0f);
+    CHECK(LookCurve(1.0f) == 1.0f);
+    CHECK(LookCurve(1.5f) == 1.0f);
+    float fLast = 0.0f;
+    for (int i = 1; i <= 20; ++i)
+    {
+        const float fMag = (float)i / 20.0f;
+        const float fCurve = LookCurve(fMag);
+        CHECK(fCurve > fLast);
+        if (i < 20)
+        {
+            CHECK(fCurve < fMag);
+        }
+        fLast = fCurve;
+    }
+    // with the gain, full turn speed comes at about 60% deflection
+    CHECK(LookCurve(0.6f) * kLookGain >= 1.0f);
+    CHECK(LookCurve(0.5f) * kLookGain < 1.0f);
+}
+
+TEST_CASE("xinput look curve leaves movement linear and full look full" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.sThumbLX = 16384;
+    pad.sThumbRX = 16384;
+    Mapped m;
+    Map(pad, 0.0f, 0.0f, m);
+    CHECK(m.afAxis[0] == doctest::Approx(16384.0f / ((1.0f - kOuterDeadZone) * 32767.0f)));
+    CHECK(m.afAxis[3] == doctest::Approx(LookCurve(m.afAxis[0])));
+    CHECK(m.afAxis[3] < m.afAxis[0]);
+
+    pad = Neutral();
+    pad.sThumbRX = 32767;
+    Map(pad, 0.1f, 0.08f, m);
+    CHECK(m.afAxis[3] == doctest::Approx(1.0f));
 }
 
 TEST_CASE("xinput y axes are down-positive like directinput" * doctest::test_suite("unit"))
