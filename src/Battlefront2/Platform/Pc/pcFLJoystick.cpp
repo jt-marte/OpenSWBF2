@@ -1126,6 +1126,8 @@ void RawControllerInputs::PadDefaultsProcess()
     XInputPad::gPadAimActive = false;
     XInputPad::gPadAimHeld = false;
     XInputPad::gPadSecondZoom = false;
+    XInputPad::gPadLookActive = false;
+    XInputPad::gPadLookMag = 0.0f;
     bool bLocked = false;
 
     for (int iPort = 0; iPort < 10; iPort++)
@@ -1135,6 +1137,17 @@ void RawControllerInputs::PadDefaultsProcess()
         {
             continue;
         }
+
+        // Right stick magnitude for the turn boost (XInputPad::TurnBoost).
+        const float fLookX = mRawInputFloat[iPort][XInputPad::kSlotRightRight];
+        const float fLookY = mRawInputFloat[iPort][XInputPad::kSlotRightDown];
+        const float fLookMag = sqrtf(fLookX * fLookX + fLookY * fLookY);
+        XInputPad::gPadLookActive = true;
+        if (fLookMag > XInputPad::gPadLookMag)
+        {
+            XInputPad::gPadLookMag = fLookMag;
+        }
+
         for (int iAction = 0; iAction < XInputPad::kActionCount; iAction++)
         {
             const int iSlot = XInputPad::DefaultSlot(iLayout, mMode, iAction);

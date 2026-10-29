@@ -79,6 +79,22 @@ float LookCurve(float fMagnitude)
     return powf(fMagnitude, kLookExponent);
 }
 
+bool gPadLookActive;
+float gPadLookMag;
+
+float TurnBoost(float fLookMag)
+{
+    if (!(fLookMag > kBoostStart))
+    {
+        return 0.0f;
+    }
+    if (fLookMag >= kBoostFull)
+    {
+        return 1.0f;
+    }
+    return (fLookMag - kBoostStart) / (kBoostFull - kBoostStart);
+}
+
 float TriggerValue(unsigned char bTrigger)
 {
     if (bTrigger <= kTriggerThreshold)

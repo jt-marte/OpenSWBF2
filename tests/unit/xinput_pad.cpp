@@ -199,9 +199,36 @@ TEST_CASE("xinput look curve is finer near the centre" * doctest::test_suite("un
         }
         fLast = fCurve;
     }
-    // with the gain, full turn speed comes at about 60% deflection
-    CHECK(LookCurve(0.6f) * kLookGain >= 1.0f);
-    CHECK(LookCurve(0.5f) * kLookGain < 1.0f);
+    // with the gain, full turn input comes at about 45% deflection
+    CHECK(LookCurve(0.5f) * kLookGain >= 1.0f);
+    CHECK(LookCurve(0.4f) * kLookGain < 1.0f);
+    CHECK(kLookGain == 3.6f);
+}
+
+TEST_CASE("xinput turn boost follows stick tilt with no wind-up" * doctest::test_suite("unit"))
+{
+    CHECK(TurnBoost(0.0f) == 0.0f);
+    CHECK(TurnBoost(-1.0f) == 0.0f);
+    CHECK(TurnBoost(kBoostStart) == 0.0f);
+    CHECK(TurnBoost(kBoostFull) == 1.0f);
+    CHECK(TurnBoost(1.0f) == 1.0f);
+    CHECK(TurnBoost(2.0f) == 1.0f);
+    float fLast = 0.0f;
+    for (int i = 0; i <= 40; ++i)
+    {
+        const float fBoost = TurnBoost((float)i / 40.0f);
+        CHECK(fBoost >= fLast);
+        CHECK(fBoost >= 0.0f);
+        CHECK(fBoost <= 1.0f);
+        fLast = fBoost;
+    }
+    // full tilt is full speed at once; half tilt keeps the base speed for
+    // fine aiming
+    CHECK(TurnBoost(LookCurve(1.0f)) == 1.0f);
+    CHECK(TurnBoost(LookCurve(0.95f)) == 1.0f);
+    CHECK(TurnBoost(LookCurve(0.5f)) == 0.0f);
+    CHECK(TurnBoost(LookCurve(0.8f)) > 0.0f);
+    CHECK(TurnBoost(LookCurve(0.8f)) < 1.0f);
 }
 
 TEST_CASE("xinput look curve leaves movement linear and full look full" * doctest::test_suite("unit"))
