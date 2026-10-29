@@ -329,6 +329,14 @@ ifs_opt_general = NewIFShellScreen {
 		elseif (this.CurButton == "reset") then
 			ifelm_shellscreen_fnPlaySound(this.acceptSound)
 			ScriptCB_ResetGameOptionsToDefault()
+			-- OpenSWBF2: the controller options live in display.ini, not the profile
+			if ( ScriptCB_SetPadLayout ) then
+				ScriptCB_SetPadLayout(0)
+			end
+			if ( ScriptCB_SetPadLookSpeed ) then
+				local iLevel, iStep, iMin, iMax, iDefault = ScriptCB_GetPadLookSpeed()
+				ScriptCB_SetPadLookSpeed(iDefault)
+			end
 			ifs_opt_general_fnUpdateStrings(this)
 			--this:ApplySettings()
 			ifs_opt_general_fnApplySettings(this)
@@ -559,7 +567,7 @@ function ifs_opt_general_fnBuildScreen(this)
 	Form_CreateVertical(this.formcontainergeneral, ifs_opt_general_layout)
 	this.formcontainergeneral.form.radiobuttons.x = 0
 	this.formcontainergeneral.form.sliders.x = ifs_opt_general_layout.width * 0.5 
-	this.formcontainergeneral.form.buttons.x = ifs_opt_general_layout.width + 35
+	this.formcontainergeneral.form.buttons.x = ifs_opt_general_layout.width + 35 + ifs_opt_general_layout.width * 0.06 -- OpenSWBF2: clear of the slider ends
 
 	if( not ScriptCB_GetShellActive() ) then	
 		this.Background = NewIFImage 

@@ -481,14 +481,15 @@ static int ScriptCB_SetPadLayout(lua_State*)
     return 0;
 }
 
-// Controller sensitivity for Options -> Game: level, step, min, max.
+// Controller sensitivity for Options -> Game: level, step, min, max, default.
 static int ScriptCB_GetPadLookSpeed(lua_State*)
 {
     lua_pushnumber(LuaHelper::mState, (float)XInputPad::gPadLookLevel);
     lua_pushnumber(LuaHelper::mState, 1.0f);
     lua_pushnumber(LuaHelper::mState, (float)XInputPad::kLookSpeedMinLevel);
     lua_pushnumber(LuaHelper::mState, (float)XInputPad::kLookSpeedMaxLevel);
-    return 4;
+    lua_pushnumber(LuaHelper::mState, (float)XInputPad::kLookSpeedDefaultLevel);
+    return 5;
 }
 
 // Applies at once and saves to display.ini.
