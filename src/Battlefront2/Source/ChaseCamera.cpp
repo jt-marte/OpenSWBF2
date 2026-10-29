@@ -14,6 +14,8 @@
 #include "Tracker.h"
 #include "PebbleFL/Common/PblRandom.h"
 #include "RedEngineFL/Graphics/RedCamera.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Interface/RedInterfaceScreen.h"
 
@@ -41,6 +43,8 @@ extern "C" PblMatrix* __stdcall D3DXMatrixMultiply(PblMatrix* pOut, const PblMat
 extern "C" PblMatrix* __stdcall D3DXMatrixRotationX(PblMatrix* pOut, float fAngle);
 extern "C" PblMatrix* __stdcall D3DXMatrixRotationY(PblMatrix* pOut, float fAngle);
 extern "C" PblMatrix* __stdcall D3DXMatrixRotationZ(PblMatrix* pOut, float fAngle);
+
+extern bool g_bNoRender;
 
 namespace AIUtil {
 
@@ -314,6 +318,14 @@ void ChaseCamera::SetupCamera(RedCamera* pCamera, float fDeltaTime)
     if (CameraManager::sInstance->m_iNumCam == 1)
     {
         fFOV = GetWidescreenFOVAdjustment(fFOV);
+    }
+    // OpenSWBF2: the field of view option (Options -> Video, display.ini Fov),
+    // only when not zoomed, so scopes magnify as before. Headless runs ignore
+    // it: the camera frustum feeds AI level of detail.
+    const unsigned int uiFov = DisplayCfg::gDisplay.uiFov;
+    if (!g_bNoRender && uiFov != 0 && uiFov != DisplayLogic::kFovDefault && fZoom == 1.0f)
+    {
+        fFOV = DisplayLogic::ScaleFov(fFOV, DisplayLogic::FovTanScale(uiFov));
     }
     mOwner->SetupCameraTrackMatrix(mMatrix, fDeltaTime);
 

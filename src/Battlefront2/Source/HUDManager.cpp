@@ -4,6 +4,8 @@
 #include "HUDManager.h"
 
 #include "RedEngineFL/Application/pc/pcFLRender.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Memory/RedMemory.h"
 #include "CameraManager.h"
@@ -231,6 +233,92 @@ void HUD::Manager::ConfigFile::WriteData(HUD::File& file, unsigned int uTabs)
     }
 }
 
+namespace
+{
+
+// OpenSWBF2: the HUD's root screen groups, drawn at the HUD scale option
+// (Options -> Video, display.ini HudScale). Each top-level HUD element is
+// scaled about the screen edge, corner or centre line it sits nearest
+// (DisplayLogic::HudAnchor), so the HUD keeps to its corners; elements in the
+// middle of the screen (the reticle) and world markers are left alone. Only
+// the drawing changes: the matrices are restored afterwards, so HUD logic and
+// events never see it. No data members, as gScreenGroup is indexed as
+// RedScreenGroupElement.
+class HudScreenGroup : public RedScreenGroupElement
+{
+protected:
+    virtual void RenderUsingContext(const PblMatrix& mContext, const RedColor& color);
+};
+
+struct HudScaled
+{
+    RedInterfaceElement* pElement;
+    PblMatrix mSaved;
+};
+
+const int kMaxHudScaled = 256;
+HudScaled sHudScaled[kMaxHudScaled];
+
+void HudScreenGroup::RenderUsingContext(const PblMatrix& mContext, const RedColor& color)
+{
+    const unsigned int uiPercent = DisplayCfg::gDisplay.uiHudScale;
+    const PblMatrix& mRoot = GetMatrix();
+    if (uiPercent == DisplayLogic::kHudScaleDefault || uiPercent == 0 || mRoot.m[0][0] == 0.0f ||
+        mRoot.m[1][1] == 0.0f)
+    {
+        RedScreenGroupElement::RenderUsingContext(mContext, color);
+        return;
+    }
+
+    const float fScale = (float)uiPercent / 100.0f;
+    const float fW = HUD::Element::GetViewportWidth();
+    const float fH = HUD::Element::GetViewportHeight();
+    int iCount = 0;
+    for (HUD::Element* pElement = HUD::Element::GetFirst(); pElement && iCount < kMaxHudScaled;
+         pElement = HUD::Element::GetNext(pElement))
+    {
+        RedInterfaceElement* pRed = &pElement->GetRedInterfaceElement();
+        if (pRed->GetGroup() != this || dynamic_cast<HUD::ElementTarget*>(pElement))
+        {
+            continue;
+        }
+        // where it sits on screen (the root group only offsets/scales its axes)
+        const PblMatrix& mLocal = pRed->GetMatrix();
+        const float fScreenX = mLocal.m[3][0] * mRoot.m[0][0] + mRoot.m[3][0];
+        const float fScreenY = mLocal.m[3][1] * mRoot.m[1][1] + mRoot.m[3][1];
+        if (DisplayLogic::HudIsCentral(fScreenX, fScreenY, fW, fH))
+        {
+            continue;
+        }
+        const float fAnchorX = (DisplayLogic::HudAnchor(fScreenX, fW) - mRoot.m[3][0]) / mRoot.m[0][0];
+        const float fAnchorY = (DisplayLogic::HudAnchor(fScreenY, fH) - mRoot.m[3][1]) / mRoot.m[1][1];
+
+        sHudScaled[iCount].pElement = pRed;
+        sHudScaled[iCount].mSaved = mLocal;
+        PblMatrix mScaled = mLocal;
+        for (int i = 0; i < 3; ++i)
+        {
+            mScaled.m[i][0] *= fScale;
+            mScaled.m[i][1] *= fScale;
+            mScaled.m[i][2] *= fScale;
+        }
+        mScaled.m[3][0] = DisplayLogic::HudScalePos(mLocal.m[3][0], fAnchorX, fScale);
+        mScaled.m[3][1] = DisplayLogic::HudScalePos(mLocal.m[3][1], fAnchorY, fScale);
+        pRed->SetMatrix(mScaled);
+        ++iCount;
+    }
+
+    RedScreenGroupElement::RenderUsingContext(mContext, color);
+
+    while (iCount > 0)
+    {
+        --iCount;
+        sHudScaled[iCount].pElement->SetMatrix(sHudScaled[iCount].mSaved);
+    }
+}
+
+}
+
 namespace HUD {
 // GLOBAL: SWBF2 0x007e69c8
 bool gScreenGroupEditEnabled = true;
@@ -286,7 +374,7 @@ void HUD::Manager::Open()
 
     gEditor = new HUD::Editor;
 
-    HUD::gScreenGroup = new RedScreenGroupElement[5];
+    HUD::gScreenGroup = new HudScreenGroup[5]; // OpenSWBF2: HUD scale
     HUD::gScreenGroupEdit = new RedScreenGroupElement[5];
 
     HUD::gScreenGroup->SetZOrder(50);
@@ -339,7 +427,7 @@ void HUD::Manager::Close()
         FLRenderer::RemoveInterfaceElement(i, &HUD::gScreenGroupEdit[i + 1]);
     }
 
-    delete[] HUD::gScreenGroup;
+    delete[] static_cast<HudScreenGroup*>(HUD::gScreenGroup);
     delete[] HUD::gScreenGroupEdit;
     HUD::gScreenGroup = 0;
     HUD::gScreenGroupEdit = 0;

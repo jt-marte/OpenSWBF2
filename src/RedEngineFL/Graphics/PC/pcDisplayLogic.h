@@ -408,4 +408,26 @@ float UiScale(unsigned int uiScreenH);
 // rounded (1920x1080 at 3840x2160 and at 2560x1440).
 void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, unsigned int& uiH);
 
+// OpenSWBF2: the HUD scale option (percent, Options -> Video). Each top-level
+// HUD element scales about the screen edge, corner or centre line it sits
+// nearest: HudAnchor gives that line along one axis (0, half or the full
+// extent, by which third fPos is in), HudScalePos moves a point about it.
+// Elements in the middle third on both axes (the reticle) stay as they are.
+const unsigned int kHudScaleMin = 50;
+const unsigned int kHudScaleMax = 150;
+const unsigned int kHudScaleDefault = 100;
+float HudAnchor(float fPos, float fExtent);
+float HudScalePos(float fPos, float fAnchor, float fScale);
+bool HudIsCentral(float fX, float fY, float fW, float fH);
+
+// OpenSWBF2: the field of view option, in degrees across a 16:9 screen for the
+// default camera (the stock 48 degrees at 4:3 widened for 16:9 is ~61). The
+// cameras' tan(FOV / 2) is scaled by FovTanScale, exactly 1 at the default,
+// so every unit's own FOV keeps its proportion and wider screens keep Hor+.
+const unsigned int kFovMin = 55;
+const unsigned int kFovMax = 100;
+const unsigned int kFovDefault = 61;
+float FovTanScale(unsigned int uiDegrees);
+float ScaleFov(float fFov, float fTanScale);
+
 }

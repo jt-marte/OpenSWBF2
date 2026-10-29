@@ -363,7 +363,7 @@ ifs_opt_pcvideo = NewIFShellScreen {
 			ScriptCB_SetResolution(values[index].data["resX"],values[index].data["resY"])
 		end
 		-- change other options all the time
-		ScriptCB_SetHUDScale(generalForm.elements["hudscale"].selValue)
+		ScriptCB_SetHUDScale(generalForm.elements["hudscale"].selValue / 100)
 
 		local iWindowed = this.iLegacyWindowed or 1
 		local iVsync = this.iLegacyVsync or 1
@@ -524,7 +524,10 @@ ifs_opt_pcvideo = NewIFShellScreen {
 		customForm.elements["distortion"].selValue,	this.iLegacyWindowed,
 		this.iLegacyVsync = ScriptCB_GetPCVideoOptions()
 
-		generalForm.elements["hudscale"].selValue = ScriptCB_GetHUDScale()
+		generalForm.elements["hudscale"].selValue = math.floor(ScriptCB_GetHUDScale() * 100 + 0.5)
+		if ( ScriptCB_GetFov ) then
+			generalForm.elements["fov"].selValue = ScriptCB_GetFov()
+		end
 
 		ifs_opt_pcvideo_fnReadDisplay(this)
 		
@@ -693,6 +696,14 @@ ifs_opt_pcvideo = NewIFShellScreen {
 					customForm.elements[key].selValue = value
 				end
 			end
+			-- OpenSWBF2: HUD scale and field of view back to their defaults
+			ScriptCB_SetHUDScale(1.0)
+			generalForm.elements["hudscale"].selValue = 100
+			if ( ScriptCB_GetFov ) then
+				local iDegrees, iMin, iMax, iDefault = ScriptCB_GetFov()
+				ScriptCB_SetFov(iDefault)
+				generalForm.elements["fov"].selValue = iDefault
+			end
 
 			Form_SetValues(generalForm)
 			Form_SetValues(customForm)
@@ -855,6 +866,18 @@ ifs_opt_pcvideo = NewIFShellScreen {
 		elseif ( element.tag == "displaymode" ) then
 			ifs_opt_pcvideo_fnShowRows(this)
 			ifs_opt_pcvideo_fnFillMultisample(this, true)
+		elseif ( element.tag == "hudscale" ) then
+			-- OpenSWBF2: 5% steps, applied at once and saved to display.ini
+			local iPercent = math.floor(element.selValue / 5 + 0.5) * 5
+			ScriptCB_SetHUDScale(iPercent / 100)
+			element.selValue = iPercent
+			Form_SetValues(form)
+		elseif ( element.tag == "fov" and ScriptCB_SetFov ) then
+			-- OpenSWBF2: whole degrees, applied at once and saved to display.ini
+			local iDegrees = math.floor(element.selValue + 0.5)
+			ScriptCB_SetFov(iDegrees)
+			element.selValue = iDegrees
+			Form_SetValues(form)
 		end
 
 		this.bChangedSettings = true
@@ -992,7 +1015,9 @@ ifs_opt_pcvideo_general_options_layout = {
         { tag = "vsync", title = "ifs.VideoOpt.vsync", fnChanged = ifs_opt_pcvideo.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"} },
         { tag = "framecap", title = "Frame cap", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {} },
         { tag = "futureframes", title = "Future Frame Rendering", fnChanged = ifs_opt_pcvideo.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"} },
-        { tag = "hudscale",  hidden = 1, title = "ifs.videoopt.hudscale", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1.0, control = "slider", minValue = 0.25, maxValue = 1.0 },
+        -- OpenSWBF2: HUD scale (percent) and field of view (degrees across 16:9), applied at once and saved to display.ini
+        { tag = "hudscale", title = "HUD scale", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 100, control = "slider", minValue = 50, maxValue = 150, sliderMultiplier = 1 },
+        { tag = "fov", title = "Field of view", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 61, control = "slider", minValue = 55, maxValue = 100, sliderMultiplier = 1 },
         { tag = "overallquality", title = "ifs.videoopt.overallquality", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {"ifs.VideoOpt.low", "ifs.VideoOpt.med", "ifs.VideoOpt.high", "ifs.VideoOpt.custom"} },
     },
 }

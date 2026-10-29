@@ -518,8 +518,42 @@ static int ScriptCB_SetPadLookSpeed(lua_State*)
     return 0;
 }
 
+// Field of view for Options -> Video, in degrees across 16:9: value, min,
+// max, default.
+static int ScriptCB_GetFov(lua_State*)
+{
+    lua_pushnumber(LuaHelper::mState, (float)DisplayCfg::gDisplay.uiFov);
+    lua_pushnumber(LuaHelper::mState, (float)DisplayLogic::kFovMin);
+    lua_pushnumber(LuaHelper::mState, (float)DisplayLogic::kFovMax);
+    lua_pushnumber(LuaHelper::mState, (float)DisplayLogic::kFovDefault);
+    return 4;
+}
+
+// Applies at once (ChaseCamera) and saves to display.ini.
+static int ScriptCB_SetFov(lua_State*)
+{
+    int iDegrees = (int)(luaL_checknumber(LuaHelper::mState, 1) + 0.5f);
+    if (iDegrees < (int)DisplayLogic::kFovMin)
+    {
+        iDegrees = (int)DisplayLogic::kFovMin;
+    }
+    else if (iDegrees > (int)DisplayLogic::kFovMax)
+    {
+        iDegrees = (int)DisplayLogic::kFovMax;
+    }
+    if ((unsigned int)iDegrees != DisplayCfg::gDisplay.uiFov)
+    {
+        DisplayCfg::gDisplay.uiFov = (unsigned int)iDegrees;
+        if (!DisplayCfg::SaveFov((unsigned int)iDegrees))
+        {
+            LOG(LogCore, Warning, "OPENSWBF2 FOV %d not saved", iDegrees);
+        }
+    }
+    return 0;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[51] =
+static const CallbackEntryT sPCCallbacks[53] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -572,6 +606,8 @@ static const CallbackEntryT sPCCallbacks[51] =
     { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },
     { "ScriptCB_GetPadLookSpeed", ScriptCB_GetPadLookSpeed },
     { "ScriptCB_SetPadLookSpeed", ScriptCB_SetPadLookSpeed },
+    { "ScriptCB_GetFov", ScriptCB_GetFov },
+    { "ScriptCB_SetFov", ScriptCB_SetFov },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -1063,7 +1099,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 51; ++i)
+    for (int i = 0; i < 53; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }
