@@ -1495,6 +1495,12 @@ void SpawnDisplay::UpdateInput()
     const float fMouseY = (float)pInputs->mMouseCoords.mPosY;
     const float fPulse = PblMath::Sin(mVisibleTimer * 8.0f) * 100.0f + 155.0f;
 
+    // OpenSWBF2: this screen is mouse hotspots only. While a pad drives the
+    // menus (cursor hidden) it works like console instead: up/down (D-pad or
+    // left stick) pick the class, A spawns, B goes back. The hidden cursor
+    // then hovers nothing, so it can't light up a second class.
+    const bool bPad = XInputPad::gPadOwnsCursor;
+
     for (int i = 0; i < 10; ++i)
     {
         Team* pTeam = Team::sTeams[mTeamNumber];
@@ -1509,7 +1515,7 @@ void SpawnDisplay::UpdateInput()
         }
 
         RedGroupElement* pBorder = m_pSlotBorder[i];
-        if (pBorder->IsEnabled() && pBorder->TestHotSpot(fMouseX, fMouseY))
+        if (!bPad && pBorder->IsEnabled() && pBorder->TestHotSpot(fMouseX, fMouseY))
         {
             if (i != mClassIndex)
             {
@@ -1527,7 +1533,7 @@ void SpawnDisplay::UpdateInput()
     for (int i = 0; i < 2; ++i)
     {
         RedBitmapElement* pIcon = m_pSideIcon[i];
-        if (pIcon->IsEnabled() && pIcon->TestHotSpot(fMouseX, fMouseY) &&
+        if (!bPad && pIcon->IsEnabled() && pIcon->TestHotSpot(fMouseX, fMouseY) &&
             !(NetGame::IsEnabled() && netAutoAssignTeams))
         {
             pIcon->m_color.a = (unsigned char)(int)fPulse;
@@ -1538,10 +1544,6 @@ void SpawnDisplay::UpdateInput()
         }
     }
 
-    // OpenSWBF2: this screen is mouse hotspots only. While a pad drives the
-    // menus (cursor hidden) it works like console instead: up/down (D-pad or
-    // left stick) pick the class, A spawns, B goes back.
-    const bool bPad = XInputPad::gPadOwnsCursor;
     static bool sbPadStickHeld;
     int iClass;
     if (bPad)
