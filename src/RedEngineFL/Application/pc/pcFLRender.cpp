@@ -1179,7 +1179,10 @@ void FLRenderer::InitCursor(unsigned int uiTextureHash, bool bInit)
 // FUNCTION: SWBF2 0x006befd0
 void FLRenderer::SetCursorPos(float fX, float fY)
 {
-    mCursorImage.SetPosition(fX, fY);
+    // OpenSWBF2: the drawn cursor grows with the menus (UI scale), like the
+    // hardware one (pcRedMouse.cpp).
+    const float fScale = RedInterfaceScreen::GetUiScale();
+    mCursorImage.SetMatrixPosScale(fX, fY, fScale, fScale);
     RedColor white;
     white.b = white.g = white.r = white.a = 0xff;
     mCursorImage.SetColor(white);

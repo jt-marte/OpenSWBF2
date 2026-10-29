@@ -546,6 +546,10 @@ ShellSize ShellSizePolicy(DisplayMode m, bool bIsShell, unsigned int uiCliW, uns
     {
         out.uiClientW = uiProfW;
         out.uiClientH = uiProfH;
+        if (bIsShell)
+        {
+            ShellBackSize(uiProfW, uiProfH, out.uiBackW, out.uiBackH);
+        }
     }
     else if (m == kModeBorderless && (uiDeskW == 0 || uiDeskH == 0))
     {
@@ -561,9 +565,48 @@ ShellSize ShellSizePolicy(DisplayMode m, bool bIsShell, unsigned int uiCliW, uns
             out.uiBackH = uiDeskH;
             out.bWarnIgnoredSize = uiReqW > 0 && uiDeskW > 0 && (uiReqW != uiDeskW || uiReqH != uiDeskH);
         }
+        else if (!bCli)
+        {
+            ShellBackSize(uiDeskW, uiDeskH, out.uiBackW, out.uiBackH);
+        }
     }
-    out.bClearMsaa = out.uiBackW == 0 || out.uiBackH == 0;
+    // the shell never multisamples (StretchRect to the window)
+    out.bClearMsaa = out.uiBackW == 0 || out.uiBackH == 0 || (bIsShell && !bCli);
     return out;
+}
+
+void ShellBackSize(unsigned int uiClientW, unsigned int uiClientH, unsigned int& uiBackW,
+                   unsigned int& uiBackH)
+{
+    uiBackW = 0;
+    uiBackH = 0;
+    if (uiClientW == 0 || uiClientH <= 600 || uiClientW > kMaxDim || uiClientH > kMaxDim)
+    {
+        return;
+    }
+    unsigned int uiW = (uiClientH * 4 + 1) / 3;
+    unsigned int uiH = uiClientH;
+    if (uiW > uiClientW)
+    {
+        // narrower than 4:3 (5:4): as wide as the window
+        uiW = uiClientW;
+        uiH = (uiClientW * 3 + 2) / 4;
+    }
+    if (uiH <= 600)
+    {
+        return;
+    }
+    uiBackW = uiW;
+    uiBackH = uiH;
+}
+
+float ShellUiScale(unsigned int uiScreenH)
+{
+    if (uiScreenH <= 600 || uiScreenH > kMaxDim)
+    {
+        return 1.0f;
+    }
+    return (float)uiScreenH / 600.0f;
 }
 
 ShellStretch ShellStretchPlan(DisplayMode m, bool bIsShell, unsigned int uiBackW,

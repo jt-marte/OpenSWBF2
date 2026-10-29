@@ -572,8 +572,9 @@ TEST_CASE("display logic shell size policy" * doctest::test_suite("unit"))
     CHECK(s.uiClientH == 768);
 
     s = ShellSizePolicy(kModeWindowed, true, 0, 0, 1280, 720, 1920, 1080);
-    CHECK(s.uiBackW == 0);
-    CHECK(s.uiBackH == 0);
+    // OpenSWBF2: a sharp 4:3 shell at the window height (ShellBackSize)
+    CHECK(s.uiBackW == 960);
+    CHECK(s.uiBackH == 720);
     CHECK(s.uiClientW == 1280);
     CHECK(s.uiClientH == 720);
     CHECK(s.bClearMsaa);
@@ -634,11 +635,21 @@ TEST_CASE("display logic shell size policy" * doctest::test_suite("unit"))
     CHECK_FALSE(s.bWarnNoMonitor);
 
     s = ShellSizePolicy(kModeBorderless, true, 0, 0, 1280, 720, 2560, 1440);
-    CHECK(s.uiBackW == 0);
-    CHECK(s.uiBackH == 0);
+    CHECK(s.uiBackW == 1920);
+    CHECK(s.uiBackH == 1440);
     CHECK(s.uiClientW == 2560);
     CHECK(s.uiClientH == 1440);
     CHECK_FALSE(s.bWarnIgnoredSize);
+    CHECK(s.bClearMsaa);
+
+    // 600 lines or fewer keep the stock 800x600 mode
+    s = ShellSizePolicy(kModeWindowed, true, 0, 0, 800, 600, 1920, 1080);
+    CHECK(s.uiBackW == 0);
+    CHECK(s.uiClientW == 800);
+    CHECK(s.bClearMsaa);
+    // and fullscreen is a real mode, unchanged
+    s = ShellSizePolicy(kModeFullscreen, true, 0, 0, 2560, 1440, 3840, 2160);
+    CHECK(s.uiBackW == 0);
 
     s = ShellSizePolicy(kModeBorderless, true, 1024, 768, 1280, 720, 2560, 1440);
     CHECK(s.uiBackW == 1024);
@@ -1777,4 +1788,65 @@ TEST_CASE("display logic scope box" * doctest::test_suite("unit"))
     // nothing to draw
     ScopeBox(0, 0, uiBox, uiBar);
     CHECK(uiBar == 0);
+}
+
+TEST_CASE("display logic sharp shell size" * doctest::test_suite("unit"))
+{
+    unsigned int w = 1;
+    unsigned int h = 1;
+    // the biggest 4:3 that fits, at the window height
+    ShellBackSize(3840, 2160, w, h);
+    CHECK(w == 2880);
+    CHECK(h == 2160);
+    ShellBackSize(2560, 1440, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1440);
+    ShellBackSize(1920, 1080, w, h);
+    CHECK(w == 1440);
+    CHECK(h == 1080);
+    ShellBackSize(3440, 1440, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1440);
+    ShellBackSize(1680, 1050, w, h);
+    CHECK(w == 1400);
+    CHECK(h == 1050);
+    // narrower than 4:3: as wide as the window
+    ShellBackSize(1280, 1024, w, h);
+    CHECK(w == 1280);
+    CHECK(h == 960);
+    // 600 lines or fewer: the stock 800x600 mode
+    ShellBackSize(1024, 600, w, h);
+    CHECK(w == 0);
+    CHECK(h == 0);
+    ShellBackSize(800, 600, w, h);
+    CHECK(w == 0);
+    ShellBackSize(0, 0, w, h);
+    CHECK(w == 0);
+    ShellBackSize(900, 1600, w, h); // portrait: 900x675, under 600? no, 675 lines
+    CHECK(w == 900);
+    CHECK(h == 675);
+    ShellBackSize(700, 1200, w, h); // 700x525: too small, stock
+    CHECK(w == 0);
+    ShellBackSize(20000, 20000, w, h);
+    CHECK(w == 0);
+}
+
+TEST_CASE("display logic shell ui scale" * doctest::test_suite("unit"))
+{
+    // the shell's 800x600 layouts fill any 4:3 back buffer
+    CHECK(ShellUiScale(600) == 1.0f);
+    CHECK(ShellUiScale(480) == 1.0f);
+    CHECK(ShellUiScale(2160) == doctest::Approx(3.6f));
+    CHECK(ShellUiScale(1080) == doctest::Approx(1.8f));
+    unsigned int w = 0;
+    unsigned int h = 0;
+    ShellBackSize(3840, 2160, w, h);
+    CHECK((float)w / ShellUiScale(h) == doctest::Approx(800.0f));
+    CHECK((float)h / ShellUiScale(h) == doctest::Approx(600.0f));
+    ShellBackSize(2560, 1440, w, h);
+    CHECK((float)w / ShellUiScale(h) == doctest::Approx(800.0f));
+    ShellBackSize(1280, 1024, w, h);
+    CHECK((float)w / ShellUiScale(h) == doctest::Approx(800.0f));
+    CHECK(ShellUiScale(0) == 1.0f);
+    CHECK(ShellUiScale(100000) == 1.0f);
 }

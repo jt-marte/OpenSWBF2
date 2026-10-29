@@ -603,6 +603,13 @@ static void ComputeTargetMode(const PlayerProfile::tPCOpt& rOpt, bool bQuiet, Ta
 
     uiWidth = kSize.uiBackW;
     uiHeight = kSize.uiBackH;
+    // OpenSWBF2: a sharp shell (DisplayLogic::ShellBackSize) the device can't
+    // take falls back to the stock 800x600.
+    if (bIsShell && !bCli && uiWidth && !ProfileSizeUsable(uiWidth, uiHeight))
+    {
+        uiWidth = 0;
+        uiHeight = 0;
+    }
     if (kSize.bClearMsaa)
     {
         msType = (D3DMULTISAMPLE_TYPE)0;

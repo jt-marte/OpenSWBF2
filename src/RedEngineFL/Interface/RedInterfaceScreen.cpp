@@ -436,11 +436,21 @@ void RedInterfaceScreen::GetSafeZone(float& fWidth, float& fHeight, float& fOffs
 // FUNCTION: SWBF2 0x006c0cd0
 float RedInterfaceScreen::GetUiScale()
 {
+    // OpenSWBF2: the shell's menus stay 800x600 on its sharp 4:3 back buffer
+    // (DisplayLogic::ShellBackSize).
+    if (RedRenderer::pcIsShellActive())
+    {
+        return DisplayLogic::ShellUiScale(GetScreenHeight());
+    }
     return DisplayLogic::UiScale(GetScreenHeight());
 }
 
 unsigned int RedInterfaceScreen::GetUiWidth()
 {
+    if (RedRenderer::pcIsShellActive())
+    {
+        return (unsigned int)((float)GetScreenWidth() / GetUiScale() + 0.5f);
+    }
     unsigned int uiW, uiH;
     DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
     return uiW;
@@ -448,6 +458,10 @@ unsigned int RedInterfaceScreen::GetUiWidth()
 
 unsigned int RedInterfaceScreen::GetUiHeight()
 {
+    if (RedRenderer::pcIsShellActive())
+    {
+        return (unsigned int)((float)GetScreenHeight() / GetUiScale() + 0.5f);
+    }
     unsigned int uiW, uiH;
     DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
     return uiH;

@@ -1241,6 +1241,7 @@ public:
     static void pcSetGammaRamp(const D3DGAMMARAMP& ramp);
 
     static void pcSetShellActive(bool bShell);
+    static bool pcIsShellActive();
 
     static void pcStageRequestTag(const DisplayRequestTag& kTag);
 
