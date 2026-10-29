@@ -218,7 +218,8 @@ ifs_opt_general = NewIFShellScreen {
 		ifs_opt_general_fnApplySettings(this)
 
 		generalForm.elements["persp"].hidden = true
-		generalForm.elements["rumble"].hidden = (gPlatformStr == "PC")
+		-- OpenSWBF2: shown on PC too, for XInput pads (-norumble still forces it off)
+		generalForm.elements["rumble"].hidden = nil
 		generalForm.elements["friendlyfire"].hidden = not ScriptCB_GetShellActive() or gDemoBuild
 		generalForm.elements["aimassist"].hidden = (gPlatformStr == "PC")
 		generalForm.elements["autoaim"].hidden = ScriptCB_IsNetworkOn() or (gPlatformStr == "PC")

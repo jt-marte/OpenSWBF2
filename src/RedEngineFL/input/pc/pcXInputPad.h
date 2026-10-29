@@ -32,8 +32,8 @@ const unsigned char kTriggerThreshold = 30;
 
 // Look (turn/pitch) gain on the right stick, ahead of the game's sensitivity
 // curve: the stock tuning felt half as fast as it should on a pad. Values
-// still clamp to +-1, so full turn speed comes at half deflection.
-const float kLookGain = 2.0f;
+// still clamp to +-1; with LookCurve full turn speed comes at ~60% deflection.
+const float kLookGain = 2.4f;
 
 // Stick-driven menu cursor speed, in UI pixels per second (retail: 512).
 const float kCursorSpeed = 1024.0f;
@@ -93,11 +93,28 @@ enum Slot
     kSlotCount = 64
 };
 
+// Radial deadzone: zero inside fDeadZone (0..0.9 of full deflection), then
+// rescaled to reach 1 at 1 - kOuterDeadZone, since many sticks top out short
+// of full travel, diagonals especially.
+const float kOuterDeadZone = 0.05f;
 void ApplyStickDeadzone(short sX, short sY, float fDeadZone, float& fX, float& fY);
+
+// Per-stick deadzones for the Options -> Controls deadzone slider (levels
+// 0..10, default 5): move = 0.02 x level (0.10 by default), look = 0.8 x move.
+// The retail table gave 0.01 at the default, fine on hall-effect sticks but
+// drifting on worn ones. gDeadZoneLevel is set when the profile applies.
+extern int gDeadZoneLevel;
+void StickDeadZones(int iLevel, float& fMove, float& fLook);
+
+// Look response: the right stick's magnitude to the power kLookExponent, so
+// small corrections are finer; kLookGain brings full turn speed back at about
+// 60% deflection.
+const float kLookExponent = 1.6f;
+float LookCurve(float fMagnitude);
 
 float TriggerValue(unsigned char bTrigger);
 
-void Map(const Pad& pad, float fDeadZone, Mapped& out);
+void Map(const Pad& pad, float fMoveDeadZone, float fLookDeadZone, Mapped& out);
 
 unsigned short MotorSpeed(float fLevel);
 
