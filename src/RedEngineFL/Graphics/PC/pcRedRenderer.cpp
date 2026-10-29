@@ -6196,6 +6196,11 @@ void RedRenderer::pcSetShellActive(bool bShell)
     sShellActive = bShell;
 }
 
+bool RedRenderer::pcIsShellActive()
+{
+    return sShellActive;
+}
+
 static void ReleaseShellStretch()
 {
     if (sShellSurface)

@@ -158,6 +158,19 @@ ShellSize ShellSizePolicy(DisplayMode m, bool bIsShell, unsigned int uiCliW, uns
                           unsigned int uiProfW, unsigned int uiProfH, unsigned int uiDeskW,
                           unsigned int uiDeskH);
 
+// OpenSWBF2: the shell's back buffer in a window or borderless. Stock used
+// 800x600 and stretched it to the window (blurry at 4K); now the biggest 4:3
+// that fits the window (2880x2160 in a 3840x2160 one), so the stretch is the
+// same 4:3-to-window look but drawn sharp. 0x0 (the stock 800x600 mode) for
+// windows 600 lines or shorter.
+void ShellBackSize(unsigned int uiClientW, unsigned int uiClientH, unsigned int& uiBackW,
+                   unsigned int& uiBackH);
+
+// The shell's menus are laid out in 800x600 pixels, so in the shell the UI
+// scale (see UiScale) is the screen height over 600 and Lua keeps seeing
+// 800x600 on a 4:3 back buffer of any size. 1.0 at 600 lines and below.
+float ShellUiScale(unsigned int uiScreenH);
+
 struct ShellStretch
 {
     bool bActive;
