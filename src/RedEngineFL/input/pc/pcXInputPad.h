@@ -111,6 +111,11 @@ bool HasPadBindings(const unsigned short (*pKeys)[3]);
 // Menu (eGUIINPUT value) for a raw pad slot, or -1.
 int GuiForSlot(int iSlot);
 
+// Analog trigger -> on/off for the menus, with hysteresis (on at 0.5, off
+// below 0.25). The GUI treats an unchanged value as "not pressed this frame",
+// so feeding it the raw analog value made a held trigger fire repeatedly.
+bool GuiTriggerDown(float fValue, bool bWasDown);
+
 // Left stick as the menu axes (eGUIINPUT_xAxis / yAxis, right and up
 // positive), which the GUI manager turns into repeating Left/Right/Up/Down.
 void GuiAxes(const float* afAxis, float& fX, float& fY);
@@ -124,6 +129,8 @@ bool IsMenuInput(unsigned __int64 uiPressedButtons, const float* afAxis);
 // cursor once the mouse takes over again.
 extern bool gPadOwnsCursor;
 extern bool gMouseResync;
+// A pad stick (not the mouse) is moving the visible cursor.
+extern bool gStickCursor;
 void PadTookMenus();
 void MouseTookMenus();
 

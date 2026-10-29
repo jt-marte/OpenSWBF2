@@ -428,8 +428,16 @@ static int ScriptCB_IsPadNavigating(lua_State*)
     return 1;
 }
 
+// True while a pad stick drives the cursor; the PC tabs ignore it so only the
+// bumpers and triggers switch them.
+static int ScriptCB_IsStickCursor(lua_State*)
+{
+    lua_pushboolean(LuaHelper::mState, XInputPad::gStickCursor);
+    return 1;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[45] =
+static const CallbackEntryT sPCCallbacks[46] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -476,6 +484,7 @@ static const CallbackEntryT sPCCallbacks[45] =
     { "ScriptCB_RestoreDisplayOptions", ScriptCB_RestoreDisplayOptions },
     { "ScriptCB_SaveDisplayOptions", ScriptCB_SaveDisplayOptions },
     { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
+    { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -967,7 +976,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 45; ++i)
+    for (int i = 0; i < 46; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }

@@ -118,6 +118,8 @@ function ifelem_tabmanager_DoCreateTabs( aLayout )
 			hotspot_height = hotspotH,
 			--bHidden = 1,
 		}
+		-- OpenSWBF2: a pad reaches tabs with LB/RB/LT/RT only, never its cursor.
+		mTabs[TagName].bNoStickCursor = 1
 		--mTabs[TagName].label.string = aLayout[i].string
 		--mTabs[TagName].label.bgleft = "BF2_radiobutton_on"
 		--mTabs[TagName].label.bgright = ""

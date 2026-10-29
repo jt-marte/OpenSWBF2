@@ -275,6 +275,36 @@ function gIFShellScreenTemplate_fnPadDefaultButton(this)
 	end
 end
 
+-- OpenSWBF2: called from C when an XInput pad takes the menus from the mouse.
+-- If the cursor left the highlight on something outside this screen's buttons
+-- (a PC tab), clear it and start on the first button instead.
+function gIFShellScreenTemplate_fnPadTookMenus()
+	local this = gCurScreenTable
+	if(gCurPopup or (not this) or (not this.buttons)) then
+		return
+	end
+	if(this.CurButton and this.buttons[this.CurButton]) then
+		return -- already on one of the screen's buttons
+	end
+
+	if(gCurHiliteButton) then
+		IFButton_fnSelect(gCurHiliteButton,nil)
+		IFButton_fnHilight(gCurHiliteButton,nil,0)
+		gCurHiliteButton = nil
+	end
+	gMouseListBox = nil
+	gMouseListBoxSlider = nil
+	this.CurButton = nil
+	gIFShellScreenTemplate_fnPadDefaultButton(this)
+	if(this.CurButton) then
+		gCurHiliteButton = this.buttons[this.CurButton]
+		if(gCurHiliteButton) then
+			IFButton_fnSelect(gCurHiliteButton,1)
+			IFButton_fnHilight(gCurHiliteButton,1,0)
+		end
+	end
+end
+
 -- Default for Reactivate function
 function gIFShellScreenTemplate_fnReactivate(this)
 	gIFShellScreenTemplate_fnPadDefaultButton(this)

@@ -18,7 +18,10 @@ function HandleMouse_Button(this,MouseX,MouseY)
 	if((this.alpha == 0) or (this.hidden == 1) or (this.bDimmed)) then
 		return nil
 	end
-	
+	if(this.bNoStickCursor and ScriptCB_IsStickCursor and ScriptCB_IsStickCursor()) then
+		return nil
+	end
+
 	local bHit = IFObj_fnIsMouseOver(this.label, MouseX, MouseY)
 	if(not bHit) then
 		return nil

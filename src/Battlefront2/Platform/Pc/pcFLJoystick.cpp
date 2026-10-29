@@ -936,7 +936,16 @@ void RawControllerInputs::ReadLatest(float fDeltaTime)
                     const int iGui = XInputPad::GuiForSlot(i);
                     if (iGui >= 0)
                     {
-                        m_pGuiInputs->Set((eGUIINPUT_TYPE)iGui, mRawInputFloat[iPort][i]);
+                        float fValue = mRawInputFloat[iPort][i];
+                        if (i == XInputPad::kSlotLeftTrigger || i == XInputPad::kSlotRightTrigger)
+                        {
+                            // Analog triggers go to the menus as a steady on/off.
+                            static bool sbTriggerDown[10][2];
+                            bool& bDown = sbTriggerDown[iPort][i == XInputPad::kSlotRightTrigger];
+                            bDown = XInputPad::GuiTriggerDown(fValue, bDown);
+                            fValue = bDown ? 1.0f : 0.0f;
+                        }
+                        m_pGuiInputs->Set((eGUIINPUT_TYPE)iGui, fValue);
                     }
                     continue;
                 }

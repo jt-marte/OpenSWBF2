@@ -346,6 +346,8 @@ void RedJoystick::UpdateCursorFromStick(float fDeltaTime, float fX, float fY)
 
     mPreviousAxisX = fX;
     mPreviousAxisY = fY;
+    // pCursorImage is cleared when the real mouse moves.
+    XInputPad::gStickCursor = pMouse->pCursorImage != 0;
 }
 
 // FUNCTION: SWBF2 0x006c5370
