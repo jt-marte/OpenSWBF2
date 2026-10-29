@@ -926,10 +926,11 @@ function PadSnap_Center(Obj)
 	return nil
 end
 
-function PadSnap_Add(List, Obj, bModal)
+-- fHalfW makes the target a horizontal span (a slider bar) centred on Obj.
+function PadSnap_Add(List, Obj, bModal, fHalfW)
 	local fX, fY = PadSnap_Center(Obj)
 	if( fX ) then
-		table.insert(List, { x = fX, y = fY, bModal = bModal })
+		table.insert(List, { x = fX, y = fY, bModal = bModal, fHalfW = fHalfW })
 	end
 end
 
@@ -960,7 +961,10 @@ function PadSnap_Collect(this, List, Seen, iDepth)
 		end
 		return
 	elseif( Type == "hslider" ) then
-		PadSnap_Add(List, this.sliderbg)
+		-- the whole bar (inside its hotspot, which takes in the thumb), so a
+		-- slider whose centre is off to one side is still the row below
+		local fHalfW = (this.width or 0) * (1 + (this.thumbwidth or 0)) * 0.45
+		PadSnap_Add(List, this.sliderbg, nil, fHalfW)
 		return
 	elseif( Type == "editbox" ) then
 		PadSnap_Add(List, this)
@@ -992,25 +996,34 @@ end
 
 -- Nearest target in the pushed direction (within ~70 degrees), favouring
 -- ones in line. No position yet: the top-left one. No direction: the one
--- closest to where we were.
+-- closest to where we were. A span (slider bar) is measured from its nearest
+-- point, and up/down also take one that's within its own half width to the
+-- side. Returns the target and the x to land on.
 function PadSnap_Pick(List, fX, fY, iDX, iDY)
 	local Best = nil
 	local fBest = nil
+	local fBestX = nil
 	local i
 	for i = 1, table.getn(List) do
 		local Item = List[i]
 		local fScore = nil
+		local fItemX = Item.x
+		if( fX and Item.fHalfW ) then
+			fItemX = math.max(Item.x - Item.fHalfW, math.min(Item.x + Item.fHalfW, fX))
+		end
 		if( not fX ) then
 			fScore = Item.y * 4 + Item.x
 		else
-			local fOX = Item.x - fX
+			local fOX = fItemX - fX
 			local fOY = Item.y - fY
 			if( (iDX == 0) and (iDY == 0) ) then
 				fScore = fOX * fOX + fOY * fOY
 			else
 				local fFwd = fOX * iDX + fOY * iDY
 				local fSide = math.abs(fOX * iDY) + math.abs(fOY * iDX)
-				if( (fFwd > 4) and (fSide <= fFwd * 3) ) then
+				local bInCone = (fSide <= fFwd * 3) or
+					(Item.fHalfW and (iDX == 0) and (fSide <= Item.fHalfW))
+				if( (fFwd > 4) and bInCone ) then
 					fScore = fFwd + fSide * 2
 				end
 			end
@@ -1018,9 +1031,10 @@ function PadSnap_Pick(List, fX, fY, iDX, iDY)
 		if( fScore and ((not fBest) or (fScore < fBest)) ) then
 			Best = Item
 			fBest = fScore
+			fBestX = fItemX
 		end
 	end
-	return Best
+	return Best, fBestX
 end
 
 -- Returns nil only when the screen has nothing to land on.
@@ -1039,11 +1053,11 @@ function PadSnap_Move(this, iDX, iDY)
 	if( table.getn(List) == 0 ) then
 		return nil
 	end
-	local Best = PadSnap_Pick(List, this.fPadSnapX, this.fPadSnapY, iDX, iDY)
+	local Best, fBestX = PadSnap_Pick(List, this.fPadSnapX, this.fPadSnapY, iDX, iDY)
 	if( Best ) then
-		this.fPadSnapX = Best.x
+		this.fPadSnapX = fBestX
 		this.fPadSnapY = Best.y
-		PadSnap_Hover(this, Best.x, Best.y)
+		PadSnap_Hover(this, fBestX, Best.y)
 	end
 	return 1
 end
