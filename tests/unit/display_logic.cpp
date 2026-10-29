@@ -1644,3 +1644,30 @@ TEST_CASE("display logic ui scale" * doctest::test_suite("unit"))
     // nonsense heights fall back to stock
     CHECK(UiScale(kMaxDim + 1) == 1.0f);
 }
+
+TEST_CASE("display logic ui size" * doctest::test_suite("unit"))
+{
+    unsigned int w = 0;
+    unsigned int h = 0;
+    // 1080p and below are untouched (the shell's 800x600 too)
+    UiSize(800, 600, w, h);
+    CHECK(w == 800);
+    CHECK(h == 600);
+    UiSize(1920, 1080, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    // higher resolutions lay out as 1080p
+    UiSize(3840, 2160, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    UiSize(2560, 1440, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    // ultrawide keeps its aspect
+    UiSize(3440, 1440, w, h);
+    CHECK(w == 2580);
+    CHECK(h == 1080);
+    UiSize(5120, 2160, w, h);
+    CHECK(w == 2560);
+    CHECK(h == 1080);
+}

@@ -350,6 +350,57 @@ TEST_CASE("interface camera near plane source pins" * doctest::test_suite("unit"
     CHECK(Has(sScreen, "const float RedInterfaceScreen::sfNear = 1.0f;"));
 }
 
+TEST_CASE("ui scale source pins" * doctest::test_suite("unit"))
+{
+    std::string sScreenRaw;
+    std::string sIFaceRaw;
+    std::string sGuiRaw;
+    std::string sMouseRaw;
+    if (!ReadSource("../src/RedEngineFL/Interface/RedInterfaceScreen.cpp", sScreenRaw) ||
+        !ReadSource("../src/Battlefront2/Source/LuaCallbacks_IFace.cpp", sIFaceRaw) ||
+        !ReadSource("../src/Battlefront2/Source/FLGuiManager.cpp", sGuiRaw) ||
+        !ReadSource("../src/RedEngineFL/input/pc/pcRedMouse.cpp", sMouseRaw))
+    {
+        SkipCase("source files not found");
+    }
+    const std::string sScreen = StripCr(sScreenRaw);
+    const std::string sIFace = StripCr(sIFaceRaw);
+    const std::string sGui = StripCr(sGuiRaw);
+    const std::string sMouse = StripCr(sMouseRaw);
+
+    // every screen group Lua creates is laid out in UI pixels
+    size_t uiCount = 0;
+    for (size_t uiAt = sIFace.find("new RedScreenGroupElement(pcName);"); uiAt != std::string::npos;
+         uiAt = sIFace.find("new RedScreenGroupElement(pcName);", uiAt + 1))
+    {
+        ++uiCount;
+        // right after the creation and its SetUseSafezone
+        CHECK(sIFace.find("pGroup->SetScaleUi(true);", uiAt) < uiAt + 160);
+    }
+    CHECK(uiCount == 3);
+
+    // and only those groups get the scale; HUD (perspective) groups keep theirs
+    const std::string sRender = FunctionBody(sScreen, "void RedInterfaceScreen::Render() const");
+    REQUIRE(!sRender.empty());
+    CHECK(Has(sRender, "const float fGroupScale = pGroup->m_bScaleUi ? fUiScale : 1.0f;"));
+    CHECK(Has(sRender, "mScreen.m[2][2] = fGroupScale;"));
+
+    // Lua sees the UI size, and mouse coordinates cross the boundary converted
+    const std::string sInfo = FunctionBody(sIFace, "int ScriptCB_GetScreenInfo(lua_State* L)");
+    const std::string sSafe = FunctionBody(sIFace, "int ScriptCB_GetSafeScreenInfo(lua_State* L)");
+    const std::string sOver = FunctionBody(sIFace, "int ScriptCB_IFObj_MouseOver(lua_State* L)");
+    const std::string sCursor = FunctionBody(sGui, "void GuiManager::UpdateCursor()");
+    REQUIRE(!sInfo.empty());
+    REQUIRE(!sSafe.empty());
+    REQUIRE(!sOver.empty());
+    REQUIRE(!sCursor.empty());
+    CHECK(Has(sInfo, "RedInterfaceScreen::GetUiWidth()"));
+    CHECK(Has(sSafe, "RedInterfaceScreen::GetUiHeight() * fSafeZone"));
+    CHECK(Has(sOver, "luaL_checknumber(LuaHelper::mState, 2) * fUiScale;"));
+    CHECK(Has(sCursor, "(float)mMouseX / fUiScale, (float)mMouseY / fUiScale"));
+    CHECK(Has(sMouse, "DisplayLogic::CursorSize(suiSrcW, suiSrcH, RedInterfaceScreen::GetUiWidth(),"));
+}
+
 TEST_CASE("display apply target failure source pins" * doctest::test_suite("unit"))
 {
     std::string sTextureRaw;

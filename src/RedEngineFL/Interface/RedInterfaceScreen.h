@@ -37,6 +37,10 @@ public:
 
     void SetUsePerspectiveHack(bool bUse) { m_bUsePerspectiveHack = bUse; }
 
+    // OpenSWBF2: groups built by Lua (menus) are laid out in pixels of the
+    // virtual UI size and scaled by RedInterfaceScreen::GetUiScale().
+    void SetScaleUi(bool bScale) { m_bScaleUi = bScale; }
+
     void SetScreenRelativePos(float fX, float fY)
     {
         m_fScreenRelativeX = fX;
@@ -47,6 +51,7 @@ public:
     float m_fScreenRelativeY;
     bool m_bUseSafeZone : 1;
     bool m_bUsePerspectiveHack : 1;
+    bool m_bScaleUi : 1;
 };
 
  
@@ -93,6 +98,13 @@ public:
     static unsigned int GetScreenHeight() { return s_screenFull.m_uiHeightInPixels; }
 
     static float GetScreenSafeZone() { return s_screenFull.m_fSafeZoneWidth; }
+
+    // OpenSWBF2: Lua menus see the screen as GetUiWidth() x GetUiHeight()
+    // (1920x1080 at 4K) and are drawn GetUiScale() times bigger, so they keep
+    // their 1080p size instead of shrinking with the resolution.
+    static float GetUiScale();
+    static unsigned int GetUiWidth();
+    static unsigned int GetUiHeight();
 
     static float GetScreenBottomV() { return s_fScreenBottomV; }
 

@@ -10,6 +10,7 @@
 #include "RedEngineFL/Graphics/RedColor.h"
 #include "RedEngineFL/Graphics/RedLight.h"
 #include "RedEngineFL/Graphics/RedDirectionalLight.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 
 class PblMatrix;
@@ -197,6 +198,7 @@ RedScreenGroupElement::RedScreenGroupElement(const char* pcName)
 {
     m_bUseSafeZone = false;
     m_bUsePerspectiveHack = false;
+    m_bScaleUi = false;
 
     m_fScreenRelativeY = 0.0f;
     m_fScreenRelativeX = 0.0f;
@@ -207,6 +209,7 @@ RedScreenGroupElement::RedScreenGroupElement()
 {
     m_bUseSafeZone = false;
     m_bUsePerspectiveHack = false;
+    m_bScaleUi = false;
 
     m_fScreenRelativeY = 0.0f;
     m_fScreenRelativeX = 0.0f;
@@ -333,6 +336,11 @@ void RedInterfaceScreen::Render() const
     mPerspective.m[0][0] = gRedInterfaceScaleX * fUnitX;
     mPerspective.m[1][1] = gRedInterfaceScaleY * fUnitY;
 
+    // OpenSWBF2: Lua menus are laid out in pixels, so above 1080p their groups
+    // are scaled up. Axes and depth scale alike: the group is the 1080p layout
+    // magnified about the camera, so 3D models keep their perspective.
+    const float fUiScale = GetUiScale();
+
     for (PblList<RedScreenGroupElement>::Itor it = m_children.Begin(); it != m_children.End(); ++it)
     {
         RedScreenGroupElement* pGroup = it;
@@ -359,6 +367,10 @@ void RedInterfaceScreen::Render() const
         }
         else
         {
+            const float fGroupScale = pGroup->m_bScaleUi ? fUiScale : 1.0f;
+            mScreen.m[0][0] = fUnitX * fGroupScale;
+            mScreen.m[1][1] = fUnitY * fGroupScale;
+            mScreen.m[2][2] = fGroupScale;
             mScreen.m[3][0] = (fX - 0.5f) * fScaleX;
             mScreen.m[3][1] = (fY - 0.5f) * fScaleY;
             mScreen.m[3][2] = -fDepth;
@@ -422,6 +434,25 @@ void RedInterfaceScreen::GetSafeZone(float& fWidth, float& fHeight, float& fOffs
 }
 
 // FUNCTION: SWBF2 0x006c0cd0
+float RedInterfaceScreen::GetUiScale()
+{
+    return DisplayLogic::UiScale(GetScreenHeight());
+}
+
+unsigned int RedInterfaceScreen::GetUiWidth()
+{
+    unsigned int uiW, uiH;
+    DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
+    return uiW;
+}
+
+unsigned int RedInterfaceScreen::GetUiHeight()
+{
+    unsigned int uiW, uiH;
+    DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
+    return uiH;
+}
+
 void RedInterfaceScreen::GetScale(float& fScaleX, float& fScaleY, float& fUnitX, float& fUnitY) const
 {
     fScaleX = (float)m_uiWidthInPixels;

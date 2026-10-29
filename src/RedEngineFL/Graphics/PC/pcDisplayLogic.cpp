@@ -1220,4 +1220,11 @@ float UiScale(unsigned int uiScreenH)
     return (float)uiScreenH / 1080.0f;
 }
 
+void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, unsigned int& uiH)
+{
+    const float fScale = UiScale(uiScreenH);
+    uiW = (unsigned int)((float)uiScreenW / fScale + 0.5f);
+    uiH = (unsigned int)((float)uiScreenH / fScale + 0.5f);
+}
+
 }
