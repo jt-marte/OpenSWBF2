@@ -231,6 +231,15 @@ TEST_CASE("xinput turn boost follows stick tilt with no wind-up" * doctest::test
     CHECK(TurnBoost(LookCurve(0.8f)) < 1.0f);
 }
 
+TEST_CASE("xinput pad keeps full turn speed in slow soldier states" * doctest::test_suite("unit"))
+{
+    CHECK(PadTurnFactor(0.6f) == 1.0f); // retail roll default
+    CHECK(PadTurnFactor(0.2f) == 1.0f);
+    CHECK(PadTurnFactor(0.0f) == 1.0f);
+    CHECK(PadTurnFactor(1.0f) == 1.0f);
+    CHECK(PadTurnFactor(1.5f) == 1.5f); // a class that turns faster keeps it
+}
+
 TEST_CASE("xinput look curve leaves movement linear and full look full" * doctest::test_suite("unit"))
 {
     Pad pad = Neutral();

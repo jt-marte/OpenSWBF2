@@ -17,6 +17,7 @@
 #include "GameModel.h"
 #include "WeaponCannonInstance.h"
 #include "RedEngineFL/Graphics/RedModel.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "AnimatedAddon.h"
 #include "CameraManager.h"
 #include "ChaseCamera.h"
@@ -7251,7 +7252,15 @@ bool EntitySoldier::Update(float fDeltaTime)
         {
             mControlReload.Clear();
         }
-        float fOmega = GetOmega(mClass->mTurnFactor[5] * fTurn);
+        // OpenSWBF2: the local XInput pad player keeps full turn speed while
+        // rolling (XInputPad::PadTurnFactor).
+        float fRollTurn = mClass->mTurnFactor[5];
+        if (XInputPad::gPadLookActive && mPlayerId >= 0 && mPlayerId == NetGame::GetLocalIndex(0) &&
+            !NetGame::IsMouseMode(mPlayerId))
+        {
+            fRollTurn = XInputPad::PadTurnFactor(fRollTurn);
+        }
+        float fOmega = GetOmega(fRollTurn * fTurn);
         float fAcceleration = mClass->mAcceleration;
         MoveOffGround(fDeltaTime, fOmega, mClass->mThrustFactor[5] * fThrust * fAcceleration,
                       -(mClass->mStrafeFactor[5] * fStrafe * fAcceleration));

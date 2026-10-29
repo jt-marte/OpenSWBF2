@@ -121,6 +121,11 @@ const float kBoostStart = 0.45f;
 const float kBoostFull = 0.9f;
 float TurnBoost(float fLookMag);
 
+// A soldier state's turn factor for the local pad player. Mouse turn input
+// runs to +-16, so the class's per-state factors (roll 0.6 by default) barely
+// slow a mouse; a pad tops out at 1 and was crippled mid-roll. Never below 1.
+float PadTurnFactor(float fClassFactor);
+
 // Published by the input layer each frame for PlayerController: an XInput pad
 // is connected, and its right stick magnitude (after deadzone and curve).
 extern bool gPadLookActive;

@@ -82,6 +82,11 @@ float LookCurve(float fMagnitude)
 bool gPadLookActive;
 float gPadLookMag;
 
+float PadTurnFactor(float fClassFactor)
+{
+    return fClassFactor < 1.0f ? 1.0f : fClassFactor;
+}
+
 float TurnBoost(float fLookMag)
 {
     if (!(fLookMag > kBoostStart))
