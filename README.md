@@ -7,6 +7,14 @@
 - DirectX SDK (June 2010), which sets DXSDK_DIR
   https://www.microsoft.com/en-us/download/details.aspx?id=6812
 
+Or let `tools\setup.ps1` check and install them. The VS2013 web installer and the DirectX SDK installer no longer work on current systems, so the script installs VS2013 from the offline ISO and extracts the SDK headers and libs directly. It also checks that your GameData is unmodded (the 1.3 patch and Remaster replace lvls the build needs) and explains how to get a stock copy if not.
+
+```
+powershell -ExecutionPolicy Bypass -File tools\setup.ps1
+```
+
+Add `-CheckOnly` to only report what is missing.
+
 ## Build
 
 ```
