@@ -521,6 +521,51 @@ TEST_CASE("display settings pad layout" * doctest::test_suite("unit"))
     SetDefaults(gDisplay);
 }
 
+TEST_CASE("display settings pad look speed" * doctest::test_suite("unit"))
+{
+    // level 4 (the tuned feel) unless the ini says otherwise; 1..10 only
+    DisplaySettings kSettings;
+    SetDefaults(kSettings);
+    CHECK(kSettings.uiPadLookSpeed == 4);
+    CHECK((kSettings.uiSet & kPadLookSpeed) == 0);
+    CHECK(SetFromText(kSettings, kPadLookSpeed, "7", "test"));
+    CHECK(kSettings.uiPadLookSpeed == 7);
+    CHECK(SetFromText(kSettings, kPadLookSpeed, "1", "test"));
+    CHECK(SetFromText(kSettings, kPadLookSpeed, "10", "test"));
+    CHECK(kSettings.uiPadLookSpeed == 10);
+    {
+        LogCapture capture;
+        CHECK_FALSE(SetFromText(kSettings, kPadLookSpeed, "0", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kPadLookSpeed, "11", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kPadLookSpeed, "fast", "test"));
+    }
+    CHECK(kSettings.uiPadLookSpeed == 10);
+
+    // saved on its own, next to the other keys
+    Cleanup();
+    WriteText("[Display]\r\nBorderless=1\r\nPadLayout=legacy\r\n");
+    SetDefaults(gCliDisplay);
+    SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
+    Init();
+    CHECK(gDisplay.uiPadLookSpeed == 4);
+    CHECK(SavePadLookSpeed(6));
+    CHECK(gDisplay.uiPadLookSpeed == 6);
+    DisplaySettings kLoaded;
+    SetDefaults(kLoaded);
+    LoadIni(kLoaded, IniPath());
+    char acText[512];
+    ReadText(acText, sizeof(acText));
+    Cleanup();
+    CHECK(kLoaded.uiPadLookSpeed == 6);
+    CHECK(kLoaded.uiPadLayout == 1);
+    CHECK(kLoaded.bBorderless);
+    const bool bWritten = strstr(acText, "PadLookSpeed=6") != 0;
+    CHECK(bWritten);
+    SetDefaults(gCliDisplay);
+    SetDefaults(gIniDisplay);
+    SetDefaults(gDisplay);
+}
+
 TEST_CASE("display settings pending adapter" * doctest::test_suite("unit"))
 {
     Cleanup();

@@ -162,23 +162,19 @@ TEST_CASE("xinput outer deadzone reaches full deflection early" * doctest::test_
     CHECK(fX < 0.6f);
 }
 
-TEST_CASE("xinput deadzone slider maps to per-stick deadzones" * doctest::test_suite("unit"))
+TEST_CASE("xinput sticks use fixed per-stick deadzones" * doctest::test_suite("unit"))
 {
-    float fMove, fLook;
-    StickDeadZones(5, fMove, fLook); // default
-    CHECK(fMove == doctest::Approx(0.10f));
-    CHECK(fLook == doctest::Approx(0.08f));
-    StickDeadZones(0, fMove, fLook);
-    CHECK(fMove == 0.0f);
-    CHECK(fLook == 0.0f);
-    StickDeadZones(10, fMove, fLook);
-    CHECK(fMove == doctest::Approx(0.20f));
-    CHECK(fLook == doctest::Approx(0.16f));
-    StickDeadZones(-3, fMove, fLook);
-    CHECK(fMove == 0.0f);
-    StickDeadZones(99, fMove, fLook);
-    CHECK(fMove == doctest::Approx(0.20f));
-    CHECK(gDeadZoneLevel == 5);
+    CHECK(kMoveDeadZone == 0.10f);
+    CHECK(kLookDeadZone == 0.08f);
+    // a worn stick's drift (5%) reads zero on both sticks
+    Pad pad;
+    memset(&pad, 0, sizeof(pad));
+    pad.sThumbLX = 1638;
+    pad.sThumbRX = 1638;
+    Mapped out;
+    Map(pad, kMoveDeadZone, kLookDeadZone, out);
+    CHECK(out.afAxis[0] == 0.0f);
+    CHECK(out.afAxis[3] == 0.0f);
 }
 
 TEST_CASE("xinput look curve is finer near the centre" * doctest::test_suite("unit"))
@@ -244,9 +240,9 @@ TEST_CASE("xinput pad yaw tops out a little under the class top speed" * doctest
 {
     // soldier defaults: base (MaxPitchSpeed) 1, top (MaxTurnSpeed) 2
     CHECK(PadYawRate(1.0f, 2.0f, 0.0f, 1.0f) == doctest::Approx(1.0f));
-    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.8f));
+    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.62f));
     CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.0f) < 2.0f);
-    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.5f) == doctest::Approx(2.7f));
+    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.5f) == doctest::Approx(2.43f));
     CHECK(PadYawRate(1.0f, 2.0f, 0.0f, 0.5f) == doctest::Approx(0.5f));
     float fLast = 0.0f;
     for (int i = 0; i <= 20; ++i)
@@ -261,11 +257,11 @@ TEST_CASE("xinput pad pitch rises with the boost to near yaw" * doctest::test_su
 {
     // fine aim keeps the base speed; retail full-tilt pitch stayed at it
     CHECK(PadPitchRate(1.0f, 2.0f, 0.0f, 1.0f) == doctest::Approx(1.0f));
-    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.6f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.44f));
     CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) > 1.0f);
     CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) < PadYawRate(1.0f, 2.0f, 1.0f, 1.0f));
-    CHECK(PadPitchRate(1.0f, 2.0f, 0.5f, 1.0f) == doctest::Approx(1.3f));
-    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.25f) == doctest::Approx(2.0f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 0.5f, 1.0f) == doctest::Approx(1.22f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.25f) == doctest::Approx(1.8f));
     float fLast = 0.0f;
     for (int i = 0; i <= 20; ++i)
     {
@@ -278,7 +274,8 @@ TEST_CASE("xinput pad pitch rises with the boost to near yaw" * doctest::test_su
 TEST_CASE("xinput joystick sensitivity scales the look speed with the default unchanged" * doctest::test_suite("unit"))
 {
     CHECK(LookSpeedScale(kLookSpeedDefaultLevel) == 1.0f);
-    CHECK(LookSpeedScale(4) == 1.0f); // what retail profiles store
+    CHECK(LookSpeedScale(4) == 1.0f);
+    CHECK(gPadLookLevel == kLookSpeedDefaultLevel); // until display.ini says otherwise
     CHECK(LookSpeedScale(1) == doctest::Approx(0.625f));
     CHECK(LookSpeedScale(10) == doctest::Approx(1.75f));
     CHECK(LookSpeedScale(5) == doctest::Approx(1.125f));

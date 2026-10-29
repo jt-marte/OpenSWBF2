@@ -6712,7 +6712,7 @@ bool EntitySoldier::Update(float fDeltaTime)
     if (IsLocalPadLook(mPlayerId))
     {
         fPitchRate = XInputPad::PadPitchRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mPitchBuildup,
-                                             XInputPad::gPadPitchScale);
+                                             XInputPad::LookSpeedScale(XInputPad::gPadLookLevel));
     }
     if (mTargetInfo.mIsAiming && pWeapon)
     {
@@ -8305,7 +8305,7 @@ float EntitySoldier::GetOmega(float fTurn) const
     if (IsLocalPadLook(mPlayerId))
     {
         fOmega = XInputPad::PadYawRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mTurnBuildup,
-                                       XInputPad::gPadYawScale);
+                                       XInputPad::LookSpeedScale(XInputPad::gPadLookLevel));
     }
     else if (mPlayerId >= 0 && !bMouse)
     {

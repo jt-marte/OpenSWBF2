@@ -99,12 +99,11 @@ enum Slot
 const float kOuterDeadZone = 0.05f;
 void ApplyStickDeadzone(short sX, short sY, float fDeadZone, float& fX, float& fY);
 
-// Per-stick deadzones for the Options -> Controls deadzone slider (levels
-// 0..10, default 5): move = 0.02 x level (0.10 by default), look = 0.8 x move.
-// The retail table gave 0.01 at the default, fine on hall-effect sticks but
-// drifting on worn ones. gDeadZoneLevel is set when the profile applies.
-extern int gDeadZoneLevel;
-void StickDeadZones(int iLevel, float& fMove, float& fLook);
+// Fixed per-stick deadzones. The retail deadzone slider (gone from Options ->
+// Controls, which is for keyboard and mouse) gave 0.01 at its default, fine on
+// hall-effect sticks but drifting on worn ones.
+const float kMoveDeadZone = 0.10f;
+const float kLookDeadZone = 0.08f;
 
 // Look response: the right stick's magnitude to the power kLookExponent, so
 // small corrections are finer; kLookGain brings full turn input back at about
@@ -130,31 +129,31 @@ float PadTurnFactor(float fClassFactor);
 // scale), from the class's base (MaxPitchSpeed, 1.0 by default) and top
 // (MaxTurnSpeed, 2.0) speeds, the turn boost (0..1) and the look scale. Both
 // start at the base, so fine aim matches retail. At full tilt yaw reaches
-// kPadYawTop of the top speed; retail pitch never left the base, half of yaw,
-// and now reaches kPadPitchTop of it.
-const float kPadYawTop = 0.9f;
-const float kPadPitchTop = 0.8f;
+// kPadYawTop of the top speed (1.62 for a soldier); retail pitch never left
+// the base, half of yaw, and now reaches kPadPitchTop of it (1.44).
+const float kPadYawTop = 0.81f;
+const float kPadPitchTop = 0.72f;
 float PadYawRate(float fBase, float fTop, float fBoost, float fScale);
 float PadPitchRate(float fBase, float fTop, float fBoost, float fScale);
 
-// Look speed multiplier for the Options -> Controls joystick sensitivity
-// slider (levels 1..10, default 4 = 1.0, the tuning above): kLookSpeedStep per
-// level, 0.625 at 1 and 1.75 at 10. The input layer reads a stored 0 as the
-// default, so the slider stops at 1. Retail's AdjustValueForSensitivity only
-// reshaped input that clamps at 1, so it never changed the top speed.
+// The controller sensitivity slider under the layout in Options -> Game
+// (levels 1..10, default 4, saved in display.ini). On foot it scales the look
+// speed (LookSpeedScale: 1.0 at the default, the tuning above, kLookSpeedStep
+// per level, 0.625 at 1 and 1.75 at 10); in vehicles it is the retail
+// sensitivity curve (AdjustValueForSensitivity), which only reshapes input
+// that clamps at 1 and so never changed a soldier's top speed.
 const int kLookSpeedDefaultLevel = 4;
 const int kLookSpeedMinLevel = 1;
 const int kLookSpeedMaxLevel = 10;
 const float kLookSpeedStep = 0.125f;
 float LookSpeedScale(int iLevel);
+extern int gPadLookLevel;
 
 // Published by the input layer each frame for PlayerController and
-// EntitySoldier: an XInput pad is connected, its right stick magnitude (after
-// deadzone and curve), and the look scales from its sensitivity levels.
+// EntitySoldier: an XInput pad is connected, and its right stick magnitude
+// (after deadzone and curve).
 extern bool gPadLookActive;
 extern float gPadLookMag;
-extern float gPadYawScale;
-extern float gPadPitchScale;
 
 float TriggerValue(unsigned char bTrigger);
 

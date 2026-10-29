@@ -296,7 +296,7 @@ end
 function ifs_opt_pccontrols_fnChangeJoySensitivity(this,delta)
 	local joySens, joySensStep, joySensMax = ScriptCB_GetJoySensitivity(0)
 	joySens = joySens + joySensStep * delta
-	joySens = math.max(joySens,1) -- OpenSWBF2: a stored 0 reads as the default (4)
+	joySens = math.max(joySens,0)
 	joySens = math.min(joySens,joySensMax)
 --	print( "New Sensitivity=", joySens )
 	ScriptCB_SetJoySensitivity(joySens, 0)
@@ -513,15 +513,6 @@ ifs_opt_pccontrols = NewIFShellScreen {
 			setting, step, max = ScriptCB_GetMouseSensitivity()
 			newSetting = math.floor(element.selValue * max + 0.5)
 			ScriptCB_SetMouseSensitivity( newSetting )
-		elseif (element.tag == "joysens") then
-			setting, step, max = ScriptCB_GetJoySensitivity(0)
-			newSetting = math.max(1, math.floor(element.selValue * max + 0.5)) -- OpenSWBF2: a stored 0 reads as the default (4)
-			ScriptCB_SetJoySensitivity( newSetting, 0 )
-			ScriptCB_SetJoySensitivity( newSetting, 1 )
-		elseif (element.tag == "deadzone") then
-			setting, step, max = ScriptCB_GetDeadZone()
-			newSetting = math.floor(element.selValue * max + 0.5)
-			ScriptCB_SetDeadZone( newSetting )
 		end
 		
 		this:ApplySettingsToForm()
@@ -534,8 +525,6 @@ ifs_opt_pccontrols = NewIFShellScreen {
 	ApplySettingsToForm = function(this)
 		local form = this.formcontainer.form
 		local mouseSens, mouseSensStep, mouseSensMax = ScriptCB_GetMouseSensitivity()
-		local joySens, joySensStep, joySensMax = ScriptCB_GetJoySensitivity(0)
-		local deadSetting, deadStep, deadMax = ScriptCB_GetDeadZone()
 		this.GeneralOptions = ScriptCB_GetGeneralOptions()
 
 		local bPersp = 2
@@ -546,9 +535,7 @@ ifs_opt_pccontrols = NewIFShellScreen {
 		end
 		
 		form.elements["mousesens"].selValue = mouseSens / mouseSensMax
-		form.elements["joysens"].selValue = joySens / joySensMax
 		form.elements["invert"].selValue = ScriptCB_GetYAxisFlip() + 1
-		form.elements["deadzone"].selValue = deadSetting / deadMax
 		form.elements["turnassist"].selValue = ScriptCB_GetMouseTurnAssist() + 1 -- must add one, yo
 		form.elements["persp"].selValue = bPersp
 		
@@ -912,8 +899,8 @@ ifs_opt_pccontrols_form_layout = {
 	elements = {
 		-- Title is for the left column, string the option (filled in by code later)
 		{ tag = "mousesens", title = "ifs.GameOpt.pc_mousesens", fnChanged = ifs_opt_pccontrols.OnElementChanged, selValue = 1, control = "slider", minValue = 0.0, maxValue = 1.0},
-		{ tag = "joysens", title = "ifs.GameOpt.pc_joysens", fnChanged = ifs_opt_pccontrols.OnElementChanged, selValue = 1, control = "slider", minValue = 0.0, maxValue = 1.0, sliderMultiplier = 10},
-		{ tag = "deadzone", title = "ifs.gameopt.pc_deadzone", fnChanged = ifs_opt_pccontrols.OnElementChanged, selValue = 1, control = "slider", minValue = 0.0, maxValue = 1.0, sliderMultiplier = 10},
+		-- OpenSWBF2: no joystick sensitivity or deadzone here; this screen is for keyboard and mouse
+		-- (controllers use built-in deadzones, and their sensitivity is under the layout in Options -> Game)
 		{ tag = "invert", title = "ifs.gameopt.pc_invert", fnChanged = ifs_opt_pccontrols.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"},},
 		{ tag = "turnassist", title = "ifs.gameopt.pc_turnassist", fnChanged = ifs_opt_pccontrols.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"},},
 		{ tag = "persp", title = "ifs.gameopt.camera", fnChanged = ifs_opt_pccontrols.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.GameOpt.cam_cockpit", "ifs.GameOpt.cam_forward"}},

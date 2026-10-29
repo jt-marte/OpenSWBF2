@@ -504,8 +504,8 @@ TEST_CASE("display apply source pins" * doctest::test_suite("unit"))
 
     CHECK(!Has(sLua, "Reset("));
     CHECK(!Has(sLua, "pcApplyDisplayMode"));
-    CHECK(Has(sLua, "sPCCallbacks[49]"));
-    CHECK(Has(sLua, "i < 49"));
+    CHECK(Has(sLua, "sPCCallbacks[51]"));
+    CHECK(Has(sLua, "i < 51"));
     const std::string sVideo = FunctionBody(sLua, "int ScriptCB_SetPCVideoOptions(");
     REQUIRE(!sVideo.empty());
     size_t uiChanged = sVideo.find("if (bChanged)\n    {\n        pProfile->UpdateProfCRC();\n"
