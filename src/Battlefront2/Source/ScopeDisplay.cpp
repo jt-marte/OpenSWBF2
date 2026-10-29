@@ -10,6 +10,7 @@
 #include "Tracker.h"
 #include "Weapon.h"
 #include "RedEngineFL/Graphics/RedCamera.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
 
 class Weapon : public Thread
@@ -122,29 +123,68 @@ void ScopeDisplay::Create()
 ScopeDisplay::ScopeDisplay()
 {
     mJoystickIndex = -1;
-    const unsigned int uHalfWidth = RedInterfaceScreen::GetScreenWidth() / 2;
-    const unsigned int uHalfHeight = RedInterfaceScreen::s_screenFull.m_uiHeightInPixels / 2;
     sCanRender = true;
     mGroupWeaponScope.Enable(false);
     mGroupWeaponScope.SendToBack();
 
-    const float fX = (float)uHalfWidth;
-    const float fY = (float)uHalfHeight;
-    mBitmapWeaponScope[0].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_RIGHT, RedBitmapElement::BITMAP_VALIGN_BOTTOM);
     mBitmapWeaponScope[0].SetTexCoords(0.0f, 0.0f, 1.0f, 1.0f, false);
     mGroupWeaponScope.AddElement(&mBitmapWeaponScope[0]);
-    mBitmapWeaponScope[1].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_LEFT, RedBitmapElement::BITMAP_VALIGN_BOTTOM);
     mBitmapWeaponScope[1].SetTexCoords(1.0f, 0.0f, 0.0f, 1.0f, false);
     mGroupWeaponScope.AddElement(&mBitmapWeaponScope[1]);
-    mBitmapWeaponScope[2].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_RIGHT, RedBitmapElement::BITMAP_VALIGN_TOP);
     mBitmapWeaponScope[2].SetTexCoords(0.0f, 1.0f, 1.0f, 0.0f, false);
     mGroupWeaponScope.AddElement(&mBitmapWeaponScope[2]);
-    mBitmapWeaponScope[3].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_LEFT, RedBitmapElement::BITMAP_VALIGN_TOP);
     mBitmapWeaponScope[3].SetTexCoords(1.0f, 1.0f, 0.0f, 0.0f, false);
     mGroupWeaponScope.AddElement(&mBitmapWeaponScope[3]);
 
+    // OpenSWBF2: the side bars match the art outside the lens (black at
+    // 6/15 alpha), so the lens edge carries on to the screen edge.
+    RedColor barColor(0, 0, 0, 102);
+    for (int i = 0; i < 2; ++i)
+    {
+        mBitmapScopeBar[i].SetTexture(0xDE020766);
+        mBitmapScopeBar[i].SetColor(barColor);
+        mGroupWeaponScope.AddElement(&mBitmapScopeBar[i]);
+    }
+    mLayoutW = 0;
+    mLayoutH = 0;
+    UpdateLayout();
+
     mScopeTexture = 0;
     mIsZooming = false;
+}
+
+// OpenSWBF2: retail drew the four quarters of the 4:3 scope art across the
+// whole screen, an oval on anything wider. They now fill a centred 4:3 box
+// (DisplayLogic::ScopeBox) with bars either side; recomputed when the screen
+// size changes, since this is built once at startup.
+void ScopeDisplay::UpdateLayout()
+{
+    const unsigned int uWidth = RedInterfaceScreen::GetScreenWidth();
+    const unsigned int uHeight = RedInterfaceScreen::s_screenFull.m_uiHeightInPixels;
+    if (uWidth == mLayoutW && uHeight == mLayoutH)
+    {
+        return;
+    }
+    mLayoutW = uWidth;
+    mLayoutH = uHeight;
+
+    unsigned int uBoxW, uBarW;
+    DisplayLogic::ScopeBox(uWidth, uHeight, uBoxW, uBarW);
+    const float fX = (float)(uBoxW / 2);
+    const float fY = (float)(uHeight / 2);
+    mBitmapWeaponScope[0].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_RIGHT, RedBitmapElement::BITMAP_VALIGN_BOTTOM);
+    mBitmapWeaponScope[1].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_LEFT, RedBitmapElement::BITMAP_VALIGN_BOTTOM);
+    mBitmapWeaponScope[2].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_RIGHT, RedBitmapElement::BITMAP_VALIGN_TOP);
+    mBitmapWeaponScope[3].SetRect(fX, fY, RedBitmapElement::BITMAP_HALIGN_LEFT, RedBitmapElement::BITMAP_VALIGN_TOP);
+
+    mBitmapScopeBar[0].SetRect((float)uBarW, (float)uHeight, RedBitmapElement::BITMAP_HALIGN_RIGHT,
+                               RedBitmapElement::BITMAP_VALIGN_CENTER);
+    mBitmapScopeBar[0].SetPosition(-fX, 0.0f);
+    mBitmapScopeBar[1].SetRect((float)uBarW, (float)uHeight, RedBitmapElement::BITMAP_HALIGN_LEFT,
+                               RedBitmapElement::BITMAP_VALIGN_CENTER);
+    mBitmapScopeBar[1].SetPosition(fX, 0.0f);
+    mBitmapScopeBar[0].Enable(uBarW > 0);
+    mBitmapScopeBar[1].Enable(uBarW > 0);
 }
 
 // FUNCTION: SWBF2 0x006339d0
@@ -249,6 +289,7 @@ bool ScopeDisplay::Update(float fDeltaTime)
         return true;
     }
 
+    UpdateLayout();
     mGroupWeaponScope.Enable(false);
     mBinocularSound.Update();
     if (mIsZooming)

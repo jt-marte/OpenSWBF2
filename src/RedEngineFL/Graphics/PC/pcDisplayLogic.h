@@ -217,6 +217,12 @@ void FakeMultisampleLevels(unsigned int* auiLevels);
 
 unsigned int EffectiveFpsCap(unsigned int uiFps, bool bPresentThrottled);
 
+// OpenSWBF2: the scope overlay art (and its blur mask) is drawn for a 4:3
+// screen, so wider screens stretched the lens into an oval. ScopeBox gives the
+// centred 4:3 box it is drawn in (the whole width at 4:3 or narrower) and the
+// width of the bars left on each side.
+void ScopeBox(unsigned int uiW, unsigned int uiH, unsigned int& uiBoxW, unsigned int& uiBarW);
+
 struct PresentWatch
 {
     unsigned int uiFrames;

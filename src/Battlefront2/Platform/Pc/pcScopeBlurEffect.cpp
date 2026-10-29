@@ -1,6 +1,7 @@
 #include "Battlefront2/Source/ScopeBlurEffect.h"
 #include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Graphics/RedColor.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcRedPrimitive.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Graphics/PC/pcRedShader.h"
@@ -21,6 +22,47 @@ static FilterCopyShaderSample BoxFilter[9] = {
     { 0.125f, 3.0f, -3.0f },  { 0.0f, 0.0f, 0.0f },     { 0.125f, -4.0f, 4.0f },
     { 0.125f, 1.0f, -1.0f },  { 0.125f, 2.0f, -2.0f },  { 0.125f, 4.0f, -4.0f },
 };
+
+namespace
+{
+
+// The view's pixel extents and the blurred copy's texture coordinates over it.
+struct BlurQuad
+{
+    float fLeft, fTop, fRight, fBottom;
+    float fU0, fV0, fU1, fV1;
+};
+
+// The masked blur over the part of the view from fT0 to fT1 (fractions across
+// it), with the mask's u from fM0 to fM1 and its v from 0 to fMV.
+void RenderBlurQuad(const BlurQuad& kView, float fT0, float fT1, float fM0, float fM1, float fMV,
+                    pcClearShader* pShader, const RedColor& color)
+{
+    pcRedPrimitive* pPrimitive = pcRedPrimitive::Create(D3DPT_TRIANGLESTRIP, 0x403, 32, 4, 0, false);
+    float* pVerts = (float*)pPrimitive->BeginVertexData();
+    if (!pVerts)
+    {
+        return;
+    }
+    const float fX0 = kView.fLeft + (kView.fRight - kView.fLeft) * fT0;
+    const float fX1 = kView.fLeft + (kView.fRight - kView.fLeft) * fT1;
+    const float fU0 = kView.fU0 + (kView.fU1 - kView.fU0) * fT0;
+    const float fU1 = kView.fU0 + (kView.fU1 - kView.fU0) * fT1;
+    pVerts[0] = fX0;    pVerts[1] = kView.fTop;     pVerts[2] = 0.0f;  pVerts[3] = 1.0f;
+    pVerts[4] = fU0;    pVerts[5] = kView.fV0;      pVerts[6] = fM0;   pVerts[7] = 0.0f;
+    pVerts[8] = fX0;    pVerts[9] = kView.fBottom;  pVerts[10] = 0.0f; pVerts[11] = 1.0f;
+    pVerts[12] = fU0;   pVerts[13] = kView.fV1;     pVerts[14] = fM0;  pVerts[15] = fMV;
+    pVerts[16] = fX1;   pVerts[17] = kView.fTop;    pVerts[18] = 0.0f; pVerts[19] = 1.0f;
+    pVerts[20] = fU1;   pVerts[21] = kView.fV0;     pVerts[22] = fM1;  pVerts[23] = 0.0f;
+    pVerts[24] = fX1;   pVerts[25] = kView.fBottom; pVerts[26] = 0.0f; pVerts[27] = 1.0f;
+    pVerts[28] = fU1;   pVerts[29] = kView.fV1;     pVerts[30] = fM1;  pVerts[31] = fMV;
+    pPrimitive->EndVertexData();
+
+    RedRenderer::pcRenderPrimitive(pPrimitive, pShader, gMatrixIdentity, color, 0x200, 0, 0, 0);
+    pPrimitive->Release();
+}
+
+}
 
 void ScopeBlurEffect::PlatformReadConfigData(PblConfig::Data& data)
 {
@@ -126,13 +168,6 @@ void ScopeBlurEffect::Render(int value)
 
     m_pClearShader->m_pAlphaMaskTex = RedTexture::Find(0xF745F270);
 
-    pPrimitive = pcRedPrimitive::Create(D3DPT_TRIANGLESTRIP, 0x403, 32, 4, 0, false);
-    pVerts = (float*)pPrimitive->BeginVertexData();
-    if (!pVerts)
-    {
-        return;
-    }
-
     RedRenderer::pcGetViewport(viewport);
     RedRenderer::pcGetViewportExtents(left, top, right, bottom);
 
@@ -140,19 +175,22 @@ void ScopeBlurEffect::Render(int value)
     float fV0 = viewport.fOffsetY * fV;
     float fU1 = (viewport.fWidth + viewport.fOffsetX) * fU;
     float fV1 = (viewport.fHeight + viewport.fOffsetY) * fV;
-    pVerts[0] = left;   pVerts[1] = top;     pVerts[2] = 0.0f;  pVerts[3] = 1.0f;
-    pVerts[4] = fU0;    pVerts[5] = fV0;     pVerts[6] = 0.0f;  pVerts[7] = 0.0f;
-    pVerts[8] = left;   pVerts[9] = bottom;  pVerts[10] = 0.0f; pVerts[11] = 1.0f;
-    pVerts[12] = fU0;   pVerts[13] = fV1;    pVerts[14] = 0.0f; pVerts[15] = 1.0f;
-    pVerts[16] = right; pVerts[17] = top;    pVerts[18] = 0.0f; pVerts[19] = 1.0f;
-    pVerts[20] = fU1;   pVerts[21] = fV0;    pVerts[22] = 1.0f; pVerts[23] = 0.0f;
-    pVerts[24] = right; pVerts[25] = bottom; pVerts[26] = 0.0f; pVerts[27] = 1.0f;
-    pVerts[28] = fU1;   pVerts[29] = fV1;    pVerts[30] = 1.0f; pVerts[31] = 1.0f;
-    pPrimitive->EndVertexData();
 
-    RedRenderer::pcRenderPrimitive(pPrimitive, m_pClearShader, gMatrixIdentity,
-                                   color, 0x200, 0, 0, 0);
-    pPrimitive->Release();
+    // OpenSWBF2: the mask's clear hole is round on a 4:3 screen. Keep it in the
+    // same centred 4:3 box as the scope art (ScopeDisplay) and blur the bars
+    // either side fully (the mask's opaque corner); at 4:3 this is one quad
+    // over the whole view, as before.
+    unsigned int uBoxW, uBarW;
+    DisplayLogic::ScopeBox((unsigned int)(right - left), (unsigned int)(bottom - top), uBoxW, uBarW);
+    const float fBox0 = uBarW ? 0.5f - (float)uBoxW / (2.0f * (right - left)) : 0.0f;
+    const float fBox1 = 1.0f - fBox0;
+    const BlurQuad kView = { left, top, right, bottom, fU0, fV0, fU1, fV1 };
+    if (uBarW)
+    {
+        RenderBlurQuad(kView, 0.0f, fBox0, 0.0f, 0.0f, 0.0f, m_pClearShader, color);
+        RenderBlurQuad(kView, fBox1, 1.0f, 0.0f, 0.0f, 0.0f, m_pClearShader, color);
+    }
+    RenderBlurQuad(kView, fBox0, fBox1, 0.0f, 1.0f, 1.0f, m_pClearShader, color);
 }
 
 // FUNCTION: SWBF2 0x00426e10

@@ -810,6 +810,20 @@ unsigned int EffectiveFpsCap(unsigned int uiFps, bool bPresentThrottled)
     return bPresentThrottled ? 0 : uiFps;
 }
 
+void ScopeBox(unsigned int uiW, unsigned int uiH, unsigned int& uiBoxW, unsigned int& uiBarW)
+{
+    // even, so the box splits into two equal halves about the centre
+    unsigned int uiBox = (unsigned int)(((unsigned long long)uiH * 4 / 3) & ~1ULL);
+    if (uiBox == 0 || uiBox >= uiW)
+    {
+        uiBoxW = uiW;
+        uiBarW = 0;
+        return;
+    }
+    uiBoxW = uiBox;
+    uiBarW = (uiW - uiBox + 1) / 2;
+}
+
 void PresentWatchReset(PresentWatch& w)
 {
     w.uiFrames = 0;

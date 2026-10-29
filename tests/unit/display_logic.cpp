@@ -1628,3 +1628,41 @@ TEST_CASE("display logic cursor mask" * doctest::test_suite("unit"))
     CHECK(aMask2[0] == 0x80);
     CHECK(aMask2[1] == 0);
 }
+
+TEST_CASE("display logic scope box" * doctest::test_suite("unit"))
+{
+    unsigned int uiBox = 0;
+    unsigned int uiBar = 0;
+    // 4:3 and narrower: the whole width, no bars (as retail)
+    ScopeBox(1024, 768, uiBox, uiBar);
+    CHECK(uiBox == 1024);
+    CHECK(uiBar == 0);
+    ScopeBox(1280, 1024, uiBox, uiBar);
+    CHECK(uiBox == 1280);
+    CHECK(uiBar == 0);
+    // 16:9: a 4:3 box in the middle, the rest in two equal bars
+    ScopeBox(1920, 1080, uiBox, uiBar);
+    CHECK(uiBox == 1440);
+    CHECK(uiBar == 240);
+    ScopeBox(3840, 2160, uiBox, uiBar);
+    CHECK(uiBox == 2880);
+    CHECK(uiBar == 480);
+    ScopeBox(2560, 1440, uiBox, uiBar);
+    CHECK(uiBox == 1920);
+    CHECK(uiBar == 320);
+    // 21:9
+    ScopeBox(3440, 1440, uiBox, uiBar);
+    CHECK(uiBox == 1920);
+    CHECK(uiBar == 760);
+    // odd sizes: the box stays even (two equal halves) and the bars cover the rest
+    ScopeBox(1366, 768, uiBox, uiBar);
+    CHECK(uiBox == 1024);
+    CHECK(uiBox + 2 * uiBar >= 1366);
+    ScopeBox(1601, 900, uiBox, uiBar);
+    CHECK(uiBox % 2 == 0);
+    CHECK(uiBox + 2 * uiBar >= 1601);
+    CHECK(uiBox + 2 * uiBar <= 1602);
+    // nothing to draw
+    ScopeBox(0, 0, uiBox, uiBar);
+    CHECK(uiBar == 0);
+}
