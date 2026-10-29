@@ -401,3 +401,28 @@ TEST_CASE("xinput menu trigger is a steady on off with hysteresis" * doctest::te
     bDown = GuiTriggerDown(0.45f, bDown);
     CHECK(!bDown);
 }
+
+TEST_CASE("xinput menu stick steps once per push" * doctest::test_suite("unit"))
+{
+    bool bHeld = false;
+    CHECK(GuiStickStep(0.0f, bHeld) == 0);
+    CHECK(GuiStickStep(0.45f, bHeld) == 0); // not far enough yet
+    CHECK(GuiStickStep(0.8f, bHeld) == -1); // up
+    CHECK(bHeld);
+    CHECK(GuiStickStep(1.0f, bHeld) == 0);  // held: no repeat
+    CHECK(GuiStickStep(0.35f, bHeld) == 0); // still latched
+    CHECK(GuiStickStep(0.1f, bHeld) == 0);  // released
+    CHECK(!bHeld);
+    CHECK(GuiStickStep(-0.9f, bHeld) == 1); // down
+    CHECK(GuiStickStep(-0.9f, bHeld) == 0);
+}
+
+TEST_CASE("xinput menu index wraps" * doctest::test_suite("unit"))
+{
+    CHECK(WrapIndex(0, 1, 6) == 1);
+    CHECK(WrapIndex(5, 1, 6) == 0);
+    CHECK(WrapIndex(0, -1, 6) == 5);
+    CHECK(WrapIndex(3, -1, 6) == 2);
+    CHECK(WrapIndex(0, 1, 1) == 0);
+    CHECK(WrapIndex(2, 1, 0) == 2); // nothing to pick
+}

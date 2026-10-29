@@ -116,6 +116,13 @@ int GuiForSlot(int iSlot);
 // so feeding it the raw analog value made a held trigger fire repeatedly.
 bool GuiTriggerDown(float fValue, bool bWasDown);
 
+// One step per push of the left stick on the menu y axis (up positive): -1 up,
+// +1 down, 0 otherwise. rbHeld latches until the stick is back near centre.
+int GuiStickStep(float fAxisY, bool& rbHeld);
+
+// iCur moved by iStep within [0, iCount), wrapping; iCur if iCount < 1.
+int WrapIndex(int iCur, int iStep, int iCount);
+
 // Left stick as the menu axes (eGUIINPUT_xAxis / yAxis, right and up
 // positive), which the GUI manager turns into repeating Left/Right/Up/Down.
 void GuiAxes(const float* afAxis, float& fX, float& fY);
