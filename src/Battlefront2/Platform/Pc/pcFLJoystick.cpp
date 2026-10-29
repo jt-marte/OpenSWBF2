@@ -1046,12 +1046,15 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
     bool bCancelAssist = false;
     float fValue;
     float fLastValue;
+    // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain).
+    const float fLookGain =
+        (ucRaw < 64 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput()) ? XInputPad::kLookGain : 1.0f;
     if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
                        iAction == ePROCESSEDINPUT_TURN_POS ||
                        iAction == ePROCESSEDINPUT_TURN_NEG))
     {
-        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
-        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityX[mMode]);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityX[mMode]);
         if (fValue < -0.4 || fValue > 0.4)
         {
             bCancelAssist = true;
@@ -1061,8 +1064,8 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
                             iAction == ePROCESSEDINPUT_PITCH_POS ||
                             iAction == ePROCESSEDINPUT_PITCH_NEG))
     {
-        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
-        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityY[mMode]);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityY[mMode]);
         if (fValue < -0.4 || fValue > 0.4)
         {
             bCancelAssist = true;
