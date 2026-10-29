@@ -17,7 +17,6 @@
 #include "PebbleFL/Common/PblUnicode.h"
 #include "Battlefront2/Source/ActionKey.h"
 
-static_assert(sizeof(ActionKey) == 3 * sizeof(unsigned short), "HasPadBindings reads ActionKey as shorts");
 static_assert(XInputPad::kActionCount == ePROCESSEDINPUT_NUM_KEY_ACTIONS &&
               XInputPad::kActPrimaryFire == ePROCESSEDINPUT_primaryFireButtonDown &&
               XInputPad::kActSecondaryFire == ePROCESSEDINPUT_secondaryFireButtonDown &&
@@ -1017,6 +1016,12 @@ void RawControllerInputs::StandardInputProcess()
             {
                 const unsigned char ucRaw = ActionKeyToRawInput(usKey);
                 const unsigned char ucPort = ucRaw < 64 ? ((const unsigned char*)&key.mKey[2])[j] : 0;
+                // OpenSWBF2: XInput pads ignore bindings and use their built-in
+                // layout (PadDefaultsProcess); keyboard and mouse keep theirs.
+                if (ucRaw < 64 && ucPort < 10 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput())
+                {
+                    continue;
+                }
                 ProcessRawAction(iAction, ucPort, ucRaw);
             }
             else if (_redKeyboard->IsKeyDown((unsigned char)usKey))
@@ -1049,7 +1054,9 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
     float fLastValue;
     // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain).
     const float fLookGain =
-        (ucRaw < 64 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput()) ? XInputPad::kLookGain : 1.0f;
+        (ucRaw < 64 && ucPort < 10 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput())
+            ? XInputPad::kLookGain
+            : 1.0f;
     if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
                        iAction == ePROCESSEDINPUT_TURN_POS ||
                        iAction == ePROCESSEDINPUT_TURN_NEG))
@@ -1109,15 +1116,17 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
 }
 
 // Retail PC binds no pad inputs by default, so a pad did nothing until every
-// action was bound by hand. XInput pads get a console-style layout on top of
-// the keyboard/mouse bindings, unless the player has bound pad inputs of their
-// own for this mode, in which case only theirs apply.
+// action was bound by hand. XInput pads always play with a built-in layout
+// (XInputPad::gPadLayout, Modern or Legacy) on top of the keyboard/mouse
+// bindings; StandardInputProcess skips any pad bindings for them.
 void RawControllerInputs::PadDefaultsProcess()
 {
-    if (XInputPad::HasPadBindings((const unsigned short (*)[3])mCurKeyboardBindings[mMode]))
-    {
-        return;
-    }
+    const int iLayout = XInputPad::gPadLayout;
+    const bool bModern = iLayout == XInputPad::kLayoutModern;
+    XInputPad::gPadAimActive = false;
+    XInputPad::gPadAimHeld = false;
+    XInputPad::gPadSecondZoom = false;
+    bool bLocked = false;
 
     for (int iPort = 0; iPort < 10; iPort++)
     {
@@ -1128,11 +1137,35 @@ void RawControllerInputs::PadDefaultsProcess()
         }
         for (int iAction = 0; iAction < XInputPad::kActionCount; iAction++)
         {
-            const int iSlot = XInputPad::DefaultSlot(mMode, iAction);
+            const int iSlot = XInputPad::DefaultSlot(iLayout, mMode, iAction);
             if (iSlot >= 0)
             {
                 ProcessRawAction(iAction, (unsigned char)iPort, iSlot);
             }
+        }
+
+        if (bModern)
+        {
+            // X: tap reloads, hold uses (gets in or out of a vehicle).
+            static XInputPad::HoldTap sHoldX[10];
+            switch (XInputPad::HoldTapStep(sHoldX[iPort], mRawInputFloat[iPort][XInputPad::kBitX] >= 0.5f,
+                                           GetTickCount()))
+            {
+            case XInputPad::kHoldTap:
+                mProcessDestination->Set(ePROCESSEDINPUT_reloadButtonDown, bLocked, 1.0f, 0.0f);
+                break;
+            case XInputPad::kHoldHeld:
+                mProcessDestination->Set(ePROCESSEDINPUT_useButtonPressed, bLocked, 1.0f, 0.0f);
+                break;
+            }
+
+            // Hold-to-aim inputs for PlayerController (XInputPad::AimZoomPress).
+            XInputPad::gPadAimActive = true;
+            XInputPad::gPadAimHeld =
+                XInputPad::gPadAimHeld || mRawInputFloat[iPort][XInputPad::kSlotLeftTrigger] >= 0.5f;
+            XInputPad::gPadSecondZoom = XInputPad::gPadSecondZoom ||
+                                        (mRawInputFloat[iPort][XInputPad::kBitRS] >= 0.5f &&
+                                         mLastRawInputFloat[iPort][XInputPad::kBitRS] < 0.5f);
         }
 
         // On foot, double-tapping B (crouch) while moving rolls: the PC Roll
@@ -1149,7 +1182,6 @@ void RawControllerInputs::PadDefaultsProcess()
             if (XInputPad::RollDoubleTap(sRollTap[iPort], bCrouchPressed, GetTickCount(),
                                          sqrtf(fMoveX * fMoveX + fMoveY * fMoveY)))
             {
-                bool bLocked = false;
                 mProcessDestination->Set(ePROCESSEDINPUT_TakeScreenshot, bLocked, 1.0f, 0.0f);
             }
         }

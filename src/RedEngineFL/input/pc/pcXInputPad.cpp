@@ -12,6 +12,10 @@ bool gNoRumble;
 bool gPadOwnsCursor;
 bool gMouseResync;
 bool gStickCursor;
+int gPadLayout = kLayoutModern;
+bool gPadAimActive;
+bool gPadAimHeld;
+bool gPadSecondZoom;
 
 static const float kStickMax = 32767.0f;
 
@@ -168,14 +172,16 @@ bool ParseVidPid(const char* pcPath, unsigned short& usVid, unsigned short& usPi
     return ParseHex4(pcVid, usVid) && ParseHex4(pcPid, usPid);
 }
 
-int DefaultSlot(int iMode, int iAction)
+int DefaultSlot(int iLayout, int iMode, int iAction)
 {
-    if (iMode < 0 || iMode >= kModeCount || iAction < 0 || iAction >= kActionCount)
+    if (iLayout < 0 || iLayout >= kLayoutCount || iMode < 0 || iMode >= kModeCount || iAction < 0 ||
+        iAction >= kActionCount)
     {
         return -1;
     }
 
     const bool bJedi = iMode == 3;
+    const bool bModern = iLayout == kLayoutModern;
     switch (iAction)
     {
     case kActStrafeAxis:    return kSlotLeftRight;
@@ -183,39 +189,82 @@ int DefaultSlot(int iMode, int iAction)
     case kActTurnAxis:      return kSlotRightRight;
     case kActPitchAxis:     return kSlotRightUp;
     case kActPrimaryFire:   return kSlotRightTrigger;
-    case kActSecondaryFire: return kSlotLeftTrigger;
+    case kActSecondaryFire: return bModern ? kBitRB : kSlotLeftTrigger;
     case kActSprint:        return kBitLS;
     case kActJump:          return kBitA;
     case kActCrouch:        return kBitB;
-    case kActReload:        return kBitX;
-    case kActUse:           return kBitY;
-    case kActZoom:          return bJedi ? -1 : kBitRS;
+    case kActReload:        return bModern ? -1 : kBitX;
+    case kActUse:           return bModern ? -1 : kBitY;
+    case kActZoom:          return bJedi ? -1 : (bModern ? kSlotLeftTrigger : kBitRS);
     case kActView:          return bJedi ? -1 : kBitDPadDown;
     case kActSquadCommand:  return kBitDPadUp;
     case kActAcceptHero:    return kBitDPadRight;
     case kActDeclineHero:   return kBitDPadLeft;
-    case kActPrimaryNext:   return bJedi ? -1 : kBitRB;
+    case kActPrimaryNext:   return bJedi ? -1 : (bModern ? kBitY : kBitRB);
     case kActSecondaryNext: return kBitLB;
     case kActPlayerList:    return kBitBack;
     default:                return -1;
     }
 }
 
-bool HasPadBindings(const unsigned short (*pKeys)[3])
+int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs)
 {
-    for (int iAction = 0; iAction < kActionCount; ++iAction)
+    if (bDown)
     {
-        for (int j = 0; j < 2; ++j)
+        if (!rState.bDown)
         {
-            const unsigned short usKey = pKeys[iAction][j];
-            // Same encoding as RawInputToActionKey: (raw + 1) << 8.
-            if (usKey > 0xff && ((usKey >> 8) - 1) < kSlotCount)
-            {
-                return true;
-            }
+            rState.bDown = true;
+            rState.bFired = false;
+            rState.uiDownMs = uiNowMs;
+            return kHoldNone;
+        }
+        if (!rState.bFired && uiNowMs - rState.uiDownMs >= kUseHoldMs)
+        {
+            rState.bFired = true;
+            return kHoldHeld;
+        }
+        return kHoldNone;
+    }
+    if (rState.bDown)
+    {
+        rState.bDown = false;
+        if (!rState.bFired)
+        {
+            return kHoldTap;
         }
     }
-    return false;
+    return kHoldNone;
+}
+
+bool AimZoomPress(AimZoom& rState, bool bAimHeld, bool bSecondPressed, bool bAiming, bool bTwoLevel)
+{
+    if (!bAimHeld)
+    {
+        rState.bSecondPending = false;
+    }
+    else if (bSecondPressed)
+    {
+        rState.bSecondPending = true;
+    }
+    // presses must be edges: leave a frame up between them
+    if (rState.bPressedLast)
+    {
+        rState.bPressedLast = false;
+        return false;
+    }
+
+    bool bPress = false;
+    if (bAimHeld != bAiming)
+    {
+        bPress = true;
+    }
+    else if (bAiming && rState.bSecondPending)
+    {
+        rState.bSecondPending = false;
+        bPress = bTwoLevel;
+    }
+    rState.bPressedLast = bPress;
+    return bPress;
 }
 
 int GuiForSlot(int iSlot)

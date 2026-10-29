@@ -11,6 +11,7 @@
 #include "RedEngineFL/Application/pc/pcWindow.h"
 #include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Graphics/PC/pcRedAutoSettings.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
@@ -419,6 +420,8 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
 
     ParseCommandLine(0, lpCmdLine);
     DisplayCfg::Init();
+    XInputPad::gPadLayout =
+        DisplayCfg::gDisplay.uiPadLayout ? XInputPad::kLayoutLegacy : XInputPad::kLayoutModern;
     PcWindow::InitDpi(DisplayCfg::gDisplay.bNoDpi);
 
     if (!bDedicated && !g_bNoRender)
