@@ -126,10 +126,35 @@ float TurnBoost(float fLookMag);
 // slow a mouse; a pad tops out at 1 and was crippled mid-roll. Never below 1.
 float PadTurnFactor(float fClassFactor);
 
-// Published by the input layer each frame for PlayerController: an XInput pad
-// is connected, and its right stick magnitude (after deadzone and curve).
+// Soldier look speeds for the local pad player (rad/s, before the zoom
+// scale), from the class's base (MaxPitchSpeed, 1.0 by default) and top
+// (MaxTurnSpeed, 2.0) speeds, the turn boost (0..1) and the look scale. Both
+// start at the base, so fine aim matches retail. At full tilt yaw reaches
+// kPadYawTop of the top speed; retail pitch never left the base, half of yaw,
+// and now reaches kPadPitchTop of it.
+const float kPadYawTop = 0.9f;
+const float kPadPitchTop = 0.8f;
+float PadYawRate(float fBase, float fTop, float fBoost, float fScale);
+float PadPitchRate(float fBase, float fTop, float fBoost, float fScale);
+
+// Look speed multiplier for the Options -> Controls joystick sensitivity
+// slider (levels 1..10, default 4 = 1.0, the tuning above): kLookSpeedStep per
+// level, 0.625 at 1 and 1.75 at 10. The input layer reads a stored 0 as the
+// default, so the slider stops at 1. Retail's AdjustValueForSensitivity only
+// reshaped input that clamps at 1, so it never changed the top speed.
+const int kLookSpeedDefaultLevel = 4;
+const int kLookSpeedMinLevel = 1;
+const int kLookSpeedMaxLevel = 10;
+const float kLookSpeedStep = 0.125f;
+float LookSpeedScale(int iLevel);
+
+// Published by the input layer each frame for PlayerController and
+// EntitySoldier: an XInput pad is connected, its right stick magnitude (after
+// deadzone and curve), and the look scales from its sensitivity levels.
 extern bool gPadLookActive;
 extern float gPadLookMag;
+extern float gPadYawScale;
+extern float gPadPitchScale;
 
 float TriggerValue(unsigned char bTrigger);
 

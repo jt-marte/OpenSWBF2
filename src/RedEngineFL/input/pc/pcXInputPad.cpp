@@ -100,6 +100,32 @@ float TurnBoost(float fLookMag)
     return (fLookMag - kBoostStart) / (kBoostFull - kBoostStart);
 }
 
+float gPadYawScale = 1.0f;
+float gPadPitchScale = 1.0f;
+
+float PadYawRate(float fBase, float fTop, float fBoost, float fScale)
+{
+    return ((fTop * kPadYawTop - fBase) * fBoost + fBase) * fScale;
+}
+
+float PadPitchRate(float fBase, float fTop, float fBoost, float fScale)
+{
+    return ((fTop * kPadPitchTop - fBase) * fBoost + fBase) * fScale;
+}
+
+float LookSpeedScale(int iLevel)
+{
+    if (iLevel < kLookSpeedMinLevel)
+    {
+        iLevel = kLookSpeedMinLevel;
+    }
+    else if (iLevel > kLookSpeedMaxLevel)
+    {
+        iLevel = kLookSpeedMaxLevel;
+    }
+    return 1.0f + (float)(iLevel - kLookSpeedDefaultLevel) * kLookSpeedStep;
+}
+
 float TriggerValue(unsigned char bTrigger)
 {
     if (bTrigger <= kTriggerThreshold)

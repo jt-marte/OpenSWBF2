@@ -296,7 +296,7 @@ end
 function ifs_opt_pccontrols_fnChangeJoySensitivity(this,delta)
 	local joySens, joySensStep, joySensMax = ScriptCB_GetJoySensitivity(0)
 	joySens = joySens + joySensStep * delta
-	joySens = math.max(joySens,0)
+	joySens = math.max(joySens,1) -- OpenSWBF2: a stored 0 reads as the default (4)
 	joySens = math.min(joySens,joySensMax)
 --	print( "New Sensitivity=", joySens )
 	ScriptCB_SetJoySensitivity(joySens, 0)
@@ -515,7 +515,7 @@ ifs_opt_pccontrols = NewIFShellScreen {
 			ScriptCB_SetMouseSensitivity( newSetting )
 		elseif (element.tag == "joysens") then
 			setting, step, max = ScriptCB_GetJoySensitivity(0)
-			newSetting = math.floor(element.selValue * max + 0.5)
+			newSetting = math.max(1, math.floor(element.selValue * max + 0.5)) -- OpenSWBF2: a stored 0 reads as the default (4)
 			ScriptCB_SetJoySensitivity( newSetting, 0 )
 			ScriptCB_SetJoySensitivity( newSetting, 1 )
 		elseif (element.tag == "deadzone") then
