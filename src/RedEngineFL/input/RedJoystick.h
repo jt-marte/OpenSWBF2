@@ -30,6 +30,9 @@ public:
     void SetHeavyEngine(float f);
     void SetLightEngine(float f);
 
+    void InitXInput(int iSlot);
+    bool IsXInput() const { return m_xinputSlot >= 0; }
+
     unsigned char m_portNum;
     bool m_connected;
     float m_fAxis[8];
@@ -46,6 +49,18 @@ public:
     float mPreviousAxisY;
 
     float mDeadZoneScale;
+
+    int m_xinputSlot;
+    unsigned long m_xinputPacket;
+    float m_xinputProbeTimer;
+    unsigned short m_usSentHeavy;
+    unsigned short m_usSentLight;
+
+private:
+    void UpdateXInput(float fDeltaTime);
+    void UpdateButtonEdges(unsigned __int64 uiOldButtons);
+    void UpdateCursorFromStick(float fDeltaTime, float fX, float fY);
+    void SendRumble(bool bForceOff);
 };
  
  

@@ -2028,6 +2028,9 @@
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedMouse.cpp">
       <Filter>src\RedEngineFL\input\pc</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\input\pc\pcXInputPad.cpp">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\movie\RedCircularBuffer.cpp">
       <Filter>src\RedEngineFL\movie</Filter>
     </ClCompile>
@@ -4215,6 +4218,9 @@
       <Filter>src\RedEngineFL\input</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\input\pc\pcRedInputManager.h">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\input\pc\pcXInputPad.h">
       <Filter>src\RedEngineFL\input\pc</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\movie\RedCircularBuffer.h">

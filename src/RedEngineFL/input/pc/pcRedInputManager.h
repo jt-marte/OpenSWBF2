@@ -15,6 +15,8 @@ IDirectInput8A* pcGetDIInterface();
 
 BOOL CALLBACK pcEnumJoystickDevice(DIDEVICEINSTANCEA const* pInstance, void* pvRef);
 
+bool pcLoadXInput();
+
 RedMouse* GetMouse(unsigned char ucPort);
 
 void Cleanup();

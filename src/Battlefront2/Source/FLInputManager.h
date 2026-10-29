@@ -37,6 +37,8 @@ public:
 
     void ReadLatest(float fDeltaTime);
     void StandardInputProcess();
+    void ProcessRawAction(int iAction, unsigned char ucPort, int iRaw);
+    void PadDefaultsProcess();
     void ChatInputProcess();
 
     void TeamOrderInputProcess();
@@ -182,6 +184,7 @@ public:
 
     int GetPlayerFromHWPort(int iHWPort) const;
     void EnableRumble(int iPort, bool bEnable);
+    void RumbleFromShake(float fShake, float fLength);
 
     void StopIntermittentRumble(int iPlayer);
 

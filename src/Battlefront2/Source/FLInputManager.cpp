@@ -362,6 +362,27 @@ bool FLInputManager::Update(float fDeltaTime)
     BindPlayerInput();
     RedInputManager::Update(fDeltaTime);
 
+    // Retail PC never pointed the rumble at a device. Use the first connected
+    // XInput pad (DirectInput pads have no motors we drive).
+    RedJoystick* pRumblePad = 0;
+    for (unsigned char i = 0; i < RedInputManager::GetNumJoystickPorts(); i++)
+    {
+        RedJoystick* pJoystick = RedInputManager::GetJoystick(i);
+        if (pJoystick->m_connected && pJoystick->IsXInput())
+        {
+            pRumblePad = pJoystick;
+            break;
+        }
+    }
+    if (m_rumble[0].mJoystick != pRumblePad)
+    {
+        if (m_rumble[0].mJoystick)
+        {
+            m_rumble[0].StopAllRumble();
+        }
+        m_rumble[0].mJoystick = pRumblePad;
+    }
+
     if (mAutoAcquire)
     {
         for (unsigned char i = 0; i < RedInputManager::GetNumJoystickPorts(); i++)
@@ -908,6 +929,18 @@ void FLInputManager::StopAllRumble()
 void FLInputManager::EnableRumble(int iPort, bool bEnable)
 {
     m_rumble[iPort].mEnabled = bEnable;
+}
+
+// Explosions shake the local player's camera; rumble the pad with it. Shake
+// strength has no fixed range, so it is squashed into 0..1 (1 shake = half).
+void FLInputManager::RumbleFromShake(float fShake, float fLength)
+{
+    if (!(fShake > 0.0f) || !(fLength > 0.0f))
+    {
+        return;
+    }
+    const float fLevel = fShake / (fShake + 1.0f);
+    m_rumble[0].Start(fLevel * 0.5f, fLevel, fLength < 1.0f ? fLength : 1.0f);
 }
 
 // FUNCTION: SWBF2 0x0052aa00

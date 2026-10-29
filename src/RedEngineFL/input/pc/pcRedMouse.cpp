@@ -10,6 +10,7 @@
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Util/RedLog.h"
+#include "pcXInputPad.h"
 
 extern HWND hGlobalWnd;
 extern bool gAppActive;
@@ -202,7 +203,7 @@ bool HwCursor::Shown()
 
 HCURSOR HwCursor::Current()
 {
-    if (!sPlan.bHcursor)
+    if (!sPlan.bHcursor || XInputPad::gPadOwnsCursor)
     {
         return 0;
     }
@@ -483,6 +484,26 @@ static void ReconcileCursor(RedMouse& kMouse)
         ::SetCursor(0);
     }
 
+    // Hide the cursor while a pad drives the menus. Visual only: mouse
+    // exclusivity and clipping are left to the plan above.
+    static bool sbPadHidden;
+    if (XInputPad::gPadOwnsCursor != sbPadHidden)
+    {
+        sbPadHidden = XInputPad::gPadOwnsCursor;
+        if (kPlan.bHcursor)
+        {
+            POINT kPt;
+            if (GetCursorPos(&kPt) && WindowFromPoint(kPt) == hGlobalWnd)
+            {
+                ::SetCursor(HwCursor::Current());
+            }
+        }
+        else if (HwCursor::Software() && sbAttached)
+        {
+            FLRenderer::mCursorImage.Enable(!sbPadHidden);
+        }
+    }
+
     if (kPlan.bClip && hGlobalWnd)
     {
         RECT kClient;
@@ -538,6 +559,7 @@ void RedMouse::Update(float fDeltaTime)
     if (abs(m_dX) >= 3 || abs(m_dY) >= 3)
     {
         pCursorImage = 0;
+        XInputPad::MouseTookMenus();
     }
 
     bool bBlockNew = false;
@@ -594,4 +616,8 @@ void RedMouse::Update(float fDeltaTime)
     const unsigned int uiChanged = uiPrevDown ^ m_uiDownButtons;
     m_uiPressedButtons = m_uiDownButtons & uiChanged;
     m_uiReleasedButtons = uiPrevDown & uiChanged;
+    if (m_uiPressedButtons)
+    {
+        XInputPad::MouseTookMenus();
+    }
 }

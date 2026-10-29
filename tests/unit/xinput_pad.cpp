@@ -1,0 +1,382 @@
+#include "third_party/doctest/doctest.h"
+
+#include <float.h>
+#include <math.h>
+#include <string.h>
+
+#include "testutil.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
+
+using namespace XInputPad;
+
+namespace
+{
+
+Pad Neutral()
+{
+    Pad pad;
+    memset(&pad, 0, sizeof(pad));
+    return pad;
+}
+
+Mapped MapPad(const Pad& pad, float fDeadZone = 0.2f)
+{
+    Mapped out;
+    Map(pad, fDeadZone, out);
+    return out;
+}
+
+bool HasBit(const Mapped& m, int iBit)
+{
+    return (m.uiButtons & ((unsigned __int64)1 << iBit)) != 0;
+}
+
+unsigned short Encode(int iRaw)
+{
+    return (unsigned short)((iRaw + 1) << 8);
+}
+
+}
+
+TEST_CASE("xinput neutral pad maps to nothing" * doctest::test_suite("unit"))
+{
+    Mapped m = MapPad(Neutral());
+    CHECK(m.uiButtons == 0);
+    for (int i = 0; i < 8; ++i)
+    {
+        CHECK(m.afAxis[i] == 0.0f);
+    }
+}
+
+TEST_CASE("xinput buttons land on the directinput xbox layout" * doctest::test_suite("unit"))
+{
+    static const struct { unsigned short wPad; int iBit; } kCases[] =
+    {
+        { kPadA, 0 }, { kPadB, 1 }, { kPadX, 2 }, { kPadY, 3 },
+        { kPadLeftShoulder, 4 }, { kPadRightShoulder, 5 }, { kPadBack, 6 }, { kPadStart, 7 },
+        { kPadLeftThumb, 8 }, { kPadRightThumb, 9 },
+        { kPadDPadUp, 32 }, { kPadDPadRight, 33 }, { kPadDPadDown, 34 }, { kPadDPadLeft, 35 }
+    };
+    for (int i = 0; i < (int)(sizeof(kCases) / sizeof(kCases[0])); ++i)
+    {
+        Pad pad = Neutral();
+        pad.wButtons = kCases[i].wPad;
+        Mapped m = MapPad(pad);
+        CHECK(m.uiButtons == ((unsigned __int64)1 << kCases[i].iBit));
+    }
+}
+
+TEST_CASE("xinput dpad diagonal sets both directions" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.wButtons = kPadDPadUp | kPadDPadLeft;
+    Mapped m = MapPad(pad);
+    CHECK(HasBit(m, kBitDPadUp));
+    CHECK(HasBit(m, kBitDPadLeft));
+    CHECK(!HasBit(m, kBitDPadDown));
+    CHECK(!HasBit(m, kBitDPadRight));
+}
+
+TEST_CASE("xinput both triggers held are independent" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.bLeftTrigger = 255;
+    pad.bRightTrigger = 255;
+    Mapped m = MapPad(pad);
+    CHECK(m.afAxis[5] == doctest::Approx(1.0f));
+    CHECK(m.afAxis[6] == doctest::Approx(1.0f));
+    // The legacy combined axis cancels, which is why DirectInput pads could
+    // never bind fire and secondary fire to the two triggers.
+    CHECK(m.afAxis[2] == doctest::Approx(0.0f));
+}
+
+TEST_CASE("xinput trigger threshold and legacy combined axis sign" * doctest::test_suite("unit"))
+{
+    CHECK(TriggerValue(0) == 0.0f);
+    CHECK(TriggerValue(kTriggerThreshold) == 0.0f);
+    CHECK(TriggerValue(kTriggerThreshold + 1) > 0.0f);
+    CHECK(TriggerValue(255) == doctest::Approx(1.0f));
+
+    Pad pad = Neutral();
+    pad.bLeftTrigger = 255;
+    CHECK(MapPad(pad).afAxis[2] == doctest::Approx(1.0f));
+    pad = Neutral();
+    pad.bRightTrigger = 255;
+    CHECK(MapPad(pad).afAxis[2] == doctest::Approx(-1.0f));
+}
+
+TEST_CASE("xinput sticks inside the deadzone read zero" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.sThumbLX = 6000;
+    pad.sThumbRY = -6000;
+    Mapped m = MapPad(pad, 0.2f);
+    CHECK(m.afAxis[0] == 0.0f);
+    CHECK(m.afAxis[4] == 0.0f);
+}
+
+TEST_CASE("xinput sticks are rescaled past the deadzone" * doctest::test_suite("unit"))
+{
+    float fX, fY;
+    ApplyStickDeadzone((short)(0.2f * 32767.0f) + 1, 0, 0.2f, fX, fY);
+    CHECK(fX >= 0.0f);
+    CHECK(fX < 0.001f);
+
+    ApplyStickDeadzone(32767, 0, 0.2f, fX, fY);
+    CHECK(fX == doctest::Approx(1.0f));
+    CHECK(fY == 0.0f);
+
+    ApplyStickDeadzone(-32768, 0, 0.2f, fX, fY);
+    CHECK(fX == doctest::Approx(-1.0f));
+
+    ApplyStickDeadzone(23170, 23170, 0.2f, fX, fY);
+    CHECK(fX == doctest::Approx(0.7071f).epsilon(0.01));
+    CHECK(fY == doctest::Approx(0.7071f).epsilon(0.01));
+    CHECK(sqrtf(fX * fX + fY * fY) <= 1.0001f);
+}
+
+TEST_CASE("xinput deadzone follows the option scale and is clamped" * doctest::test_suite("unit"))
+{
+    float fX, fY;
+    ApplyStickDeadzone(1000, 0, 0.0f, fX, fY);
+    CHECK(fX == doctest::Approx(1000.0f / 32767.0f));
+
+    ApplyStickDeadzone(1000, 0, -1.0f, fX, fY);
+    CHECK(fX == doctest::Approx(1000.0f / 32767.0f));
+
+    ApplyStickDeadzone(32000, 0, 5.0f, fX, fY);
+    CHECK(fX > 0.0f);
+}
+
+TEST_CASE("xinput y axes are down-positive like directinput" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.sThumbLY = 32767;
+    pad.sThumbRY = -32768;
+    Mapped m = MapPad(pad);
+    CHECK(m.afAxis[1] == doctest::Approx(-1.0f));
+    CHECK(m.afAxis[4] == doctest::Approx(1.0f));
+
+    pad = Neutral();
+    pad.sThumbRX = 32767;
+    CHECK(MapPad(pad).afAxis[3] == doctest::Approx(1.0f));
+}
+
+TEST_CASE("xinput motor speed clamps to the xinput range" * doctest::test_suite("unit"))
+{
+    CHECK(MotorSpeed(0.0f) == 0);
+    CHECK(MotorSpeed(-1.0f) == 0);
+    CHECK(MotorSpeed(0.5f) == 32768);
+    CHECK(MotorSpeed(1.0f) == 65535);
+    CHECK(MotorSpeed(7.0f) == 65535);
+    volatile float fZero = 0.0f;
+    CHECK(MotorSpeed(fZero / fZero) == 0);
+}
+
+TEST_CASE("xinput device paths are recognised by the ig marker" * doctest::test_suite("unit"))
+{
+    CHECK(IsXInputDevicePath("\\\\?\\HID#VID_045E&PID_028E&IG_00#3&1b2c3d4e&0&0000#{4d1e55b2}"));
+    CHECK(IsXInputDevicePath("\\\\?\\hid#vid_2dc8&pid_310a&ig_00#a&1&0#{4d1e55b2}"));
+    CHECK(!IsXInputDevicePath("\\\\?\\HID#VID_054C&PID_09CC&MI_03#7&2a&0&0000#{4d1e55b2}"));
+    CHECK(!IsXInputDevicePath(""));
+    CHECK(!IsXInputDevicePath(0));
+}
+
+TEST_CASE("xinput vid and pid are parsed from a device path" * doctest::test_suite("unit"))
+{
+    unsigned short usVid = 0, usPid = 0;
+    CHECK(ParseVidPid("\\\\?\\HID#VID_045E&PID_028E&IG_00#3", usVid, usPid));
+    CHECK(usVid == 0x045E);
+    CHECK(usPid == 0x028E);
+
+    CHECK(ParseVidPid("\\\\?\\hid#vid_2dc8&pid_310a&ig_00", usVid, usPid));
+    CHECK(usVid == 0x2DC8);
+    CHECK(usPid == 0x310A);
+
+    CHECK(!ParseVidPid("\\\\?\\HID#VID_045E&IG_00", usVid, usPid));
+    CHECK(!ParseVidPid("\\\\?\\HID#VID_04XE&PID_028E", usVid, usPid));
+    CHECK(!ParseVidPid(0, usVid, usPid));
+}
+
+TEST_CASE("xinput soldier default layout" * doctest::test_suite("unit"))
+{
+    CHECK(DefaultSlot(0, kActPrimaryFire) == kSlotRightTrigger);
+    CHECK(DefaultSlot(0, kActSecondaryFire) == kSlotLeftTrigger);
+    CHECK(DefaultSlot(0, kActJump) == kBitA);
+    CHECK(DefaultSlot(0, kActCrouch) == kBitB);
+    CHECK(DefaultSlot(0, kActReload) == kBitX);
+    CHECK(DefaultSlot(0, kActUse) == kBitY);
+    CHECK(DefaultSlot(0, kActSprint) == kBitLS);
+    CHECK(DefaultSlot(0, kActZoom) == kBitRS);
+    CHECK(DefaultSlot(0, kActStrafeAxis) == kSlotLeftRight);
+    CHECK(DefaultSlot(0, kActMoveAxis) == kSlotLeftUp);
+    CHECK(DefaultSlot(0, kActTurnAxis) == kSlotRightRight);
+    CHECK(DefaultSlot(0, kActPitchAxis) == kSlotRightUp);
+}
+
+TEST_CASE("xinput every mode can move aim and fire" * doctest::test_suite("unit"))
+{
+    for (int iMode = 0; iMode < kModeCount; ++iMode)
+    {
+        CHECK(DefaultSlot(iMode, kActMoveAxis) >= 0);
+        CHECK(DefaultSlot(iMode, kActTurnAxis) >= 0);
+        CHECK(DefaultSlot(iMode, kActPitchAxis) >= 0);
+        CHECK(DefaultSlot(iMode, kActPrimaryFire) >= 0);
+        CHECK(DefaultSlot(iMode, kActUse) >= 0);
+    }
+    CHECK(DefaultSlot(3, kActZoom) == -1);
+    CHECK(DefaultSlot(-1, kActJump) == -1);
+    CHECK(DefaultSlot(kModeCount, kActJump) == -1);
+    CHECK(DefaultSlot(0, kActionCount) == -1);
+}
+
+TEST_CASE("xinput default layout never binds one input twice in a mode" * doctest::test_suite("unit"))
+{
+    for (int iMode = 0; iMode < kModeCount; ++iMode)
+    {
+        bool abUsed[kSlotCount];
+        memset(abUsed, 0, sizeof(abUsed));
+        for (int iAction = 0; iAction < kActionCount; ++iAction)
+        {
+            const int iSlot = DefaultSlot(iMode, iAction);
+            if (iSlot < 0)
+            {
+                continue;
+            }
+            REQUIRE(iSlot < kSlotCount);
+            CHECK(!abUsed[iSlot]);
+            abUsed[iSlot] = true;
+        }
+    }
+}
+
+TEST_CASE("xinput player pad bindings switch the defaults off" * doctest::test_suite("unit"))
+{
+    unsigned short aKeys[kActionCount][3];
+    memset(aKeys, 0, sizeof(aKeys));
+    CHECK(!HasPadBindings(aKeys));
+
+    aKeys[kActJump][0] = 0x39;
+    aKeys[kActPrimaryFire][0] = Encode(66);
+    aKeys[kActTurnAxis][1] = Encode(64);
+    CHECK(!HasPadBindings(aKeys));
+
+    aKeys[kActCrouch][1] = Encode(0);
+    CHECK(HasPadBindings(aKeys));
+
+    aKeys[kActCrouch][1] = Encode(63);
+    CHECK(HasPadBindings(aKeys));
+
+    aKeys[kActCrouch][1] = 0;
+    aKeys[kActCrouch][2] = Encode(0);
+    CHECK(!HasPadBindings(aKeys));
+}
+
+TEST_CASE("xinput menu navigation" * doctest::test_suite("unit"))
+{
+    CHECK(GuiForSlot(kBitA) == kGuiAccept);
+    CHECK(GuiForSlot(kBitB) == kGuiBack);
+    CHECK(GuiForSlot(kBitStart) == kGuiStart);
+    CHECK(GuiForSlot(kBitDPadUp) == kGuiUp);
+    CHECK(GuiForSlot(kBitDPadDown) == kGuiDown);
+    CHECK(GuiForSlot(kBitDPadLeft) == kGuiLeft);
+    CHECK(GuiForSlot(kBitDPadRight) == kGuiRight);
+    CHECK(GuiForSlot(kBitLS) == -1);
+    CHECK(GuiForSlot(kSlotLeftUp) == -1);
+    CHECK(GuiForSlot(kBitLB) == kGuiLeftTrigger);
+    CHECK(GuiForSlot(kBitRB) == kGuiRightTrigger);
+    CHECK(GuiForSlot(kSlotLeftTrigger) == kGuiLeftTrigger2);
+    CHECK(GuiForSlot(kSlotRightTrigger) == kGuiRightTrigger2);
+    CHECK(GuiForSlot(kSlotLeftTrigger + 1) == -1);
+}
+
+TEST_CASE("xinput left stick feeds the menu axes right and up positive" * doctest::test_suite("unit"))
+{
+    Pad pad = Neutral();
+    pad.sThumbLY = 32767;
+    Mapped m = MapPad(pad);
+    float fX, fY;
+    GuiAxes(m.afAxis, fX, fY);
+    CHECK(fY == doctest::Approx(1.0f));
+    CHECK(fX == 0.0f);
+
+    pad = Neutral();
+    pad.sThumbLY = -32768;
+    pad.sThumbLX = 0;
+    m = MapPad(pad);
+    GuiAxes(m.afAxis, fX, fY);
+    CHECK(fY == doctest::Approx(-1.0f));
+
+    pad = Neutral();
+    pad.sThumbLX = 32767;
+    m = MapPad(pad);
+    GuiAxes(m.afAxis, fX, fY);
+    CHECK(fX == doctest::Approx(1.0f));
+
+    pad = Neutral();
+    pad.sThumbLX = 3000;
+    m = MapPad(pad);
+    GuiAxes(m.afAxis, fX, fY);
+    CHECK(fX == 0.0f);
+    CHECK(fY == 0.0f);
+}
+
+TEST_CASE("xinput menu input is dpad a b start bumpers triggers or a pushed left stick" * doctest::test_suite("unit"))
+{
+    float afRest[8];
+    memset(afRest, 0, sizeof(afRest));
+    CHECK(!IsMenuInput(0, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitA, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitB, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitStart, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitDPadDown, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitLB, afRest));
+    CHECK(IsMenuInput((unsigned __int64)1 << kBitRB, afRest));
+    CHECK(!IsMenuInput((unsigned __int64)1 << kBitLS, afRest));
+    CHECK(!IsMenuInput((unsigned __int64)1 << kBitBack, afRest));
+
+    float afTrigger[8];
+    memset(afTrigger, 0, sizeof(afTrigger));
+    afTrigger[5] = 0.6f;
+    CHECK(IsMenuInput(0, afTrigger));
+    afTrigger[5] = 0.0f;
+    afTrigger[6] = 0.4f;
+    CHECK(!IsMenuInput(0, afTrigger));
+    afTrigger[6] = 1.0f;
+    CHECK(IsMenuInput(0, afTrigger));
+
+    float afStick[8];
+    memset(afStick, 0, sizeof(afStick));
+    afStick[1] = -0.6f;
+    CHECK(IsMenuInput(0, afStick));
+    afStick[1] = -0.4f;
+    CHECK(!IsMenuInput(0, afStick));
+
+    // The right stick is the cursor, never menu navigation.
+    memset(afStick, 0, sizeof(afStick));
+    afStick[3] = 1.0f;
+    afStick[4] = 1.0f;
+    CHECK(!IsMenuInput(0, afStick));
+}
+
+TEST_CASE("xinput pad and mouse hand the menus back and forth" * doctest::test_suite("unit"))
+{
+    gPadOwnsCursor = false;
+    gMouseResync = false;
+
+    MouseTookMenus();
+    CHECK(!gPadOwnsCursor);
+    CHECK(!gMouseResync);
+
+    PadTookMenus();
+    CHECK(gPadOwnsCursor);
+    CHECK(!gMouseResync);
+
+    MouseTookMenus();
+    CHECK(!gPadOwnsCursor);
+    CHECK(gMouseResync);
+
+    gMouseResync = false;
+    MouseTookMenus();
+    CHECK(!gMouseResync);
+}

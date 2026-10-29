@@ -19,6 +19,7 @@
 #include "RedEngineFL/Util/RedLog.h"
 
 #include "RedEngineFL/input/RedKeyboard.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 
 // GLOBAL: SWBF2 0x01e5794c
@@ -419,8 +420,16 @@ static int ScriptCB_MarkDisplayOptions(lua_State* L);
 static int ScriptCB_RestoreDisplayOptions(lua_State* L);
 static int ScriptCB_SaveDisplayOptions(lua_State* L);
 
+// True while an XInput pad drives the menus (cursor hidden); shell screens
+// then highlight their first button on entry, as on console.
+static int ScriptCB_IsPadNavigating(lua_State*)
+{
+    lua_pushboolean(LuaHelper::mState, XInputPad::gPadOwnsCursor);
+    return 1;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[44] =
+static const CallbackEntryT sPCCallbacks[45] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -466,6 +475,7 @@ static const CallbackEntryT sPCCallbacks[44] =
     { "ScriptCB_MarkDisplayOptions", ScriptCB_MarkDisplayOptions },
     { "ScriptCB_RestoreDisplayOptions", ScriptCB_RestoreDisplayOptions },
     { "ScriptCB_SaveDisplayOptions", ScriptCB_SaveDisplayOptions },
+    { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -957,7 +967,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 44; ++i)
+    for (int i = 0; i < 45; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }
