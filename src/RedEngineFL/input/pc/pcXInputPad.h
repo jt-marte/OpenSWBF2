@@ -32,8 +32,8 @@ const unsigned char kTriggerThreshold = 30;
 
 // Look (turn/pitch) gain on the right stick, ahead of the game's sensitivity
 // curve: the stock tuning felt far too slow on a pad. Values still clamp to
-// +-1; with LookCurve full turn input comes at ~45% deflection.
-const float kLookGain = 3.6f;
+// +-1; with LookCurve full turn input comes at ~55% deflection.
+const float kLookGain = 2.7f;
 
 // Stick-driven menu cursor speed, in UI pixels per second (retail: 512).
 const float kCursorSpeed = 1024.0f;
@@ -108,7 +108,7 @@ void StickDeadZones(int iLevel, float& fMove, float& fLook);
 
 // Look response: the right stick's magnitude to the power kLookExponent, so
 // small corrections are finer; kLookGain brings full turn input back at about
-// 45% deflection.
+// 55% deflection.
 const float kLookExponent = 1.6f;
 float LookCurve(float fMagnitude);
 
