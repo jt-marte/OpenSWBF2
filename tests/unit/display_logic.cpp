@@ -1628,3 +1628,19 @@ TEST_CASE("display logic cursor mask" * doctest::test_suite("unit"))
     CHECK(aMask2[0] == 0x80);
     CHECK(aMask2[1] == 0);
 }
+
+TEST_CASE("display logic ui scale" * doctest::test_suite("unit"))
+{
+    // stock size up to 1080p, so nothing changes for existing setups
+    CHECK(UiScale(0) == 1.0f);
+    CHECK(UiScale(600) == 1.0f);
+    CHECK(UiScale(1080) == 1.0f);
+    // grows with the height above that
+    CHECK(UiScale(1440) == doctest::Approx(1440.0f / 1080.0f));
+    CHECK(UiScale(2160) == 2.0f);
+    CHECK(UiScale(4320) == 4.0f);
+    CHECK(UiScale(1200) > 1.0f);
+    CHECK(UiScale(1440) < UiScale(2160));
+    // nonsense heights fall back to stock
+    CHECK(UiScale(kMaxDim + 1) == 1.0f);
+}

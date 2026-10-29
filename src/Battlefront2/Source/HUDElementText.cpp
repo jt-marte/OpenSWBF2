@@ -7,8 +7,17 @@
 #include "HUDElementText.h"
 #include "PebbleFL/Common/PblHashTable.h"
 #include "PebbleFL/Common/PblUnicode.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Interface/RedFont.h"
+#include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
+
+// OpenSWBF2: HUD fonts are fixed-pixel bitmaps, so text shrank against the
+// rest of the HUD above 1080p; keep it the size it is at 1080p.
+static float ResolutionTextScale()
+{
+    return DisplayLogic::UiScale(RedInterfaceScreen::GetScreenHeight());
+}
 
 // GLOBAL: SWBF2 0x007e6984
 char* HUD::ElementText::Factory::sTextClip[1] =
@@ -97,6 +106,7 @@ HUD::ElementText::ElementText(const char* const pName, Factory::ItemCallback pCa
     SetIntercharacterSpacing(1);
     SetTabSpacing(10);
     SetFont(RedFont::GAMEFONT_TINY);
+    SetTextScale(ResolutionTextScale(), ResolutionTextScale());
     RedTextElement::Enable(false);
 }
 
@@ -284,7 +294,7 @@ bool HUD::ElementText::ReadData(PblConfig& config, PblConfig::Data& data)
         return true;
     }
     case kTextScaleHash:
-        SetTextScale(data.GetFloatArg(0), data.GetFloatArg(1));
+        SetTextScale(data.GetFloatArg(0) * ResolutionTextScale(), data.GetFloatArg(1) * ResolutionTextScale());
         return true;
     case kTextCharacterSpacingHash:
         SetIntercharacterSpacing(data.GetInt32Arg(0));
