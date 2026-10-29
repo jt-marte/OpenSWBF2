@@ -271,6 +271,22 @@ int WrapIndex(int iCur, int iStep, int iCount)
     return iNew < 0 ? iNew + iCount : iNew;
 }
 
+bool RollDoubleTap(RollTap& rState, bool bPressed, unsigned int uiNowMs, float fMoveMagnitude)
+{
+    if (!bPressed)
+    {
+        return false;
+    }
+    if (rState.bArmed && uiNowMs - rState.uiTapMs <= kRollTapMs && fMoveMagnitude >= kRollStick)
+    {
+        rState.bArmed = false;
+        return true;
+    }
+    rState.bArmed = true;
+    rState.uiTapMs = uiNowMs;
+    return false;
+}
+
 void GuiAxes(const float* afAxis, float& fX, float& fY)
 {
     fX = afAxis[0];
