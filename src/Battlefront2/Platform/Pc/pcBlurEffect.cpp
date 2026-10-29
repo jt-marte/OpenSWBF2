@@ -8,6 +8,19 @@
 #include "RedEngineFL/Graphics/PC/Shaders/pcClearShader.h"
 #include "RedEngineFL/Graphics/PC/Shaders/pcFilterCopyShader.h"
 #include "RedEngineFL/Application/pc/pcRenderHelpers.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+
+// OpenSWBF2: the view is copied into the TEMP buffer (512x512 at most) at
+// m_downSizeFactor, 0.25 by default. Above 2048 px wide that no longer fits,
+// the StretchRect fails, and the blur draws whatever TEMP last held (often the
+// scope blur's 256x256 copy of the scene) magnified over the top-left of the
+// screen. Lower the factor until the copy fits; the blur only gets softer.
+static float BlurDownSize(float fFactor, float fViewW, float fViewH)
+{
+    const RedTexture* pTemp = RedRenderer::pcGetBuffer(PC_BUFFER_TEMP);
+    return DisplayLogic::FitDownSize(fFactor, (unsigned int)fViewW, (unsigned int)fViewH,
+                                     pTemp->m_uiWidth, pTemp->m_uiHeight);
+}
 
 // GLOBAL: SWBF2 0x007e5820
 FilterCopyShaderSample BoxFilter[8] = {
@@ -87,13 +100,14 @@ void BlurEffect::Render(int value)
     float left, top, right, bottom;
     RedRenderer::pcGetViewportExtents(left, top, right, bottom);
 
-    float fU1 = (right - left) * m_downSizeFactor /
+    const float fDownSize = BlurDownSize(m_downSizeFactor, right - left, bottom - top);
+    float fU1 = (right - left) * fDownSize /
                 (float)(RedRenderer::pcGetBuffer(PC_BUFFER_SKY))->m_uiWidth;
-    float fV1 = (bottom - top) * m_downSizeFactor /
+    float fV1 = (bottom - top) * fDownSize /
                 (float)(RedRenderer::pcGetBuffer(PC_BUFFER_SKY))->m_uiHeight;
-    float fU0 = (right - left) * m_downSizeFactor /
+    float fU0 = (right - left) * fDownSize /
                 (float)(RedRenderer::pcGetBuffer(PC_BUFFER_TEMP))->m_uiWidth;
-    float fV0 = (bottom - top) * m_downSizeFactor /
+    float fV0 = (bottom - top) * fDownSize /
                 (float)(RedRenderer::pcGetBuffer(PC_BUFFER_TEMP))->m_uiHeight;
 
     float fX = fU1 * 2.0f - 1.0f;
@@ -158,8 +172,9 @@ void BlurEffect::pcCopyBackBuffer() const
     src.top = (int)fMinY;
     src.right = (int)fMaxX;
     src.bottom = (int)fMaxY;
-    dest.right = (int)((fMaxX - fMinX) * m_downSizeFactor);
-    dest.bottom = (int)((fMaxY - fMinY) * m_downSizeFactor);
+    const float fDownSize = BlurDownSize(m_downSizeFactor, fMaxX - fMinX, fMaxY - fMinY);
+    dest.right = (int)((fMaxX - fMinX) * fDownSize);
+    dest.bottom = (int)((fMaxY - fMinY) * fDownSize);
 
     RedTexture* pBuffer = RedRenderer::pcGetBuffer(PC_BUFFER_TEMP);
     IDirect3DSurface9* pBackBuffer;

@@ -948,6 +948,21 @@ BufferSet BufferSizes(unsigned int uiBackW, unsigned int uiBackH, unsigned int u
     return out;
 }
 
+float FitDownSize(float fFactor, unsigned int uiViewW, unsigned int uiViewH, unsigned int uiBufW,
+                  unsigned int uiBufH)
+{
+    float fFit = fFactor;
+    if (uiViewW > 0 && (float)uiViewW * fFit > (float)uiBufW)
+    {
+        fFit = (float)uiBufW / (float)uiViewW;
+    }
+    if (uiViewH > 0 && (float)uiViewH * fFit > (float)uiBufH)
+    {
+        fFit = (float)uiBufH / (float)uiViewH;
+    }
+    return fFit;
+}
+
 bool ShadowQuadSharesSky(unsigned int uiBackW, unsigned int uiBackH, unsigned int uiMsType,
                          bool bDriverMs, unsigned int uiSkyW, unsigned int uiSkyH)
 {

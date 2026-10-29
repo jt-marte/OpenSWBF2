@@ -282,6 +282,28 @@ TEST_CASE("runtime reset restyle source pins" * doctest::test_suite("unit"))
     CHECK(sBody.find("ApplyCurrentMode(", uiRevert) != std::string::npos);
 }
 
+TEST_CASE("blur effect copy fits source pins" * doctest::test_suite("unit"))
+{
+    std::string sRaw;
+    if (!ReadSource("../src/Battlefront2/Platform/Pc/pcBlurEffect.cpp", sRaw))
+    {
+        SkipCase("source file not found");
+    }
+    const std::string sBlur = StripCr(sRaw);
+    const std::string sRender = FunctionBody(sBlur, "void BlurEffect::Render(int value)");
+    const std::string sCopy = FunctionBody(sBlur, "void BlurEffect::pcCopyBackBuffer() const");
+    REQUIRE(!sRender.empty());
+    REQUIRE(!sCopy.empty());
+
+    // the copy into TEMP and the UVs that read it back use the same fitted
+    // factor, so the 4K copy never overflows the 512 buffer
+    CHECK(Has(sCopy, "BlurDownSize(m_downSizeFactor, fMaxX - fMinX, fMaxY - fMinY);"));
+    CHECK(Has(sCopy, "dest.right = (int)((fMaxX - fMinX) * fDownSize);"));
+    CHECK(Has(sRender, "BlurDownSize(m_downSizeFactor, right - left, bottom - top);"));
+    CHECK(!Has(sRender, "* m_downSizeFactor"));
+    CHECK(!Has(sCopy, "* m_downSizeFactor"));
+}
+
 TEST_CASE("shadow quad reset source pins" * doctest::test_suite("unit"))
 {
     std::string sQuadRaw;

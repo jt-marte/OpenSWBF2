@@ -753,6 +753,22 @@ TEST_CASE("display logic apply buffer sizes" * doctest::test_suite("unit"))
     CHECK(s.akBuf[2].uiH == 256);
 }
 
+TEST_CASE("display logic blur copy fits the temp buffer" * doctest::test_suite("unit"))
+{
+    // stock: 0.25 of 1080p (480x270) fits the 512x512 TEMP buffer untouched
+    CHECK(FitDownSize(0.25f, 1920, 1080, 512, 512) == 0.25f);
+    CHECK(FitDownSize(0.25f, 800, 600, 512, 512) == 0.25f);
+    CHECK(FitDownSize(0.5f, 1024, 768, 512, 512) == 0.5f);
+    // 1440p and 4K overflowed it (640 and 960 wide), so the factor drops
+    CHECK(FitDownSize(0.25f, 2560, 1440, 512, 512) == 0.2f);
+    CHECK(FitDownSize(0.25f, 3840, 2160, 512, 512) == doctest::Approx(512.0f / 3840.0f));
+    CHECK(3840.0f * FitDownSize(0.25f, 3840, 2160, 512, 512) <= 512.0f);
+    // a tall view is limited by its height
+    CHECK(FitDownSize(0.25f, 1080, 3840, 512, 512) == doctest::Approx(512.0f / 3840.0f));
+    // nothing to fit
+    CHECK(FitDownSize(0.25f, 0, 0, 512, 512) == 0.25f);
+}
+
 TEST_CASE("display logic live size fits caps" * doctest::test_suite("unit"))
 {
     CHECK(SizeFitsCaps(1920, 1080, 2048, 2048));
