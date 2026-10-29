@@ -21,6 +21,7 @@
 #include "RedEngineFL/input/RedKeyboard.h"
 #include "RedEngineFL/Interface/RedHotSpot.h"
 #include "RedEngineFL/Interface/RedInterfaceElement.h"
+#include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 
@@ -452,8 +453,10 @@ static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
     {
         return 0;
     }
-    lua_pushnumber(LuaHelper::mState, fX);
-    lua_pushnumber(LuaHelper::mState, fY);
+    // in UI pixels, like the mouse coordinates Lua gets (GuiManager::UpdateCursor)
+    const float fUiScale = RedInterfaceScreen::GetUiScale();
+    lua_pushnumber(LuaHelper::mState, fX / fUiScale);
+    lua_pushnumber(LuaHelper::mState, fY / fUiScale);
     return 2;
 }
 

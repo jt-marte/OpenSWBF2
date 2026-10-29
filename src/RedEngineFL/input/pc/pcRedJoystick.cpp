@@ -305,10 +305,13 @@ void RedJoystick::UpdateCursorFromStick(float fDeltaTime, float fX, float fY)
 
     if (pMouse->pCursorImage == this)
     {
-        int iDX = (int)(fX * fDeltaTime * 512.0f);
+        // OpenSWBF2: 512 UI pixels a second, so the cursor crosses the menus
+        // as fast at 4K as at 1080p (RedInterfaceScreen::GetUiScale).
+        const float fSpeed = 512.0f * RedInterfaceScreen::GetUiScale();
+        int iDX = (int)(fX * fDeltaTime * fSpeed);
         pMouse->m_X += iDX;
         pMouse->m_dX = iDX;
-        int iDY = (int)(fY * fDeltaTime * 512.0f);
+        int iDY = (int)(fY * fDeltaTime * fSpeed);
         pMouse->m_Y += iDY;
         pMouse->m_dY = iDY;
 
