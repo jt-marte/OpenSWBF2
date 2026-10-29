@@ -146,6 +146,10 @@ function ifs_opt_general_fnApplySettings(this)
 	if ( ScriptCB_GetPadLayout ) then
 		generalForm.elements["padlayout"].selValue = ScriptCB_GetPadLayout() + 1
 	end
+	if ( ScriptCB_GetPadLookSpeed ) then
+		local iLevel, iStep, iMin, iMax = ScriptCB_GetPadLookSpeed()
+		generalForm.elements["padlook"].selValue = iLevel / iMax
+	end
 	--generalForm.elements["ttreset"].selValue = 1
 end
 
@@ -384,6 +388,22 @@ ifs_opt_general = NewIFShellScreen {
 		if ( element.tag == "reticulealpha" ) then
 			ScriptCB_SetReticuleTransparency(1 - element.selValue)
 			this.GeneralOpts.iReticuleAlpha = 1 - element.selValue
+		elseif ( element.tag == "padlook" and ScriptCB_SetPadLookSpeed ) then
+			-- whole levels, applied at once and saved to display.ini; a pad step
+			-- (a twentieth of the bar) is less than a level, so it moves one
+			local iCur, iStep, iMin, iMax = ScriptCB_GetPadLookSpeed()
+			local fRaw = element.selValue * iMax
+			local iLevel = math.floor(fRaw + 0.5)
+			if ( iLevel == iCur ) then
+				if ( fRaw > iCur + 0.25 ) then
+					iLevel = iCur + 1
+				elseif ( fRaw < iCur - 0.25 ) then
+					iLevel = iCur - 1
+				end
+			end
+			iLevel = math.max(iMin, math.min(iMax, iLevel))
+			ScriptCB_SetPadLookSpeed(iLevel)
+			element.selValue = iLevel / iMax
 		end
 		
 		ScriptCB_SetGeneralOptions(this.GeneralOpts)
@@ -507,6 +527,8 @@ ifs_opt_general_layout = {
         { tag = "subtitles", title = "ifs.gameopt.moviesubtitles", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"}, },
 		-- OpenSWBF2: built-in controller layouts (an XInput pad ignores the PC bindings)
 		{ tag = "padlayout", title = "Controller layout", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"Modern", "Legacy"}, },
+		-- OpenSWBF2: controller look sensitivity, levels 1..10 (4 is the default feel)
+		{ tag = "padlook", title = "Controller sensitivity", fnChanged = ifs_opt_general.OnElementChanged, selValue = 0.4, control = "slider", minValue = 0.1, maxValue = 1.0, sliderMultiplier = 10 },
 		--{ tag = "ttreset", title = "", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.select", "common.change"}},
         --{ tag = "viewdistance", title = "ifs.VideoOpt.viewdistance", selValue = 0.5, control = "slider", minValue = 0.0, maxValue = 1.0 },
 		{ tag = "reticulealpha", title = "ifs.gameopt.reticulealpha", fnChanged = ifs_opt_general.OnElementChanged, selValue = 1.0, control = "slider", minValue = 0.0, maxValue = 1.0},

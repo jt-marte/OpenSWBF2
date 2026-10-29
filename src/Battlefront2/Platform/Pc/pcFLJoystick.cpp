@@ -1052,14 +1052,16 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
     bool bCancelAssist = false;
     float fValue;
     float fLastValue;
-    // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain). On foot their
-    // sensitivity scales the look speed instead (XInputPad::LookSpeedScale), so
-    // the input curve stays at the default level.
+    // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain) and take their
+    // sensitivity from the controller slider (XInputPad::gPadLookLevel), not
+    // the profile. On foot it scales the look speed instead
+    // (XInputPad::LookSpeedScale), so the input curve stays at the default.
     const bool bXInput = ucRaw < 64 && ucPort < 10 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput();
     const float fLookGain = bXInput ? XInputPad::kLookGain : 1.0f;
-    const bool bOnFoot = bXInput && (mMode == 0 || mMode == 3);
-    const unsigned char ucSensX = bOnFoot ? XInputPad::kLookSpeedDefaultLevel : mJoystickSensitivityX[mMode];
-    const unsigned char ucSensY = bOnFoot ? XInputPad::kLookSpeedDefaultLevel : mJoystickSensitivityY[mMode];
+    const unsigned char ucPadSens = (unsigned char)((mMode == 0 || mMode == 3) ? XInputPad::kLookSpeedDefaultLevel
+                                                                               : XInputPad::gPadLookLevel);
+    const unsigned char ucSensX = bXInput ? ucPadSens : mJoystickSensitivityX[mMode];
+    const unsigned char ucSensY = bXInput ? ucPadSens : mJoystickSensitivityY[mMode];
     if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
                        iAction == ePROCESSEDINPUT_TURN_POS ||
                        iAction == ePROCESSEDINPUT_TURN_NEG))
@@ -1131,8 +1133,6 @@ void RawControllerInputs::PadDefaultsProcess()
     XInputPad::gPadSecondZoom = false;
     XInputPad::gPadLookActive = false;
     XInputPad::gPadLookMag = 0.0f;
-    XInputPad::gPadYawScale = 1.0f;
-    XInputPad::gPadPitchScale = 1.0f;
     bool bLocked = false;
 
     for (int iPort = 0; iPort < 10; iPort++)
@@ -1152,9 +1152,6 @@ void RawControllerInputs::PadDefaultsProcess()
         {
             XInputPad::gPadLookMag = fLookMag;
         }
-        // The joystick sensitivity slider scales the soldier's pad look speed.
-        XInputPad::gPadYawScale = XInputPad::LookSpeedScale(mJoystickSensitivityX[mMode]);
-        XInputPad::gPadPitchScale = XInputPad::LookSpeedScale(mJoystickSensitivityY[mMode]);
 
         for (int iAction = 0; iAction < XInputPad::kActionCount; iAction++)
         {

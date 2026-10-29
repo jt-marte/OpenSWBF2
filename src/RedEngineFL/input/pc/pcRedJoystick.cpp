@@ -452,9 +452,7 @@ void RedJoystick::UpdateXInput(float fDeltaTime)
     }
 
     XInputPad::Mapped mapped;
-    float fMoveDeadZone, fLookDeadZone;
-    XInputPad::StickDeadZones(XInputPad::gDeadZoneLevel, fMoveDeadZone, fLookDeadZone);
-    XInputPad::Map(pad, fMoveDeadZone, fLookDeadZone, mapped);
+    XInputPad::Map(pad, XInputPad::kMoveDeadZone, XInputPad::kLookDeadZone, mapped);
 
     unsigned __int64 uiOldButtons = m_uiDownButtons;
     m_uiDownButtons = mapped.uiButtons;

@@ -50,22 +50,6 @@ void ApplyStickDeadzone(short sX, short sY, float fDeadZone, float& fX, float& f
     fY = fRawY / fMag * fScaled;
 }
 
-int gDeadZoneLevel = 5;
-
-void StickDeadZones(int iLevel, float& fMove, float& fLook)
-{
-    if (iLevel < 0)
-    {
-        iLevel = 0;
-    }
-    else if (iLevel > 10)
-    {
-        iLevel = 10;
-    }
-    fMove = 0.02f * (float)iLevel;
-    fLook = 0.8f * fMove;
-}
-
 float LookCurve(float fMagnitude)
 {
     if (!(fMagnitude > 0.0f))
@@ -100,8 +84,7 @@ float TurnBoost(float fLookMag)
     return (fLookMag - kBoostStart) / (kBoostFull - kBoostStart);
 }
 
-float gPadYawScale = 1.0f;
-float gPadPitchScale = 1.0f;
+int gPadLookLevel = kLookSpeedDefaultLevel;
 
 float PadYawRate(float fBase, float fTop, float fBoost, float fScale)
 {

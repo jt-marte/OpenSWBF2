@@ -484,8 +484,41 @@ static int ScriptCB_SetPadLayout(lua_State*)
     return 0;
 }
 
+// Controller sensitivity for Options -> Game: level, step, min, max.
+static int ScriptCB_GetPadLookSpeed(lua_State*)
+{
+    lua_pushnumber(LuaHelper::mState, (float)XInputPad::gPadLookLevel);
+    lua_pushnumber(LuaHelper::mState, 1.0f);
+    lua_pushnumber(LuaHelper::mState, (float)XInputPad::kLookSpeedMinLevel);
+    lua_pushnumber(LuaHelper::mState, (float)XInputPad::kLookSpeedMaxLevel);
+    return 4;
+}
+
+// Applies at once and saves to display.ini.
+static int ScriptCB_SetPadLookSpeed(lua_State*)
+{
+    int iLevel = (int)luaL_checknumber(LuaHelper::mState, 1);
+    if (iLevel < XInputPad::kLookSpeedMinLevel)
+    {
+        iLevel = XInputPad::kLookSpeedMinLevel;
+    }
+    else if (iLevel > XInputPad::kLookSpeedMaxLevel)
+    {
+        iLevel = XInputPad::kLookSpeedMaxLevel;
+    }
+    if (iLevel != XInputPad::gPadLookLevel)
+    {
+        XInputPad::gPadLookLevel = iLevel;
+        if (!DisplayCfg::SavePadLookSpeed((unsigned int)iLevel))
+        {
+            LOG(LogCore, Warning, "OPENSWBF2 PAD look speed %d not saved", iLevel);
+        }
+    }
+    return 0;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[49] =
+static const CallbackEntryT sPCCallbacks[51] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -536,6 +569,8 @@ static const CallbackEntryT sPCCallbacks[49] =
     { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
     { "ScriptCB_GetPadLayout", ScriptCB_GetPadLayout },
     { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },
+    { "ScriptCB_GetPadLookSpeed", ScriptCB_GetPadLookSpeed },
+    { "ScriptCB_SetPadLookSpeed", ScriptCB_SetPadLookSpeed },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -1027,7 +1062,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 49; ++i)
+    for (int i = 0; i < 51; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }
