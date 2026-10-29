@@ -253,6 +253,12 @@ struct BufferSet
 BufferSet BufferSizes(unsigned int uiBackW, unsigned int uiBackH, unsigned int uiMaxTexW,
                       unsigned int uiMaxTexH, bool bNonPow2);
 
+// A downsize factor that makes a uiViewW x uiViewH copy fit a uiBufW x uiBufH
+// buffer: fFactor, lowered if needed. The blur effect copies the view into the
+// 512-capped TEMP buffer at 0.25, which overflows above 2048 px wide.
+float FitDownSize(float fFactor, unsigned int uiViewW, unsigned int uiViewH, unsigned int uiBufW,
+                  unsigned int uiBufH);
+
 bool ShadowQuadSharesSky(unsigned int uiBackW, unsigned int uiBackH, unsigned int uiMsType,
                          bool bDriverMs, unsigned int uiSkyW, unsigned int uiSkyH);
 
