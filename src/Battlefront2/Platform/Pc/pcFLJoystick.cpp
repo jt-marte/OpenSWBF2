@@ -1052,17 +1052,20 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
     bool bCancelAssist = false;
     float fValue;
     float fLastValue;
-    // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain).
-    const float fLookGain =
-        (ucRaw < 64 && ucPort < 10 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput())
-            ? XInputPad::kLookGain
-            : 1.0f;
+    // OpenSWBF2: XInput pads look faster (XInputPad::kLookGain). On foot their
+    // sensitivity scales the look speed instead (XInputPad::LookSpeedScale), so
+    // the input curve stays at the default level.
+    const bool bXInput = ucRaw < 64 && ucPort < 10 && _redJoystick[ucPort] && _redJoystick[ucPort]->IsXInput();
+    const float fLookGain = bXInput ? XInputPad::kLookGain : 1.0f;
+    const bool bOnFoot = bXInput && (mMode == 0 || mMode == 3);
+    const unsigned char ucSensX = bOnFoot ? XInputPad::kLookSpeedDefaultLevel : mJoystickSensitivityX[mMode];
+    const unsigned char ucSensY = bOnFoot ? XInputPad::kLookSpeedDefaultLevel : mJoystickSensitivityY[mMode];
     if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
                        iAction == ePROCESSEDINPUT_TURN_POS ||
                        iAction == ePROCESSEDINPUT_TURN_NEG))
     {
-        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityX[mMode]);
-        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityX[mMode]);
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, ucSensX);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, ucSensX);
         if (fValue < -0.4 || fValue > 0.4)
         {
             bCancelAssist = true;
@@ -1072,8 +1075,8 @@ void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, in
                             iAction == ePROCESSEDINPUT_PITCH_POS ||
                             iAction == ePROCESSEDINPUT_PITCH_NEG))
     {
-        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityY[mMode]);
-        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, mJoystickSensitivityY[mMode]);
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw] * fLookGain, ucSensY);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw] * fLookGain, ucSensY);
         if (fValue < -0.4 || fValue > 0.4)
         {
             bCancelAssist = true;
@@ -1128,6 +1131,8 @@ void RawControllerInputs::PadDefaultsProcess()
     XInputPad::gPadSecondZoom = false;
     XInputPad::gPadLookActive = false;
     XInputPad::gPadLookMag = 0.0f;
+    XInputPad::gPadYawScale = 1.0f;
+    XInputPad::gPadPitchScale = 1.0f;
     bool bLocked = false;
 
     for (int iPort = 0; iPort < 10; iPort++)
@@ -1147,6 +1152,9 @@ void RawControllerInputs::PadDefaultsProcess()
         {
             XInputPad::gPadLookMag = fLookMag;
         }
+        // The joystick sensitivity slider scales the soldier's pad look speed.
+        XInputPad::gPadYawScale = XInputPad::LookSpeedScale(mJoystickSensitivityX[mMode]);
+        XInputPad::gPadPitchScale = XInputPad::LookSpeedScale(mJoystickSensitivityY[mMode]);
 
         for (int iAction = 0; iAction < XInputPad::kActionCount; iAction++)
         {

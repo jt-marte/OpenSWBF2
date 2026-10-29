@@ -6061,6 +6061,14 @@ int Play(VOType eType, const GameObject* pSpeaker, const GameObject* pTarget,
 }
 }
 
+// OpenSWBF2: the soldier is the local player looking with an XInput pad
+// (XInputPad::PadYawRate / PadPitchRate / PadTurnFactor apply).
+static bool IsLocalPadLook(int iPlayerId)
+{
+    return XInputPad::gPadLookActive && iPlayerId >= 0 && iPlayerId == NetGame::GetLocalIndex(0) &&
+           !NetGame::IsMouseMode(iPlayerId);
+}
+
 // FUNCTION: SWBF2 0x004e8920
 bool EntitySoldier::Update(float fDeltaTime)
 {
@@ -6701,6 +6709,11 @@ bool EntitySoldier::Update(float fDeltaTime)
     }
 
     float fPitchRate = bMouse ? GetClassMaxTurnSpeed() : mClass->mMaxPitchSpeed;
+    if (IsLocalPadLook(mPlayerId))
+    {
+        fPitchRate = XInputPad::PadPitchRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mPitchBuildup,
+                                             XInputPad::gPadPitchScale);
+    }
     if (mTargetInfo.mIsAiming && pWeapon)
     {
         fPitchRate /= pWeapon->mZoomTurnScale;
@@ -7255,8 +7268,7 @@ bool EntitySoldier::Update(float fDeltaTime)
         // OpenSWBF2: the local XInput pad player keeps full turn speed while
         // rolling (XInputPad::PadTurnFactor).
         float fRollTurn = mClass->mTurnFactor[5];
-        if (XInputPad::gPadLookActive && mPlayerId >= 0 && mPlayerId == NetGame::GetLocalIndex(0) &&
-            !NetGame::IsMouseMode(mPlayerId))
+        if (IsLocalPadLook(mPlayerId))
         {
             fRollTurn = XInputPad::PadTurnFactor(fRollTurn);
         }
@@ -8290,7 +8302,12 @@ float EntitySoldier::GetOmega(float fTurn) const
     }
 
     float fOmega;
-    if (mPlayerId >= 0 && !bMouse)
+    if (IsLocalPadLook(mPlayerId))
+    {
+        fOmega = XInputPad::PadYawRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mTurnBuildup,
+                                       XInputPad::gPadYawScale);
+    }
+    else if (mPlayerId >= 0 && !bMouse)
     {
         float fMin = mClass->mMaxPitchSpeed;
         fOmega = (GetClassMaxTurnSpeed() - fMin) * mTurnBuildup + fMin;

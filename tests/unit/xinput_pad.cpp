@@ -240,6 +240,61 @@ TEST_CASE("xinput pad keeps full turn speed in slow soldier states" * doctest::t
     CHECK(PadTurnFactor(1.5f) == 1.5f); // a class that turns faster keeps it
 }
 
+TEST_CASE("xinput pad yaw tops out a little under the class top speed" * doctest::test_suite("unit"))
+{
+    // soldier defaults: base (MaxPitchSpeed) 1, top (MaxTurnSpeed) 2
+    CHECK(PadYawRate(1.0f, 2.0f, 0.0f, 1.0f) == doctest::Approx(1.0f));
+    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.8f));
+    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.0f) < 2.0f);
+    CHECK(PadYawRate(1.0f, 2.0f, 1.0f, 1.5f) == doctest::Approx(2.7f));
+    CHECK(PadYawRate(1.0f, 2.0f, 0.0f, 0.5f) == doctest::Approx(0.5f));
+    float fLast = 0.0f;
+    for (int i = 0; i <= 20; ++i)
+    {
+        const float fRate = PadYawRate(1.0f, 2.0f, (float)i / 20.0f, 1.0f);
+        CHECK(fRate >= fLast);
+        fLast = fRate;
+    }
+}
+
+TEST_CASE("xinput pad pitch rises with the boost to near yaw" * doctest::test_suite("unit"))
+{
+    // fine aim keeps the base speed; retail full-tilt pitch stayed at it
+    CHECK(PadPitchRate(1.0f, 2.0f, 0.0f, 1.0f) == doctest::Approx(1.0f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) == doctest::Approx(1.6f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) > 1.0f);
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.0f) < PadYawRate(1.0f, 2.0f, 1.0f, 1.0f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 0.5f, 1.0f) == doctest::Approx(1.3f));
+    CHECK(PadPitchRate(1.0f, 2.0f, 1.0f, 1.25f) == doctest::Approx(2.0f));
+    float fLast = 0.0f;
+    for (int i = 0; i <= 20; ++i)
+    {
+        const float fRate = PadPitchRate(1.0f, 2.0f, (float)i / 20.0f, 1.0f);
+        CHECK(fRate >= fLast);
+        fLast = fRate;
+    }
+}
+
+TEST_CASE("xinput joystick sensitivity scales the look speed with the default unchanged" * doctest::test_suite("unit"))
+{
+    CHECK(LookSpeedScale(kLookSpeedDefaultLevel) == 1.0f);
+    CHECK(LookSpeedScale(4) == 1.0f); // what retail profiles store
+    CHECK(LookSpeedScale(1) == doctest::Approx(0.625f));
+    CHECK(LookSpeedScale(10) == doctest::Approx(1.75f));
+    CHECK(LookSpeedScale(5) == doctest::Approx(1.125f));
+    // out of range clamps
+    CHECK(LookSpeedScale(0) == LookSpeedScale(1));
+    CHECK(LookSpeedScale(-3) == LookSpeedScale(1));
+    CHECK(LookSpeedScale(11) == LookSpeedScale(10));
+    CHECK(LookSpeedScale(255) == LookSpeedScale(10));
+    float fLast = 0.0f;
+    for (int i = kLookSpeedMinLevel; i <= kLookSpeedMaxLevel; ++i)
+    {
+        CHECK(LookSpeedScale(i) > fLast);
+        fLast = LookSpeedScale(i);
+    }
+}
+
 TEST_CASE("xinput look curve leaves movement linear and full look full" * doctest::test_suite("unit"))
 {
     Pad pad = Neutral();
