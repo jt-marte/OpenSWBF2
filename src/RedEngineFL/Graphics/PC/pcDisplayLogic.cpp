@@ -1211,4 +1211,13 @@ void CursorMaskFromBgra(const unsigned int* puiBgra, unsigned int uiW, unsigned 
     }
 }
 
+float UiScale(unsigned int uiScreenH)
+{
+    if (uiScreenH <= 1080 || uiScreenH > kMaxDim)
+    {
+        return 1.0f;
+    }
+    return (float)uiScreenH / 1080.0f;
+}
+
 }

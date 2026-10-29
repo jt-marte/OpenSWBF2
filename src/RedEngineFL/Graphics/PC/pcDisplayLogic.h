@@ -393,4 +393,9 @@ unsigned int CursorMaskStride(unsigned int uiW);
 void CursorMaskFromBgra(const unsigned int* puiBgra, unsigned int uiW, unsigned int uiH,
                         unsigned char* pucMask);
 
+// Pixel-sized interface (bitmap-font HUD text, Lua menus) grows with the screen
+// height past 1080 lines (2x at 2160) so it reads as it does at 1080p.
+// 1.0 at 1080 and below.
+float UiScale(unsigned int uiScreenH);
+
 }

@@ -329,6 +329,27 @@ TEST_CASE("shadow quad reset source pins" * doctest::test_suite("unit"))
     CHECK(uiCreateLoop < uiSkip);
 }
 
+TEST_CASE("interface camera near plane source pins" * doctest::test_suite("unit"))
+{
+    std::string sRaw;
+    if (!ReadSource("../src/RedEngineFL/Interface/RedInterfaceScreen.cpp", sRaw))
+    {
+        SkipCase("source file not found");
+    }
+    const std::string sScreen = StripCr(sRaw);
+    const std::string sRender = FunctionBody(sScreen, "void RedInterfaceScreen::Render() const");
+    REQUIRE(!sRender.empty());
+
+    // HUD models sit ~554 * (640 / width) * 0.01 from the camera, about 0.92
+    // at 3840 wide; the near plane has to stay well under that (it was 1.0).
+    CHECK(Has(sRender, "static const float kNear = 0.05f;"));
+    CHECK(Has(sRender, "camera.SetFrustum(kNear, sfFar, sfWidth * kNear,"));
+    CHECK(Has(sRender, "((float)m_uiWidthInPixels * sfHeight) * kNear);"));
+    // positions and sizes still come from the original 1.0-near frustum
+    CHECK(Has(sRender, "const float fDepth = (float)m_uiWidthInPixels / sfWidth;"));
+    CHECK(Has(sScreen, "const float RedInterfaceScreen::sfNear = 1.0f;"));
+}
+
 TEST_CASE("display apply target failure source pins" * doctest::test_suite("unit"))
 {
     std::string sTextureRaw;

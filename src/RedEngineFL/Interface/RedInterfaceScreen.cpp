@@ -283,11 +283,18 @@ void RedInterfaceScreen::Render() const
     RedRenderer::SetFogEnable(false);
     const RedCamera* pOldCamera = RedRenderer::GetCamera();
 
+    // OpenSWBF2: the HUD's 3D models (reticle, weapon icons) sit at distance
+    // ~554 * (640 / width) * 0.01 from this camera (see the perspective hack in
+    // Red3DModelElementLite::LocalToWorld), which drops below the original 1.0
+    // near plane above ~3500 px wide, so 4K clipped them away. A closer near
+    // plane, with the width scaled to match, keeps the same field of view and
+    // every position and size; only the clipping changes.
+    static const float kNear = 0.05f;
     static RedCamera camera;
     camera.SetMatrix(gMatrixIdentity);
-    camera.SetFrustum(sfNear, sfFar, sfWidth,
+    camera.SetFrustum(kNear, sfFar, sfWidth * kNear,
                       (float)m_uiHeightInPixels * sfWidth * sfHeight /
-                          ((float)m_uiWidthInPixels * sfHeight));
+                          ((float)m_uiWidthInPixels * sfHeight) * kNear);
     RedRenderer::SetCamera(&camera);
 
     const float fNearSceneStart = RedRenderer::pcGetNearSceneStart();
