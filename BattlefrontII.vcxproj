@@ -787,6 +787,7 @@
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedJoystick.cpp" />
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedKeyboard.cpp" />
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedMouse.cpp" />
+    <ClCompile Include="src\RedEngineFL\input\pc\pcXInputPad.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedCircularBuffer.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedFileAsync.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMovie.cpp" />
@@ -1524,6 +1525,7 @@
     <ClInclude Include="src\RedEngineFL\geometry\vector.h" />
     <ClInclude Include="src\RedEngineFL\input\RedInputEventHandler.h" />
     <ClInclude Include="src\RedEngineFL\input\RedJoystick.h" />
+    <ClInclude Include="src\RedEngineFL\input\pc\pcXInputPad.h" />
     <ClInclude Include="src\RedEngineFL\input\RedKeyboard.h" />
     <ClInclude Include="src\RedEngineFL\input\RedMouse.h" />
     <ClInclude Include="src\RedEngineFL\input\pc\pcRedInputManager.h" />

@@ -335,6 +335,28 @@ void Rumble::StopAllRumble()
     }
 }
 
+// Linear fade over fLength. A weaker effect never cuts a stronger one short.
+void Rumble::Start(float fLight, float fHeavy, float fLength)
+{
+    if (!mJoystick || !mEnabled || fLength <= 0.0f || (fLight <= 0.0f && fHeavy <= 0.0f))
+    {
+        return;
+    }
+    if (mRumbleMode == eRumble && fLight <= mLight && fHeavy <= mHeavy)
+    {
+        return;
+    }
+    mRumbleMode = eRumble;
+    mLight = fLight;
+    mHeavy = fHeavy;
+    mLightDecay = fLight / fLength;
+    mHeavyDecay = fHeavy / fLength;
+    mTimeLeftLight = fLength;
+    mTimeLeftHeavy = fLength;
+    mDelayLight = 0.0f;
+    mDelayHeavy = 0.0f;
+}
+
 // FUNCTION: SWBF2 0x0052bb20
 void Rumble::Update(float fDeltaTime)
 {

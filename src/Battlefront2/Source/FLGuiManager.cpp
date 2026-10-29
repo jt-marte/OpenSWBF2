@@ -14,6 +14,7 @@
 #include "RedEngineFL/Interface/RedIFScreen.h"
 #include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Memory/RedMemory.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 
 namespace FLRenderer
 {
@@ -780,6 +781,18 @@ void GuiManager::CollectInputs(int iJoystick, GUIInputs* pInputs, int iControlle
     {
         memcpy(m_InputTriggered[iJoystick], bTriggered, sizeof(bTriggered));
         return;
+    }
+
+    // A pad drove the menu while the mouse sat still. Re-hit-test under the
+    // cursor before anything else is queued, so a click that hands control
+    // back to the mouse lands where the mouse points, not on the pad's
+    // highlight.
+    if (XInputPad::gMouseResync && mInstances->mJoystickIndex == iController)
+    {
+        XInputPad::gMouseResync = false;
+        mMouseX = pInputs->mMouseCoords.mPosX;
+        mMouseY = pInputs->mMouseCoords.mPosY;
+        CreateInputEvent(eInputCode_Coords, iController);
     }
 
     if (pInputs->mProcessedGUIInputs[eGUIINPUT_Start] >= 0.125f &&

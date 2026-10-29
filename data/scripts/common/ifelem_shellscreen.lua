@@ -266,8 +266,18 @@ function gIFShellScreenTemplate_fnCenterClickableButton(ObjToMove,TextToGetWidth
 	IFText_fnSetString(TextToGetWidthFrom,string)
 end
 
+-- OpenSWBF2: when an XInput pad is driving the menus (cursor hidden), start
+-- on the first button like console instead of waiting for the mouse.
+function gIFShellScreenTemplate_fnPadDefaultButton(this)
+	if(this.buttons and (not this.CurButton) and this.buttons.TagOfFirst and
+		 ScriptCB_IsPadNavigating and ScriptCB_IsPadNavigating()) then
+		this.CurButton = this.buttons.TagOfFirst
+	end
+end
+
 -- Default for Reactivate function
 function gIFShellScreenTemplate_fnReactivate(this)
+	gIFShellScreenTemplate_fnPadDefaultButton(this)
 	-- Set currently hilighted button to whatever this screen has
 	if(this.buttons and this.CurButton) then
 		gCurHiliteButton = this.buttons[this.CurButton]
@@ -298,6 +308,7 @@ function gIFShellScreenTemplate_fnEnter(this, bFwd)
 	gCurScreenStr = this.ScreenName -- e.g. "ifs_main"
 	gCurScreenTable = this
 
+	gIFShellScreenTemplate_fnPadDefaultButton(this)
 	-- Set currently hilighted button to whatever this screen has
 	if(this.buttons and this.CurButton) then
 		gCurHiliteButton = this.buttons[this.CurButton]

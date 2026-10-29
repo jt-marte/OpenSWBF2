@@ -12,8 +12,43 @@
 #include "RedEngineFL/input/RedJoystick.h"
 #include "RedEngineFL/input/RedKeyboard.h"
 #include "RedEngineFL/input/RedMouse.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
 #include "PebbleFL/Common/PblUnicode.h"
+#include "Battlefront2/Source/ActionKey.h"
+
+static_assert(sizeof(ActionKey) == 3 * sizeof(unsigned short), "HasPadBindings reads ActionKey as shorts");
+static_assert(XInputPad::kActionCount == ePROCESSEDINPUT_NUM_KEY_ACTIONS &&
+              XInputPad::kActPrimaryFire == ePROCESSEDINPUT_primaryFireButtonDown &&
+              XInputPad::kActSecondaryFire == ePROCESSEDINPUT_secondaryFireButtonDown &&
+              XInputPad::kActSprint == ePROCESSEDINPUT_sprintButtonDown &&
+              XInputPad::kActJump == ePROCESSEDINPUT_jumpButtonDown &&
+              XInputPad::kActCrouch == ePROCESSEDINPUT_crouchButtonDown &&
+              XInputPad::kActZoom == ePROCESSEDINPUT_zoomButtonDown &&
+              XInputPad::kActView == ePROCESSEDINPUT_viewButtonDown &&
+              XInputPad::kActReload == ePROCESSEDINPUT_reloadButtonDown &&
+              XInputPad::kActUse == ePROCESSEDINPUT_useButtonPressed &&
+              XInputPad::kActSquadCommand == ePROCESSEDINPUT_squadCommandButtonPressed &&
+              XInputPad::kActAcceptHero == ePROCESSEDINPUT_acceptHeroPressed &&
+              XInputPad::kActDeclineHero == ePROCESSEDINPUT_declineHeroPressed &&
+              XInputPad::kActPrimaryNext == ePROCESSEDINPUT_primaryNextButtonPressed &&
+              XInputPad::kActSecondaryNext == ePROCESSEDINPUT_secondaryNextButtonPressed &&
+              XInputPad::kActPlayerList == ePROCESSEDINPUT_playerList &&
+              XInputPad::kActStrafeAxis == ePROCESSEDINPUT_STRAFE_AXIS &&
+              XInputPad::kActMoveAxis == ePROCESSEDINPUT_MOVE_AXIS &&
+              XInputPad::kActTurnAxis == ePROCESSEDINPUT_TURN_AXIS &&
+              XInputPad::kActPitchAxis == ePROCESSEDINPUT_PITCH_AXIS,
+              "XInputPad actions mirror ePROCESSEDINPUT_TYPE");
+static_assert(XInputPad::kGuiAccept == eGUIINPUT_Accept && XInputPad::kGuiBack == eGUIINPUT_Back &&
+              XInputPad::kGuiStart == eGUIINPUT_Start && XInputPad::kGuiSelect == eGUIINPUT_Select &&
+              XInputPad::kGuiMisc1 == eGUIINPUT_Misc1 && XInputPad::kGuiMisc2 == eGUIINPUT_Misc2 &&
+              XInputPad::kGuiUp == eGUIINPUT_Up && XInputPad::kGuiDown == eGUIINPUT_Down &&
+              XInputPad::kGuiLeft == eGUIINPUT_Left && XInputPad::kGuiRight == eGUIINPUT_Right &&
+              XInputPad::kGuiLeftTrigger == eGUIINPUT_LeftTrigger &&
+              XInputPad::kGuiRightTrigger == eGUIINPUT_RightTrigger &&
+              XInputPad::kGuiLeftTrigger2 == eGUIINPUT_LeftTrigger2 &&
+              XInputPad::kGuiRightTrigger2 == eGUIINPUT_RightTrigger2,
+              "XInputPad menu inputs mirror eGUIINPUT_TYPE");
 
 // FUNCTION: SWBF2 0x00415c60
 void RawControllerInputs::CloseChatMode()
@@ -876,8 +911,35 @@ void RawControllerInputs::ReadLatest(float fDeltaTime)
     {
         if (_redJoystick[iPort])
         {
+            // Retail maps every pad's first four buttons to Accept and nothing
+            // else; XInput pads get A/B/Start/D-pad menu navigation.
+            const bool bXInput = _redJoystick[iPort]->IsXInput();
+            if (bXInput)
+            {
+                // Left stick as the console menu axes; GuiManager::CollectInputs
+                // turns past-0.5 into repeating Up/Down/Left/Right.
+                float fGuiX, fGuiY;
+                XInputPad::GuiAxes(_redJoystick[iPort]->m_fAxis, fGuiX, fGuiY);
+                if (fGuiX != 0.0f)
+                {
+                    m_pGuiInputs->Set(eGUIINPUT_xAxis, fGuiX);
+                }
+                if (fGuiY != 0.0f)
+                {
+                    m_pGuiInputs->Set(eGUIINPUT_yAxis, fGuiY);
+                }
+            }
             for (int i = 0; i < 64; i++)
             {
+                if (bXInput)
+                {
+                    const int iGui = XInputPad::GuiForSlot(i);
+                    if (iGui >= 0)
+                    {
+                        m_pGuiInputs->Set((eGUIINPUT_TYPE)iGui, mRawInputFloat[iPort][i]);
+                    }
+                    continue;
+                }
                 m_pGuiInputs->Set(s_defUIBindings[i].mKeyA, mRawInputFloat[iPort][i]);
                 m_pGuiInputs->Set(s_defUIBindings[i].mKeyB, mRawInputFloat[iPort][i]);
             }
@@ -944,76 +1006,8 @@ void RawControllerInputs::StandardInputProcess()
             if (usKey > 0xff)
             {
                 const unsigned char ucRaw = ActionKeyToRawInput(usKey);
-                const int iRaw = ucRaw;
-                unsigned char ucPort;
-                if (iRaw > -1 && ucRaw < 64)
-                {
-                    ucPort = ((const unsigned char*)&key.mKey[2])[j];
-                }
-                else
-                {
-                    ucPort = 0;
-                }
-
-                bool bCancelAssist = false;
-                float fValue;
-                float fLastValue;
-                if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
-                                   iAction == ePROCESSEDINPUT_TURN_POS ||
-                                   iAction == ePROCESSEDINPUT_TURN_NEG))
-                {
-                    fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
-                    fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
-                    if (fValue < -0.4 || fValue > 0.4)
-                    {
-                        bCancelAssist = true;
-                    }
-                }
-                else if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_PITCH_AXIS ||
-                                        iAction == ePROCESSEDINPUT_PITCH_POS ||
-                                        iAction == ePROCESSEDINPUT_PITCH_NEG))
-                {
-                    fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
-                    fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
-                    if (fValue < -0.4 || fValue > 0.4)
-                    {
-                        bCancelAssist = true;
-                    }
-                }
-                else
-                {
-                    fValue = mRawInputFloat[ucPort][iRaw];
-                    fLastValue = mLastRawInputFloat[ucPort][iRaw];
-                }
-
-                if (mFlip[mMode] && iAction == ePROCESSEDINPUT_PITCH_AXIS)
-                {
-                    fValue *= -1.0f;
-                    fLastValue *= -1.0f;
-                }
-
-                if (bCancelAssist)
-                {
-                    mMouseOldXTimer = 0.0f;
-                    *(double*)mMouseOldX = 0.0;
-                    *(double*)mMouseOldY = 0.0;
-                    mMouseOldYTimer = 0.0f;
-                }
-
-                if (fValue != fLastValue)
-                {
-                    if (ucRaw < 64)
-                    {
-                        mProcessDestination->bits.mMouseMode = 0;
-                    }
-                    else if (ucRaw < 76)
-                    {
-                        mProcessDestination->bits.mMouseMode = 2;
-                    }
-                }
-
-                mProcessDestination->Set((ePROCESSEDINPUT_TYPE)iAction,
-                                         mLockedRawInputBool[ucPort][iRaw], fValue, fLastValue);
+                const unsigned char ucPort = ucRaw < 64 ? ((const unsigned char*)&key.mKey[2])[j] : 0;
+                ProcessRawAction(iAction, ucPort, ucRaw);
             }
             else if (_redKeyboard->IsKeyDown((unsigned char)usKey))
             {
@@ -1027,6 +1021,104 @@ void RawControllerInputs::StandardInputProcess()
                     mMouseOldYTimer = 0.0f;
                 }
                 mProcessDestination->Set((ePROCESSEDINPUT_TYPE)iAction, bLocked, 1.0f, 0.0f);
+            }
+        }
+    }
+
+    PadDefaultsProcess();
+}
+
+// One raw input (pad slot < 64 or mouse slot < 76) feeding one action; the
+// body of the retail StandardInputProcess loop, shared with the pad defaults.
+void RawControllerInputs::ProcessRawAction(int iAction, unsigned char ucPort, int iRaw)
+{
+    const unsigned char ucRaw = (unsigned char)iRaw;
+
+    bool bCancelAssist = false;
+    float fValue;
+    float fLastValue;
+    if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_TURN_AXIS ||
+                       iAction == ePROCESSEDINPUT_TURN_POS ||
+                       iAction == ePROCESSEDINPUT_TURN_NEG))
+    {
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityX[mMode]);
+        if (fValue < -0.4 || fValue > 0.4)
+        {
+            bCancelAssist = true;
+        }
+    }
+    else if (ucRaw < 64 && (iAction == ePROCESSEDINPUT_PITCH_AXIS ||
+                            iAction == ePROCESSEDINPUT_PITCH_POS ||
+                            iAction == ePROCESSEDINPUT_PITCH_NEG))
+    {
+        fValue = AdjustValueForSensitivity(mRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
+        fLastValue = AdjustValueForSensitivity(mLastRawInputFloat[ucPort][iRaw], mJoystickSensitivityY[mMode]);
+        if (fValue < -0.4 || fValue > 0.4)
+        {
+            bCancelAssist = true;
+        }
+    }
+    else
+    {
+        fValue = mRawInputFloat[ucPort][iRaw];
+        fLastValue = mLastRawInputFloat[ucPort][iRaw];
+    }
+
+    if (mFlip[mMode] && iAction == ePROCESSEDINPUT_PITCH_AXIS)
+    {
+        fValue *= -1.0f;
+        fLastValue *= -1.0f;
+    }
+
+    if (bCancelAssist)
+    {
+        mMouseOldXTimer = 0.0f;
+        *(double*)mMouseOldX = 0.0;
+        *(double*)mMouseOldY = 0.0;
+        mMouseOldYTimer = 0.0f;
+    }
+
+    if (fValue != fLastValue)
+    {
+        if (ucRaw < 64)
+        {
+            mProcessDestination->bits.mMouseMode = 0;
+        }
+        else if (ucRaw < 76)
+        {
+            mProcessDestination->bits.mMouseMode = 2;
+        }
+    }
+
+    mProcessDestination->Set((ePROCESSEDINPUT_TYPE)iAction,
+                             mLockedRawInputBool[ucPort][iRaw], fValue, fLastValue);
+}
+
+// Retail PC binds no pad inputs by default, so a pad did nothing until every
+// action was bound by hand. XInput pads get a console-style layout on top of
+// the keyboard/mouse bindings, unless the player has bound pad inputs of their
+// own for this mode, in which case only theirs apply.
+void RawControllerInputs::PadDefaultsProcess()
+{
+    if (XInputPad::HasPadBindings((const unsigned short (*)[3])mCurKeyboardBindings[mMode]))
+    {
+        return;
+    }
+
+    for (int iPort = 0; iPort < 10; iPort++)
+    {
+        RedJoystick* pJoystick = _redJoystick[iPort];
+        if (!pJoystick || !pJoystick->IsXInput())
+        {
+            continue;
+        }
+        for (int iAction = 0; iAction < XInputPad::kActionCount; iAction++)
+        {
+            const int iSlot = XInputPad::DefaultSlot(mMode, iAction);
+            if (iSlot >= 0)
+            {
+                ProcessRawAction(iAction, (unsigned char)iPort, iSlot);
             }
         }
     }

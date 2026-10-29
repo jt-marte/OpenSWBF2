@@ -224,6 +224,8 @@ public:
 
     void StopIntermittent();
 
+    void Start(float fLight, float fHeavy, float fLength);
+
     void Update(float fDeltaTime);
 
     RumbleMode mRumbleMode;

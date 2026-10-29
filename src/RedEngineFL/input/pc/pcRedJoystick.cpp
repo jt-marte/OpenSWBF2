@@ -2,16 +2,64 @@
 #include <string.h>
 
 #include "pcRedInputManager.h"
+#include "pcXInputPad.h"
 #include "RedEngineFL/Interface/RedInterfaceScreen.h"
+#include "RedEngineFL/Util/RedLog.h"
+
+#include <XInput.h>
 
 extern HWND hGlobalWnd;
+
+static_assert(XInputPad::kPadA == XINPUT_GAMEPAD_A && XInputPad::kPadY == XINPUT_GAMEPAD_Y &&
+              XInputPad::kPadDPadUp == XINPUT_GAMEPAD_DPAD_UP &&
+              XInputPad::kPadRightShoulder == XINPUT_GAMEPAD_RIGHT_SHOULDER &&
+              XInputPad::kTriggerThreshold == XINPUT_GAMEPAD_TRIGGER_THRESHOLD,
+              "XInputPad mirrors XINPUT_GAMEPAD");
+
+typedef DWORD(WINAPI* XInputGetStateFn)(DWORD dwUserIndex, XINPUT_STATE* pState);
+typedef DWORD(WINAPI* XInputSetStateFn)(DWORD dwUserIndex, XINPUT_VIBRATION* pVibration);
+
+static XInputGetStateFn sXInputGetState;
+static XInputSetStateFn sXInputSetState;
+
+// Loaded at runtime so the exe still starts where no XInput DLL exists; newest first.
+bool RedInputManager::pcLoadXInput()
+{
+    static bool sbTried;
+    if (sbTried)
+    {
+        return sXInputGetState != 0;
+    }
+    sbTried = true;
+
+    static const char* const kDlls[] = { "xinput1_4.dll", "xinput1_3.dll", "xinput9_1_0.dll" };
+    for (int i = 0; i < (int)(sizeof(kDlls) / sizeof(kDlls[0])); ++i)
+    {
+        HMODULE hDll = LoadLibraryA(kDlls[i]);
+        if (!hDll)
+        {
+            continue;
+        }
+        sXInputGetState = (XInputGetStateFn)GetProcAddress(hDll, "XInputGetState");
+        sXInputSetState = (XInputSetStateFn)GetProcAddress(hDll, "XInputSetState");
+        if (sXInputGetState)
+        {
+            LOG(LogCore, Inform, "XInput: using %s", kDlls[i]);
+            return true;
+        }
+        sXInputSetState = 0;
+        FreeLibrary(hDll);
+    }
+    LOG(LogCore, Warning, "XInput: no XInput DLL found, controllers use DirectInput only");
+    return false;
+}
 
 BOOL CALLBACK EnumObjectsCallback(DIDEVICEOBJECTINSTANCEA const* pObject, void* pvRef);
 
 // FUNCTION: SWBF2 0x006c54a0
 void RedJoystick::Insert()
 {
-    if (m_connected)
+    if (m_connected || IsXInput())
     {
         return;
     }
@@ -27,15 +75,17 @@ void RedJoystick::Insert()
 }
 
 // FUNCTION: SWBF2 0x006c5540
+// Retail PC left these empty. The level holds until the next Update sends it,
+// and Rumble::Update refreshes it every frame while an effect is running.
 void RedJoystick::SetHeavyEngine(float f)
 {
-    (void)f;
+    m_iHeavyEngine = XInputPad::MotorSpeed(f);
 }
 
 // FUNCTION: SWBF2 0x006c5550
 void RedJoystick::SetLightEngine(float f)
 {
-    (void)f;
+    m_iLightEngine = XInputPad::MotorSpeed(f);
 }
 
 // FUNCTION: SWBF2 0x006c5470
@@ -47,6 +97,26 @@ void RedJoystick::Init(unsigned char ucPortNum)
     m_connected = false;
     mPreviousAxisX = 1000.0f;
     mPreviousAxisY = 1000.0f;
+
+    m_xinputSlot = -1;
+    m_xinputPacket = 0;
+    m_xinputProbeTimer = 0.0f;
+    m_iHeavyEngine = 0;
+    m_iLightEngine = 0;
+    m_usSentHeavy = 0;
+    m_usSentLight = 0;
+}
+
+void RedJoystick::InitXInput(int iSlot)
+{
+    m_xinputSlot = iSlot;
+    m_connected = false;
+    m_xinputPacket = 0xFFFFFFFF;
+    m_xinputProbeTimer = 0.0f;
+    m_uiDownButtons = 0;
+    m_uiPressedButtons = 0;
+    m_uiReleasedButtons = 0;
+    memset(m_fAxis, 0, sizeof(m_fAxis));
 }
 
 // FUNCTION: SWBF2 0x006c5a60
@@ -116,6 +186,7 @@ BOOL CALLBACK EnumObjectsCallback(DIDEVICEOBJECTINSTANCEA const* pObject, void* 
 RedJoystick::RedJoystick()
 {
     mDeadZoneScale = 0.2f;
+    m_xinputSlot = -1;
 }
 
 // FUNCTION: SWBF2 0x006c5330
@@ -131,6 +202,12 @@ void SetCursorPos(float fX, float fY);
 // FUNCTION: SWBF2 0x006c5560
 void RedJoystick::Update(float fDeltaTime)
 {
+    if (IsXInput())
+    {
+        UpdateXInput(fDeltaTime);
+        return;
+    }
+
     if (!pc_device)
     {
         return;
@@ -158,7 +235,8 @@ void RedJoystick::Update(float fDeltaTime)
     {
         if (pc_state.rgbButtons[i] & 0x80)
         {
-            m_uiDownButtons |= 1 << i;
+            // Retail used int 1 << i: button 32 sign-extended into every POV bit.
+            m_uiDownButtons |= (unsigned __int64)1 << i;
         }
     }
 
@@ -178,9 +256,7 @@ void RedJoystick::Update(float fDeltaTime)
         }
     }
 
-    unsigned __int64 uiChanged = uiOldButtons ^ m_uiDownButtons;
-    m_uiPressedButtons = m_uiDownButtons & uiChanged;
-    m_uiReleasedButtons = uiOldButtons & uiChanged;
+    UpdateButtonEdges(uiOldButtons);
 
     const float fScale = 1.0f / 16384.0f;
     m_fAxis[0] = pc_state.lX * fScale;
@@ -192,14 +268,26 @@ void RedJoystick::Update(float fDeltaTime)
     m_fAxis[6] = pc_state.rglSlider[0] * fScale;
     m_fAxis[7] = pc_state.rglSlider[1] * fScale;
 
+    UpdateCursorFromStick(fDeltaTime, pc_state.lX * fScale, pc_state.lY * fScale);
+}
+
+void RedJoystick::UpdateButtonEdges(unsigned __int64 uiOldButtons)
+{
+    unsigned __int64 uiChanged = uiOldButtons ^ m_uiDownButtons;
+    m_uiPressedButtons = m_uiDownButtons & uiChanged;
+    m_uiReleasedButtons = uiOldButtons & uiChanged;
+}
+
+// A stick pushed past 0.4 takes the menu cursor (DirectInput pads: left
+// stick; XInput pads: right stick).
+void RedJoystick::UpdateCursorFromStick(float fDeltaTime, float fX, float fY)
+{
     RedMouse* pMouse = RedInputManager::GetMouse(0);
     if (!pMouse)
     {
         return;
     }
 
-    float fX = pc_state.lX * fScale;
-    float fY = pc_state.lY * fScale;
     if (mPreviousAxisX > 10.0f)
     {
         mPreviousAxisX = fX;
@@ -263,6 +351,10 @@ void RedJoystick::Update(float fDeltaTime)
 // FUNCTION: SWBF2 0x006c5370
 void RedJoystick::Cleanup()
 {
+    if (IsXInput())
+    {
+        SendRumble(true);
+    }
     if (pc_device)
     {
         pc_device->Unacquire();
@@ -275,10 +367,128 @@ void RedJoystick::Cleanup()
 // FUNCTION: SWBF2 0x006c5510
 void RedJoystick::Remove()
 {
+    if (IsXInput())
+    {
+        SendRumble(true);
+    }
     if (pc_device)
     {
         pc_device->Unacquire();
         pc_device->SetCooperativeLevel(hGlobalWnd, DISCL_NONEXCLUSIVE | DISCL_FOREGROUND);
     }
     m_connected = false;
+}
+
+void RedJoystick::UpdateXInput(float fDeltaTime)
+{
+    // Rumble::StopAllRumble calls Update(0) mid-frame just to flush the motors;
+    // re-polling there would eat this frame's pressed/released edges.
+    if (fDeltaTime == 0.0f)
+    {
+        if (m_connected)
+        {
+            SendRumble(false);
+        }
+        return;
+    }
+
+    if (!m_connected)
+    {
+        // XInputGetState on an empty slot is slow, so only re-probe now and then.
+        m_xinputProbeTimer -= fDeltaTime;
+        if (m_xinputProbeTimer > 0.0f)
+        {
+            return;
+        }
+        m_xinputProbeTimer = 2.0f;
+    }
+
+    XINPUT_STATE state;
+    memset(&state, 0, sizeof(state));
+    if (!sXInputGetState || sXInputGetState((DWORD)m_xinputSlot, &state) != ERROR_SUCCESS)
+    {
+        if (m_connected)
+        {
+            LOG(LogCore, Inform, "XInput: pad %d disconnected", m_xinputSlot);
+            m_connected = false;
+            m_xinputProbeTimer = 2.0f;
+            m_uiReleasedButtons = m_uiDownButtons;
+            m_uiDownButtons = 0;
+            m_uiPressedButtons = 0;
+            memset(m_fAxis, 0, sizeof(m_fAxis));
+            m_usSentHeavy = 0;
+            m_usSentLight = 0;
+        }
+        return;
+    }
+
+    if (!m_connected)
+    {
+        LOG(LogCore, Inform, "XInput: pad %d connected", m_xinputSlot);
+        m_connected = true;
+    }
+    m_xinputPacket = state.dwPacketNumber;
+
+    XInputPad::Pad pad;
+    pad.wButtons = state.Gamepad.wButtons;
+    pad.bLeftTrigger = state.Gamepad.bLeftTrigger;
+    pad.bRightTrigger = state.Gamepad.bRightTrigger;
+    pad.sThumbLX = state.Gamepad.sThumbLX;
+    pad.sThumbLY = state.Gamepad.sThumbLY;
+    pad.sThumbRX = state.Gamepad.sThumbRX;
+    pad.sThumbRY = state.Gamepad.sThumbRY;
+
+    // XInput keeps reporting while the game is in the background; DirectInput
+    // pads are DISCL_FOREGROUND, so match that and go quiet.
+    const bool bFocused = GetForegroundWindow() == hGlobalWnd;
+    if (!bFocused)
+    {
+        memset(&pad, 0, sizeof(pad));
+    }
+
+    XInputPad::Mapped mapped;
+    XInputPad::Map(pad, mDeadZoneScale, mapped);
+
+    unsigned __int64 uiOldButtons = m_uiDownButtons;
+    m_uiDownButtons = mapped.uiButtons;
+    UpdateButtonEdges(uiOldButtons);
+    memcpy(m_fAxis, mapped.afAxis, sizeof(m_fAxis));
+
+    SendRumble(!bFocused);
+
+    // Console-style menus: the D-pad and left stick move the highlight (fed to
+    // the GUI as xAxis/yAxis in pcFLJoystick), which hides the cursor. The
+    // right stick drives the cursor for the few mouse-only PC widgets.
+    if (XInputPad::IsMenuInput(m_uiPressedButtons, m_fAxis))
+    {
+        XInputPad::PadTookMenus();
+    }
+    else if (fabsf(m_fAxis[3]) > 0.4f || fabsf(m_fAxis[4]) > 0.4f)
+    {
+        XInputPad::MouseTookMenus();
+    }
+    UpdateCursorFromStick(fDeltaTime, m_fAxis[3], m_fAxis[4]);
+}
+
+void RedJoystick::SendRumble(bool bForceOff)
+{
+    const bool bOff = bForceOff || XInputPad::gNoRumble;
+    const unsigned short usHeavy = bOff ? 0 : (unsigned short)m_iHeavyEngine;
+    const unsigned short usLight = bOff ? 0 : (unsigned short)m_iLightEngine;
+    m_iHeavyEngine = 0;
+    m_iLightEngine = 0;
+
+    if (!sXInputSetState || (usHeavy == m_usSentHeavy && usLight == m_usSentLight))
+    {
+        return;
+    }
+
+    XINPUT_VIBRATION vibration;
+    vibration.wLeftMotorSpeed = usHeavy;
+    vibration.wRightMotorSpeed = usLight;
+    if (sXInputSetState((DWORD)m_xinputSlot, &vibration) == ERROR_SUCCESS)
+    {
+        m_usSentHeavy = usHeavy;
+        m_usSentLight = usLight;
+    }
 }

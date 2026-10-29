@@ -22,6 +22,7 @@
 #include "PebbleFL/Common/PblUnicode.h"
 
 #include "RedEngineFL/input/pc/pcRedInputManager.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Interface/RedFont.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
 
@@ -430,6 +431,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
             break;
         case DisplayCfg::kHashSwCursor:
             DisplayCfg::SetFlag(DisplayCfg::gCliDisplay, DisplayCfg::kSoftwareCursor);
+            break;
+        case XInputPad::kHashNoXInput:
+            XInputPad::gDisabled = true;
+            break;
+        case XInputPad::kHashNoRumble:
+            XInputPad::gNoRumble = true;
             break;
         case DisplayCfg::kHashDisplayIni:
             if (i + 1 < iArgc)

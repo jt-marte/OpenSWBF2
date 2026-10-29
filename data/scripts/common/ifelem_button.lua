@@ -77,7 +77,10 @@ function FollowButtonLink(container,CurrentStr,DirStr)
 	local EntrySelectedTable = nil
 	local NewBtnStr = nil
 	
-	if(not CurrentStr) then
+	-- OpenSWBF2: CurrentStr can name a button outside this container (a PC
+	-- tab the mouse last hovered); start from the first button then instead
+	-- of indexing nil.
+	if((not CurrentStr) or (not container[CurrentStr])) then
 		NewBtnStr = container.TagOfFirst
 		EntrySelectedTable  = container[container.TagOfFirst]
 	else

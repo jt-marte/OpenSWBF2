@@ -1768,7 +1768,11 @@ bool tProfile::IsDirty(bool bArg)
 void RedJoystick::SetDeadZoneScale(float f)
 {
     mDeadZoneScale = f;
-    pc_device->EnumObjects(EnumObjectsCallback, this, 0);
+    // XInput ports have no DirectInput device; they read mDeadZoneScale directly.
+    if (pc_device)
+    {
+        pc_device->EnumObjects(EnumObjectsCallback, this, 0);
+    }
 }
 
 // GLOBAL: SWBF2 0x00788140

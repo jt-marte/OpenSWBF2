@@ -14,6 +14,7 @@
 #include "Entity.h"
 #include "EntityMine.h"
 #include "FishEffect.h"
+#include "FLInputManager.h"
 #include "GameObject.h"
 #include "LightFlash.h"
 #include "NetGame.h"
@@ -753,6 +754,8 @@ void ExplosionClass::CreateExplosion(const PblVector3& aPos, const DamageOwner& 
                             CameraManager::sInstance->ApplyShake(scaledShake, scaledLength);
 
                             pTrackable->GetControllable();
+                            // Retail PC dropped the console rumble that went here.
+                            FLInputManager::s_instance.RumbleFromShake(scaledShake, scaledLength);
                         }
                     }
                 }

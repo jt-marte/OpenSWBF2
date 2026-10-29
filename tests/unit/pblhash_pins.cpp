@@ -2,6 +2,7 @@
 
 #include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 
 TEST_CASE("hash pin ai" * doctest::test_suite("unit"))
 {
@@ -395,4 +396,16 @@ TEST_CASE("hash pin displayini" * doctest::test_suite("unit"))
 TEST_CASE("hash pin is case insensitive" * doctest::test_suite("unit"))
 {
     CHECK((unsigned int)PblHash("NoRender") == (unsigned int)PblHash("norender"));
+}
+
+TEST_CASE("hash pin noxinput" * doctest::test_suite("unit"))
+{
+    CHECK((unsigned int)PblHash("noxinput") == 0x0BFED71A);
+    CHECK((unsigned int)PblHash("noxinput") == XInputPad::kHashNoXInput);
+}
+
+TEST_CASE("hash pin norumble" * doctest::test_suite("unit"))
+{
+    CHECK((unsigned int)PblHash("norumble") == 0x820BCB67);
+    CHECK((unsigned int)PblHash("norumble") == XInputPad::kHashNoRumble);
 }

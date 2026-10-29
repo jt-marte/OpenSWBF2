@@ -1,4 +1,5 @@
 #include "pcRedInputManager.h"
+#include "pcXInputPad.h"
 
 #include "PebbleFL/Common/PblJournal.h"
 #include "Battlefront2/Source/NetSetup.h"
@@ -162,6 +163,70 @@ RedMouse* GetMouse(unsigned char ucPort)
     return &m_mouses[ucPort];
 }
 
+struct VidPid
+{
+    unsigned short usVid;
+    unsigned short usPid;
+};
+
+static VidPid sXInputDevices[16];
+static int sNumXInputDevices = -1;
+
+// Raw Input names XInput pads' HID interfaces with "IG_"; remember their
+// VID/PID so the DirectInput enumeration below can skip them.
+static void CollectXInputDevices()
+{
+    sNumXInputDevices = 0;
+
+    UINT uiCount = 0;
+    if (GetRawInputDeviceList(0, &uiCount, sizeof(RAWINPUTDEVICELIST)) != 0 || uiCount == 0)
+    {
+        return;
+    }
+    RAWINPUTDEVICELIST* pList = new RAWINPUTDEVICELIST[uiCount];
+    UINT uiGot = GetRawInputDeviceList(pList, &uiCount, sizeof(RAWINPUTDEVICELIST));
+    for (UINT i = 0; i < uiGot && uiGot != (UINT)-1; ++i)
+    {
+        if (pList[i].dwType != RIM_TYPEHID)
+        {
+            continue;
+        }
+        char acName[256];
+        UINT uiSize = sizeof(acName);
+        if (GetRawInputDeviceInfoA(pList[i].hDevice, RIDI_DEVICENAME, acName, &uiSize) == (UINT)-1)
+        {
+            continue;
+        }
+        acName[sizeof(acName) - 1] = '\0';
+        VidPid id;
+        if (XInputPad::IsXInputDevicePath(acName) && XInputPad::ParseVidPid(acName, id.usVid, id.usPid) &&
+            sNumXInputDevices < (int)(sizeof(sXInputDevices) / sizeof(sXInputDevices[0])))
+        {
+            sXInputDevices[sNumXInputDevices++] = id;
+        }
+    }
+    delete[] pList;
+}
+
+static bool IsXInputDirectInputDevice(DIDEVICEINSTANCEA const* pInstance)
+{
+    if (!pInstance || sNumXInputDevices <= 0)
+    {
+        return false;
+    }
+    // DirectInput packs the product GUID's first field as MAKELONG(vid, pid).
+    const unsigned short usVid = LOWORD(pInstance->guidProduct.Data1);
+    const unsigned short usPid = HIWORD(pInstance->guidProduct.Data1);
+    for (int i = 0; i < sNumXInputDevices; ++i)
+    {
+        if (sXInputDevices[i].usVid == usVid && sXInputDevices[i].usPid == usPid)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 // FUNCTION: SWBF2 0x006dbf50
 void Init()
 {
@@ -205,6 +270,16 @@ void Init()
     m_numJoysticks = 0;
     if (!isReadingJournal)
     {
+        // XInput pads take the first ports, connected or not, so the first pad
+        // is always port 0 and can be plugged in later.
+        if (!g_bNoRender && !XInputPad::gDisabled && pcLoadXInput())
+        {
+            CollectXInputDevices();
+            for (int iSlot = 0; iSlot < XInputPad::kMaxPads; ++iSlot)
+            {
+                m_joysticks[m_numJoysticks++].InitXInput(iSlot);
+            }
+        }
 
         m_pDI->EnumDevices(DI8DEVCLASS_GAMECTRL, pcEnumJoystickDevice, 0,
                            DIEDFL_ATTACHEDONLY);
@@ -232,6 +307,16 @@ IDirectInput8A* pcGetDIInterface()
 // FUNCTION: SWBF2 0x006dc250
 BOOL CALLBACK pcEnumJoystickDevice(DIDEVICEINSTANCEA const* pInstance, void*  )
 {
+    if (m_numJoysticks >= 10)
+    {
+        return DIENUM_STOP;
+    }
+
+    // The same pad already has an XInput port; don't give it a second one.
+    if (IsXInputDirectInputDevice(pInstance))
+    {
+        return DIENUM_CONTINUE;
+    }
 
     if (m_joysticks[m_numJoysticks].pcCreateDevice(pInstance))
     {

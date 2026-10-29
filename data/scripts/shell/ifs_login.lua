@@ -547,6 +547,75 @@ function ifs_login_fnClickDropDownButtons( this )
 end
 
 ----------------------------------------------------------------------------------------
+-- OpenSWBF2: this screen is all mouse widgets (dropdowns, a hidden listbox and
+-- loose PC buttons), so a pad gets console-style controls instead: Up/Down
+-- pick the profile, A loads it, X creates, Y deletes; in create mode
+-- Left/Right pick the difficulty and A creates with the (pre-filled) name.
+-- Only while a pad drives the menus; mouse and keyboard are unchanged.
+
+function ifs_login_fnPadActive(this)
+	return ScriptCB_IsPadNavigating and ScriptCB_IsPadNavigating() and
+		(not this.bProfileDropBoxesOpen) and (not this.bDiffDropBoxesOpen)
+end
+
+function ifs_login_fnPadStepProfile(this, iDir)
+	local iCount = table.getn(ifs_login_listbox_contents)
+	if( iCount < 1 ) then
+		return
+	end
+	local i = (ifs_login_listbox_layout.SelectedIdx or 1) + iDir
+	if( i < 1 ) then
+		i = iCount
+	elseif( i > iCount ) then
+		i = 1
+	end
+	ifs_login_listbox_layout.SelectedIdx = i
+	ifs_login_listbox_layout.CursorIdx = i
+	ifs_login_listbox_layout.LastSelectedIdx = i
+	ListManager_fnFillContents(this.listbox, ifs_login_listbox_contents, ifs_login_listbox_layout)
+	RoundIFButtonLabel_fnSetUString(this.profile_button, ifs_login_listbox_contents[i].showstr)
+	ScriptCB_SndPlaySound("shell_select_change")
+end
+
+function ifs_login_fnPadStepDiff(this, iDir)
+	local iCount = table.getn(ifs_login_diff_listbox_contents)
+	local i = (ifs_login_diff_listbox_layout.SelectedIdx or 1) + iDir
+	if( i < 1 ) then
+		i = iCount
+	elseif( i > iCount ) then
+		i = 1
+	end
+	ifs_login_diff_listbox_layout.SelectedIdx = i
+	ListManager_fnFillContents(this.diff_listbox, ifs_login_diff_listbox_contents, ifs_login_diff_listbox_layout)
+	RoundIFButtonLabel_fnSetString(this.diff_button, ifs_login_diff_listbox_contents[i].showstr)
+	ScriptCB_SndPlaySound("shell_select_change")
+end
+
+function ifs_login_fnUpdatePadHint(this)
+	if( not this.PadHint ) then
+		return
+	end
+	local iMode = nil
+	if( ifs_login_fnPadActive(this) and (not ScriptCB_IsPopupOpen()) ) then
+		if( this.bCreateMode ) then
+			iMode = 2
+		else
+			iMode = 1
+		end
+	end
+	if( this.iPadHintMode == iMode and this.bPadHintInited ) then
+		return
+	end
+	this.bPadHintInited = 1
+	this.iPadHintMode = iMode
+	if( iMode == 1 ) then
+		IFText_fnSetUString(this.PadHint, ScriptCB_tounicode("[Up/Down] Profile     [A] Load     [X] New     [Y] Delete"))
+	elseif( iMode == 2 ) then
+		IFText_fnSetUString(this.PadHint, ScriptCB_tounicode("[Left/Right] Difficulty     [A] Create     [B] Cancel"))
+	end
+	IFObj_fnSetVis(this.PadHint, iMode)
+end
+
 ----------------------------------------------------------------------------------------
 --local movie_background = "shell_main"
 local image_background = "profile_manager"
@@ -756,6 +825,8 @@ ifs_login = NewIFShellScreen {
 		-- Call base class functionality
 		gIFShellScreenTemplate_fnUpdate(this, fDt)
 
+		ifs_login_fnUpdatePadHint(this)
+
 		if(this.iForceLoginTime) then
 			this.iForceLoginTime = this.iForceLoginTime - 1
 			if(this.iForceLoginTime <= 0) then
@@ -798,7 +869,9 @@ ifs_login = NewIFShellScreen {
 			return
 		end
 
-		if(gButtonMode == 1) then
+		if(ifs_login_fnPadActive(this) and (not this.bCreateMode)) then
+			ifs_login_fnPadStepProfile(this, -1)
+		elseif(gButtonMode == 1) then
 			gDefault_Input_GeneralUp(this) -- do default behavior
 		else
 				ListManager_fnNavUp(this.listbox,ifs_login_listbox_contents,ifs_login_listbox_layout)
@@ -820,7 +893,9 @@ ifs_login = NewIFShellScreen {
 			return
 		end
 
-		if(gButtonMode == 1) then
+		if(ifs_login_fnPadActive(this) and (not this.bCreateMode)) then
+			ifs_login_fnPadStepProfile(this, 1)
+		elseif(gButtonMode == 1) then
 			gDefault_Input_GeneralDown(this) -- do default behavior
 		else
 			ListManager_fnNavDown(this.listbox,ifs_login_listbox_contents,ifs_login_listbox_layout)
@@ -836,15 +911,42 @@ ifs_login = NewIFShellScreen {
 		end
 	end,
 
-	-- Not possible on this screen
+	-- Not possible on this screen (OpenSWBF2: a pad picks the difficulty here
+	-- in create mode)
 	Input_GeneralLeft = function(this)
+		if(ifs_login_fnPadActive(this) and this.bCreateMode) then
+			ifs_login_fnPadStepDiff(this, -1)
+		end
   end,
 	Input_GeneralRight = function(this)
+		if(ifs_login_fnPadActive(this) and this.bCreateMode) then
+			ifs_login_fnPadStepDiff(this, 1)
+		end
   end,
+
+	-- OpenSWBF2: pad X creates a profile, Y deletes the selected one
+	Input_Misc = function(this)
+		if(ifs_login_fnPadActive(this) and (not this.bCreateMode)) then
+			this.CurButton = "_create"
+			this:Input_Accept()
+			this.CurButton = nil -- so the next A means Accept
+		end
+	end,
+	Input_Misc2 = function(this)
+		if(ifs_login_fnPadActive(this) and (not this.bCreateMode) and IFObj_fnGetVis(this.Helptext_Delete)) then
+			this.CurButton = "_delete"
+			this:Input_Accept()
+			this.CurButton = nil
+		end
+	end,
 
 	bStartedCreate = nil,
   Input_Accept = function(this)
 --									 print("ifs_login, Input_Accept. CurButton = ", this.CurButton)
+		-- OpenSWBF2: with a pad nothing is hovered, so A means Accept
+		if(ifs_login_fnPadActive(this) and ((not this.CurButton) or this.CurButton == "")) then
+			this.CurButton = "_accept"
+		end
    		-- If the tab manager handled this event, then we're done
    		if(ifelem_tabmanager_HandleInputAccept(this, gPCMainTabsLayout)
    			or ifelem_tabmanager_HandleInputAccept(this, gPCMinimizeQuitTabsLayout, 1)) then
@@ -1069,7 +1171,22 @@ function ifs_login_fnBuildScreen(this)
 		tag = "_back",
 	}
 	RoundIFButtonLabel_fnSetString( this.Helptext_Back, "common.cancel" )
-	
+
+	-- OpenSWBF2: pad controls hint, above the bottom buttons
+	this.PadHint = NewIFText {
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 1.0,
+		x = -300,
+		y = -52,
+		textw = 600,
+		texth = 18,
+		halign = "hcenter",
+		valign = "vcenter",
+		font = "gamefont_small",
+		ColorR = gHelptextTextColor[1], ColorG = gHelptextTextColor[2], ColorB = gHelptextTextColor[3],
+		nocreatebackground = 1,
+	}
+
 --	this.Helptext_Rename = NewPCIFButton
 --	{
 --		ScreenRelativeX = 0.0,

@@ -145,6 +145,226 @@ function ifelem_tabmanager_Create(this, aLayout, aLayout1, aLayout2, aLayout3)
 	if( aLayout3 ) then
 		this._Tabs3 = ifelem_tabmanager_DoCreateTabs( aLayout3 )
 	end
+
+	-- OpenSWBF2: remember the layouts so a pad can cycle the tabs
+	this._TabsLayout = aLayout
+	this._Tabs1Layout = aLayout1
+	this._Tabs2Layout = aLayout2
+	this._Tabs3Layout = aLayout3
+	if( not this._bPadTabs ) then
+		this._bPadTabs = 1
+		ifelem_tabmanager_WrapPadInput(this, "Input_LTrigger", -1, "top")
+		ifelem_tabmanager_WrapPadInput(this, "Input_RTrigger", 1, "top")
+		ifelem_tabmanager_WrapPadInput(this, "Input_LTrigger2", -1, "lower")
+		ifelem_tabmanager_WrapPadInput(this, "Input_RTrigger2", 1, "lower")
+
+		this._PadHint = ifelem_tabmanager_MakePadHint()
+		local fnUpdate = this.Update
+		this.Update = function(this, a, b)
+			if( fnUpdate ) then
+				fnUpdate(this, a, b)
+			end
+			ifelem_tabmanager_UpdatePadHint(this)
+		end
+	end
+end
+
+-- OpenSWBF2: PC tabs are mouse-only buttons, so pads switch them like
+-- console: LB/RB (Input_LTrigger/RTrigger) cycle the top row, LT/RT
+-- (Input_LTrigger2/RTrigger2) the row nearest the content. The screen's own
+-- handler (list paging, volume steps) still runs when no tab was switched.
+function ifelem_tabmanager_WrapPadInput(this, FuncName, iDir, Which)
+	local fnOriginal = this[FuncName]
+	this[FuncName] = function(this, a, b)
+		if( ifelem_tabmanager_PadCycle(this, iDir, Which) ) then
+			return
+		end
+		if( fnOriginal ) then
+			return fnOriginal(this, a, b)
+		end
+	end
+end
+
+-- Tab row a pad cycles: "top" is the first row; "lower" is the first visible
+-- row under it. Deeper rows (Instant Action's Playlist/Global/Host... page
+-- buttons, the controls sub-tabs) are in-page buttons, not screen tabs.
+function ifelem_tabmanager_PadRow(this, Which)
+	if( Which == "top" ) then
+		if( this._Tabs and this._TabsLayout and IFObj_fnGetVis(this._Tabs) ) then
+			return this._Tabs, this._TabsLayout
+		end
+		return nil
+	end
+	if( this._Tabs1 and this._Tabs1Layout and IFObj_fnGetVis(this._Tabs1) ) then
+		return this._Tabs1, this._Tabs1Layout
+	end
+	if( this._Tabs2 and this._Tabs2Layout and IFObj_fnGetVis(this._Tabs2) ) then
+		return this._Tabs2, this._Tabs2Layout
+	end
+	if( this._Tabs3 and this._Tabs3Layout and IFObj_fnGetVis(this._Tabs3) ) then
+		return this._Tabs3, this._Tabs3Layout
+	end
+	return nil
+end
+
+-- A row is worth a pad hint when it has a usable tab besides the selected one.
+function ifelem_tabmanager_PadRowUsable(Tabs, Layout)
+	if( not Tabs ) then
+		return nil
+	end
+	local i
+	for i=1, table.getn(Layout) do
+		local Entry = Layout[i]
+		local Tab = Tabs[Entry.tag]
+		if( Tab and (not Tab.bSelected) and (not Entry.bNoPadCycle) and (Tab.bDimmed ~= 1) and IFObj_fnGetVis(Tab) ) then
+			return 1
+		end
+	end
+	return nil
+end
+
+-- Console-style button hints at the bottom centre, shown only while a pad
+-- drives the menus: "[LB][RB] Menu" for the top row, "[LT][RT] Section" for
+-- the row under it. Badges reuse the PC tab button art.
+-- The pill end caps draw ~10 units past bg_width, so badges sit 40 apart and
+-- the label starts after the second one.
+function ifelem_tabmanager_MakePadBadge(xPos)
+	return NewIFText {
+		x = xPos, y = -5,
+		textw = 26, texth = 10,
+		halign = "hcenter", valign = "vcenter",
+		font = "gamefont_tiny",
+		bgleft = "headerbuttonleft", bgmid = "headerbuttonmid", bgright = "headerbuttonright",
+		bg_width = 26,
+		ColorR = 255, ColorG = 255, ColorB = 255,
+	}
+end
+
+function ifelem_tabmanager_MakePadHintGroup(xPos)
+	return NewIFContainer {
+		x = xPos,
+		left = ifelem_tabmanager_MakePadBadge(0),
+		right = ifelem_tabmanager_MakePadBadge(40),
+		label = NewIFText {
+			x = 80, y = -5,
+			textw = 100, texth = 10,
+			halign = "left", valign = "vcenter",
+			font = "gamefont_tiny",
+			ColorR = gHelptextTextColor[1], ColorG = gHelptextTextColor[2], ColorB = gHelptextTextColor[3],
+			nocreatebackground = 1,
+		},
+	}
+end
+
+-- In the black strip above the tabs, level with the PC title text
+-- ("Profile Name: ..." / version, AddPCTitleText): the one spot that is free
+-- on every tabbed screen.
+function ifelem_tabmanager_MakePadHint()
+	return NewIFContainer {
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0.0,
+		y = -24, -- -27 clipped the pills' top edge at 1440p borderless
+		ZPos = 40,
+		top = ifelem_tabmanager_MakePadHintGroup(-180),
+		lower = ifelem_tabmanager_MakePadHintGroup(20),
+	}
+end
+
+-- Raw (unlocalized) strings must be pushed once the C++ objects exist.
+function ifelem_tabmanager_SetPadHintStrings(Group, Left, Right, Label)
+	IFText_fnSetUString(Group.left, ScriptCB_tounicode(Left))
+	IFText_fnSetUString(Group.right, ScriptCB_tounicode(Right))
+	IFText_fnSetUString(Group.label, ScriptCB_tounicode(Label))
+end
+
+function ifelem_tabmanager_UpdatePadHint(this)
+	local Hint = this._PadHint
+	if( not Hint ) then
+		return
+	end
+
+	local bTop = nil
+	local bLower = nil
+	if( ScriptCB_IsPadNavigating and ScriptCB_IsPadNavigating() and (not ScriptCB_IsPopupOpen()) ) then
+		bTop = ifelem_tabmanager_PadRowUsable(ifelem_tabmanager_PadRow(this, "top"))
+		bLower = ifelem_tabmanager_PadRowUsable(ifelem_tabmanager_PadRow(this, "lower"))
+	end
+
+	if( Hint.bInited and (Hint.bTop == bTop) and (Hint.bLower == bLower) ) then
+		return
+	end
+	if( not Hint.bInited ) then
+		Hint.bInited = 1
+		ifelem_tabmanager_SetPadHintStrings(Hint.top, "LB", "RB", "Menu")
+		ifelem_tabmanager_SetPadHintStrings(Hint.lower, "LT", "RT", "Section")
+	end
+	Hint.bTop = bTop
+	Hint.bLower = bLower
+	IFObj_fnSetVis(Hint, bTop or bLower)
+	IFObj_fnSetVis(Hint.top, bTop)
+	IFObj_fnSetVis(Hint.lower, bLower)
+end
+
+-- Selects the next usable tab in iDir (wrapping) exactly as a click would:
+-- the screen's Input_Accept runs ifelem_tabmanager_HandleInputAccept, so
+-- callbacks and save-before-switch behave the same. Only while a pad drives
+-- the menus and no editbox has focus, since keyboard 3/4 send the same
+-- events. Returns nil when nothing was switched.
+function ifelem_tabmanager_PadCycle(this, iDir, Which)
+	if( (not ScriptCB_IsPadNavigating) or (not ScriptCB_IsPadNavigating()) or gCurEditbox ) then
+		return nil
+	end
+
+	local Tabs, Layout = ifelem_tabmanager_PadRow(this, Which)
+	if( not Tabs ) then
+		return nil
+	end
+
+	local NUM_TABS = table.getn(Layout)
+	local iCur = 0
+	local i
+	for i=1, NUM_TABS do
+		local Tab = Tabs[Layout[i].tag]
+		if( Tab and Tab.bSelected ) then
+			iCur = i
+		end
+	end
+
+	local iNext = iCur
+	local step
+	for step=1, NUM_TABS do
+		iNext = iNext + iDir
+		if( iNext < 1 ) then
+			iNext = NUM_TABS
+		elseif( iNext > NUM_TABS ) then
+			iNext = 1
+		end
+		if( iNext == iCur ) then
+			return nil
+		end
+		local Entry = Layout[iNext]
+		local Tab = Tabs[Entry.tag]
+		if( Tab and (not Entry.bNoPadCycle) and (Tab.bDimmed ~= 1) and IFObj_fnGetVis(Tab) ) then
+			-- forget what the (hidden) mouse last hovered, or Input_Accept
+			-- would act on that instead of the tab
+			gMouseListBox = nil
+			gMouseListBoxSlider = nil
+			local PrevButton = this.CurButton
+			this.CurButton = Entry.tag
+			this:Input_Accept()
+			-- don't leave the tab as this screen's button: coming back, the
+			-- D-pad would start from a tag that isn't in this.buttons
+			if( this.CurButton == Entry.tag ) then
+				if( PrevButton and this.buttons and this.buttons[PrevButton] ) then
+					this.CurButton = PrevButton
+				else
+					this.CurButton = nil
+				end
+			end
+			return 1
+		end
+	end
+	return nil
 end
 
 
