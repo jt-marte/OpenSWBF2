@@ -1,3 +1,4 @@
+#include <math.h>
 #include <stdio.h>
 #include <string.h>
 
@@ -1240,6 +1241,52 @@ void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, u
     const float fScale = UiScale(uiScreenH);
     uiW = (unsigned int)((float)uiScreenW / fScale + 0.5f);
     uiH = (unsigned int)((float)uiScreenH / fScale + 0.5f);
+}
+
+float HudAnchor(float fPos, float fExtent)
+{
+    if (fPos < fExtent / 3.0f)
+    {
+        return 0.0f;
+    }
+    if (fPos > fExtent * 2.0f / 3.0f)
+    {
+        return fExtent;
+    }
+    return fExtent * 0.5f;
+}
+
+float HudScalePos(float fPos, float fAnchor, float fScale)
+{
+    return fAnchor + (fPos - fAnchor) * fScale;
+}
+
+bool HudIsCentral(float fX, float fY, float fW, float fH)
+{
+    return HudAnchor(fX, fW) == fW * 0.5f && HudAnchor(fY, fH) == fH * 0.5f;
+}
+
+float FovTanScale(unsigned int uiDegrees)
+{
+    if (uiDegrees == kFovDefault)
+    {
+        return 1.0f;
+    }
+    if (uiDegrees < kFovMin)
+    {
+        uiDegrees = kFovMin;
+    }
+    else if (uiDegrees > kFovMax)
+    {
+        uiDegrees = kFovMax;
+    }
+    const double kHalfDegToRad = 3.14159265358979323846 / 360.0;
+    return (float)(tan((double)uiDegrees * kHalfDegToRad) / tan((double)kFovDefault * kHalfDegToRad));
+}
+
+float ScaleFov(float fFov, float fTanScale)
+{
+    return (float)atan((double)fTanScale * tan((double)fFov * 0.5)) * 2.0f;
 }
 
 }

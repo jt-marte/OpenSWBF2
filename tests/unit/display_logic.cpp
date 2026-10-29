@@ -1,6 +1,7 @@
 #include "third_party/doctest/doctest.h"
 
 #include <d3d9.h>
+#include <math.h>
 #include <string.h>
 
 #include <string>
@@ -1686,4 +1687,56 @@ TEST_CASE("display logic ui size" * doctest::test_suite("unit"))
     UiSize(5120, 2160, w, h);
     CHECK(w == 2560);
     CHECK(h == 1080);
+}
+
+TEST_CASE("display logic hud anchor" * doctest::test_suite("unit"))
+{
+    // the third of the view a point is in picks the edge, centre line or far edge
+    CHECK(HudAnchor(10.0f, 1920.0f) == 0.0f);
+    CHECK(HudAnchor(600.0f, 1920.0f) == 0.0f);
+    CHECK(HudAnchor(960.0f, 1920.0f) == 960.0f);
+    CHECK(HudAnchor(1300.0f, 1920.0f) == 1920.0f);
+    CHECK(HudAnchor(1910.0f, 1920.0f) == 1920.0f);
+    CHECK(HudAnchor(1000.0f, 1080.0f) == 1080.0f);
+    // a point keeps its distance ratio to the anchor: edges stay on edges
+    CHECK(HudScalePos(1920.0f, 1920.0f, 0.5f) == 1920.0f);
+    CHECK(HudScalePos(0.0f, 0.0f, 1.5f) == 0.0f);
+    CHECK(HudScalePos(100.0f, 0.0f, 0.5f) == doctest::Approx(50.0f));
+    CHECK(HudScalePos(1820.0f, 1920.0f, 0.5f) == doctest::Approx(1870.0f));
+    CHECK(HudScalePos(1000.0f, 960.0f, 2.0f) == doctest::Approx(1040.0f));
+    // scale 1 changes nothing
+    CHECK(HudScalePos(1234.0f, 1920.0f, 1.0f) == 1234.0f);
+    // only the middle on both axes (the reticle) is central
+    CHECK(HudIsCentral(960.0f, 540.0f, 1920.0f, 1080.0f));
+    CHECK_FALSE(HudIsCentral(960.0f, 1000.0f, 1920.0f, 1080.0f));
+    CHECK_FALSE(HudIsCentral(100.0f, 540.0f, 1920.0f, 1080.0f));
+    CHECK(kHudScaleDefault == 100);
+    CHECK(kHudScaleMin < kHudScaleDefault);
+    CHECK(kHudScaleMax > kHudScaleDefault);
+}
+
+TEST_CASE("display logic field of view scale" * doctest::test_suite("unit"))
+{
+    // the default leaves every camera exactly as it was
+    CHECK(FovTanScale(kFovDefault) == 1.0f);
+    CHECK(ScaleFov(0.83775806f, 1.0f) == doctest::Approx(0.83775806f));
+    // wider settings widen, monotonic, clamped to the range
+    float fLast = 0.0f;
+    for (unsigned int i = kFovMin; i <= kFovMax; ++i)
+    {
+        CHECK(FovTanScale(i) > fLast);
+        fLast = FovTanScale(i);
+    }
+    CHECK(FovTanScale(kFovMin) < 1.0f);
+    CHECK(FovTanScale(kFovMax) > 1.0f);
+    CHECK(FovTanScale(10) == FovTanScale(kFovMin));
+    CHECK(FovTanScale(170) == FovTanScale(kFovMax));
+    // 90 degrees: tan(45) / tan(30.5)
+    CHECK(FovTanScale(90) == doctest::Approx(1.0f / 0.58904f).epsilon(0.001));
+    // the 16:9 default camera (~61.4 degrees) at 90 comes out near 90
+    const float fDefault169 = 2.0f * atanf(0.75f * tanf(0.41887903f) * 16.0f / 9.0f);
+    const float fWide = ScaleFov(fDefault169, FovTanScale(90));
+    CHECK(fWide * 57.29578f == doctest::Approx(90.0f).epsilon(0.01));
+    // scaling the tangent keeps narrower units narrower
+    CHECK(ScaleFov(0.6f, FovTanScale(90)) < ScaleFov(0.8f, FovTanScale(90)));
 }

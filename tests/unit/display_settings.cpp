@@ -566,6 +566,60 @@ TEST_CASE("display settings pad look speed" * doctest::test_suite("unit"))
     SetDefaults(gDisplay);
 }
 
+TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("unit"))
+{
+    // 100% and 61 degrees (today's HUD and camera) unless the ini says otherwise
+    DisplaySettings kSettings;
+    SetDefaults(kSettings);
+    CHECK(kSettings.uiHudScale == 100);
+    CHECK(kSettings.uiFov == 61);
+    CHECK((kSettings.uiSet & (kHudScale | kFov)) == 0);
+    CHECK(SetFromText(kSettings, kHudScale, "75", "test"));
+    CHECK(kSettings.uiHudScale == 75);
+    CHECK(SetFromText(kSettings, kFov, "90", "test"));
+    CHECK(kSettings.uiFov == 90);
+    {
+        LogCapture capture;
+        CHECK_FALSE(SetFromText(kSettings, kHudScale, "49", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kHudScale, "151", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kFov, "54", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kFov, "101", "test"));
+        CHECK_FALSE(SetFromText(kSettings, kFov, "wide", "test"));
+    }
+    CHECK(kSettings.uiHudScale == 75);
+    CHECK(kSettings.uiFov == 90);
+
+    // each saved on its own, next to the other keys
+    Cleanup();
+    WriteText("[Display]\r\nBorderless=1\r\nPadLookSpeed=6\r\n");
+    SetDefaults(gCliDisplay);
+    SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
+    Init();
+    CHECK(gDisplay.uiHudScale == 100);
+    CHECK(gDisplay.uiFov == 61);
+    CHECK(SaveHudScale(80));
+    CHECK(SaveFov(85));
+    CHECK(gDisplay.uiHudScale == 80);
+    CHECK(gDisplay.uiFov == 85);
+    DisplaySettings kLoaded;
+    SetDefaults(kLoaded);
+    LoadIni(kLoaded, IniPath());
+    char acText[512];
+    ReadText(acText, sizeof(acText));
+    Cleanup();
+    CHECK(kLoaded.uiHudScale == 80);
+    CHECK(kLoaded.uiFov == 85);
+    CHECK(kLoaded.uiPadLookSpeed == 6);
+    CHECK(kLoaded.bBorderless);
+    const bool bHud = strstr(acText, "HudScale=80") != 0;
+    const bool bFov = strstr(acText, "Fov=85") != 0;
+    CHECK(bHud);
+    CHECK(bFov);
+    SetDefaults(gCliDisplay);
+    SetDefaults(gIniDisplay);
+    SetDefaults(gDisplay);
+}
+
 TEST_CASE("display settings pending adapter" * doctest::test_suite("unit"))
 {
     Cleanup();

@@ -17,6 +17,9 @@
 #include "PlayerProfile.h"
 #include "ToolTips.h"
 #include "PebbleFL/Common/PblHashTable.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 static unsigned __int64 ShaRotate(unsigned __int64 value, unsigned int bits)
 {
@@ -584,16 +587,36 @@ int ScriptCB_SetHorizontalSplitScreen(lua_State* L)
 }
 
 // FUNCTION: SWBF2 0x00597fe0
+// OpenSWBF2: retail went through HUD::Element::SetRuntimeScaleAll, which only
+// scales elements marked Scalable, and the stock HUD has none. This is now the
+// HUD scale option (0.5..1.5), applied at once and saved to display.ini as
+// HudScale; HUDManager.cpp draws the HUD with it.
 int ScriptCB_SetHUDScale(lua_State* L)
 {
-    HUD::Element::SetRuntimeScaleAll((float)luaL_checknumber(LuaHelper::mState, 1));
+    int iPercent = (int)((float)luaL_checknumber(LuaHelper::mState, 1) * 100.0f + 0.5f);
+    if (iPercent < (int)DisplayLogic::kHudScaleMin)
+    {
+        iPercent = (int)DisplayLogic::kHudScaleMin;
+    }
+    else if (iPercent > (int)DisplayLogic::kHudScaleMax)
+    {
+        iPercent = (int)DisplayLogic::kHudScaleMax;
+    }
+    if ((unsigned int)iPercent != DisplayCfg::gDisplay.uiHudScale)
+    {
+        DisplayCfg::gDisplay.uiHudScale = (unsigned int)iPercent;
+        if (!DisplayCfg::SaveHudScale((unsigned int)iPercent))
+        {
+            LOG(LogCore, Warning, "OPENSWBF2 HUD scale %d%% not saved", iPercent);
+        }
+    }
     return 0;
 }
 
 // FUNCTION: SWBF2 0x00598010
 int ScriptCB_GetHUDScale(lua_State* L)
 {
-    lua_pushnumber(LuaHelper::mState, HUD::Element::GetRuntimeScaleAll());
+    lua_pushnumber(LuaHelper::mState, (float)DisplayCfg::gDisplay.uiHudScale / 100.0f);
     return 1;
 }
 

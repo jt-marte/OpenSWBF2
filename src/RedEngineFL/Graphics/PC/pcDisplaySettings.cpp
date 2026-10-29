@@ -6,6 +6,7 @@
 
 #include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/input/pc/pcXInputPad.h"
+#include "pcDisplayLogic.h"
 
 namespace DisplayCfg
 {
@@ -42,6 +43,10 @@ static const char* KeyName(unsigned int uiKey)
         return "PadLayout";
     case kPadLookSpeed:
         return "PadLookSpeed";
+    case kHudScale:
+        return "HudScale";
+    case kFov:
+        return "Fov";
     }
     return "?";
 }
@@ -73,6 +78,8 @@ void SetDefaults(DisplaySettings& kSettings)
     kSettings.uiFps = 80;
     kSettings.bNoWaitQuery = true;
     kSettings.uiPadLookSpeed = XInputPad::kLookSpeedDefaultLevel;
+    kSettings.uiHudScale = DisplayLogic::kHudScaleDefault;
+    kSettings.uiFov = DisplayLogic::kFovDefault;
 }
 
 bool ParseUInt(const char* pcText, unsigned int uiLo, unsigned int uiHi, unsigned int& uiOut)
@@ -228,6 +235,20 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
             kSettings.uiPadLookSpeed = uiValue;
         }
         break;
+    case kHudScale:
+        bValid = ParseUInt(pcValue, DisplayLogic::kHudScaleMin, DisplayLogic::kHudScaleMax, uiValue);
+        if (bValid)
+        {
+            kSettings.uiHudScale = uiValue;
+        }
+        break;
+    case kFov:
+        bValid = ParseUInt(pcValue, DisplayLogic::kFovMin, DisplayLogic::kFovMax, uiValue);
+        if (bValid)
+        {
+            kSettings.uiFov = uiValue;
+        }
+        break;
     case kDisplayIni:
         bValid = pcValue != 0 && pcValue[0] != '\0' && strlen(pcValue) < sizeof(kSettings.acDisplayIni);
         if (bValid)
@@ -321,6 +342,14 @@ void Merge(DisplaySettings& dst, const DisplaySettings& cli)
     {
         dst.uiPadLookSpeed = cli.uiPadLookSpeed;
     }
+    if (cli.uiSet & kHudScale)
+    {
+        dst.uiHudScale = cli.uiHudScale;
+    }
+    if (cli.uiSet & kFov)
+    {
+        dst.uiFov = cli.uiFov;
+    }
     if (cli.uiSet & kDisplayIni)
     {
         strcpy(dst.acDisplayIni, cli.acDisplayIni);
@@ -338,7 +367,7 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath)
     }
     static const unsigned int auiKeys[] = {kAdapter, kAdapterName, kBorderless, kRefresh,
                                            kVsync,   kFps,         kNoWaitQuery, kNoDpi,
-                                           kSoftwareCursor, kPadLayout, kPadLookSpeed};
+                                           kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov};
     for (unsigned int i = 0; i < sizeof(auiKeys) / sizeof(auiKeys[0]); ++i)
     {
         char acValue[256];
@@ -419,6 +448,16 @@ bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFra
     {
         sprintf(acValue, "%u", kSettings.uiPadLookSpeed);
         bOk = PutKey("PadLookSpeed", acValue, acTemp) && bOk;
+    }
+    if (ShouldWrite(kSettings, kHudScale))
+    {
+        sprintf(acValue, "%u", kSettings.uiHudScale);
+        bOk = PutKey("HudScale", acValue, acTemp) && bOk;
+    }
+    if (ShouldWrite(kSettings, kFov))
+    {
+        sprintf(acValue, "%u", kSettings.uiFov);
+        bOk = PutKey("Fov", acValue, acTemp) && bOk;
     }
     WritePrivateProfileStringA(0, 0, 0, acTemp);
     if (bOk)
@@ -517,9 +556,9 @@ bool SavePadLayout(unsigned int uiLayout)
     return true;
 }
 
-// OpenSWBF2: the controller sensitivity level from Options -> Game, written on
-// its own like the layout.
-bool SavePadLookSpeed(unsigned int uiLevel)
+// OpenSWBF2: one numeric option from the options screens, written on its own
+// like the layout.
+static bool SaveUIntKey(unsigned int uiKey, unsigned int uiValue, unsigned int DisplaySettings::*puiField)
 {
     char acPath[MAX_PATH];
     if (!DisplayIniPath(acPath, sizeof(acPath)))
@@ -529,16 +568,33 @@ bool SavePadLookSpeed(unsigned int uiLevel)
     DisplaySettings kSave;
     SetDefaults(kSave);
     char acValue[16];
-    sprintf(acValue, "%u", uiLevel);
-    if (!SetFromText(kSave, kPadLookSpeed, acValue, "lua") || !SaveIni(kSave, acPath, true))
+    sprintf(acValue, "%u", uiValue);
+    if (!SetFromText(kSave, uiKey, acValue, "lua") || !SaveIni(kSave, acPath, true))
     {
         return false;
     }
-    gIniDisplay.uiPadLookSpeed = kSave.uiPadLookSpeed;
-    gIniDisplay.uiSet |= kPadLookSpeed;
-    gDisplay.uiPadLookSpeed = kSave.uiPadLookSpeed;
-    gDisplay.uiSet |= kPadLookSpeed;
+    gIniDisplay.*puiField = kSave.*puiField;
+    gIniDisplay.uiSet |= uiKey;
+    gDisplay.*puiField = kSave.*puiField;
+    gDisplay.uiSet |= uiKey;
     return true;
+}
+
+// The controller sensitivity level from Options -> Game.
+bool SavePadLookSpeed(unsigned int uiLevel)
+{
+    return SaveUIntKey(kPadLookSpeed, uiLevel, &DisplaySettings::uiPadLookSpeed);
+}
+
+// The HUD scale and field of view from Options -> Video.
+bool SaveHudScale(unsigned int uiPercent)
+{
+    return SaveUIntKey(kHudScale, uiPercent, &DisplaySettings::uiHudScale);
+}
+
+bool SaveFov(unsigned int uiDegrees)
+{
+    return SaveUIntKey(kFov, uiDegrees, &DisplaySettings::uiFov);
 }
 
 static PendingAdapter sPendingAdapter;
