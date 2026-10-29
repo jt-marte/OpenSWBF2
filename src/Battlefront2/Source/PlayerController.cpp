@@ -319,7 +319,16 @@ void PlayerController::Update(float dt)
 
     if (!(bMouseMode && bIsSoldier))
     {
-        if (fPitch * fPitch + fTurn * fTurn >= 0.9f)
+        if (XInputPad::gPadLookActive && !bMouseMode)
+        {
+            // OpenSWBF2: on an XInput pad the turn boost follows how far the
+            // stick is pushed, not how long it has been held, so full tilt
+            // turns at full speed straight away (XInputPad::TurnBoost).
+            const float fBoost = XInputPad::TurnBoost(XInputPad::gPadLookMag);
+            mOwner->SetTurnBuildup(fBoost);
+            mOwner->SetPitchBuildup(fBoost);
+        }
+        else if (fPitch * fPitch + fTurn * fTurn >= 0.9f)
         {
             float fTurnBuildup = mOwner->GetTurnBuildup() + dt;
             mOwner->SetTurnBuildup(fTurnBuildup < 1.0f ? fTurnBuildup : 1.0f);

@@ -31,9 +31,9 @@ enum PadButton
 const unsigned char kTriggerThreshold = 30;
 
 // Look (turn/pitch) gain on the right stick, ahead of the game's sensitivity
-// curve: the stock tuning felt half as fast as it should on a pad. Values
-// still clamp to +-1; with LookCurve full turn speed comes at ~60% deflection.
-const float kLookGain = 2.4f;
+// curve: the stock tuning felt far too slow on a pad. Values still clamp to
+// +-1; with LookCurve full turn input comes at ~45% deflection.
+const float kLookGain = 3.6f;
 
 // Stick-driven menu cursor speed, in UI pixels per second (retail: 512).
 const float kCursorSpeed = 1024.0f;
@@ -107,10 +107,24 @@ extern int gDeadZoneLevel;
 void StickDeadZones(int iLevel, float& fMove, float& fLook);
 
 // Look response: the right stick's magnitude to the power kLookExponent, so
-// small corrections are finer; kLookGain brings full turn speed back at about
-// 60% deflection.
+// small corrections are finer; kLookGain brings full turn input back at about
+// 45% deflection.
 const float kLookExponent = 1.6f;
 float LookCurve(float fMagnitude);
+
+// Turn speed boost (the game's mTurnBuildup, 0 = base speed, 1 = top speed)
+// from how far the right stick is pushed, instead of the retail ramp that
+// needed about a second at full tilt. fLookMag is the stick magnitude after
+// deadzone and LookCurve: no boost up to kBoostStart (~60% tilt), full boost
+// from kBoostFull (~94% tilt), linear in between.
+const float kBoostStart = 0.45f;
+const float kBoostFull = 0.9f;
+float TurnBoost(float fLookMag);
+
+// Published by the input layer each frame for PlayerController: an XInput pad
+// is connected, and its right stick magnitude (after deadzone and curve).
+extern bool gPadLookActive;
+extern float gPadLookMag;
 
 float TriggerValue(unsigned char bTrigger);
 
