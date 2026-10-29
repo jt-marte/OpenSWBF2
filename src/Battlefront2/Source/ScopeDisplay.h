@@ -53,9 +53,16 @@ public:
     static void InitAll();
     static void HideAll();
 
+    // OpenSWBF2: sizes the overlay for the current screen (a round lens in a
+    // centred 4:3 box, bars at the sides on wider screens).
+    void UpdateLayout();
+
     int mJoystickIndex;
     RedScreenGroupElement mGroupWeaponScope;
     RedBitmapElement mBitmapWeaponScope[4];
+    RedBitmapElement mBitmapScopeBar[2];
+    unsigned int mLayoutW;
+    unsigned int mLayoutH;
     unsigned int mScopeTexture;
     float mPrevZoom;
     bool mWeaponScope;
