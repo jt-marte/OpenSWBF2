@@ -4091,4 +4091,7 @@ end
 ifs_missionselect_pcMulti_fnBuildScreen(ifs_missionselect_pcMulti)
 ifs_missionselect_pcMulti_fnBuildScreen = nil -- dump out of memory to save
 
+-- OpenSWBF2: its console list code never highlights anything on PC, so a pad
+-- uses snap navigation (ifelem_tabmanager.lua)
+ifs_missionselect_pcMulti.bPadSnap = 1
 AddIFScreen(ifs_missionselect_pcMulti,"ifs_missionselect_pcMulti")

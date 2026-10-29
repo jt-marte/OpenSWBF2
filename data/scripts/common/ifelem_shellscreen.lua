@@ -279,6 +279,7 @@ end
 -- If the cursor left the highlight on something outside this screen's buttons
 -- (a PC tab), clear it and start on the first button instead.
 function gIFShellScreenTemplate_fnPadTookMenus()
+	gPadSnapPrimed = nil -- mouse-only screens: land on a widget again
 	local this = gCurScreenTable
 	if(gCurPopup or (not this) or (not this.buttons)) then
 		return
@@ -337,6 +338,7 @@ function gIFShellScreenTemplate_fnEnter(this, bFwd)
 
 	gCurScreenStr = this.ScreenName -- e.g. "ifs_main"
 	gCurScreenTable = this
+	gPadSnapPrimed = nil
 
 	gIFShellScreenTemplate_fnPadDefaultButton(this)
 	-- Set currently hilighted button to whatever this screen has

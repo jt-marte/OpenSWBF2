@@ -18,7 +18,8 @@ function HandleMouse_Button(this,MouseX,MouseY)
 	if((this.alpha == 0) or (this.hidden == 1) or (this.bDimmed)) then
 		return nil
 	end
-	if(this.bNoStickCursor and ScriptCB_IsStickCursor and ScriptCB_IsStickCursor()) then
+	if(this._PadTabRowKey and ScriptCB_IsStickCursor and ScriptCB_IsStickCursor() and
+		 ifelem_tabmanager_IsPadCycledTab(this)) then
 		return nil
 	end
 

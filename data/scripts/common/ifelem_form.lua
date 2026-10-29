@@ -569,6 +569,8 @@ function Form_CreateVertical(container, layout)
 				tag = "list_" .. layout.elements[i].tag,
 				bg_texture = "border_dropdown",
 			}
+			-- OpenSWBF2: while open, a pad's snap navigation stays in it
+			dropdown.listbox.bPadModal = 1
 			-- button windows have a default z of 135
 			-- put the button a little bit behind it.
 			dropdown.button = NewPCDropDownButton {

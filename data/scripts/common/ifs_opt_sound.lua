@@ -1401,5 +1401,7 @@ ifs_opt_sound_fnBuildSliders = nil -- dump out of memory when done.
 ifs_opt_sound_fnBuildScreen = nil
 ifs_opt_sound_vbutton_layout = nil
 
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_opt_sound.bPadSnap = 1
 AddIFScreen(ifs_opt_sound,"ifs_opt_sound")
 ifs_opt_sound = DoPostDelete(ifs_opt_sound)

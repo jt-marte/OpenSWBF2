@@ -1199,5 +1199,7 @@ end
 
 ifs_mp_leaderboard_fnInitScreen(ifs_mp_leaderboard)
 ifs_mp_leaderboard_fnInitScreen = nil
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_mp_leaderboard.bPadSnap = 1
 AddIFScreen(ifs_mp_leaderboard,"ifs_mp_leaderboard")
 

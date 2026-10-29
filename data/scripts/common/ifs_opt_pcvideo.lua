@@ -1181,6 +1181,8 @@ end
 ifs_opt_pcvideo_fnBuildScreen(ifs_opt_pcvideo,ifs_opt_pcvideo_general_options_layout)
 ifs_opt_pcvideo_fnBuildScreen = nil
 
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_opt_pcvideo.bPadSnap = 1
 AddIFScreen(ifs_opt_pcvideo,"ifs_opt_pcvideo")
 
 

@@ -1230,4 +1230,7 @@ ifs_opt_pccontrols_fnBuildScreen(ifs_opt_pccontrols)
 ifs_opt_pccontrols_fnBuildScreen = nil
 vbutton_layout = nil
 
+-- OpenSWBF2: its console button list misses most of the page, so a pad uses
+-- snap navigation (ifelem_tabmanager.lua)
+ifs_opt_pccontrols.bPadSnap = 1
 AddIFScreen(ifs_opt_pccontrols, "ifs_opt_pccontrols")

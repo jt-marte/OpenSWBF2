@@ -654,6 +654,8 @@ end
 
 ifs_opt_mp_fnBuildScreen(ifs_opt_mp)
 ifs_opt_mp_fnBuildScreen = nil
+-- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
+ifs_opt_mp.bPadSnap = 1
 AddIFScreen(ifs_opt_mp, "ifs_opt_mp")
 
 ifs_opt_mp = DoPostDelete(ifs_opt_mp)

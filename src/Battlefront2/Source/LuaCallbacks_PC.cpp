@@ -19,6 +19,8 @@
 #include "RedEngineFL/Util/RedLog.h"
 
 #include "RedEngineFL/input/RedKeyboard.h"
+#include "RedEngineFL/Interface/RedHotSpot.h"
+#include "RedEngineFL/Interface/RedInterfaceElement.h"
 #include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 
@@ -436,8 +438,27 @@ static int ScriptCB_IsStickCursor(lua_State*)
     return 1;
 }
 
+// Screen position of an element's hotspot centre (nothing if it has none), so
+// a pad can hop between the mouse-only PC widgets.
+static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
+{
+    if (lua_type(LuaHelper::mState, 1) != LUA_TLIGHTUSERDATA)
+    {
+        return 0;
+    }
+    const RedInterfaceElement* pElement = (const RedInterfaceElement*)lua_topointer(LuaHelper::mState, 1);
+    float fX, fY;
+    if (!pElement || !pElement->m_pHotSpot || !pElement->m_pHotSpot->GetScreenCenter(fX, fY))
+    {
+        return 0;
+    }
+    lua_pushnumber(LuaHelper::mState, fX);
+    lua_pushnumber(LuaHelper::mState, fY);
+    return 2;
+}
+
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[46] =
+static const CallbackEntryT sPCCallbacks[47] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -485,6 +506,7 @@ static const CallbackEntryT sPCCallbacks[46] =
     { "ScriptCB_SaveDisplayOptions", ScriptCB_SaveDisplayOptions },
     { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
     { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
+    { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
 };
 
 // FUNCTION: SWBF2 0x00599170
@@ -976,7 +998,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 46; ++i)
+    for (int i = 0; i < 47; ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }

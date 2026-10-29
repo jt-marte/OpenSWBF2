@@ -28,6 +28,7 @@ public:
 
     bool GetLocalCoordinates(float fX, float fY, float& rfLocalX, float& rfLocalY) const;
     bool GetLocalScaledCoordinates(float fX, float fY, float& rfLocalX, float& rfLocalY) const;
+    bool GetScreenCenter(float& rfX, float& rfY) const;
 protected:
 
     friend class RedInterfaceElement;
