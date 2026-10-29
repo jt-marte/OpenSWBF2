@@ -1,0 +1,3 @@
+class AmmoCounter	size(1):
+	+---
+	+---

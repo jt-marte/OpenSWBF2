@@ -1,0 +1,34 @@
+class Ordnance	size(152):
+	+---
+	| +--- (base class Thread)
+ 0	| | {vfptr}
+ 4	| | Node mThreadListNode
+	| +---
+	| +--- (base class PblHandled)
+24	| | {vfptr}
+28	| | mHandleId
+	| +---
+	| +--- (base class FoleyFXCollider)
+32	| | mColliderClass
+36	| | mFoleyFX
+40	| | mFoleyFXGroup
+	| +---
+	| +--- (base class FoleyFXCollidee)
+44	| | mCollideeClass
+	| +---
+48	| mClass
+52	| mRatio
+56	| mCheckStaticCollision
+57	| mDecrementLifeTime
+  	| <alignment member> (size=2)
+60	| mLifeTime
+64	| mLifeElapsed
+68	| RedColor mRenderColor
+72	| PblVector3 mPosition
+84	| ?$PblHandle@VGameObject@@ mOwner
+92	| DamageOwner mDamageOwner
+120	| Node mCollisionManagerNode
+136	| ?$PblHandle@VFLEffectObject@@ mTrailEmitterObj
+144	| GameSoundControllable mSoundOrdnance
+148	| mInterpIndex
+	+---

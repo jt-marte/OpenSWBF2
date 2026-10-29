@@ -1,0 +1,3 @@
+class EntityWalker	size(1):
+	+---
+	+---

@@ -1,0 +1,5 @@
+class Aimer	size(148):
+	+---
+ 0	| mUnmodeledPrefix
+136	| PblVector3 mFirePos
+	+---

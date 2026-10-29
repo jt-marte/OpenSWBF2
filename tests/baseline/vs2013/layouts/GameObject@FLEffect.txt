@@ -1,0 +1,8 @@
+class GameObject	size(544):
+	+---
+ 0	| {vfptr}
+ 4	| mInheritedObjectStorage
+516	| mHandleId
+520	| mHandleAndObjectStorage
+540	| mNetUniqueId
+	+---

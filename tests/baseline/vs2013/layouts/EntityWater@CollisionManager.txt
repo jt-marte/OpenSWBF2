@@ -1,0 +1,32 @@
+class EntityWater	size(136):
+	+---
+	| +--- (base class CollisionObject)
+ 0	| | {vfptr}
+	| | +--- (base class TreeGridObject)
+ 4	| | | mStackPtr
+ 8	| | | mStackIdx
+12	| | | PblSphere mCollisionSphere
+28	| | | m2dRadius
+32	| | | mData
+36	| | | mTreeGridCellIndex
+	| | +---
+	| | +--- (base class FoleyFXCollider)
+40	| | | mColliderClass
+44	| | | mFoleyFX
+48	| | | mFoleyFXGroup
+	| | +---
+	| | +--- (base class FoleyFXCollidee)
+52	| | | mCollideeClass
+	| | +---
+56	| | mCollisionObjectNode
+72	| | mCollisionModel
+76	| | mParent
+80	| | mMass
+84	| | PblBox mAABB
+108.	| | mProcedurallyAnimated (bitstart=0,nbits=1)
+108.	| | mLastCollidedWithNonTerrain (bitstart=1,nbits=1)
+  	| | <alignment member> (size=3)
+112	| | PblVector3 mLastPosition
+124	| | mLastCollidedObjs
+	| +---
+	+---

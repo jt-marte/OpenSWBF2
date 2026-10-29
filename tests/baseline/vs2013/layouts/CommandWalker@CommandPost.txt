@@ -1,0 +1,3 @@
+class CommandWalker	size(1):
+	+---
+	+---

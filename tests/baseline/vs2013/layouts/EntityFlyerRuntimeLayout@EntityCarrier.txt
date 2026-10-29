@@ -1,0 +1,26 @@
+class EntityFlyerRuntimeLayout	size(7568):
+	+---
+ 0	| mPrimaryVptr
+ 4	| _toCollisionVptr
+12	| mCollisionVptr
+16	| _toVptr94
+148	| mVptr94
+152	| _toVptr140
+320	| mVptr140
+324	| _toVptr200
+512	| mVptr200
+516	| _toControllable
+576	| mControllableVptr
+580	| _toVptr258
+600	| mVptr258
+604	| _toPathFollower
+972	| mPathFollowerVptr
+976	| _toVelocity
+1344	| PblVector3 mVelocity
+1356	| _toState
+1380	| State mState
+1384	| _toClass
+1580	| mClass
+1584	| _toPose
+6240	| mPoseAndTail
+	+---

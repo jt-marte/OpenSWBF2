@@ -1,0 +1,263 @@
+class CommandHover	size(7456):
+	+---
+	| +--- (base class EntityHover)
+	| | +--- (base class GameObject)
+	| | | +--- (base class EntityGeometry)
+	| | | | +--- (base class EntityEx)
+	| | | | | +--- (base class Entity)
+ 0	| | | | | | {vfptr}
+	| | | | | +---
+ 4	| | | | | mId
+ 8	| | | | | mEntityClass
+	| | | | +---
+	| | | | +--- (base class CollisionObject)
+12	| | | | | {vfptr}
+	| | | | | +--- (base class TreeGridObject)
+16	| | | | | | mStackPtr
+20	| | | | | | mStackIdx
+24	| | | | | | PblSphere mCollisionSphere
+40	| | | | | | m2dRadius
+44	| | | | | | mData
+48	| | | | | | mTreeGridCellIndex
+	| | | | | +---
+	| | | | | +--- (base class FoleyFXCollider)
+52	| | | | | | mColliderClass
+56	| | | | | | mFoleyFX
+60	| | | | | | mFoleyFXGroup
+	| | | | | +---
+	| | | | | +--- (base class FoleyFXCollidee)
+64	| | | | | | mCollideeClass
+	| | | | | +---
+68	| | | | | mCollisionObjectNode
+84	| | | | | mCollisionModel
+88	| | | | | mParent
+92	| | | | | mMass
+96	| | | | | PblBox mAABB
+120.	| | | | | mProcedurallyAnimated (bitstart=0,nbits=1)
+120.	| | | | | mLastCollidedWithNonTerrain (bitstart=1,nbits=1)
+  	| | | | | <alignment member> (size=3)
+124	| | | | | PblVector3 mLastPosition
+136	| | | | | mLastCollidedObjs
+	| | | | +---
+	| | | | +--- (base class RedSceneObject)
+	| | | | | +--- (base class DynDisplayable)
+	| | | | | | +--- (base class ?$BaseDisplayable@VIDisplayable@pvs@@)
+	| | | | | | | +--- (base class IDisplayable)
+148	| | | | | | | | {vfptr}
+	| | | | | | | +---
+152	| | | | | | | sector_
+156	| | | | | | | flags_
+160	| | | | | | | aframe_
+164	| | | | | | | pframe_
+	| | | | | | +---
+168	| | | | | | nextCheckDist_
+172	| | | | | | ?$Vector3@M lastCheckPos_
+	| | | | | +---
+184	| | | | | mNextSceneObject
+188	| | | | | mPrevSceneObject
+192	| | | | | mSceneAABox
+196	| | | | | PblVector4 _Sphere
+212	| | | | | _pLodData
+216	| | | | | _uiRenderFlags
+220	| | | | | _bActive
+  	| | | | | <alignment member> (size=3)
+224	| | | | | _fPriorityMod
+228	| | | | | _iFrameNum
+232	| | | | | _uiOcclusionIndex
+	| | | | +---
+  	| | | | <alignment member> (size=4)
+240	| | | | PblMatrix mMatrix
+304	| | | | mModel
+308	| | | | mSmallestCollisionDim
+312	| | | | m_pAttachedEffects
+  	| | | | <alignment member> (size=4)
+	| | | +---
+	| | | +--- (base class Damageable)
+320	| | | | {vfptr}
+324	| | | | mCurHealth
+328	| | | | mMaxHealth
+332	| | | | mAddHealth
+336	| | | | mCurShield
+340	| | | | mMaxShield
+344	| | | | mAddShield
+348	| | | | mDisableTime
+352	| | | | mAIDamageThreshold
+356	| | | | DamageOwner mDamageOwner
+384	| | | | mDamageEffect
+464	| | | | mDamageEffectSound
+504	| | | | mDamageRegionTime
+508.	| | | | mHealthType (bitstart=0,nbits=3)
+508.	| | | | mIsAlive (bitstart=3,nbits=1)
+508.	| | | | mVanishing (bitstart=4,nbits=1)
+508.	| | | | mIsShielded (bitstart=5,nbits=1)
+	| | | +---
+	| | | +--- (base class PblHandled)
+512	| | | | {vfptr}
+516	| | | | mHandleId
+	| | | +---
+520	| | | ?$PblList@VControllable@@ mControllableList
+540	| | | mNetUniqueId
+544	| | | mPrevFoliageObj
+548	| | | GameSoundControllable mGameObjectAttachedSound
+552	| | | ?$PblHandle@VFLEffectObject@@ mDisabledEffectHandle
+560	| | | mCreatedTime
+564.	| | | mTeam (bitstart=0,nbits=4)
+564.	| | | mPerceivedTeam (bitstart=4,nbits=4)
+564.	| | | mOwningTeam (bitstart=8,nbits=4)
+564.	| | | mHealthTypeForLockOn (bitstart=12,nbits=4)
+568.	| | | mIsTargetable (bitstart=0,nbits=1)
+  	| | | <alignment member> (size=7)
+	| | +---
+	| | +--- (base class Controllable)
+	| | | +--- (base class Thread)
+576	| | | | {vfptr}
+580	| | | | Node mThreadListNode
+	| | | +---
+	| | | +--- (base class Trackable)
+600	| | | | {vfptr}
+604	| | | | whichCornerToCastForCamera
+  	| | | | <alignment member> (size=2)
+608	| | | | minCameraCastDist
+628	| | | | mTracker
+	| | | +---
+632	| | | mControlFire
+640	| | | Trigger mControlReload
+644	| | | Trigger mControlJump
+648	| | | Trigger mControlCrouch
+652	| | | Trigger mControlSprint
+656	| | | Trigger mControlUse
+660	| | | Trigger mControlZoom
+664	| | | Trigger mControlView
+668	| | | Trigger mControlLockTarget
+672	| | | Trigger mControlSquadCommand
+676	| | | Trigger mControlSpecialMove
+680	| | | Trigger mControlThrustFwd
+684	| | | Trigger mControlThrustBack
+688	| | | Trigger mControlStrafeLeft
+692	| | | Trigger mControlStrafeRight
+696	| | | mTriggerControlSwitch
+704	| | | mControlMove
+708	| | | mControlStrafe
+712	| | | mControlTurn
+716	| | | mControlPitch
+720	| | | mControlSwitch
+728	| | | mWpnChannel
+732	| | | AIThread mAIThread
+760	| | | Node mNode
+776	| | | mCtrl
+780	| | | mCharacter
+784	| | | mPilot
+788	| | | mPlayerId
+792	| | | mInitialPlayerId
+796	| | | PblVector3 mEyePoint
+808	| | | PblVector3 mEyeDir
+820	| | | mTurnBuildup
+824	| | | mPitchBuildup
+828	| | | mIndirectControlFlag
+829	| | | mUsingTurnAdjusted
+830	| | | mPlayAnim
+  	| | | <alignment member> (size=1)
+832	| | | mAnimNameId
+836	| | | mWpnDistFactor
+840	| | | ?$PblHandle@VGameObject@@ mCollisionObj
+848	| | | mEnemyLockedOnMeState
+852	| | | mEnemyLockedOnMeTimestamp
+856	| | | mEnemyLockedOnMeMissile
+860	| | | mEnemyLockedOnMeDistance
+864	| | | mTurnAdjusted
+868	| | | mPitchAdjusted
+872	| | | mTurnAuto
+876	| | | mPitchAuto
+880	| | | mLockBreakTimer
+884	| | | mInCaptureRegionTimestamp
+888	| | | ?$PblHandle@VGameObject@@ mTargetLockedObj
+896	| | | mAllowedLockTypes
+900	| | | PilotType mPilotType
+904	| | | TargetInfo mTargetInfo
+932	| | | mReticuleTarget
+948	| | | mAIReticuleTarget
+964	| | | mReticuleAffiliation
+	| | +---
+	| | +--- (base class VehicleMusic)
+972	| | | mTimeWithPilot
+976	| | | mMusic
+	| | +---
+	| | +--- (base class VehicleEngine)
+1040	| | | Node mNode
+1044	| | | SoundParameterized mEngine
+1084	| | | GameSoundControllable mAttached
+1088	| | | GameSound mAttachedProps
+1096	| | | GameSoundControllable mBoostController
+1100	| | | GameSound mBoostProps
+1108	| | | mPrevSpeed
+1112	| | | mTimer
+1116	| | | mParams
+1118	| | | mFlags
+  	| | | <alignment member> (size=1)
+	| | +---
+1120	| | PblVector3 mVelocity
+1132	| | PblVector3 mOmega
+1144	| | mGroundRatio
+1148	| | mLastSuspensionOffset
+1152	| | mNextSuspensionOffset
+1156	| | mCurrSuspensionOffset
+1160	| | mSuspensionVelocity
+1164	| | mClass
+1168	| | PblVector3 mGroundNormal
+1180	| | mPassengerSlots
+1196	| | mTurret
+1228	| | mNumTurrets
+1229	| | mCloseToGround
+  	| | <alignment member> (size=2)
+1232	| | mBankPitchAngle
+1236	| | mBankRollAngle
+1240	| | mFinPitchValue
+1244	| | mFinRollValue
+1248	| | mYawValue
+1252	| | mPitchValue
+1256	| | mAimer
+1272	| | mWeapon
+1288	| | mWeaponIndex
+1296	| | mStuckState
+1300	| | PblVector3 mStuckDir
+1312	| | mStuckTimer
+1316	| | mStuckCycle
+1320	| | mWheelTextureU
+1336	| | mWheelTextureV
+1352	| | mWakeEmitters
+1400	| | ?$PblHandle@VFLEffectObject@@ mWaterEmitter
+1408	| | PblVector3 mWaterEmitterPos
+  	| | <alignment member> (size=4)
+1424	| | ?$ZephyrSkeleton@$0CA@ mZephyrSkeleton
+3488	| | ?$ZephyrPoseDyn@$0CA@ mZephyrPoseDyn
+5968	| | RedPose mPose
+  	| | <alignment member> (size=8)
+7008	| | mProceduralPoseMatrix
+7200	| | mForceFrameNum1
+7204	| | mForceFrameNum2
+7208	| | mForceFrameBlend
+7212	| | mSpeedPrev
+7216	| | mGroundRatioPrev
+7220	| | mStrain
+7224	| | mAccel
+7228	| | mObstacle
+7232	| | PostCollision mPostCollision
+7260	| | mColliderBody
+7380	| | mGroundPitch
+7384	| | mGroundBank
+7388	| | mGroundPitchVel
+7392	| | mGroundBankVel
+7396	| | mEnergyBar
+7408	| | mEjectTimer
+7412	| | mTimeSinceLastHack
+7416	| | mJumpTimer
+7420	| | mReserveForPlayer
+7424	| | mBoost
+7425.	| | mIsDead (bitstart=0,nbits=1)
+7425.	| | mJumpMode (bitstart=1,nbits=1)
+  	| | <alignment member> (size=14)
+	| +---
+7440	| mClass
+7444	| mPost
+7448	| _tailPad
+	+---

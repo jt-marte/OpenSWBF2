@@ -1,0 +1,258 @@
+Id           Control  Reverted    Exit       Tests
+CRASH-02     GREEN    RED         1          file log writes percent text literally 
+NETF-01      GREEN    RED         1,1,1      recvgroup rejects fragment idx ge count | recvgroup rejects count zero | recvgroup rejects count over max 
+NETF-01B     GREEN    RED         1          recvgroup count mismatch frees partial and packet 
+NETF-01C     GREEN    RED         1          recvgroup evicts oldest partial at per-source cap 
+NETF-02      GREEN    RED         3221225477,3221225477 alloc recv keeps the big reserve | alloc recv keeps the small reserve crash 0xC0000005,crash 0xC0000005
+NETF-02B     GREEN    RED         1          alloc exhaustion is fatal and does not recycle 
+NETF-03      GREEN    RED         1          group read bytes negative length keeps cursor and marks bad 
+NETF-04      GREEN    RED         1          group bad discards later readers 
+NETF-05      GREEN    RED         1,1        lobby copy helper exact fit is terminated | lobby copy helper truncates host name to 64 
+NETR-01      GREEN    RED         3221226505 chat payload over cap is truncated and the group stays in sync crash 0xC0000409
+NETR-01B     GREEN    RED         1          chat fields out of range are rejected 
+NETR-02      GREEN    RED         1          upload names outside the allowlist are unsafe 
+NETR-02B     GREEN    RED         1          upload dirs outside the allowlist are unsafe 
+NETR-02C     GREEN    RED         1          upload chunk longer than the buffer is rejected and fully consumed 
+NETR-02D     GREEN    RED         1          upload chunk longer than the remaining size is rejected 
+NETR-03      GREEN    RED         1          uploads are off by default 
+NETR-03B     GREEN    RED         1          uploads allowed follows the switch 
+NETR-04      GREEN    RED         3221226505 rcon line is capped at 63 characters crash 0xC0000409
+NETR-04B     GREEN    RED         1          rcon line is capped to the bytes left in the packet 
+NETR-04C     GREEN    RED         1          rcon auth needs eight bytes for J and paren but seven for s 
+NETR-05      GREEN    RED         1          login limiter allows five attempts per ten seconds 
+NETR-06      GREEN    RED         1          player count is clamped to 1 through 64 
+NETR-07      GREEN    RED         1          turn rate outside the retail range is rejected 
+NETR-08      GREEN    RED         1          reject flood logs once per second with a suppressed count 
+NETR-09      GREEN    RED         1          client of index accepts only one and two 
+LOCAL-01     GREEN    RED         1          command post index 
+LOCAL-02     GREEN    RED         1          net object cap 
+LOCAL-02B    GREEN    RED         1          net object cap 
+LOCAL-03     GREEN    RED         1          team slot bounds 
+LOCAL-04     GREEN    RED         124        bone matrix pool crash 0x0000007C
+LOCAL-04B    GREEN    RED         1          bone matrix pool 
+LOCAL-05     GREEN    RED         1          render item pool 
+MEM-02       GREEN    RED         1          alloc failure handler logs and suppresses 
+MEM-02B      GREEN    RED         1          alloc failure handler tolerates bad heap id 
+MEM-02C      GREEN    RED         1          alloc failure handler ignores re-entry 
+MEM-03       GREEN    RED         1          lua failed shrink keeps the old block 
+MEM-03B      GREEN    RED         3221225477 lua oom is raised as LUA_ERRMEM crash 0xC0000005
+MEM-04       GREEN    RED         1          lua error restores the current heap 
+MEM-04B      GREEN    RED         1          lua panic handler exits with code 4 
+STRLCPY-NULL GREEN    RED         3221225477 strlcpy treats a null source as empty crash 0xC0000005
+DIAG-02      GREEN    RED         1          redlog ensure counts once per site 
+DIAG-03      GREEN    RED         0,0        strictness probe emits an undeclared error | strictness probe unmatched expectation 
+DIAG-05      GREEN    RED         1          alloc failure handler logs and suppresses 
+DBGOUT-01    GREEN    RED         1          debugger output mirrors the log 
+DBGOUT-03    GREEN    RED         1          debugger output mirrors the log 
+DBGOUT-02    GREEN    RED         1          debugger output mirrors the log 
+LAA-02A      GREEN    RED         1,1        ordered list keeps address order across 2GB | ptr order key is monotonic across 2GB 
+LAA-02B      GREEN    RED         1          collision tie-break is unsigned 
+LAA-02C      GREEN    RED         1          pointer order sites use the unsigned helpers 
+LAA-02D      GREEN    RED         1          pointer order sites use the unsigned helpers 
+LAA-02E      GREEN    RED         1          pointer order sites use the unsigned helpers 
+DSET-03      GREEN    RED         1          display settings bad value keeps default and logs once 
+DSET-01      GREEN    RED         1          display settings merge precedence 
+DSET-04A     GREEN    RED         1          display settings save gate refuses without a good frame 
+DSET-04C     GREEN    RED         1          display settings save menu writes only changed keys 
+DSET-04B     GREEN    RED         1          display settings save skips command line values 
+MODE-02      GREEN    RED         1          display logic mode list keeps one adapter 
+MODE-01      GREEN    RED         1          display logic mode list collapses duplicates and has no cap 
+MODE-03      GREEN    RED         1,1        display logic desktop default empty list | display logic desktop default zero desktop 
+MODE-05      GREEN    RED         1          display logic refresh fallback 
+MODE-04      GREEN    RED         1          display logic adapter fallback 
+MODE-03U     GREEN    RED         1          display logic usable uncached 
+PACE-01      GREEN    RED         1          frame limiter waits then spins above the margin 
+PACE-01B     GREEN    RED         1          frame limiter uncapped never returns zero ticks 
+PACE-03      GREEN    RED         1          message drain stops at the message bound 
+PACE-03T     GREEN    RED         1          message drain stops at the time bound 
+PACE-03Q     GREEN    RED         1          message drain reports WM_QUIT and stops 
+VSYNC-01     GREEN    RED         1          display logic vsync half needs fullscreen and caps 
+VSYNC-01B    GREEN    RED         1          display logic effective vsync precedence 
+RESET-01C    GREEN    RED         1          reset step reverts once then fatal 
+RESET-02     GREEN    RED         1          reset step startup timeout is fatal 
+RESET-02B    GREEN    RED         1          reset step lost device waits without limit 
+RESET-04A    GREEN    RED         1          runtime reset restyle source pins 
+RESET-04B    GREEN    RED         1          runtime reset restyle source pins 
+WIN-02A      GREEN    RED         1          window mode source pins 
+WIN-01A      GREEN    RED         1          display logic window style 
+WIN-01B      GREEN    RED         1          display logic window placement 
+WIN-01C      GREEN    RED         1          display logic window style 
+WIN-01D      GREEN    RED         1          window mode source pins 
+WIN-01E      GREEN    RED         1          window mode source pins 
+WIN-01F      GREEN    RED         1          window mode source pins 
+WIN-02B      GREEN    RED         1          display logic mode resolution 
+WIN-03A      GREEN    RED         1          display logic dpi cascade 
+WIN-03C      GREEN    RED         1          display logic dpi cascade 
+WIN-03D      GREEN    RED         1          window mode source pins 
+WIN-03E      GREEN    RED         1          window mode source pins 
+WIN-03F      GREEN    RED         1          display logic dpi preset 
+WIN-03G      GREEN    RED         1          window mode source pins 
+WIN-04B      GREEN    RED         1          display logic coordinate mapping 
+WIN-05A      GREEN    RED         1          display logic shell size policy 
+WIN-05B      GREEN    RED         1          display logic shell size policy 
+WIN-04A      GREEN    RED         1          window mode source pins 
+WIN-04C      GREEN    RED         1          window mode source pins 
+WIN-04D      GREEN    RED         1          window mode source pins 
+WIN-09A      GREEN    RED         1          window mode source pins 
+APPLY-02D    GREEN    RED         1          display logic apply phase 
+APPLY-02E    GREEN    RED         1          display logic apply same params 
+APPLY-02F    GREEN    RED         1          display logic stage arm merge 
+APPLY-02H    GREEN    RED         1          display logic stage arm merge 
+APPLY-02I    GREEN    RED         1          display menu source pins 
+APPLY-02J    GREEN    RED         1          display menu source pins 
+APPLY-01C    GREEN    RED         1          display logic apply buffer sizes 
+APPLY-03A    GREEN    RED         1          display logic adapter decision 
+APPLY-01B    GREEN    RED         1          display apply source pins 
+APPLY-03B    GREEN    RED         1          display apply source pins 
+APPLY-03C    GREEN    RED         1          display apply source pins 
+APPLY-01D    GREEN    RED         1          display apply source pins 
+APPLY-01E    GREEN    RED         1          display apply source pins 
+APPLY-04A    GREEN    RED         1          shadow quad reset source pins 
+APPLY-04B    GREEN    RED         1          display logic shadow quad shares sky 
+APPLY-04C    GREEN    RED         1          shadow quad reset source pins 
+APPLY-04D    GREEN    RED         1          shadow quad reset source pins 
+APPLY-05B    GREEN    RED         1          display logic apply buffer sizes 
+APPLY-05C    GREEN    RED         1          display logic live size fits caps 
+APPLY-05D    GREEN    RED         1          display apply target failure source pins 
+APPLY-05E    GREEN    RED         1          display apply target failure source pins 
+APPLY-05F    GREEN    RED         1          display apply target failure source pins 
+APPLY-05G    GREEN    RED         1          display apply target failure source pins 
+APPLY-05H    GREEN    RED         1          display apply target failure source pins 
+APPLY-06A    GREEN    RED         1          display logic revert restores profile 
+APPLY-06B    GREEN    RED         1          display logic revert restores profile 
+APPLY-06C    GREEN    RED         1          display apply snapshot source pins 
+APPLY-06D    GREEN    RED         1          display apply snapshot source pins 
+APPLY-06E    GREEN    RED         1          display apply snapshot source pins 
+APPLY-06F    GREEN    RED         1          display apply snapshot source pins 
+APPLY-07A    GREEN    RED         1          display apply cleanup source pins 
+APPLY-07B    GREEN    RED         1          display apply cleanup source pins 
+APPLY-07C    GREEN    RED         1          display apply cleanup source pins 
+APPLY-08A    GREEN    RED         1          display settings save adapter writes only the adapter keys 
+APPLY-08B    GREEN    RED         1          display settings save adapter keeps memory when the save fails 
+APPLY-08C    GREEN    RED         1          display settings save adapter skips an unchanged file 
+APPLY-08D    GREEN    RED         1          display settings save adapter skips an unchanged file 
+GAMMA-04     GREEN    RED         1          display logic gamma identity 
+GAMMA-05     GREEN    RED         1          display logic gamma pass runs 
+GAMMA-06     GREEN    RED         1          display logic gamma path 
+GAMMA-07     GREEN    RED         1,1,1      color ramp golden default | color ramp golden menu range | color ramp golden clamp ends 
+GAMMA-08     GREEN    RED         1          gamma pass source pins 
+GAMMA-09     GREEN    RED         1          gamma pass source pins 
+GAMMA-10     GREEN    RED         1          gamma pass source pins 
+GAMMA-15     GREEN    RED         1          gamma pass source pins 
+GAMMA-15B    GREEN    RED         1          gamma pass source pins 
+GAMMA-15C    GREEN    RED         1          gamma pass source pins 
+GAMMA-16     GREEN    RED         1          gamma pass shader bytecode 
+MENU-01      GREEN    RED         1          legacy video args arity 
+MENU-02      GREEN    RED         1          display logic confirm phase 
+MENU-05      GREEN    RED         1          display logic legacy flags 
+MENU-06      GREEN    RED         1          display menu source pins 
+MENU-07      GREEN    RED         1          display menu source pins 
+MENU-09      GREEN    RED         1          display logic frame cap list 
+MENU-10      GREEN    RED         1          display logic confirm needed 
+MENU-11      GREEN    RED         1          display settings validate menu fields 
+MENU-12      GREEN    RED         1          display settings save menu writes only changed keys 
+MENU-13      GREEN    RED         1          display apply source pins 
+MENU-14      GREEN    RED         1          display menu label format pins 
+MENU-16      GREEN    RED         1          display menu source pins 
+MENU-17      GREEN    RED         1          display logic effective fps cap 
+MENU-18      GREEN    RED         1          frame cap vsync source pins 
+MENU-19      GREEN    RED         1          display logic present watch 
+MENU-20      GREEN    RED         1          display logic present watch 
+MENU-21      GREEN    RED         1          present watch wiring pins 
+MENU-22      GREEN    RED         1          display menu lua source pins 
+MENU-23      GREEN    RED         1          display menu lua source pins 
+MENU-24      GREEN    RED         1          display menu lua source pins 
+MENU-25      GREEN    RED         1          display menu lua source pins 
+MENU-26      GREEN    RED         1          display menu lua source pins 
+MENU-27      GREEN    RED         1          display msaa single query pins 
+MENU-28      GREEN    RED         1          display msaa single query pins 
+MENU-29      GREEN    RED         1          display logic multisample list 
+MENU-30      GREEN    RED         1          display logic multisample list 
+MENU-31      GREEN    RED         1          display msaa single query pins 
+MENU-32      GREEN    RED         1          display logic monitor label 
+MENU-33      GREEN    RED         1          shell stretch source pins 
+MENU-34      GREEN    RED         1          display logic shell stretch plan 
+MENU-36      GREEN    RED         1          display menu lua source pins 
+MENU-37      GREEN    RED         1          desktop mode source pins 
+MENU-38      GREEN    RED         1          desktop mode source pins 
+MENU-39      GREEN    RED         1          desktop mode source pins 
+MENU-40      GREEN    RED         1          display logic refresh desktop default 
+MENU-41      GREEN    RED         1          display logic refresh desktop default 
+MENU-42      GREEN    RED         1          desktop mode source pins 
+MENU-43      GREEN    RED         1          display menu lua source pins 
+MENU-44      GREEN    RED         1          display menu lua source pins 
+MENU-45      GREEN    RED         1          display menu lua source pins 
+MENU-46      GREEN    RED         1          display menu lua source pins 
+MENU-47      GREEN    RED         1          display menu lua source pins 
+MENU-48      GREEN    RED         1          desktop mode source pins 
+MENU-49      GREEN    RED         1          display menu lua source pins 
+MENU-50      GREEN    RED         1          display menu source pins 
+MENU-52      GREEN    RED         1          display menu lua source pins 
+MENU-60      GREEN    RED         1          display menu lua save failure waits 
+MENU-61      GREEN    RED         1          display menu lua source pins 
+MENU-55      GREEN    RED         1          display menu lua confirm mark 
+MENU-56      GREEN    RED         1          display menu lua confirm mark 
+MENU-57      GREEN    RED         1          display menu lua confirm mark 
+CUR-03A      GREEN    RED         1          display logic cursor plan 
+CUR-04A      GREEN    RED         1          display logic cursor plan 
+CUR-04C      GREEN    RED         1          display logic cursor plan 
+CUR-04B      GREEN    RED         1          display logic cursor button latch 
+CUR-04D      GREEN    RED         1          hardware cursor source pins 
+CUR-04E      GREEN    RED         1          hardware cursor source pins 
+CUR-04F      GREEN    RED         1          hardware cursor source pins 
+CUR-03B      GREEN    RED         1          hardware cursor source pins 
+CUR-02A      GREEN    RED         1          hardware cursor source pins 
+CUR-02B      GREEN    RED         1          hardware cursor source pins 
+CUR-01A      GREEN    RED         1          hardware cursor source pins 
+CUR-01B      GREEN    RED         1          display logic cursor scale 
+CUR-01C      GREEN    RED         1          hardware cursor source pins 
+LAA-01       GREEN    RED                    hardening:laa check=laa ok=False
+WIN-03B      GREEN    RED                    hardening:import-SetProcessDPIAware check=import-SetProcessDPIAware ok=False
+MEM-01       GREEN    RED         0x00000000 smoke:crash-arenaoom class=Pass dumps=0
+MEM-01B      GREEN    RED         0x00000000 smoke:crash-debugheapoom class=Pass dumps=0
+MEM-02S      GREEN    RED         0x00000000 smoke:crash-heapfail class=Pass dumps=0
+MEM-03S      GREEN    RED         0x00000003 smoke:crash-luaoom class=Fatal dumps=1
+MEM-04S      GREEN    RED         0x00000000 smoke:crash-luapanic class=Pass dumps=0
+DIAG-04      GREEN    RED         0x00000003 smoke:crash-hang class=Fatal dumps=1
+PACE-02      GREEN    RED         0x00000000 smoke:display-switches class=Pass dumps=0
+VSYNC-02     GREEN    RED         0x00000000 smoke:display-switches class=Pass dumps=0
+RESET-01     GREEN    RED         0x00000000 smoke:crash-resetrecover class=Pass dumps=0
+RESET-01B    GREEN    RED         0x00000003 smoke:crash-resetrecover class=Fatal dumps=1
+RESET-01D    GREEN    RED         0x00000001 smoke:crash-resetflap class=Fatal dumps=1
+RESET-01E    GREEN    RED         0x00000000 smoke:crash-resetflap class=Pass dumps=0
+RESET-02C    GREEN    RED         0x00000001 smoke:crash-resetlaterinit class=Fatal dumps=1
+RESET-02D    GREEN    RED         0x00000003 smoke:crash-resetlaterinit class=Fatal dumps=1
+RESET-02E    GREEN    RED         0x00000000 smoke:crash-resetlaterinit class=Pass dumps=0
+RESET-03     GREEN    RED         0x00000001 smoke:crash-resetrecover class=Fatal dumps=1
+WIN-DPI-SMOKE GREEN    RED         0x00000000 smoke:display-switches class=Pass dumps=0
+APPLY-02A    GREEN    RED         0x00000000 smoke:crash-applypresentfail class=Pass dumps=0
+APPLY-02B    GREEN    RED         0x00000000 smoke:crash-applyfail class=Pass dumps=0
+APPLY-02C    GREEN    RED         0x00000000 smoke:crash-applypresentfail class=Pass dumps=0
+APPLY-01     GREEN    RED         0x00000000 smoke:crash-applymode class=Pass dumps=0
+APPLY-02G    GREEN    RED         0x00000000 smoke:crash-menuorderrev class=Pass dumps=0
+APPLY-03D    GREEN    RED         0x00000000 smoke:crash-adaptercancel class=Pass dumps=0
+APPLY-03E    GREEN    RED         0x00000000 smoke:crash-adaptercancel class=Pass dumps=0
+APPLY-05A    GREEN    RED         0x00000000 smoke:crash-applytargetfail class=Pass dumps=0
+APPLY-06G    GREEN    RED         0x00000000 smoke:crash-applyfail class=Pass dumps=0
+APPLY-09A    GREEN    RED         0x00000000 smoke:crash-applymodesmall class=Pass dumps=0
+GAMMA-01     GREEN    RED         0x00000000 smoke:crash-gammapass class=Pass dumps=0
+GAMMA-02     GREEN    RED         0x00000000 smoke:crash-gammapass class=Pass dumps=0
+GAMMA-02B    GREEN    RED         0x00000000 smoke:crash-gammapass class=Pass dumps=0
+GAMMA-03     GREEN    RED         0x00000000 smoke:crash-gammafallback class=Pass dumps=0
+GAMMA-11     GREEN    RED         0x00000000 smoke:crash-gammadrawfail class=Pass dumps=0
+GAMMA-12     GREEN    RED         0x00000000 smoke:crash-gammalost class=Pass dumps=0
+GAMMA-13     GREEN    RED         0x00000000 smoke:crash-gammalost class=Pass dumps=0
+GAMMA-14     GREEN    RED         0x00000000 smoke:crash-gammapass class=Pass dumps=0
+GAMMA-06S    GREEN    RED         0x00000000 smoke:pacing-default class=Pass dumps=0
+MENU-03      GREEN    RED         0x00000000 smoke:crash-menuconfirm class=Pass dumps=0
+MENU-04      GREEN    RED         0x00000000 smoke:crash-menuconfirm class=Pass dumps=0
+MENU-08      GREEN    RED         0x00000000 smoke:crash-menukeep class=Pass dumps=0
+MENU-15      GREEN    RED         0x00000000 smoke:pacing-default class=Pass dumps=0
+MENU-35      GREEN    RED         0x00000003 smoke:crash-shellstretch class=Fatal dumps=1
+MENU-51      GREEN    RED         0x00000000 smoke:crash-menuconfirm class=Pass dumps=0
+MENU-53      GREEN    RED         0x00000000 smoke:crash-menukeep class=Pass dumps=0
+MENU-54      GREEN    RED         0x00000000 smoke:crash-menurevertsave class=Pass dumps=0
+MENU-58      GREEN    RED         0x00000000 smoke:crash-menuapplyfail class=Pass dumps=0
+MENU-59      GREEN    RED         0x00000000 smoke:crash-menuapplyfail class=Pass dumps=0
+CUR-05A      GREEN    RED         0x00000000 smoke:cursor-sw class=Pass dumps=0
+DIGEST-01    GREEN    RED         0x00000000 smoke:geo1c_con class=Pass dumps=0

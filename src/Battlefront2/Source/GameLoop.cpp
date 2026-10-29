@@ -124,6 +124,7 @@ namespace EventManager { void Init(); void Cleanup(); }
 
 namespace Lua_Callbacks { void Cleanup(); }
 namespace RedMissionLog { bool Enabled(); }
+namespace SimDigest { unsigned int StateHash(); void TraceTurn(); void LogFactories(); void LogFactoryCounts(); void Reset(); }
 
 class EntityWater
 {
@@ -757,6 +758,7 @@ int Init()
         netHeroUnlocked[i] = false;
     }
     SetLastGameWinner(-1);
+    SimDigest::Reset();
     sInitCompleteFlag = true;
     sMissionActive = false;
 
@@ -1232,6 +1234,7 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
     {
         pcCrash::RunMissionCrashTest();
     }
+    SimDigest::LogFactories();
 
     ScreenTransition::sInstance->Update(fSystemDeltaTime);
     sSystemDeltaTime = fSystemDeltaTime;
@@ -1366,6 +1369,7 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
                 NetGame::ReceiveHost();
                 NetGame::HostChangeSpectator();
                 NetGame::HostChangePregame();
+                SimDigest::TraceTurn();
             }
             NetGame::UpdatePreGame();
             static unsigned int suDigestTurns;
@@ -1374,8 +1378,10 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
             if (gExitOnGameOver && !sbDigestLogged && suDigestTurns >= 1500)
             {
                 sbDigestLogged = true;
-                LOG(LogSim, Inform, "OPENSWBF2 SIM DIGEST turns=%u time=%.3f rand=%u/%u snd=%.3f", suDigestTurns,
-                    GameLoop::GetMissionTime(), PblRandom::_Global._uiSeed, PblRandom::_Sim._uiSeed, gSoundClockTime);
+                LOG(LogSim, Inform, "OPENSWBF2 SIM DIGEST turns=%u time=%.3f rand=%u/%u snd=%.3f state=0x%08X",
+                    suDigestTurns, GameLoop::GetMissionTime(), PblRandom::_Global._uiSeed, PblRandom::_Sim._uiSeed,
+                    gSoundClockTime, SimDigest::StateHash());
+                SimDigest::LogFactoryCounts();
             }
             if (iTurnsRun && !sGameOver && Team::sWinningTeams)
             {

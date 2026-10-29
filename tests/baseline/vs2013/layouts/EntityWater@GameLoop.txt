@@ -1,0 +1,4 @@
+class EntityWater	size(164):
+	+---
+ 0	| mOpaqueWaterState
+	+---

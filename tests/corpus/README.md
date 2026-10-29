@@ -43,3 +43,56 @@ case whose input is missing exits 3 and reports `[CRASH]`, never `[KNOWN]`.
 - `load`: 7 bit player count in the first word. `turnrate`: 10 bit duration then 3 bit turns.
 
 `corpus generate netwire` regenerates the files when `OPENSWBF2_GEN_CORPUS=1`. The `fuzz netwire readers` case mutates these files with its own seeds and pinned checksums.
+
+
+## floatparse
+
+Text data, not `.bin`: one token per line, CRLF, tab between the token and the fields, a space
+between fields. Bits are upper-case hex.
+
+    <token>\t<ret> <fbits %08X> <atof %016I64X> <fatof %08X> <strtod %016I64X> <consumed>
+
+`ret` and `fbits` are the return value of `sscanf(token, "%f", &f)` and the float bits, with `f`
+filled with `7FA5A5A5` beforehand so a failed conversion shows. `atof` is the double result of
+`atof(token)`, `fatof` the bits of `(float)atof(token)`, `strtod` the double result of
+`strtod(token, &end)` and `consumed` is `end - token`.
+
+- `odf.txt`: every distinct numeric token in the retail lvl `PROP` chunks, sorted bytewise.
+  The game reads ODF values from `PROP` chunks inside the lvl files (`entc`, `ordc`, `wpnc`,
+  `expc` class chunks; `EntityClass::Read` -> `SetProperty` -> `sscanf("%f")`), so the tokens
+  come from those chunks only. The values are split on whitespace, quotes and commas are
+  stripped, and only tokens matching `^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$` are kept. The file
+  holds numbers only, no names or strings. 191 lvl files, 125,744 PROPs, 784 tokens.
+- `edge.txt`: hand-picked edge cases. The loose `.cfg`/`.ini` numeric paths go through the same
+  `sscanf("%f")` and `atof` entry points, and `edge.txt` covers them with the long-mantissa,
+  near-halfway, exponent, leading `+`/`.` and trailing-junk cases, plus `nan`, `inf`, `1.#INF`
+  and `1.#QNAN` forms recorded as VS2013 parses them.
+
+## mathfn
+
+`math.txt`, text data, CRLF:
+
+    <form>\t<in1 bits> [<in2 bits or decimal int>]\t<out bits>
+
+Float bits are `%08X`, double bits `%016I64X`. `<fn>.f` is the C++ float overload as game code
+writes it (`sin((float)x)`), `<fn>.d` the double call, for `sin cos tan asin acos atan sqrt exp
+log log10 floor ceil`, plus `atan2.f`, `atan2.d`, `fmod.f`, `fmod.d`, `pow.ff`, `pow.dd`,
+`pow.fi` (float, int) and `pow.di` (double, int). Inputs are a grid over each function's sim
+domain plus edge values (signed zeros, `FLT_MIN`, denormals, `FLT_MAX`, multiples of pi, `1e6`,
+`1e10`, NaN, infinities; `1e300`, `DBL_MIN` and `DBL_MAX` for the double forms). The checker
+reads the input bits from the file at run time, so the compiler cannot fold them.
+
+`math corpus x87 pc24` replays the file under `_PC_24`, the x87 mode Direct3D sets without
+`D3DCREATE_FPU_PRESERVE`. Optimized code binds the double calls to `__libm_sse2_*_precise` and
+`__CI*`, which ignore x87 precision, so in Release every line matches. Unoptimized code (T1 Debug,
+and `NetGame.cpp`/`NetSetup.cpp` in the game) calls the plain msvcr120 entries, and `sqrt` and
+`atan` there follow x87 precision: the case allows only `sqrt.d` and `atan.d` lines to differ and
+prints how many did (273 in Debug, 0 in Release).
+
+## Provenance of floatparse and mathfn
+
+Generated once on VS2013 Update 5 (`cl` 18.00.40629, `msvcr120.dll` 12.00.40664.0) by running
+`..\bin\Tests\Release\OpenSWBF2Tests.exe --gen-corpus=corpus` from `tests\` with retail GameData
+present (without it the mode prints `[SKIP]` and exits 77). Do not regenerate them after the
+toolchain switch: Phase 20 compares the v143/UCRT results against these bits. The checker cases
+in the `corpus` suite read only these files and need no GameData, so they never skip.

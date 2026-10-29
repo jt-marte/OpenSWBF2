@@ -1,0 +1,108 @@
+class GameObject	size(576):
+	+---
+	| +--- (base class EntityGeometry)
+	| | +--- (base class EntityEx)
+	| | | +--- (base class Entity)
+ 0	| | | | {vfptr}
+	| | | +---
+ 4	| | | mId
+ 8	| | | mEntityClass
+	| | +---
+	| | +--- (base class CollisionObject)
+12	| | | {vfptr}
+	| | | +--- (base class TreeGridObject)
+16	| | | | mStackPtr
+20	| | | | mStackIdx
+24	| | | | PblSphere mCollisionSphere
+40	| | | | m2dRadius
+44	| | | | mData
+48	| | | | mTreeGridCellIndex
+	| | | +---
+	| | | +--- (base class FoleyFXCollider)
+52	| | | | mColliderClass
+56	| | | | mFoleyFX
+60	| | | | mFoleyFXGroup
+	| | | +---
+	| | | +--- (base class FoleyFXCollidee)
+64	| | | | mCollideeClass
+	| | | +---
+68	| | | mCollisionObjectNode
+84	| | | mCollisionModel
+88	| | | mParent
+92	| | | mMass
+96	| | | PblBox mAABB
+120.	| | | mProcedurallyAnimated (bitstart=0,nbits=1)
+120.	| | | mLastCollidedWithNonTerrain (bitstart=1,nbits=1)
+  	| | | <alignment member> (size=3)
+124	| | | PblVector3 mLastPosition
+136	| | | mLastCollidedObjs
+	| | +---
+	| | +--- (base class RedSceneObject)
+	| | | +--- (base class DynDisplayable)
+	| | | | +--- (base class ?$BaseDisplayable@VIDisplayable@pvs@@)
+	| | | | | +--- (base class IDisplayable)
+148	| | | | | | {vfptr}
+	| | | | | +---
+152	| | | | | sector_
+156	| | | | | flags_
+160	| | | | | aframe_
+164	| | | | | pframe_
+	| | | | +---
+168	| | | | nextCheckDist_
+172	| | | | ?$Vector3@M lastCheckPos_
+	| | | +---
+184	| | | mNextSceneObject
+188	| | | mPrevSceneObject
+192	| | | mSceneAABox
+196	| | | PblVector4 _Sphere
+212	| | | _pLodData
+216	| | | _uiRenderFlags
+220	| | | _bActive
+  	| | | <alignment member> (size=3)
+224	| | | _fPriorityMod
+228	| | | _iFrameNum
+232	| | | _uiOcclusionIndex
+	| | +---
+  	| | <alignment member> (size=4)
+240	| | PblMatrix mMatrix
+304	| | mModel
+308	| | mSmallestCollisionDim
+312	| | m_pAttachedEffects
+  	| | <alignment member> (size=4)
+	| +---
+	| +--- (base class Damageable)
+320	| | {vfptr}
+324	| | mCurHealth
+328	| | mMaxHealth
+332	| | mAddHealth
+336	| | mCurShield
+340	| | mMaxShield
+344	| | mAddShield
+348	| | mDisableTime
+352	| | mAIDamageThreshold
+356	| | DamageOwner mDamageOwner
+384	| | mDamageEffect
+464	| | mDamageEffectSound
+504	| | mDamageRegionTime
+508.	| | mHealthType (bitstart=0,nbits=3)
+508.	| | mIsAlive (bitstart=3,nbits=1)
+508.	| | mVanishing (bitstart=4,nbits=1)
+508.	| | mIsShielded (bitstart=5,nbits=1)
+	| +---
+	| +--- (base class PblHandled)
+512	| | {vfptr}
+516	| | mHandleId
+	| +---
+520	| ?$PblList@VControllable@@ mControllableList
+540	| mNetUniqueId
+544	| mPrevFoliageObj
+548	| GameSoundControllable mGameObjectAttachedSound
+552	| ?$PblHandle@VFLEffectObject@@ mDisabledEffectHandle
+560	| mCreatedTime
+564.	| mTeam (bitstart=0,nbits=4)
+564.	| mPerceivedTeam (bitstart=4,nbits=4)
+564.	| mOwningTeam (bitstart=8,nbits=4)
+564.	| mHealthTypeForLockOn (bitstart=12,nbits=4)
+568.	| mIsTargetable (bitstart=0,nbits=1)
+  	| <alignment member> (size=7)
+	+---

@@ -1,0 +1,41 @@
+class FLInputManager	size(12164):
+	+---
+	| +--- (base class RedInputEventHandler)
+ 0	| | {vfptr}
+ 4	| | Node m_node
+	| +---
+20	| mLCDPageToggle
+21	| mReservedAfterPageToggle
+22	| mChatText
+1046	| mReservedBeforeTextTimer
+1048	| mTextTimer
+1052	| mPageTimer
+1056	| mPageIndex
+1060	| mReservedBeforeJoysticks
+1064	| mJoysticks
+11464	| m_inputs
+11488	| m_rumble
+11540	| m_guiInputs
+11860	| m_HWPort
+11864	| m_HWPort_Full
+11868	| mPrimaryPort
+11872	| mSecondaryPort
+11876	| mShadowPrimary
+11880	| mShadowSecondary
+11884	| mActiveControllers
+11885	| mReadAllControllers
+11886	| mAllowBindMultiple
+11887	| mBindAll
+11888	| m_AnyMissing
+11889	| m_bPausedByInput
+11890	| m_bHudGroupsEnabled
+11893	| mReservedBeforeMissingPort
+11896	| m_MissingPort
+11900	| m_bIsMissing
+11901	| m_bGameWasPaused
+11902	| mAutoAcquire
+11903	| mReservedBeforeAskController
+11904	| mAskControllerMsg
+12160	| mIgnoreMissing
+  	| <alignment member> (size=3)
+	+---

@@ -1,0 +1,71 @@
+class EntityGeometry	size(320):
+	+---
+	| +--- (base class EntityEx)
+	| | +--- (base class Entity)
+ 0	| | | {vfptr}
+	| | +---
+ 4	| | mId
+ 8	| | mEntityClass
+	| +---
+	| +--- (base class CollisionObject)
+12	| | {vfptr}
+	| | +--- (base class TreeGridObject)
+16	| | | mStackPtr
+20	| | | mStackIdx
+24	| | | PblSphere mCollisionSphere
+40	| | | m2dRadius
+44	| | | mData
+48	| | | mTreeGridCellIndex
+	| | +---
+	| | +--- (base class FoleyFXCollider)
+52	| | | mColliderClass
+56	| | | mFoleyFX
+60	| | | mFoleyFXGroup
+	| | +---
+	| | +--- (base class FoleyFXCollidee)
+64	| | | mCollideeClass
+	| | +---
+68	| | mCollisionObjectNode
+84	| | mCollisionModel
+88	| | mParent
+92	| | mMass
+96	| | PblBox mAABB
+120.	| | mProcedurallyAnimated (bitstart=0,nbits=1)
+120.	| | mLastCollidedWithNonTerrain (bitstart=1,nbits=1)
+  	| | <alignment member> (size=3)
+124	| | PblVector3 mLastPosition
+136	| | mLastCollidedObjs
+	| +---
+	| +--- (base class RedSceneObject)
+	| | +--- (base class DynDisplayable)
+	| | | +--- (base class ?$BaseDisplayable@VIDisplayable@pvs@@)
+	| | | | +--- (base class IDisplayable)
+148	| | | | | {vfptr}
+	| | | | +---
+152	| | | | sector_
+156	| | | | flags_
+160	| | | | aframe_
+164	| | | | pframe_
+	| | | +---
+168	| | | nextCheckDist_
+172	| | | ?$Vector3@M lastCheckPos_
+	| | +---
+184	| | mNextSceneObject
+188	| | mPrevSceneObject
+192	| | mSceneAABox
+196	| | PblVector4 _Sphere
+212	| | _pLodData
+216	| | _uiRenderFlags
+220	| | _bActive
+  	| | <alignment member> (size=3)
+224	| | _fPriorityMod
+228	| | _iFrameNum
+232	| | _uiOcclusionIndex
+	| +---
+  	| <alignment member> (size=4)
+240	| PblMatrix mMatrix
+304	| mModel
+308	| mSmallestCollisionDim
+312	| m_pAttachedEffects
+  	| <alignment member> (size=4)
+	+---

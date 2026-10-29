@@ -1,0 +1,60 @@
+class WeaponGrenade	size(288):
+	+---
+	| +--- (base class Weapon)
+	| | +--- (base class Thread)
+ 0	| | | {vfptr}
+ 4	| | | Node mThreadListNode
+	| | +---
+  	| | <alignment member> (size=8)
+32	| | PblMatrix mFirePointMatrix
+96	| | mStart
+100	| | mClass
+104	| | mRenderClass
+108	| | mOwner
+112	| | mAimer
+116	| | mTrigger
+120	| | mReload
+124	| | PblVector3 mFirePos
+136	| | m_pAmmoCounter
+140	| | m_pEnergyBar
+144	| | mCurChargeStrengthHeavy
+148	| | mCurChargeStrengthLight
+152	| | mCurChargeDelayHeavy
+156	| | mCurChargeDelayLight
+160	| | mCurChargeRateLight
+164	| | mCurChargeRateHeavy
+168	| | mCurTimeAtMaxCharge
+172.	| | mHideWeapon (bitstart=0,nbits=1)
+172.	| | mFiredFlag (bitstart=1,nbits=1)
+172.	| | mSelectedFlag (bitstart=2,nbits=1)
+172.	| | m_iSoldierState (bitstart=3,nbits=6)
+176	| | WeaponState mState
+180	| | mStateTimer
+184	| | mStateLimit
+188	| | mZoom
+192	| | mZoomTurnScale
+196	| | mMuzzleFlashStartTime
+200	| | mSoldierAnimationMap
+204	| | GameSoundControllable mSoundControl
+208	| | GameSoundControllable mSoundControlFire
+212	| | GameSoundControllable mFoleyFXControl
+216	| | GameSound mSoundProps
+224	| | GameSound mSoundPropsFire
+232	| | GameSound mFoleyFXProps
+240	| | ?$PblHandle@VParticleEmitterObject@@ mChargeUpEmitter
+248	| | mLastFireTime
+252	| | mSkipTime
+256.	| | mSkip (bitstart=0,nbits=1)
+256.	| | mCharged (bitstart=1,nbits=1)
+257	| | mDeactivateScheduled
+  	| | <alignment member> (size=2)
+260	| | ?$PblHandle@$$CBVGameObject@@ mTarget
+268	| | mTargetBodyID
+	| +---
+272	| mNetFiredFlag
+273	| mFired
+274	| m_iFirePos
+  	| <alignment member> (size=1)
+276	| mStrength
+280	| mUnmodeledTail
+	+---

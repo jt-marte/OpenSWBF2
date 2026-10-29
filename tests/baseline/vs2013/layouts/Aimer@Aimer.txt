@@ -1,0 +1,38 @@
+class Aimer	size(544):
+	+---
+	| +--- (base class Thread)
+ 0	| | {vfptr}
+ 4	| | Node mThreadListNode
+	| +---
+24	| mNextAimer
+28	| mClass
+32	| mOwner
+36	| mParentMatrix
+40	| mWithinLimitsFlag
+41	| bDirect
+  	| <alignment member> (size=2)
+44	| PblVector3 mOffsetPos
+56	| mPitch
+60	| mOmegaPitch
+64	| mYaw
+68	| mOmegaYaw
+72	| PblVector3 mDirection
+84	| PblVector3 mMountPos
+96	| PblQuaternion mMountRot
+112	| PblVector3 mRootPos
+124	| PblVector3 mOldRootPos
+136	| PblVector3 mFirePos
+148	| PblVector3 mPrevFirePos
+160	| PblVector3 mAngVel
+  	| <alignment member> (size=4)
+176	| PblMatrix mMountPoseMatrix
+240	| mBarrelPoseMatrix
+496	| mPose
+500	| mRecoil
+516	| mCurrentBarrel
+520	| mWeapon
+524	| mSkip
+  	| <alignment member> (size=3)
+528	| mSkipTime
+  	| <alignment member> (size=12)
+	+---

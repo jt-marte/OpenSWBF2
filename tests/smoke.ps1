@@ -252,6 +252,20 @@ function Get-SmokeAllowed($caseName) {
     return $allowed
 }
 
+function Get-DigestExpected($caseName) {
+    $file = $env:OPENSWBF2_DIGEST_EXPECTED
+    if (-not $file) { $file = Join-Path $PSScriptRoot 'smoke\digest-expected.txt' }
+    if (-not (Test-Path -LiteralPath $file)) { return $null }
+    foreach ($line in [IO.File]::ReadAllLines($file)) {
+        $t = $line.Trim()
+        if (-not $t -or $t.StartsWith('#')) { continue }
+        $i = $t.IndexOf("`t")
+        if ($i -lt 0) { continue }
+        if ($t.Substring(0, $i) -ceq $caseName) { return $t.Substring($i + 1) }
+    }
+    return $null
+}
+
 function Get-SmokeUnexpected($caseName, $caseDir) {
     $runLog = Join-Path $caseDir 'run.log'
     if (-not (Test-Path -LiteralPath $runLog)) { return @() }
@@ -284,6 +298,17 @@ function Test-SmokeExpect($case, $res) {
         if (-not (Test-Path -LiteralPath $ini)) { return $false }
         $iniText = [IO.File]::ReadAllText($ini)
         foreach ($rx in @($x.IniRx)) { if ($iniText -cnotmatch $rx) { return $false } }
+    }
+    if (-not $script:SmokeDigestConfiguration -or $script:SmokeDigestConfiguration -eq 'Release') {
+        $want = Get-DigestExpected $case.Name
+        if ($want) {
+            $got = Get-DigestKey $res.CaseDir
+            if ($want -cne $got) {
+                Write-Host "    digest expected: $want"
+                Write-Host "    digest actual: $got"
+                return $false
+            }
+        }
     }
     $unexpected = @(Get-SmokeUnexpected $case.Name $res.CaseDir)
     if ($unexpected.Count -gt 0) {
@@ -581,6 +606,14 @@ function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $fals
         foreach ($i in 1, 2) {
             $cases += New-Object PSObject -Property @{ Name = "twice-digest-$i"; Args = "nab2g_c $htail"; Expect = $digestExpect; Twice = 2 + $i; Timeout = 30 }
         }
+        foreach ($m in 'hot1g_con', 'spa3c_ass') {
+            $cases += New-Object PSObject -Property @{ Name = "digest-$m"; Args = "$m $htail"; Expect = $pass; Twice = 0; Timeout = 0 }
+        }
+        $traceExpect = @{ Class = 'Pass'; LogRx = (@('OPENSWBF2 DIGEST TRACE turn=1500 ') + $hrx) }
+        foreach ($i in 1, 2) {
+            $ttail = $htail.Replace('-seed 1 ', "-seed $i ")
+            $cases += New-Object PSObject -Property @{ Name = "trace-seed-$i"; Args = "hot1g_con $ttail -digesttrace 1600"; Expect = $traceExpect; Twice = 0; Timeout = 0 }
+        }
     }
     return $cases
 }
@@ -591,6 +624,27 @@ function Get-DigestKey($caseDir) {
     $m = Select-String -LiteralPath $f -Pattern 'OPENSWBF2 SIM DIGEST .*' | Select-Object -First 1
     if (-not $m) { return $null }
     return $m.Matches[0].Value
+}
+
+function Get-DigestTrace($runLog) {
+    $map = @{}
+    if (-not (Test-Path -LiteralPath $runLog)) { return $map }
+    foreach ($m in (Select-String -LiteralPath $runLog -Pattern 'OPENSWBF2 DIGEST TRACE turn=(\d+) (.*)' -CaseSensitive)) {
+        $map[[int]$m.Matches[0].Groups[1].Value] = $m.Matches[0].Groups[2].Value
+    }
+    return $map
+}
+
+function Compare-DigestTrace($logA, $logB) {
+    $a = Get-DigestTrace $logA
+    $b = Get-DigestTrace $logB
+    if ($a.Count -eq 0 -or $b.Count -eq 0) { return -1 }
+    $last = [Math]::Max($a.Count, $b.Count)
+    for ($t = 1; $t -le $last; $t++) {
+        if (-not $a.ContainsKey($t) -or -not $b.ContainsKey($t)) { return -1 }
+        if (($a[$t] -split ' ')[0] -cne ($b[$t] -split ' ')[0]) { return $t }
+    }
+    return 0
 }
 
 function Get-FinalScoreKey($caseDir) {

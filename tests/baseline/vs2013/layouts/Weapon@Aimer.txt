@@ -1,0 +1,8 @@
+class Weapon	size(48):
+	+---
+ 0	| szName
+32	| uiNameHash
+36	| COMBO eCombo
+40	| WEAPON eParent
+44	| bHasAlertState
+	+---

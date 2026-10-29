@@ -1,0 +1,5 @@
+class PAGameObjectTeam	size(568):
+	+---
+ 0	| pad_0000
+564.	| mTeam (bitstart=0,nbits=4)
+	+---

@@ -1,0 +1,5 @@
+class EntityFlyer	size(1384):
+	+---
+ 0	| mFlyerBaseStorage
+1380	| State mState
+	+---

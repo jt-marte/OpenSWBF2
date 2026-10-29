@@ -378,6 +378,7 @@
     <ClCompile Include="src\Battlefront2\Source\NetMatch.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPacket.cpp" />
     <ClCompile Include="src\Battlefront2\Source\MemFailLog.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\SimDigest.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetWire.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPredict.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetQOS.cpp" />
@@ -1172,6 +1173,8 @@
     <ClInclude Include="src\Battlefront2\Source\NetMatch.h" />
     <ClInclude Include="src\Battlefront2\Source\NetPacket.h" />
     <ClInclude Include="src\Battlefront2\Source\MemFailLog.h" />
+    <ClInclude Include="src\Battlefront2\Source\SimDigest.h" />
+    <ClInclude Include="src\Battlefront2\Source\SimDigestCore.h" />
     <ClInclude Include="src\Battlefront2\Source\NetWire.h" />
     <ClInclude Include="src\Battlefront2\Source\LocalLimits.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.h" />

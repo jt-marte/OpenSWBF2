@@ -1,0 +1,5 @@
+class GameObject	size(520):
+	+---
+ 0	| mInheritedObjectStorage
+516	| mHandleId
+	+---

@@ -1,0 +1,41 @@
+class GameObject	size(148):
+	+---
+	| +--- (base class EntityGeometry)
+	| | +--- (base class EntityEx)
+	| | | +--- (base class Entity)
+ 0	| | | | {vfptr}
+	| | | +---
+ 4	| | | mId
+ 8	| | | mEntityClass
+	| | +---
+	| | +--- (base class CollisionObject)
+12	| | | {vfptr}
+	| | | +--- (base class TreeGridObject)
+16	| | | | mStackPtr
+20	| | | | mStackIdx
+24	| | | | PblSphere mCollisionSphere
+40	| | | | m2dRadius
+44	| | | | mData
+48	| | | | mTreeGridCellIndex
+	| | | +---
+	| | | +--- (base class FoleyFXCollider)
+52	| | | | mColliderClass
+56	| | | | mFoleyFX
+60	| | | | mFoleyFXGroup
+	| | | +---
+	| | | +--- (base class FoleyFXCollidee)
+64	| | | | mCollideeClass
+	| | | +---
+68	| | | mCollisionObjectNode
+84	| | | mCollisionModel
+88	| | | mParent
+92	| | | mMass
+96	| | | PblBox mAABB
+120.	| | | mProcedurallyAnimated (bitstart=0,nbits=1)
+120.	| | | mLastCollidedWithNonTerrain (bitstart=1,nbits=1)
+  	| | | <alignment member> (size=3)
+124	| | | PblVector3 mLastPosition
+136	| | | mLastCollidedObjs
+	| | +---
+	| +---
+	+---

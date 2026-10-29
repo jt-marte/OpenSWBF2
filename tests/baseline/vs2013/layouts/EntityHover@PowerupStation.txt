@@ -1,0 +1,3 @@
+class EntityHover	size(1):
+	+---
+	+---

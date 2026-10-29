@@ -1,0 +1,17 @@
+0	0002:ffbfa000	?_Generic_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Generic_object$initializer$)(void)	gfSteamAuth.obj
+1	0002:ffbfa000	?_Iostream_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Iostream_object$initializer$)(void)	gfSteamAuth.obj
+2	0002:ffbfa000	?_System_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_System_object$initializer$)(void)	gfSteamAuth.obj
+3	0002:ffbfa000	?sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Entity,class EntityClass,struct EntityDesc>::sList$initializer$)(void)	NetSetup.obj
+4	0002:ffbfa000	?sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc>::sList$initializer$)(void)	NetSetup.obj
+5	0002:ffbfa000	?sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Weapon,class WeaponClass,struct WeaponDesc>::sList$initializer$)(void)	NetSetup.obj
+6	0002:ffbfa000	?sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc>::sList$initializer$)(void)	NetSetup.obj
+7	0002:ffbfa000	?_Generic_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Generic_object$initializer$)(void)	NetSetup.obj
+8	0002:ffbfa000	?_Iostream_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Iostream_object$initializer$)(void)	NetSetup.obj
+9	0002:ffbfa000	?_System_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_System_object$initializer$)(void)	NetSetup.obj
+10	0002:ffbfa000	?_Generic_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Generic_object$initializer$)(void)	NetMatch.obj
+11	0002:ffbfa000	?_Iostream_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_Iostream_object$initializer$)(void)	NetMatch.obj
+12	0002:ffbfa000	?_System_object$initializer$@?$_Error_objects@H@std@@2P6AXXZA	public: static void (__cdecl* std::_Error_objects<int>::_System_object$initializer$)(void)	NetMatch.obj
+13	0002:ffbfa000	?sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Entity,class EntityClass,struct EntityDesc>::sList$initializer$)(void)	NetGame.obj
+14	0002:ffbfa000	?sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc>::sList$initializer$)(void)	NetGame.obj
+15	0002:ffbfa000	?sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Weapon,class WeaponClass,struct WeaponDesc>::sList$initializer$)(void)	NetGame.obj
+16	0002:ffbfa000	?sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA	public: static void (__cdecl* Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc>::sList$initializer$)(void)	NetGame.obj

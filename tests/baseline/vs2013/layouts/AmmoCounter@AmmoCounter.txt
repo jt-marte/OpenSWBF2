@@ -1,0 +1,9 @@
+class AmmoCounter	size(24):
+	+---
+ 0	| m_pClass
+ 4	| mDefaultMaxClips
+ 8	| mMaxClips
+12	| mNumClips
+16	| mCurClip
+20	| m_uiRefCount
+	+---

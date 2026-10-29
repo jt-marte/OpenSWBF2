@@ -51,6 +51,7 @@ static LONG WINAPI CrashFilter(EXCEPTION_POINTERS* pInfo)
 }
 
 extern void __cdecl PblTraceP(const char* Format, ...);
+int FloatCorpusGenerate(const char* pcOutDir);
 
 int main(int argc, char** argv)
 {
@@ -66,6 +67,10 @@ int main(int argc, char** argv)
             PblTraceP("pbltrace-marker\n");
             RedWarning::LogMessage("legacy-marker\n");
             return 0;
+        }
+        if (strncmp(argv[i], "--gen-corpus=", 13) == 0)
+        {
+            return FloatCorpusGenerate(argv[i] + 13);
         }
     }
 

@@ -65,6 +65,8 @@ bool gBootLagger;
 bool gShowLoadSpam;
 bool gLogFinalScore;
 bool gExitOnGameOver;
+int gDigestTrace;
+bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
 bool gSeedSet;
@@ -331,6 +333,29 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "exitongameover") == 0)
         {
             gExitOnGameOver = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "digesttrace") == 0)
+        {
+            const char* pcValue = i + 1 < iArgc ? apcArgv[i + 1] : 0;
+            char* pcEnd = 0;
+            unsigned long ulValue = pcValue ? strtoul(pcValue, &pcEnd, 10) : 0;
+            if (!pcValue || pcValue[0] == '-' || pcEnd == pcValue || *pcEnd)
+            {
+                LOG(LogCore, Warning, "-digesttrace needs a number, ignored");
+            }
+            else
+            {
+                ++i;
+                gDigestTrace = ulValue > 100000ul ? 100000 : (int)ulValue;
+            }
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "factorylog") == 0)
+        {
+            gFactoryLog = true;
             continue;
         }
 

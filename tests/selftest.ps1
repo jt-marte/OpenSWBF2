@@ -216,6 +216,65 @@ foreach ($lc in $laaCases) {
     if ($got -ne $lc[2]) { $failed++; Write-Host "FAILED ${n}: $($lc[0])" }
     else { Write-Host "OK $n $($lc[0])" }
 }
+$digTmp = Join-Path $env:TEMP ("openswbf2-digest-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $digTmp | Out-Null
+$savedExpected = $env:OPENSWBF2_DIGEST_EXPECTED
+try {
+    $n++
+    $digLine = 'OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1/2 snd=49.923 state=0x0000ABCD'
+    [IO.File]::WriteAllText((Join-Path $digTmp 'run.log'), "$digLine`r`n")
+    $goodExp = Join-Path $digTmp 'good.txt'
+    $flipExp = Join-Path $digTmp 'flip.txt'
+    [IO.File]::WriteAllText($goodExp, "# header`r`nselftest-case`t$digLine`r`n")
+    [IO.File]::WriteAllText($flipExp, "selftest-case`t$($digLine.Replace('state=0x0000ABCD', 'state=0x0000ABCC'))`r`n")
+    $digCase = New-Object PSObject -Property @{ Name = 'selftest-case'; Expect = @{ Class = 'Pass' } }
+    $digRes = New-Object PSObject -Property @{ Class = 'Pass'; CaseDir = $digTmp; LogText = $digLine; Dumps = @() }
+    $env:OPENSWBF2_DIGEST_EXPECTED = $goodExp
+    $okGood = Test-SmokeExpect $digCase $digRes
+    $env:OPENSWBF2_DIGEST_EXPECTED = $flipExp
+    $okFlip = Test-SmokeExpect $digCase $digRes
+    if (-not $okGood -or $okFlip) { $failed++; Write-Host "FAILED ${n}: digest compare: matching=$okGood flipped=$okFlip" }
+    else { Write-Host "OK $n digest compare fails on a one-bit state flip" }
+    $n++
+    $trA = Join-Path $digTmp 'trace-a.log'
+    $trB = Join-Path $digTmp 'trace-b.log'
+    $linesA = 1..9 | ForEach-Object { 'OPENSWBF2 DIGEST TRACE turn={0} state=0x{0:X8} rand=1/2' -f $_ }
+    $linesB = 1..9 | ForEach-Object { if ($_ -ge 7) { 'OPENSWBF2 DIGEST TRACE turn={0} state=0x{1:X8} rand=1/2' -f $_, ($_ + 100) } else { 'OPENSWBF2 DIGEST TRACE turn={0} state=0x{0:X8} rand=1/2' -f $_ } }
+    [IO.File]::WriteAllLines($trA, [string[]]$linesA)
+    [IO.File]::WriteAllLines($trB, [string[]]$linesB)
+    $trC = Join-Path $digTmp 'trace-c.log'
+    $linesC = 1..9 | ForEach-Object { 'OPENSWBF2 DIGEST TRACE turn={0} state=0x{0:X8} rand=3/4' -f $_ }
+    [IO.File]::WriteAllLines($trC, [string[]]$linesC)
+    $trE = Join-Path $digTmp 'trace-e.log'
+    [IO.File]::WriteAllLines($trE, [string[]]@('no trace here'))
+    $split = Compare-DigestTrace $trA $trB
+    $same = Compare-DigestTrace $trA $trA
+    $randOnly = Compare-DigestTrace $trA $trC
+    $empty = Compare-DigestTrace $trA $trE
+    if ($split -ne 7 -or $same -ne 0 -or $randOnly -ne 0 -or $empty -ne -1) { $failed++; Write-Host "FAILED ${n}: digest trace split: split=$split same=$same randOnly=$randOnly empty=$empty" }
+    else { Write-Host "OK $n digest trace split names turn 7, ignores rand, fails an empty trace" }
+}
+finally {
+    $env:OPENSWBF2_DIGEST_EXPECTED = $savedExpected
+    Remove-Item -Recurse -Force $digTmp -ErrorAction SilentlyContinue
+}
+$n++
+$allLines = @(Get-Content (Join-Path $PSScriptRoot 'smoke\missions-all.txt') | Where-Object { $_.Trim() })
+$parAll = @{}
+foreach ($c in @(Get-SmokeCases 'All' $allLines $false $null)) { $parAll[$c.Name] = $c }
+$parTw = @{}
+foreach ($c in @(Get-SmokeCases 'Twice' @() $false $null)) { $parTw[$c.Name] = $c }
+$parStd = @{}
+foreach ($c in @(Get-SmokeCases 'Standard' @() $false $null)) { $parStd[$c.Name] = $c }
+$why = $null
+foreach ($p in @(@('nab2g_c', $parTw, 'twice-digest-1'), @('hot1g_con', $parTw, 'digest-hot1g_con'), @('spa3c_ass', $parTw, 'digest-spa3c_ass'), @('geo1c_con', $parStd, 'geo1c_con'))) {
+    if (-not $parAll.ContainsKey($p[0])) { $why = "All case $($p[0]) missing"; break }
+    if (-not $p[1].ContainsKey($p[2])) { $why = "case $($p[2]) missing"; break }
+    if ($parAll[$p[0]].Args -cne $p[1][$p[2]].Args) { $why = "All $($p[0]) args differ from $($p[2])"; break }
+}
+if (-not $why -and $parAll['nab2g_c'].Timeout -ne 0) { $why = 'All nab2g_c must use the default timeout' }
+if ($why) { $failed++; Write-Host "FAILED ${n}: all/twice digest parity: $why" }
+else { Write-Host "OK $n all/twice digest parity" }
 $testExe = Join-Path (Split-Path $PSScriptRoot -Parent) 'bin\Tests\Debug\OpenSWBF2Tests.exe'
 foreach ($probe in 'strictness probe emits an undeclared error', 'strictness probe unmatched expectation') {
     $n++

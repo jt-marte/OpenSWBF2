@@ -1,0 +1,7 @@
+class EntityCarrierRuntimeLayout	size(7664):
+	+---
+ 0	| EntityFlyerRuntimeLayout mFlyer
+7568	| mCargoArray
+7648	| mCargoCount
+7652	| _tail
+	+---

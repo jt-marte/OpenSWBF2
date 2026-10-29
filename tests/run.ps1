@@ -20,6 +20,7 @@ if ($Jobs -eq 0) { $Jobs = [Math]::Max(1, [Math]::Min(8, [int][Math]::Floor([Env
 $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
+$script:SmokeDigestConfiguration = $SmokeConfiguration
 
 $hardenOnly = $Hardening -and -not $PSBoundParameters.ContainsKey('Smoke') -and -not ($Suite -or $Filter -or $Fuzz)
 $smokeActive = ($Smoke -ne 'None') -and -not ($Suite -or $Filter -or $Fuzz) -and -not $hardenOnly
@@ -324,6 +325,35 @@ if ($smokeActive) {
                     Add-SmokeResult "[FAIL] smoke:$($pair[2]) mismatch" 'FAIL'
                     $bad++
                 }
+            }
+        }
+        $traceLog1 = Join-Path $outDir 'smoke\trace-seed-1\run.log'
+        $traceLog2 = Join-Path $outDir 'smoke\trace-seed-2\run.log'
+        if ((Test-Path -LiteralPath $traceLog1) -and (Test-Path -LiteralPath $traceLog2)) {
+            $t = Compare-DigestTrace $traceLog1 $traceLog2
+            if ($t -gt 0) { Add-SmokeResult "[PASS] smoke:digest-trace split at turn $t" 'PASS' }
+            elseif ($t -lt 0) {
+                Add-SmokeResult '[FAIL] smoke:digest-trace incomplete trace' 'FAIL'
+                $bad++
+            }
+            else {
+                Add-SmokeResult '[FAIL] smoke:digest-trace no split' 'FAIL'
+                $bad++
+            }
+            $dk = Get-DigestKey (Join-Path $outDir 'smoke\trace-seed-1')
+            $dt = $null
+            $ds = $null
+            if ($dk -and $dk -cmatch 'turns=(\d+) .*state=(0x[0-9A-F]{8})') {
+                $dt = [int]$Matches[1]
+                $ds = $Matches[2]
+            }
+            $tr = Get-DigestTrace $traceLog1
+            if ($dt -and $tr.ContainsKey($dt) -and $tr[$dt] -cmatch '^state=(0x[0-9A-F]{8}) ' -and $Matches[1] -ceq $ds) {
+                Add-SmokeResult "[PASS] smoke:digest-trace matches digest at turn $dt" 'PASS'
+            }
+            else {
+                Add-SmokeResult "[FAIL] smoke:digest-trace mismatch at turn $dt" 'FAIL'
+                $bad++
             }
         }
     }

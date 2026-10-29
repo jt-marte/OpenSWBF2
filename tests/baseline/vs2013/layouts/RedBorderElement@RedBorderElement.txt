@@ -1,0 +1,22 @@
+class RedBorderElement	size(608):
+	+---
+	| +--- (base class RedInterfaceElement)
+ 0	| | {vfptr}
+16	| | m_crcName
+20.	| | m_zorder (bitstart=0,nbits=8)
+20.	| | m_bEnabled (bitstart=8,nbits=1)
+20.	| | m_bInAllObjectList (bitstart=9,nbits=1)
+20.	| | m_bVisible (bitstart=10,nbits=1)
+20.	| | m_uiFlags (bitstart=11,nbits=21)
+24	| | m_pHotSpot
+28	| | Node m_groupNode
+44	| | RedColor m_color
+48	| | PblMatrix m_mLocal
+	| +---
+112	| mShadowMode
+116	| BlendModeT m_eBlendMode
+120	| mBorderRect
+144	| m_vertices
+592	| m_pInterfaceShader
+596	| mReservedTail
+	+---

@@ -23,6 +23,8 @@ extern bool gBootLagger;
 extern bool gShowLoadSpam;
 extern bool gLogFinalScore;
 extern bool gExitOnGameOver;
+extern int gDigestTrace;
+extern bool gFactoryLog;
 extern bool gNoFocusPause;
 extern bool gAllowUploads;
 extern bool gSeedSet;

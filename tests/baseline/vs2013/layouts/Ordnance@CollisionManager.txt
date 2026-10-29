@@ -1,0 +1,9 @@
+class Ordnance	size(136):
+	+---
+	| +--- (base class Thread)
+ 0	| | {vfptr}
+ 4	| | Node mThreadListNode
+	| +---
+24	| mOrdnanceFields
+120	| Node mCollisionManagerNode
+	+---
