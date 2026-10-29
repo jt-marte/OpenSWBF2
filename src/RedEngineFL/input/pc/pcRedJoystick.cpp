@@ -305,10 +305,10 @@ void RedJoystick::UpdateCursorFromStick(float fDeltaTime, float fX, float fY)
 
     if (pMouse->pCursorImage == this)
     {
-        int iDX = (int)(fX * fDeltaTime * 512.0f);
+        int iDX = (int)(fX * fDeltaTime * XInputPad::kCursorSpeed);
         pMouse->m_X += iDX;
         pMouse->m_dX = iDX;
-        int iDY = (int)(fY * fDeltaTime * 512.0f);
+        int iDY = (int)(fY * fDeltaTime * XInputPad::kCursorSpeed);
         pMouse->m_Y += iDY;
         pMouse->m_dY = iDY;
 

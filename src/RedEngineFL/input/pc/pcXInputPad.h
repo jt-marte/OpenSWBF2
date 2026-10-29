@@ -30,6 +30,14 @@ enum PadButton
 
 const unsigned char kTriggerThreshold = 30;
 
+// Look (turn/pitch) gain on the right stick, ahead of the game's sensitivity
+// curve: the stock tuning felt half as fast as it should on a pad. Values
+// still clamp to +-1, so full turn speed comes at half deflection.
+const float kLookGain = 2.0f;
+
+// Stick-driven menu cursor speed, in UI pixels per second (retail: 512).
+const float kCursorSpeed = 1024.0f;
+
 struct Pad
 {
     unsigned short wButtons;
