@@ -404,7 +404,7 @@ TEST_CASE("ui scale source pins" * doctest::test_suite("unit"))
     // and only those groups get the scale; HUD (perspective) groups keep theirs
     const std::string sRender = FunctionBody(sScreen, "void RedInterfaceScreen::Render() const");
     REQUIRE(!sRender.empty());
-    CHECK(Has(sRender, "const float fGroupScale = pGroup->m_bScaleUi ? fUiScale : 1.0f;"));
+    CHECK(Has(sRender, "pGroup->m_bScaleUi ? fUiScale : (pGroup->m_bHudScale ? fHudScale : 1.0f);"));
     CHECK(Has(sRender, "mScreen.m[2][2] = fGroupScale;"));
 
     // Lua sees the UI size, and mouse coordinates cross the boundary converted

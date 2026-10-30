@@ -1,6 +1,8 @@
 #include "ChatMessageDisplay.h"
 #include "GameLoop.h"
 #include "PebbleFL/Common/PblVector.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Interface/RedFont.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
 
@@ -36,11 +38,18 @@ ChatMessageDisplay::~ChatMessageDisplay()
 {
 }
 
+// OpenSWBF2: the chat line is drawn at the HUD's size (SetHudScale below), so it
+// spans the safe width in its own, scaled units.
+static float ChatLineWidth()
+{
+    return (float)RedInterfaceScreen::GetScreenWidth() * RedInterfaceScreen::GetScreenSafeZone() /
+           DisplayLogic::HudGroupScale(RedInterfaceScreen::GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale);
+}
+
 // FUNCTION: SWBF2 0x00454850
 void ChatMessageDisplay::Init()
 {
-    float fScreenWidth = (float)RedInterfaceScreen::GetScreenWidth() *
-                         RedInterfaceScreen::GetScreenSafeZone();
+    float fScreenWidth = ChatLineWidth();
     unsigned int uiFont = RedFont::GAMEFONT_SMALL;
     if (fScreenWidth < 1024.0f)
     {
@@ -86,6 +95,7 @@ void ChatMessageDisplay::Init()
     mMessageGroup.AddElement(&mTextElement);
 
     FLRenderer::AddInterfaceElement(&mMessageGroup, 0.0f, 0.0f, true);
+    mMessageGroup.SetHudScale(true);
 }
 
 // FUNCTION: SWBF2 0x00454ac0
@@ -124,8 +134,11 @@ void ChatMessageDisplay::Show(bool bShow, unsigned short usType)
         mTextElement.SetColor(RedColor::YELLOW);
     }
 
-    float fScreenWidth = (float)RedInterfaceScreen::GetScreenWidth() *
-                         RedInterfaceScreen::GetScreenSafeZone();
+    float fScreenWidth = ChatLineWidth();
+    // OpenSWBF2: the HUD scale can change after Init
+    mBitmapBackground.SetRect(fScreenWidth + 6.0f, (float)mTextElement.m_pFont->m_uiHeight + 6.0f,
+                              RedBitmapElement::BitmapHAlignT(0),
+                              RedBitmapElement::BitmapVAlignT(0));
     float fLeft, fTop, fRight, fBottom;
     mTextElementPrompt.GetRect(fLeft, fTop, fRight, fBottom);
     mTextElement.SetPosition(mTextElementPrompt.GetPosition().x + fRight + 4.0f,

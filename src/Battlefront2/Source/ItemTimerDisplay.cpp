@@ -97,6 +97,7 @@ void ItemTimerDisplay::Init()
             pText->SetTextAlign(RedTextElement::TEXT_HALIGN_CENTER, RedTextElement::TEXT_VALIGN_BOTTOM);
 
             FLRenderer::AddInterfaceElement(hView, pGroup, 0.5f, 0.5f, false);
+            pGroup->SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
         }
     }
 }

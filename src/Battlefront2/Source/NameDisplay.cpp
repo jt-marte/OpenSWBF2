@@ -115,6 +115,7 @@ void NameDisplay::Init()
             FLRenderer::AddInterfaceElement(hView, &sNameDisplayThread[i]->mPlayerNames[j],
                                             RedInterfaceScreen::CENTER, RedInterfaceScreen::CENTER,
                                             false);
+            sNameDisplayThread[i]->mPlayerNames[j].SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
         }
     }
 }

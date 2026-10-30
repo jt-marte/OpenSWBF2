@@ -56,6 +56,7 @@ EndDisplay::EndDisplay()
     {
         FLRenderer::AddInterfaceElement(CameraManager::sInstance->m_hView[i], &mEndGroup[i], 0.5f, 0.5f,
                                         true);
+        mEndGroup[i].SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
         mEndText[i].Enable(false);
         mEndGroup[i].AddElement(&mEndText[i]);
     }
