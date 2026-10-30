@@ -9,6 +9,14 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F303D4E6-ED54-5075-A41B-A8829D3D67C5}</ProjectGuid>
@@ -34,6 +42,14 @@
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <!-- the lvl tools stay 32-bit (they write 32-bit Lua bytecode), so x64 runs the Win32 build of them -->
+    <LuaCompilerExe>bin\Win32\$(Configuration)\LuaCompiler.exe</LuaCompilerExe>
+  </PropertyGroup>
+  <!-- OpenSWBF2: the x64 build. Galaxy, steam_api and Bink only exist as 32-bit DLLs, so x64 has
+       no Galaxy (Modern multiplayer only) and plays movies with FFmpeg (third_party\ffmpeg). -->
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <IncludePath>$(IncludePath);$(ProjectDir)third_party\ffmpeg\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSdk_71A_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(ProjectDir)third_party\ffmpeg\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -67,6 +83,18 @@
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;lib\binkw32.lib;lib\steam_api.lib;lib\Galaxy.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>OPENSWBF2_NO_GALAXY;OPENSWBF2_FFMPEG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- pointer truncation (C4311/C4312/C4302) is always a bug in the x64 build -->
+      <AdditionalOptions>/we4311 /we4312 /we4302 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -1673,6 +1701,7 @@
     <ProjectReference Include="LuaCompiler.vcxproj">
       <Project>{8E0BC5D7-03D1-5947-AEC7-5EAA5F25A967}</Project>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <Properties Condition="'$(Platform)'=='x64'">Platform=Win32</Properties>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -1681,17 +1710,21 @@
     <SWBF2_GAMEDATA Condition="'$(_SteamSWBF2)' != ''">$(_SteamSWBF2)\GameData</SWBF2_GAMEDATA>
   </PropertyGroup>
   <Target Name="BuildLuaLvls" AfterTargets="Build" DependsOnTargets="StageGameData" Condition="'$(SWBF2_GAMEDATA)' != '' and '$(SWBF2_NOSTAGE)' != 'true'">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(OutDir)LuaCompiler.exe&quot; lvl --index &quot;data\scripts\index.json&quot; --gamedata &quot;$(SWBF2_GAMEDATA)&quot; --out-dir &quot;$(OutDir)data\_lvl_pc&quot;" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(LuaCompilerExe)&quot; lvl --index &quot;data\scripts\index.json&quot; --gamedata &quot;$(SWBF2_GAMEDATA)&quot; --out-dir &quot;$(OutDir)data\_lvl_pc&quot;" />
   </Target>
   <Target Name="StageGameData" AfterTargets="Build" Condition="'$(SWBF2_GAMEDATA)' != '' and '$(SWBF2_NOSTAGE)' != 'true'">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(OutDir)LuaCompiler.exe&quot; stage --retail &quot;$(SWBF2_GAMEDATA)&quot; --out &quot;$(OutDir).&quot;" />
-    <ItemGroup>
+    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(LuaCompilerExe)&quot; stage --retail &quot;$(SWBF2_GAMEDATA)&quot; --out &quot;$(OutDir).&quot;" />
+    <ItemGroup Condition="'$(Platform)'=='Win32'">
       <GameDataFile Include="$(SWBF2_GAMEDATA)\binkw32.dll" Condition="Exists('$(SWBF2_GAMEDATA)\binkw32.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\Galaxy.dll" Condition="Exists('$(SWBF2_GAMEDATA)\Galaxy.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\GalaxyPeer.dll" Condition="Exists('$(SWBF2_GAMEDATA)\GalaxyPeer.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\steam_api.dll" Condition="Exists('$(SWBF2_GAMEDATA)\steam_api.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\unicows.dll" Condition="Exists('$(SWBF2_GAMEDATA)\unicows.dll')" />
     </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='x64'">
+      <GameDataFile Include="third_party\ffmpeg\bin\avcodec-*.dll;third_party\ffmpeg\bin\avformat-*.dll;third_party\ffmpeg\bin\avutil-*.dll;third_party\ffmpeg\bin\swresample-*.dll;third_party\ffmpeg\bin\swscale-*.dll" />
+    </ItemGroup>
+    <Warning Condition="'$(Platform)'=='x64' and !Exists('third_party\ffmpeg\bin')" Text="third_party\ffmpeg is missing (run tools\setup.ps1): the x64 build will not start without the FFmpeg DLLs." />
     <Copy SourceFiles="@(GameDataFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <WriteLinesToFile File="$(OutDir)steam_appid.txt" Lines="6060" Overwrite="true" />
     <MakeDir Directories="$(OutDir)SaveGames" />
