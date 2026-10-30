@@ -690,6 +690,23 @@ TEST_CASE("xinput double tap crouch while moving rolls" * doctest::test_suite("u
     CHECK(RollDoubleTap(still, true, 300, kRollStick));
 }
 
+TEST_CASE("xinput modern rs locks on unless a two-level scope is up" * doctest::test_suite("unit"))
+{
+    RsLock state = {};
+    // a press with no scope up locks on for as long as it is held
+    CHECK(RsLockTarget(state, true, false));
+    CHECK(RsLockTarget(state, true, false));
+    CHECK_FALSE(RsLockTarget(state, false, false));
+    // a press with the scope up steps the zoom (AimZoomPress) and never locks on, even if the
+    // scope drops while RS is still held
+    CHECK_FALSE(RsLockTarget(state, true, true));
+    CHECK_FALSE(RsLockTarget(state, true, false));
+    CHECK_FALSE(RsLockTarget(state, false, false));
+    // and a press that started as lock-on stays lock-on if the scope comes up mid-hold
+    CHECK(RsLockTarget(state, true, false));
+    CHECK(RsLockTarget(state, true, true));
+}
+
 TEST_CASE("xinput controller page labels every button" * doctest::test_suite("unit"))
 {
     CHECK(strcmp(SlotLabel(kBitA), "A") == 0);
@@ -728,6 +745,9 @@ TEST_CASE("xinput controller page names each layout's actions" * doctest::test_s
     CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActUse), "Hold X") == 0);
     CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActZoom), "Hold LT (RS: next zoom)") == 0);
     CHECK(strcmp(ActionLabel(kLayoutModern, 1, kActZoom), "LT") == 0); // vehicles toggle
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActLockTarget), "Click RS") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 2, kActLockTarget), "Click RS") == 0); // flyers
+    CHECK(!ActionLabel(kLayoutLegacy, 1, kActLockTarget)); // RS is zoom there
     // Legacy: the console layout
     CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActSecondaryFire), "LT") == 0);
     CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActReload), "X") == 0);
@@ -766,8 +786,10 @@ TEST_CASE("xinput prompts show each layout's button for a console token" * docte
     CHECK(TokenGlyph("crouchButton", kLayoutModern, 0) == kGlyphB);
     CHECK(TokenGlyph("useButton", kLayoutLegacy, 0) == kGlyphY);
     CHECK(TokenGlyph("OptionL", kLayoutModern, 0) == kTokenRetail);
+    // lock-on: RS on Modern, unbound on Legacy (RS zooms)
+    CHECK(TokenGlyph("btnmisc", kLayoutModern, 2) == kGlyphRS);
     // unbound on the pad, or unknown
-    CHECK(TokenGlyph("btnmisc", kLayoutModern, 0) == -1); // lock-on
+    CHECK(TokenGlyph("btnmisc", kLayoutLegacy, 0) == -1);
     CHECK(TokenGlyph("Map", kLayoutModern, 0) == -1);
     CHECK(TokenGlyph("nosuchtoken", kLayoutModern, 0) == -1);
     CHECK(TokenGlyph(0, kLayoutModern, 0) == -1);
@@ -792,7 +814,8 @@ TEST_CASE("xinput prompts only replace text whose tokens all resolve" * doctest:
     const unsigned short usOpen[] = { '{', 'b', 't', 'n', 'a', 0 };
     const unsigned short usOption[] = { '{', 'O', 'p', 't', 'i', 'o', 'n', 'L', '}', '{', 'b', 't', 'n', 'a', '}', 0 };
     CHECK(PromptTextResolves(usFire, kLayoutModern, 0));
-    CHECK_FALSE(PromptTextResolves(usLock, kLayoutModern, 0));
+    CHECK(PromptTextResolves(usLock, kLayoutModern, 1));
+    CHECK_FALSE(PromptTextResolves(usLock, kLayoutLegacy, 1));
     CHECK(PromptTextResolves(usPlain, kLayoutModern, 0));
     CHECK_FALSE(PromptTextResolves(usOpen, kLayoutModern, 0));
     CHECK(PromptTextResolves(usOption, kLayoutLegacy, 0));

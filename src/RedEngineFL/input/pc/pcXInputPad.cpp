@@ -16,6 +16,7 @@ int gPadLayout = kLayoutModern;
 bool gPadAimActive;
 bool gPadAimHeld;
 bool gPadSecondZoom;
+bool gPadScopeStepsZoom;
 
 static const float kStickMax = 32767.0f;
 
@@ -325,6 +326,10 @@ const char* ActionLabel(int iLayout, int iMode, int iAction)
     {
         return "Hold LT (RS: next zoom)";
     }
+    if (bModern && iAction == kActLockTarget)
+    {
+        return "Click RS"; // RsLockTarget
+    }
     if (iAction == kActRoll)
     {
         return bOnFoot ? "Double-tap B + move" : 0;
@@ -383,6 +388,10 @@ int ActionGlyph(int iLayout, int iMode, int iAction)
     if (bModern && iAction == kActZoom && iMode == 0)
     {
         return kGlyphLT;
+    }
+    if (bModern && iAction == kActLockTarget)
+    {
+        return kGlyphRS;
     }
     if (iAction == kActRoll)
     {
@@ -582,6 +591,16 @@ bool AimZoomPress(AimZoom& rState, bool bAimHeld, bool bSecondPressed, bool bAim
     }
     rState.bPressedLast = bPress;
     return bPress;
+}
+
+bool RsLockTarget(RsLock& rState, bool bRSDown, bool bScopeStepsZoom)
+{
+    if (bRSDown && !rState.bDown)
+    {
+        rState.bForZoom = bScopeStepsZoom;
+    }
+    rState.bDown = bRSDown;
+    return bRSDown && !rState.bForZoom;
 }
 
 int GuiForSlot(int iSlot)
