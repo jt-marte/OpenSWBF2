@@ -77,7 +77,9 @@ void DoThrottle()
     }
     else if (NetComm::IsLAN())
     {
-        NetComm::SetBandwidth(64, 0x500000, 0x500000);
+        // Retail used a fixed 5 Mbit/s here; the host bandwidth option can now raise it.
+        const int iUp = gAutoNetPlayers * 0xa000 > 0x500000 ? gAutoNetPlayers * 0xa000 : 0x500000;
+        NetComm::SetBandwidth(64, iUp, 0x500000);
     }
     else if (gAutoNetPlayers)
     {

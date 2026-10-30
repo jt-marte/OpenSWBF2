@@ -39,6 +39,11 @@ int ClampPlayerCount(unsigned int uWire);
 bool IsValidGuestCount(unsigned int uGuests);
 int DecodeLanMaxPlayers(unsigned int uWire);
 bool IsUsableIPv4(unsigned long ulNetOrder);
+// Host bandwidth option (profile mu8PlayersSupported): 0..8 are retail's 128K..6M, then
+// OpenSWBF2's 10M, 25M, 50M, 100M and Unlimited.
+const unsigned int kHostBandwidthOptions = 14;
+const unsigned int kHostBandwidthDefault = 9; // 10M
+int HostBandwidthSlots(unsigned int uOption);
 bool ParseHostPort(const char* pcText, char* pcHost, unsigned int uHostCap, int& iPort, int iDefaultPort);
 bool IsValidTurnRate(int iDuration, int iTurns);
 

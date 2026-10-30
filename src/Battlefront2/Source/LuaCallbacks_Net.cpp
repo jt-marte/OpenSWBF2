@@ -30,6 +30,7 @@
 #include "SoundFL/source/win/sndengine.h"
 #include "NetMatch.h"
 #include "RedEngineFL/Util/RedLog.h"
+#include "NetWire.h"
 #include "Steam/gfGalaxy.h"
 #include "BootDisplay.h"
 
@@ -1579,7 +1580,6 @@ extern void SetNetAwardsEnabled(int);
 
 extern bool netAutoAssignTeams;
 
-namespace Lua_Callbacks { static const unsigned int netPlayersSupported[9] = {3, 6, 9, 12, 19, 25, 38, 76, 153}; }
 
 // GLOBAL: SWBF2 0x007e8edb
 bool NetSetup::mLoginErrorsAreFatal = true;
@@ -3640,17 +3640,10 @@ int ScriptCB_BeginLobby(lua_State*)
         return 0;
     }
     PlayerProfile::tProfile* profile = PlayerProfile::GetCurProfile();
-    unsigned int index = profile ? profile->mOnlineOptions.mu8PlayersSupported : 0;
-    if (index >= 9)
-    {
-        index = 8;
-    }
-    unsigned int players = Lua_Callbacks::netPlayersSupported[index];
-    if (NetComm::IsLAN())
-    {
-        players = 32;
-    }
-    gAutoNetPlayers = players;
+    unsigned int index = profile ? profile->mOnlineOptions.mu8PlayersSupported : NetWire::kHostBandwidthDefault;
+    // OpenSWBF2: the option sets the upload cap on LAN/Direct too (retail fixed LAN at 32 slots
+    // here and 5 Mbit/s in DoThrottle, which still acts as the floor there).
+    gAutoNetPlayers = NetWire::HostBandwidthSlots(index);
     hostGame = NetSetup::HostGame();
     lastChangeCount = 0;
     if (netIsDedicated)

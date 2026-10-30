@@ -280,6 +280,14 @@ int DecodeLanMaxPlayers(unsigned int uWire)
     return uWire == 0 ? (int)kMaxPlayers : (int)uWire;
 }
 
+// Upload cap in "slots" of 40 kbit/s, the unit DoThrottle multiplies by. Retail stopped at
+// 153 slots (6M); the last entry is about 2 Gbit/s, which no link reaches.
+int HostBandwidthSlots(unsigned int uOption)
+{
+    static const int aiSlots[kHostBandwidthOptions] = {3, 6, 9, 12, 19, 25, 38, 76, 153, 256, 640, 1280, 2560, 48828};
+    return aiSlots[uOption < kHostBandwidthOptions ? uOption : kHostBandwidthOptions - 1];
+}
+
 // Any unicast IPv4 a LAN-transport peer can use: private, VPN (100.64/10), public and loopback.
 // Retail accepted only 10/8, 172.16/12 and 192.168/16, which kept Direct and VPN play out.
 bool IsUsableIPv4(unsigned long ulNetOrder)

@@ -398,7 +398,8 @@ void NetComm::SetBandwidth(int iDest, int iUp, int iDown)
         int iPipe = bLAN ? PIPE_LAN : PIPE_INTERNET;
         int iPercent = bLAN ? 100 : bwPercent;
         sendBits[iPipe] = 0.0f;
-        bps[iPipe] = iPercent * iUp / 100;
+        // 64-bit: percent times an upload above about 21 Mbit/s overflows an int.
+        bps[iPipe] = (int)((__int64)iPercent * iUp / 100);
     }
 }
 
