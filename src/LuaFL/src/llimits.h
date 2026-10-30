@@ -24,9 +24,11 @@ typedef unsigned int lu_hash;
 
 typedef int ls_hash;
 
-typedef unsigned long lu_mem;
+// Was unsigned long, which stays 32 bits on Win64 and truncated block sizes
+// before luaM_realloc could check them; size_t is the same width on Win32.
+typedef size_t lu_mem;
 
-#define MAX_LUMEM	ULONG_MAX
+#define MAX_LUMEM	((lu_mem)(~(lu_mem)0))
 
 typedef long ls_nstr;
 
@@ -36,7 +38,8 @@ typedef unsigned char lu_byte;
 
 #define MAX_INT (INT_MAX-2)
 
-#define IntPoint(p)  ((lu_hash)(p))
+// Hashes the low 32 bits of the address on Win64; the narrowing is intended.
+#define IntPoint(p)  ((lu_hash)(size_t)(p))
 
 #ifndef LUSER_ALIGNMENT_T
 typedef union { double u; void *s; long l; } L_Umaxalign;
