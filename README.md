@@ -29,7 +29,7 @@ The build automatically finds the Steam install's GameData through Steam's regis
 
 ## Multiplayer
 
-**Direct connect.** In Multiplayer > Join, set the source to LAN: the list shows servers found on the local network, and **Join IP** joins any address (`1.2.3.4`, `1.2.3.4:3700` or a host name; the port defaults to 3658). Private, VPN (Tailscale, Hamachi), public and loopback addresses all work. Hosting from Create with the LAN source makes a server others can join the same way; players outside your network need UDP 3658 forwarded to you. `BattlefrontII.exe /autonet client -lan /connect <address>` joins headlessly. The Internet source is the Galaxy list, shared with the stock Steam game.
+**Direct connect.** In Multiplayer > Join, set the source to LAN: the list shows servers found on the local network, and **Join IP** joins any address (`1.2.3.4`, `1.2.3.4:3700` or a host name; the port defaults to 3658). Private, VPN (Tailscale, Hamachi), public and loopback addresses all work. Hosting from Create with the LAN source makes a server others can join the same way; players outside your network need UDP 3658 forwarded to you. `BattlefrontII.exe /autonet client -lan /connect <address>` joins headlessly. The Internet source is the Galaxy list, shared with the stock Steam game. Hosts pick 30, 60 (default) or 120 turns per second in Options > Online; the stock game ran 20, and how it copes with a faster host is untested.
 
 **Dedicated server.** `BattlefrontII.exe -dedicated <map> [<map> ...]` starts a headless Direct server: no window, renderer or sound, no Steam sign-in needed, logs to stdout (and to the parent console when started from one). Maps use mission names such as `geo1c_con`, optionally followed by both teams' reinforcements (`geo1c_con 150 150`).
 
@@ -40,7 +40,7 @@ The build automatically finds the Steam install's GameData through Steam's regis
 | `/playerlimit N` | player limit, 1 to 64 |
 | `/password text` | join password |
 | `/bots N` | AI units per team |
-| `/tps N` | simulation turns per second (default 20) |
+| `/tps N` | simulation turns per second: 30, 60 (default) or 120; clients get as many updates a second as the turn rate, so 120 suits LAN and high-upload servers |
 | `/configdir dir` | folder holding `ServerSettings.cfg` and `ServerRotation.cfg` (default `settings`); each line is an admin command such as `/gamename My Server` or `/addmap geo1c_con` |
 | `-console` | open a console window for the log when there is no stdout |
 | `-netstats` | log ping, updates per second and bandwidth once a second |

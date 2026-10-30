@@ -288,6 +288,15 @@ int HostBandwidthSlots(unsigned int uOption)
     return aiSlots[uOption < kHostBandwidthOptions ? uOption : kHostBandwidthOptions - 1];
 }
 
+int HostTurnRate(int iProfileTurns)
+{
+    if (iProfileTurns < 30)
+    {
+        return kDefaultTurnRate;
+    }
+    return iProfileTurns > 255 ? 255 : iProfileTurns;
+}
+
 // Any unicast IPv4 a LAN-transport peer can use: private, VPN (100.64/10), public and loopback.
 // Retail accepted only 10/8, 172.16/12 and 192.168/16, which kept Direct and VPN play out.
 bool IsUsableIPv4(unsigned long ulNetOrder)

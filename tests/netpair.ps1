@@ -7,6 +7,7 @@ param(
     [ValidateRange(30, 600)][int]$JoinTimeout = 120,
     [switch]$Direct,
     [string]$ServerArgs = '',
+    [string]$ClientArgs = '',
     [string]$OutDir
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
@@ -84,7 +85,7 @@ function Invoke-NetPair($name, $drag) {
             $cliLog = Join-Path $caseDir "client$i.log"
             $cliLogs += $cliLog
             $join = if ($Direct) { '/connect 127.0.0.1' } else { '' }
-            $cliArgs = "/autonet client -lan /gamename $gameName $join $common -log `"$cliLog`""
+            $cliArgs = "/autonet client -lan /gamename $gameName $join $common $ClientArgs -log `"$cliLog`""
             $procs += Start-Process -FilePath (Join-Path $dirs[$i] 'BattlefrontII.exe') -ArgumentList $cliArgs -WorkingDirectory $dirs[$i] -PassThru
         }
         $joined = $false

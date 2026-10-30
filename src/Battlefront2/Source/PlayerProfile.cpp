@@ -1301,7 +1301,7 @@ void PlayerProfile::tOnlineOpt::ResetToDefault()
     mu8VoiceRecordVol = 10;
     mu8VoicePlayVol = 10;
     mu8PlayersSupported = NetWire::kHostBandwidthDefault; // retail 0 (128K)
-    mu8TurnsPerSecond = 20;
+    mu8TurnsPerSecond = NetWire::kDefaultTurnRate; // retail 20
     mOnlineIcon = 1;
     mVoiceEnable = 0;
     mShowAllRegions = 0;

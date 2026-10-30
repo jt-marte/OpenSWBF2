@@ -91,7 +91,8 @@ bool g_bNoSound;
 // GLOBAL: SWBF2 0x007e8e90
 int autoNetPlayers = 2;
 // GLOBAL: SWBF2 0x007e8e94
-int netFPS = 20;
+// Turn rate for autonet and dedicated hosts (/tps). OpenSWBF2 hosts default to 60; retail 20.
+int netFPS = 60;
 
 // GLOBAL: SWBF2 0x007e8e98
 char autoNetSession[64] = "LY";
@@ -1033,7 +1034,7 @@ CNetHostGame::CNetHostGame()
         PlayerProfile::tProfile* pCur = PlayerProfile::GetCurProfile();
         if (pCur)
         {
-            iTurnRate = pCur->mOnlineOptions.mu8TurnsPerSecond;
+            iTurnRate = NetWire::HostTurnRate(pCur->mOnlineOptions.mu8TurnsPerSecond);
         }
     }
     if (iTurnRate < 10)
@@ -4624,7 +4625,7 @@ void WriteShellUpdate(NetPktGroup& group, int player, ShellUpdate& update, Shell
         PlayerProfile::tProfile* profile = PlayerProfile::GetCurProfile();
         if (profile)
         {
-            turnRate = profile->mOnlineOptions.mu8TurnsPerSecond;
+            turnRate = NetWire::HostTurnRate(profile->mOnlineOptions.mu8TurnsPerSecond);
         }
     }
     if (turnRate < 10)
@@ -6544,7 +6545,10 @@ void PublishNextMissionToLobby()
                     iPlaying++;
                 }
             }
-            unsigned char u8Turns = PlayerProfile::GetCurProfile()->mOnlineOptions.mu8TurnsPerSecond;
+            // Advertise the rate this host runs (retail sent the raw profile value even on a
+            // dedicated server, which runs /tps).
+            unsigned char u8Turns = (unsigned char)(useProfile ? NetWire::HostTurnRate(
+                PlayerProfile::GetCurProfile()->mOnlineOptions.mu8TurnsPerSecond) : netFPS);
 
             group.BeginWrite();
             group.WriteBits(uWord, 32);
@@ -6623,7 +6627,8 @@ void PublishNextMissionToLobby()
         SetLobbyData("fgr_int_r1", gf::utils::ToString(iReinf1));
         SetLobbyData("fgd_int_numPlayers", gf::utils::ToString(iPlaying));
         SetLobbyData("fgd_int_netPlayerLimit", gf::utils::ToString(netPlayerLimit));
-        unsigned char u8Turns = PlayerProfile::GetCurProfile()->mOnlineOptions.mu8TurnsPerSecond;
+        unsigned char u8Turns = (unsigned char)(useProfile ? NetWire::HostTurnRate(
+            PlayerProfile::GetCurProfile()->mOnlineOptions.mu8TurnsPerSecond) : netFPS);
         SetLobbyData("fgd_int_serverType", gf::utils::ToString(1));
         SetLobbyData("fgd_int_turns_per_second", gf::utils::ToString((int)u8Turns));
         SetLobbyData("fgr_int_netMinPlayersToAutoLaunchDedicated", gf::utils::ToString(netMinPlayersToAutoLaunchDedicated));

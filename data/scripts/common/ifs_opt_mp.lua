@@ -110,11 +110,10 @@ function ifs_opt_mp_fnUpdateForm( form )
 	form.elements["voiceplayback"].selValue = this.OnlinePrefs.iVoicePlayVol
 	form.elements["players"].selValue = this.OnlinePrefs.iPlayersSupported + 1
 
-	if ( this.OnlinePrefs.iTurnsPerSecond == 60 ) then
-		form.elements["turns"].selValue = 4
-	elseif ( this.OnlinePrefs.iTurnsPerSecond == 30 ) then
+	-- OpenSWBF2: 30, 60 (default) and 120 turns per second
+	if ( this.OnlinePrefs.iTurnsPerSecond >= 120 ) then
 		form.elements["turns"].selValue = 3
-	elseif ( this.OnlinePrefs.iTurnsPerSecond == 15 ) then
+	elseif ( this.OnlinePrefs.iTurnsPerSecond == 30 ) then
 		form.elements["turns"].selValue = 1
 	else
 		form.elements["turns"].selValue = 2
@@ -312,13 +311,11 @@ ifs_opt_mp = NewIFShellScreen {
 			this.OnlinePrefs.iPlayersSupported = btnNum - 1
 		elseif (buttongroup.tag == "turns") then
 			if ( btnNum == 1 ) then
-				this.OnlinePrefs.iTurnsPerSecond = 15
-			elseif ( btnNum == 2 ) then
-				this.OnlinePrefs.iTurnsPerSecond = 20
-			elseif ( btnNum == 3 ) then
 				this.OnlinePrefs.iTurnsPerSecond = 30
-			else
+			elseif ( btnNum == 2 ) then
 				this.OnlinePrefs.iTurnsPerSecond = 60
+			else
+				this.OnlinePrefs.iTurnsPerSecond = 120
 			end
 		elseif (buttongroup.tag == "icon") then
 			this.OnlinePrefs.iOnlineIcon = btnNum - 1
@@ -343,8 +340,8 @@ ifs_opt_mp = NewIFShellScreen {
 			this.OnlinePrefs.iPlayersSupported = element.selValue - 1
 			Form_UpdateElement(form, "players")
 		elseif (element.tag == "turns") then
-			local aiTurns = { 15, 20, 30, 60 }
-			this.OnlinePrefs.iTurnsPerSecond = aiTurns[element.selValue] or 20
+			local aiTurns = { 30, 60, 120 }
+			this.OnlinePrefs.iTurnsPerSecond = aiTurns[element.selValue] or 60
 			Form_UpdateElement(form, "turns")
 		end
 		
@@ -559,7 +556,7 @@ ifs_opt_mp_form_layout = {
 		{ tag = "voicevol",  title = "ifs.onlineopt.voicetotvvolume", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 10, control = "slider", minValue = 0.0, maxValue = 100.0,},
 		{ tag = "prompt",  title = "ifs.onlineopt.autologin", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.never", "ifs.gsprofile.prompt", "common.always"}},
 		{ tag = "players", title = "ifs.onlineopt.hostbandwidth", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"128K", "256K", "384K", "512K", "768K", "1M", "1.5M", "3M", "6M", "10M", "25M", "50M", "100M", "Unlimited"},},
-		{ tag = "turns", title = "ifs.onlineopt.tps", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"15", "20", "30", "60"},},
+		{ tag = "turns", title = "ifs.onlineopt.tps", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"30", "60", "120"},},
 		{ tag = "allregions", title = "ifs.onlineopt.allregions", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"}},
 		{ tag = "icon", title = "ifs.onlineopt.icon", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"}},   -- display network performance icon 
 		{ tag = "voicerecord",   title = "ifs.onlineopt.voicerecordvol", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 10, control = "slider", minValue = 0.0, maxValue = 10.0,},
