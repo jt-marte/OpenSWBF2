@@ -549,7 +549,7 @@ ifs_opt_mp_form_layout = {
 		{ tag = "voicemask", title = "ifs.onlineopt.voicemask", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"}},
 		{ tag = "voicevol",  title = "ifs.onlineopt.voicetotvvolume", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 10, control = "slider", minValue = 0.0, maxValue = 100.0,},
 		{ tag = "prompt",  title = "ifs.onlineopt.autologin", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.never", "ifs.gsprofile.prompt", "common.always"}},
-		{ tag = "players", title = "ifs.onlineopt.hostbandwidth", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"128K", "256K", "384K", "512K", "768K", "1M", "1.5M", "3M", "6M"},},
+		{ tag = "players", title = "ifs.onlineopt.hostbandwidth", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"128K", "256K", "384K", "512K", "768K", "1M", "1.5M", "3M", "6M", "10M", "25M", "50M", "100M", "Unlimited"},},
 		{ tag = "turns", title = "ifs.onlineopt.tps", fnChanged = ifs_opt_mp.OnElementChanged, selValue = 1, control = "dropdown", values = {"15", "20", "30"},},
 		{ tag = "allregions", title = "ifs.onlineopt.allregions", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"}},
 		{ tag = "icon", title = "ifs.onlineopt.icon", fnChanged = ifs_opt_mp.OnRadioChanged, selValue = 1, control = "radio", values = {"common.no", "common.yes"}},   -- display network performance icon 

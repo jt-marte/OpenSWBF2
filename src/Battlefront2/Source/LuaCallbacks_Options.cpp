@@ -20,6 +20,7 @@
 #include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Util/RedLog.h"
+#include "NetWire.h"
 
 static unsigned __int64 ShaRotate(unsigned __int64 value, unsigned int bits)
 {
@@ -54,7 +55,6 @@ extern bool netShowNames;
 namespace PblBuildType { extern bool gDemoAutoAssign; }
 extern bool netAutoAssignTeamsOriginalSetting;
 extern int netMinPlayersToAutoLaunchDedicated;
-extern int netThrottle;
 extern int netHeroRuleUnlock;
 extern int netHeroRulePlayer;
 extern int netHeroRuleTeam;
@@ -102,7 +102,6 @@ bool gRandomizePlaylist;
 bool gIsDedicated;
 
 // GLOBAL: SWBF2 0x0078a294
-static const int netPlayersSupported[9] = { 3, 6, 9, 12, 19, 25, 38, 76, 153 };
 
 }
 
@@ -880,9 +879,9 @@ int ScriptCB_GetOnlineOpts(lua_State* L)
         iVoiceRecordVol = rOnline.mu8VoiceRecordVol;
         iVoicePlayVol = rOnline.mu8VoicePlayVol;
         iPlayersSupported = rOnline.mu8PlayersSupported;
-        if (iPlayersSupported >= 9)
+        if (iPlayersSupported >= (int)NetWire::kHostBandwidthOptions)
         {
-            iPlayersSupported = 8;
+            iPlayersSupported = NetWire::kHostBandwidthOptions - 1;
         }
         iTurnsPerSecond = rOnline.mu8TurnsPerSecond;
         iOnlineIcon = rOnline.mOnlineIcon;
@@ -959,28 +958,8 @@ int ScriptCB_GetNetGameDefaults(lua_State* L)
 
     if (NetGame::IsHost())
     {
-        PlayerProfile::tProfile* pCur = PlayerProfile::GetCurProfile();
-        if (pCur && !NetComm::IsLAN())
-        {
-            int iSupported = pCur->mOnlineOptions.mu8PlayersSupported;
-            if (iSupported >= 9)
-            {
-                iSupported = 8;
-            }
-            int iLimit = Lua_Callbacks::netPlayersSupported[iSupported];
-            if (netThrottle)
-            {
-                iLimit = 64;
-            }
-            if (iLimit < iMaxDedicatedPlayers)
-            {
-                iMaxDedicatedPlayers = iLimit;
-            }
-            if (iLimit + 1 < iMaxPlayers)
-            {
-                iMaxPlayers = iLimit + 1;
-            }
-        }
+        // OpenSWBF2: the host bandwidth option only caps upload now. Retail also capped online
+        // games at its slot count plus one, so the default 128K allowed 4 players.
         if (iNumPlayers > iMaxPlayers)
         {
             iNumPlayers = iMaxPlayers;

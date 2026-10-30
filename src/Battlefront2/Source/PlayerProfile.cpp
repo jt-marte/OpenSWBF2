@@ -31,6 +31,7 @@
 #include "GameVoiceChatNode.h"
 #include "NetMatch.h"
 #include "RedEngineFL/input/RedJoystick.h"
+#include "NetWire.h"
 
 BOOL CALLBACK EnumObjectsCallback(DIDEVICEOBJECTINSTANCEA const* pObject, void* pvRef);
 
@@ -1299,7 +1300,7 @@ void PlayerProfile::tOnlineOpt::ResetToDefault()
     mHasSeenEULA = false;
     mu8VoiceRecordVol = 10;
     mu8VoicePlayVol = 10;
-    mu8PlayersSupported = 0;
+    mu8PlayersSupported = NetWire::kHostBandwidthDefault; // retail 0 (128K)
     mu8TurnsPerSecond = 20;
     mOnlineIcon = 1;
     mVoiceEnable = 0;

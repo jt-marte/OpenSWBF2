@@ -502,6 +502,24 @@ TEST_CASE("join ip text parses host and optional port" * doctest::test_suite("re
     CHECK(!NetWire::ParseHostPort("1.2.3.45", acSmall, sizeof(acSmall), iPort, 3658));
 }
 
+TEST_CASE("host bandwidth option goes past 6M" * doctest::test_suite("regression"))
+{
+    // Retail's nine options keep their slots, so old profiles keep their upload cap.
+    const int aiRetail[9] = {3, 6, 9, 12, 19, 25, 38, 76, 153};
+    for (unsigned int i = 0; i < 9; ++i)
+    {
+        CHECK(NetWire::HostBandwidthSlots(i) == aiRetail[i]);
+    }
+    CHECK(NetWire::kHostBandwidthOptions == 14);
+    CHECK(NetWire::HostBandwidthSlots(9) * 40960 > 10000000);   // 10M
+    CHECK(NetWire::HostBandwidthSlots(12) * 40960 > 100000000); // 100M
+    // Unlimited still fits DoThrottle's int multiply by 40960.
+    CHECK((long long)NetWire::HostBandwidthSlots(13) * 40960 < 2147483647LL);
+    CHECK(NetWire::HostBandwidthSlots(13) * 40960 > 1000000000);
+    CHECK(NetWire::HostBandwidthSlots(200) == NetWire::HostBandwidthSlots(13));
+    CHECK(NetWire::kHostBandwidthDefault == 9);
+}
+
 TEST_CASE("turn rate outside the retail range is rejected" * doctest::test_suite("regression"))
 {
     NetTestReset();
