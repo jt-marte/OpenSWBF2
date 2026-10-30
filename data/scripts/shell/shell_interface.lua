@@ -72,6 +72,11 @@ ScriptCB_DoFile("ifs_mp_lobby_quick")
 -- Pull in list of missions.
 ScriptCB_DoFile("missionlist")
 
+-- OpenSWBF2: custom_gc_<n> script mods (globals.lua), now that the mission lists, the era and
+-- mode registry and the Galactic Conquest button hooks exist, and before the screens are built
+ScriptSlots_Load("custom_gc_")
+missionlist_BuildRegistry()
+
 if(gPlatformStr == "PC") then
     ScriptCB_DoFile("pctabs_options")
     ScriptCB_DoFile("ifs_pckeyboard")   

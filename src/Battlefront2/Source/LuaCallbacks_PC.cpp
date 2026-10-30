@@ -1,7 +1,9 @@
+#include <windows.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "LuaCallbacks_PC.h"
+#include "LoadUtil.h"
 #include "LuaHelper.h"
 #include "LuaVideoArgs.h"
 #include "FLGuiManager.h"
@@ -537,6 +539,26 @@ static int ScriptCB_IsPadBumperDown(lua_State*)
     return 1;
 }
 
+// True when a data file exists (resolved like ScriptCB_IsFileExist) and is not empty. The
+// numbered script-mod slots (custom_gc_<n>, user_script_<n>) use it: players leave 0-byte
+// placeholders there, and reading one as a level fails.
+static int ScriptCB_IsLvlUsable(lua_State*)
+{
+    bool bUsable = false;
+    if (lua_isstring(LuaHelper::mState, 1))
+    {
+        char acFileName[256];
+        LoadUtil::MakeFullName(lua_tostring(LuaHelper::mState, 1), LoadUtil::FILE_TYPE_NONE, acFileName,
+                               sizeof(acFileName), false);
+        WIN32_FILE_ATTRIBUTE_DATA kInfo;
+        bUsable = GetFileAttributesExA(acFileName, GetFileExInfoStandard, &kInfo) &&
+                  !(kInfo.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) &&
+                  (kInfo.nFileSizeLow != 0 || kInfo.nFileSizeHigh != 0);
+    }
+    lua_pushboolean(LuaHelper::mState, bUsable);
+    return 1;
+}
+
 // Screen position of an element's hotspot centre (nothing if it has none), so
 // a pad can hop between the mouse-only PC widgets.
 static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
@@ -730,6 +752,7 @@ static const CallbackEntryT sPCCallbacks[] =
     { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
     { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
     { "ScriptCB_IsPadBumperDown", ScriptCB_IsPadBumperDown },
+    { "ScriptCB_IsLvlUsable", ScriptCB_IsLvlUsable },
     { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
     { "ScriptCB_GetPadLayout", ScriptCB_GetPadLayout },
     { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },

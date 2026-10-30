@@ -10,6 +10,7 @@
 #include "LoadUtil.h"
 #include "LuaHelper.h"
 #include "LuaScript.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 namespace DownloadableContent
 {
@@ -18,7 +19,7 @@ namespace DownloadableContent
 int mNumMissions;
 
 // GLOBAL: SWBF2 0x01e30950
-DownloadableMissionType mMissions[500];
+DownloadableMissionType mMissions[kMaxMissions];
 
 // GLOBAL: SWBF2 0x007e632c
 int mCurMissionIndex = -1;
@@ -88,7 +89,7 @@ static int AddDownloadableContent(lua_State* L)
     char const* pcMissionName = LuaHelper::GetString(2);
     unsigned int uiLevelMemory = (LuaHelper::GetInt(3) + 32) << 16;
 
-    if (mNumMissions < 500)
+    if (mNumMissions < kMaxMissions)
     {
         mMissions[mNumMissions].mMapName = PblHash(pcMapName);
         mMissions[mNumMissions].mMissionName = PblHash(pcMissionName);
@@ -98,7 +99,17 @@ static int AddDownloadableContent(lua_State* L)
         ++mNumMissions;
         SetCurrentMission(PblHash(pcMissionName));
     }
+    else
+    {
+        LOG(LogLoad, Warning, "AddOn: more than %d missions, %s (%s) left out", kMaxMissions,
+            pcMissionName ? pcMissionName : "?", mCurMissionDir);
+    }
     return 0;
+}
+
+bool IsSkippedAddOn(char const* pcFolder)
+{
+    return pcFolder && _stricmp(pcFolder, "AAA-v1.3patch") == 0;
 }
 
 // FUNCTION: SWBF2 0x0048e830
@@ -124,6 +135,12 @@ void AddMissions(LuaScript* pScript)
         if (strcmp(findData.name, ".") != 0 && strcmp(findData.name, "..") != 0 &&
             (findData.attrib & _A_SUBDIR))
         {
+            if (IsSkippedAddOn(findData.name))
+            {
+                LOG(LogLoad, Inform, "AddOn: skipped %s (OpenSWBF2 has 1.3-style mod support built in)",
+                    findData.name);
+                continue;
+            }
             _snprintf(acFileName, sizeof(acFileName) - 1, "%s/%s", PC_DOWNLOADABLECONTENT_DIR,
                       findData.name);
             acFileName[sizeof(acFileName) - 1] = 0;

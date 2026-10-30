@@ -9,14 +9,8 @@ ifs_freeform_pickscenario_vbutton_layout = {
 	xSpacing = 10,
 	ySpacing = 5,
 	font = gMenuButtonFont,
-	buttonlist = { 	
-		{ tag = "load", string = "ifs.meta.load.btnload", },
-		{ tag = "1", string = "ifs.meta.Configs.1", },
-		{ tag = "2", string = "ifs.meta.Configs.2", },
-		{ tag = "3", string = "ifs.meta.Configs.3", },
-		{ tag = "4", string = "ifs.meta.Configs.4", },
-		{ tag = "custom", string = "ifs.meta.Configs.custom", },
-	},
+	-- OpenSWBF2: load, 1-4 and custom, plus any scenarios custom_gc script mods add (missionlist.lua)
+	buttonlist = custom_GetGCButtonList(),
 	title = "ifs.meta.Configs.title",
 --	rotY = 35,
 }
@@ -47,6 +41,10 @@ ifs_freeform_pickscenario = NewIFShellScreen {
 		end
 
  		ifelm_shellscreen_fnPlaySound(this.acceptSound)
+		-- OpenSWBF2: a scenario a custom_gc script mod added handles its own button
+		if (this.CurButton and custom_PressedGCButton(this.CurButton)) then
+			return
+		end
  		if (this.CurButton == "load") then
  			-- load existing game
 			ifs_freeform_load.Mode = "Load"

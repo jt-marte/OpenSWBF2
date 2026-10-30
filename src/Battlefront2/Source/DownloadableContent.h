@@ -28,6 +28,13 @@ char const* GetContentDirectory();
 bool IsMissionDownloaded(unsigned int uiHash);
 bool ReadDataFile(char const* pcFileName);
 
-extern DownloadableMissionType mMissions[500];
+// OpenSWBF2: retail kept 500 and silently dropped the rest; big mod collections pass that.
+const int kMaxMissions = 4096;
+
+// OpenSWBF2: the unofficial 1.3 patch's own addon. Its addme caps every other mod at 500
+// missions, and OpenSWBF2 has the same mod support built in, so it is skipped.
+bool IsSkippedAddOn(char const* pcFolder);
+
+extern DownloadableMissionType mMissions[kMaxMissions];
 
 }

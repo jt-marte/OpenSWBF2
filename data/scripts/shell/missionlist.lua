@@ -427,6 +427,190 @@ gMapModes = {
 	},
 }
 
+------------------------------------------------------------------------------------
+-- OpenSWBF2: built-in 1.3-style mod support (our own code, compatible with mods made for
+-- the unofficial 1.3 patch, without the patch).
+--
+-- Any era and game mode works. A mod's mission list entries only need era_<id> and
+-- mode_<mode>_<id> keys: ids nobody registered get a record when the lists are expanded
+-- (missionlist_DiscoverErasAndModes). custom_gc_<n> script mods can also add records to
+-- custom_gEras / custom_gModes, as with the patch ({ id = "k" } or a full record); they are
+-- merged by missionlist_BuildRegistry. Names come from the mod's or the game's localize keys
+-- (common.era.<id>, modename.name.<id>), else readable English (missionlist_EraUName /
+-- missionlist_ModeUName).
+------------------------------------------------------------------------------------
+
+custom_gEras = {}
+custom_gModes = {}
+
+-- The patch's mission cap, for mods that read it; OpenSWBF2 lists up to 4096 (DownloadableContent.h)
+__max_missions__ = 4096
+
+-- English names for well-known mode ids, used when nothing localizes modename.name.<id>
+gModeFallbackNames = {
+	obj = "Objective", c = "Campaign", uber = "Uber", bf1 = "Battlefront 1", holo = "Holocron",
+	ord66 = "Order 66", dm = "Deathmatch", space = "Space Battle", hctf = "Hero CTF",
+	c1 = "Custom 1", c2 = "Custom 2", c3 = "Custom 3", c4 = "Custom 4",
+	vh = "Vehicles", vhcon = "Vehicle Conquest", vhtdm = "Vehicle TDM", vhctf = "Vehicle CTF",
+	lms = "Last Man Standing", race = "Race", koh = "King of the Hill", surv = "Survival",
+	rpg = "RPG", wav = "Waves", ctrl = "Control", siege = "Siege", seige = "Siege",
+}
+
+function missionlist_FindEra(Subst)
+	local i
+	for i = 1, table.getn(gMapEras) do
+		if(gMapEras[i].subst == Subst) then
+			return gMapEras[i]
+		end
+	end
+end
+
+-- Key is the whole key ("mode_con") or the part after "mode_"
+function missionlist_FindMode(Key)
+	if(string.sub(Key, 1, 5) ~= "mode_") then
+		Key = "mode_" .. Key
+	end
+	local i
+	for i = 1, table.getn(gMapModes) do
+		if(gMapModes[i].key == Key) then
+			return gMapModes[i]
+		end
+	end
+end
+
+-- A full era record from a bare { id = ... } (or a record that is missing fields)
+function missionlist_MakeEra(Rec)
+	local Id = Rec.id or Rec.subst or string.sub(Rec.key or "era_?", 5)
+	Rec.subst = Rec.subst or Id
+	Rec.key = Rec.key or ("era_" .. Id)
+	Rec.showstr = Rec.showstr or ("common.era." .. Id)
+	Rec.Team1Name = Rec.Team1Name or ("common.sides." .. Id .. ".name")
+	Rec.Team2Name = Rec.Team2Name or ("common.sides." .. Id .. ".name")
+	return Rec
+end
+
+-- A full mode record from a bare { id = ... }. The key keeps the mission flag spelling
+-- (mode_<id>_<era>); subst is what the mission name uses.
+function missionlist_MakeMode(Rec)
+	local Id = Rec.id or string.sub(Rec.key or "mode_?", 6)
+	Rec.key = Rec.key or ("mode_" .. Id)
+	Rec.subst = Rec.subst or Id
+	Rec.showstr = Rec.showstr or ("modename.name." .. Id)
+	Rec.descstr = Rec.descstr or ("modename.description." .. Id)
+	return Rec
+end
+
+function missionlist_AddEra(Rec)
+	Rec = missionlist_MakeEra(Rec)
+	if(not missionlist_FindEra(Rec.subst)) then
+		table.insert(gMapEras, Rec)
+		gRegistryVersion = (gRegistryVersion or 0) + 1
+	end
+	return missionlist_FindEra(Rec.subst)
+end
+
+function missionlist_AddMode(Rec)
+	Rec = missionlist_MakeMode(Rec)
+	if(not missionlist_FindMode(Rec.key)) then
+		table.insert(gMapModes, Rec)
+		gRegistryVersion = (gRegistryVersion or 0) + 1
+	end
+	return missionlist_FindMode(Rec.key)
+end
+
+-- Merges what custom_gc scripts put in custom_gEras / custom_gModes. Safe to call again.
+function missionlist_BuildRegistry()
+	local i
+	for i = 1, table.getn(custom_gEras) do
+		missionlist_AddEra(custom_gEras[i])
+	end
+	for i = 1, table.getn(custom_gModes) do
+		missionlist_AddMode(custom_gModes[i])
+	end
+	custom_gEras = {}
+	custom_gModes = {}
+end
+
+-- Registers every era and mode the entries of a mission list use: era_<id> keys, and
+-- mode_<mode>_<id> keys (the era is after the last underscore).
+function missionlist_DiscoverErasAndModes(List)
+	local i, k, v
+	for i = 1, table.getn(List) do
+		for k, v in List[i] do
+			if(type(k) == "string" and v) then
+				if(string.sub(k, 1, 4) == "era_") then
+					if(string.len(k) > 4) then
+						missionlist_AddEra({ id = string.sub(k, 5) })
+					end
+				elseif(string.sub(k, 1, 5) == "mode_") then
+					local _, _, Mode, Era = string.find(k, "^mode_(.+)_([^_]+)$")
+					if(Mode and Era) then
+						missionlist_AddMode({ key = "mode_" .. Mode })
+						missionlist_AddEra({ id = Era })
+					end
+				end
+			end
+		end
+	end
+end
+
+-- Display names as unicode: the localized key if there is one, else readable English
+function missionlist_EraUName(Era)
+	local UStr = Era.showstr and ScriptCB_getlocalizestr(Era.showstr, 1)
+	if(UStr) then
+		return UStr
+	end
+	return ScriptCB_tounicode("Era " .. string.upper(Era.subst or "?"))
+end
+
+function missionlist_ModeUName(Mode)
+	local UStr = Mode.showstr and ScriptCB_getlocalizestr(Mode.showstr, 1)
+	if(UStr) then
+		return UStr
+	end
+	local Id = string.sub(Mode.key or "mode_?", 6)
+	return ScriptCB_tounicode(gModeFallbackNames[Id] or string.upper(Id))
+end
+
+-- The patch's getters, for mod scripts that call them
+function custom_GetGMapEras()
+	missionlist_BuildRegistry()
+	return gMapEras
+end
+
+function custom_GetGMapModes()
+	missionlist_BuildRegistry()
+	return gMapModes
+end
+
+function custom_GetEraButtonList()
+	missionlist_BuildRegistry()
+	local List = {}
+	local i
+	for i = 1, table.getn(gMapEras) do
+		table.insert(List, { tag = gMapEras[i].subst, string = gMapEras[i].showstr })
+	end
+	return List
+end
+
+-- Galactic Conquest scenario buttons. custom_gc scripts wrap these to add their own
+-- scenarios (ifs_freeform_pickscenario builds its buttons from the list and asks
+-- custom_PressedGCButton first; true means the script handled the press).
+function custom_GetGCButtonList()
+	return {
+		{ tag = "load", string = "ifs.meta.load.btnload", },
+		{ tag = "1", string = "ifs.meta.Configs.1", },
+		{ tag = "2", string = "ifs.meta.Configs.2", },
+		{ tag = "3", string = "ifs.meta.Configs.3", },
+		{ tag = "4", string = "ifs.meta.Configs.4", },
+		{ tag = "custom", string = "ifs.meta.Configs.custom", },
+	}
+end
+
+function custom_PressedGCButton(Tag)
+	return nil
+end
+
 gAllMapsStr = "_all_maps_"
 gDelAllMapsStr = "_remove_all_"
 gAllModesStr = "_all_modes_"
@@ -448,7 +632,11 @@ end
 function missionlist_ExpandMaplist(bForMP)
 
 	if(not gSortedMaplist) then
-		table.sort(sp_missionselect_listbox_contents, missionlist_mapsorthelper) 
+		-- OpenSWBF2: the mods' addme scripts have run by now; register their eras and modes
+		missionlist_BuildRegistry()
+		missionlist_DiscoverErasAndModes(sp_missionselect_listbox_contents)
+		missionlist_DiscoverErasAndModes(mp_missionselect_listbox_contents)
+		table.sort(sp_missionselect_listbox_contents, missionlist_mapsorthelper)
 		table.sort(mp_missionselect_listbox_contents, missionlist_mapsorthelper) 
 		gSortedMaplist = 1
 	end

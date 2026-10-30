@@ -322,3 +322,40 @@ RumbleLarge = {
 	FXName = "Doesn'tWorkYet", --the particle effect that gets triggered, is read in, but not used yet.
 	
 }
+
+-- OpenSWBF2: built-in support for the numbered script mods the unofficial 1.3 patch
+-- introduced, so they run without it: custom_gc_<n>.lvl in the shell and user_script_<n>.lvl
+-- in game, read from data\_lvl_pc for n = 0..99. Empty placeholder files are skipped, and a
+-- script that already ran is not run again (one of them may load the next ones itself, as the
+-- patch's own slot 10 did).
+function ScriptSlots_Load(Prefix)
+	if(not ScriptCB_IsLvlUsable) then
+		return
+	end
+	if(not gScriptSlots_DoFile) then
+		gScriptSlots_DoFile = ScriptCB_DoFile
+		-- passes on exactly the arguments it got: the engine's ScriptCB_DoFile does nothing
+		-- unless it gets just one
+		ScriptCB_DoFile = function(...)
+			local Name = arg[1]
+			if(gScriptSlots_Ran and Name) then
+				if(gScriptSlots_Ran[Name]) then
+					return
+				end
+				gScriptSlots_Ran[Name] = 1
+			end
+			return gScriptSlots_DoFile(unpack(arg))
+		end
+	end
+	gScriptSlots_Ran = {}
+	local n
+	for n = 0, 99 do
+		local Name = Prefix .. n
+		if((not gScriptSlots_Ran[Name]) and ScriptCB_IsLvlUsable(Name .. ".lvl")) then
+			print("OpenSWBF2: script mod " .. Name)
+			ReadDataFile(Name .. ".lvl")
+			ScriptCB_DoFile(Name)
+		end
+	end
+	gScriptSlots_Ran = nil
+end
