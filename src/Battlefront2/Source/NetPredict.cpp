@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "NetPredict.h"
 #include "NetGame.h"
 
@@ -353,6 +355,12 @@ void __fastcall SmoothLocal(SmoothInfo* pInfo)
 // `dynamic initializer for 'smoothInfo''
 SmoothInfo smoothInfo[64];
 
+// OpenSWBF2 -netstats: how far remote soldiers' predicted positions moved when an update
+// corrected them (metres, under 10), summed and maxed until LogNetStats reads and clears them.
+float gNetCorrSum;
+float gNetCorrMax;
+unsigned int gNetCorrCount;
+
 // FUNCTION: SWBF2 0x005d9c00
 SmoothInfo& NetPredict::GetSmoothInfo(int iIndex)
 {
@@ -415,6 +423,13 @@ void SmoothInfo::SetMat(const PblMatrix& mat, float fParam1, float fParam2)
     const PblMatrix& rendered = lastRenderMat[i];
     PblVector3 vPosErr(rendered.m[3][0] - mat.m[3][0], rendered.m[3][1] - mat.m[3][1],
                        rendered.m[3][2] - mat.m[3][2]);
+    const float fCorr = sqrtf(vPosErr.x * vPosErr.x + vPosErr.y * vPosErr.y + vPosErr.z * vPosErr.z);
+    if (!bLocal && fCorr < 10.0f) // past Smooth's 10 m small-jump limit it is a respawn or teleport
+    {
+        gNetCorrSum += fCorr;
+        gNetCorrMax = fCorr > gNetCorrMax ? fCorr : gNetCorrMax;
+        ++gNetCorrCount;
+    }
     PblVector3 vFrontErr(rendered.m[2][0] - mat.m[2][0], rendered.m[2][1] - mat.m[2][1],
                          rendered.m[2][2] - mat.m[2][2]);
     if (vPosErr.y * vPosErr.y + vPosErr.x * vPosErr.x + vPosErr.z * vPosErr.z >

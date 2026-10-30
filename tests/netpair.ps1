@@ -3,7 +3,7 @@ param(
     [string]$Map = 'geo1c_con',
     [ValidateRange(1, 8)][int]$Clients = 1,
     [ValidateRange(10, 3600)][int]$Seconds = 45,
-    [ValidateSet('clean', 'lag100', 'lag200', 'all')][string]$Profile = 'clean',
+    [ValidateSet('clean', 'lag100', 'lag200', 'jitter', 'all')][string]$Profile = 'clean',
     [ValidateRange(30, 600)][int]$JoinTimeout = 120,
     [switch]$Direct,
     [string]$ServerArgs = '',
@@ -38,8 +38,10 @@ $profiles = @{
     clean  = @{ Drag = ''; MinUpdates = 8.0 }
     lag100 = @{ Drag = '-latency 100 -loss 1'; MinUpdates = 3.0 }
     lag200 = @{ Drag = '-latency 200 -loss 2'; MinUpdates = 2.0 }
+    # 60 ms each way, +-30 ms per packet (-jitter is a percentage of -latency), 1% loss
+    jitter = @{ Drag = '-latency 60 -jitter 50 -loss 1'; MinUpdates = 3.0 }
 }
-$runProfiles = if ($Profile -eq 'all') { @('clean', 'lag100', 'lag200') } else { @($Profile) }
+$runProfiles = if ($Profile -eq 'all') { @('clean', 'lag100', 'lag200', 'jitter') } else { @($Profile) }
 if (-not $OutDir) { $OutDir = Join-Path $root ("artifacts\netpair\" + (Get-Date -Format 'yyyyMMdd-HHmmss')) }
 New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
 
@@ -115,6 +117,11 @@ function Invoke-NetPair($name, $drag) {
     $updates = @()
     $pings = @()
     $loss = @()
+    $corrAvg = @()
+    $corrMax = @()
+    $fills = @()
+    $fixed = @()
+    $lost = @()
     foreach ($log in @($srvLog) + $cliLogs) {
         if (-not (Test-Path $log)) { $problems += "missing $(Split-Path $log -Leaf)"; continue }
         foreach ($m in (Read-Stats $log $badRx)) { $problems += "$(Split-Path $log -Leaf): $($m.Value)" }
@@ -128,21 +135,37 @@ function Invoke-NetPair($name, $drag) {
     foreach ($log in $cliLogs) {
         if (-not (Test-Path $log)) { continue }
         # Skip the first two stats lines: the first second after load is still catching up.
-        $stats = @(Read-Stats $log 'OPENSWBF2 NET STATS client player=\d+ ping=(\d+) updates=(\d+) in=\d+ out=\d+ loss=(\d+)') | Select-Object -Skip 2
+        $stats = @(Read-Stats $log 'OPENSWBF2 NET STATS client player=\d+ ping=(\d+) updates=(\d+) in=\d+ out=\d+ loss=(\d+).*?(?: corr=([\d.]+)/([\d.]+))?$') | Select-Object -Skip 2
         foreach ($m in $stats) {
             $pings += [int]$m.Groups[1].Value
             $updates += [int]$m.Groups[2].Value
             $loss += [int]$m.Groups[3].Value
+            if ($m.Groups[4].Success) {
+                $corrAvg += [double]$m.Groups[4].Value
+                $corrMax += [double]$m.Groups[5].Value
+            }
+        }
+    }
+    # Host side, per remote player and second: turns filled with a guess, late moves replayed,
+    # and filled turns whose real move never came in time.
+    if (Test-Path $srvLog) {
+        foreach ($m in (@(Read-Stats $srvLog 'OPENSWBF2 NET STATS player=\d+ .* fills_s=(\d+) same_s=(\d+) fixed_s=(\d+) lost_s=(\d+)') | Select-Object -Skip 2)) {
+            $fills += [int]$m.Groups[1].Value
+            $fixed += [int]$m.Groups[3].Value
+            $lost += [int]$m.Groups[4].Value
         }
     }
     $avg = { param($a) if ($a.Count) { [Math]::Round(($a | Measure-Object -Average).Average, 1) } else { 0 } }
     $u = & $avg $updates
     $p = & $avg $pings
     $l = & $avg $loss
+    $ca = if ($corrAvg.Count) { [Math]::Round(($corrAvg | Measure-Object -Average).Average, 2) } else { 0 }
+    $cm = if ($corrMax.Count) { [Math]::Round(($corrMax | Measure-Object -Maximum).Maximum, 2) } else { 0 }
     if ($joined -and $updates.Count -lt 5) { $problems += "only $($updates.Count) stats seconds" }
     if ($updates.Count -and $u -lt $profiles[$name].MinUpdates) { $problems += "updates/s $u below $($profiles[$name].MinUpdates)" }
     $mode = if ($Direct) { 'direct' } else { 'lan' }
-    $summary = "netpair:$name join=$mode clients=$Clients updates=$u ping=$p loss=$l seconds=$($updates.Count)"
+    $summary = "netpair:$name join=$mode clients=$Clients updates=$u ping=$p loss=$l seconds=$($updates.Count)" +
+        " fills/s=$(& $avg $fills) replayed/s=$(& $avg $fixed) lost/s=$(& $avg $lost) corr=$ca/$cm"
     $problems = @($problems | Select-Object -Unique)
     $token = if ($problems.Count) { 'FAIL' } else { 'PASS' }
     $text = "[$token] $summary"

@@ -139,8 +139,17 @@ namespace StatsManager
  
  
  
+// OpenSWBF2: shot events wait in a ring of 512 (retail 128, which a busy fight at 60+ turns a
+// second could lap between two updates to one client). Each client takes what it has not yet
+// been sent (sauEventSent), so an update that is full keeps the rest for the next one instead
+// of skipping past them; events older than kNetEventMaxAge seconds are dropped as stale.
+const int kNetEventRing = 512;
+const float kNetEventMaxAge = 0.25f;
+
 // GLOBAL: SWBF2 0x01fa3d88
-NetEvent sServerNetEvents[128];
+NetEvent sServerNetEvents[kNetEventRing];
+static unsigned int sauNetEventTurn[kNetEventRing];
+static unsigned int sauEventSent[64][kNetEventRing / 32];
 
 bool netInShell = true;
 bool netEnabled;
@@ -664,12 +673,21 @@ NetTurn remoteClientTurns;
 // SYNTHETIC: SWBF2 0x00768db0
 // `dynamic atexit destructor for 'localClientTurns''
 ProcessedInputs localClientTurns[32][2];
+// OpenSWBF2: the host keeps 64 turns of moves (retail 32) and 32 turns of late-move state
+// (retail 8). Retail's late window was a fixed 3 turns, 150 ms at its 20 turns a second but only
+// 25 ms at 120; LateWindowTurns keeps it about 150 ms at any rate, and the bigger move ring lets
+// a client lead the host by up to kHostTurnRing - window - 4 turns (over 350 ms at 120).
+const unsigned int kHostTurnRing = 64;
+const unsigned int kHostTurnMask = kHostTurnRing - 1;
+const unsigned int kLateRing = 32;
+const unsigned int kLateMask = kLateRing - 1;
+
 // GLOBAL: SWBF2 0x01ed89d0
 // SYNTHETIC: SWBF2 0x004047b0
 // `dynamic initializer for 'hostTurns''
 // SYNTHETIC: SWBF2 0x00768de0
 // `dynamic atexit destructor for 'hostTurns''
-NetTurn hostTurns[32];
+NetTurn hostTurns[kHostTurnRing];
 // GLOBAL: SWBF2 0x01ee7a88
 // SYNTHETIC: SWBF2 0x00404800
 // `dynamic initializer for 'noInputs''
@@ -680,7 +698,7 @@ ProcessedInputs noInputs;
 // GLOBAL: SWBF2 0x01ee5280
 // SYNTHETIC: SWBF2 0x004047e0
 // `dynamic initializer for 'lateState''
-NetPktGroup lateState[8];
+NetPktGroup lateState[kLateRing];
 
 class NetNdObj
 {
@@ -1008,7 +1026,7 @@ int netHeroLastPlayerID[3];
 // GLOBAL: SWBF2 0x01e62f93
 bool clientHostCommProblems;
 // GLOBAL: SWBF2 0x01e62fc0
-unsigned int lateRecv[16];
+unsigned int lateRecv[kLateRing * 2];
 // GLOBAL: SWBF2 0x01e63001
 bool netIsLastUpdateTurn;
 
@@ -1022,6 +1040,14 @@ int clientLag;
 float miniMoveTime;
 // GLOBAL: SWBF2 0x01e64b54
 int netTurnsPerSecond;
+
+// OpenSWBF2: how many turns late a move may arrive and still be replayed: 0.15 s of turns,
+// retail's 3 turns at its 20 a second (5 at 30, 9 at 60, 18 at 120).
+static unsigned int LateWindowTurns()
+{
+    const unsigned int uTurns = (unsigned int)(netTurnsPerSecond * 3 + 19) / 20;
+    return uTurns < 3 ? 3 : (uTurns > kLateRing - 1 ? kLateRing - 1 : uTurns);
+}
 // GLOBAL: SWBF2 0x01e64b60
 int clientAhead;
 // GLOBAL: SWBF2 0x01e64b9f
@@ -1031,7 +1057,7 @@ bool netGameOver;
 // GLOBAL: SWBF2 0x01e64de4
 int clientHostTurnNumber;
 // GLOBAL: SWBF2 0x01e64de8
-unsigned int hostRecv[64];
+unsigned int hostRecv[kHostTurnRing * 2];
 // GLOBAL: SWBF2 0x01e64eec
 int clientUpdateCount;
 
@@ -2827,7 +2853,7 @@ void SetNetLOD(bool bArg);
 namespace GameLoop { extern float sDeltaTime; }
 
 // GLOBAL: SWBF2 0x01e63220
-NetPktGroupOffset lateStateOffset[8][64];
+NetPktGroupOffset lateStateOffset[kLateRing][64];
 // GLOBAL: SWBF2 0x01fa87c8
 GameObject* lateObjects[32];
 // GLOBAL: SWBF2 0x01fa670c
@@ -2841,10 +2867,32 @@ int lateRecvPlayerIndex;
 // GLOBAL: SWBF2 0x01faa719
 bool hasPendingLateRecv;
 
+// OpenSWBF2 -netstats counters (host side): late moves that matched the host's guess for a
+// filled turn, late moves that differed and so were replayed, turns re-run by ApplyLateMoves,
+// and shots created (all, and on replayed turns).
+static unsigned int sauLateSame[64];
+static unsigned int sauLateFixed[64];
+// replayed late moves whose fire buttons differ from the guess: shots fired late or not at all,
+// since weapons don't run on replayed turns (Aimer::Update)
+static unsigned int sauLateFire[64];
+static unsigned int suReplayTurns;
+static unsigned int suShots;
+static unsigned int suReplayShots;
+// shot events written to clients, dropped as stale before a client got them, and updates that
+// needed a second packet
+static unsigned int suEventsSent;
+static unsigned int suEventsStale;
+static unsigned int suSplitUpdates;
+// OpenSWBF2: per client, the bytes of object state an update may hold (retail always 800 of
+// 1024). The objects go first and the rest of the update (reliable events, chat, shots) after,
+// so when an update still needed a second packet the next ones give objects less room.
+static int saiObjectBudget[64];
+
 // FUNCTION: SWBF2 0x005ba110
 void NetGame::ApplyLateMoves()
 {
-    if (!netEnabledNext || netWaitLate || (unsigned int)hostTurnNumber < 3)
+    const unsigned int uWindow = LateWindowTurns();
+    if (!netEnabledNext || netWaitLate || (unsigned int)hostTurnNumber < uWindow)
     {
         return;
     }
@@ -2853,14 +2901,14 @@ void NetGame::ApplyLateMoves()
 
     if (hasPendingLateRecv)
     {
-        int iSlot = (hostTurnNumber - 1) & 7;
+        int iSlot = (hostTurnNumber - 1) & kLateMask;
         pLateRecv[iSlot] |= (unsigned __int64)1 << lateRecvPlayerIndex;
     }
 
     unsigned int uTurn;
-    for (uTurn = hostTurnNumber - 3; uTurn < (unsigned int)hostTurnNumber; uTurn++)
+    for (uTurn = hostTurnNumber - uWindow; uTurn < (unsigned int)hostTurnNumber; uTurn++)
     {
-        if (pLateRecv[uTurn & 7] & hostPlayingMask)
+        if (pLateRecv[uTurn & kLateMask] & hostPlayingMask)
         {
             break;
         }
@@ -2874,7 +2922,7 @@ void NetGame::ApplyLateMoves()
     unsigned __int64 uMask = 0;
     for (uTurn = lateTurnNumber; uTurn < (unsigned int)hostTurnNumber; uTurn++)
     {
-        uMask |= pLateRecv[uTurn & 7] & hostPlayingMask;
+        uMask |= pLateRecv[uTurn & kLateMask] & hostPlayingMask;
     }
 
     int i;
@@ -2890,7 +2938,7 @@ void NetGame::ApplyLateMoves()
         return;
     }
 
-    int iGroup = lateTurnNumber & 7;
+    int iGroup = lateTurnNumber & kLateMask;
     NetPktGroup* pGroup = &lateState[iGroup];
     pGroup->BeginRead();
     BeginNetLOD();
@@ -2924,11 +2972,12 @@ void NetGame::ApplyLateMoves()
     pGroup->EndRead();
 
     netIsLateTurn = true;
+    suReplayTurns += hostTurnNumber - lateTurnNumber;
     float fDeltaTime = netSecondsPerTurn;
     GameLoop::sDeltaTime = fDeltaTime;
     while ((unsigned int)lateTurnNumber < (unsigned int)hostTurnNumber)
     {
-        int iTurn = lateTurnNumber & 0x1f;
+        int iTurn = lateTurnNumber & kHostTurnMask;
         for (i = 0; i < netCurMaxPlayers; i++)
         {
             if (NetGame::IsPlaying(i, false))
@@ -2938,7 +2987,7 @@ void NetGame::ApplyLateMoves()
         }
         ControllerManager::Update(fDeltaTime);
         Thread::UpdateAll(fDeltaTime, false, false);
-        pLateRecv[lateTurnNumber & 7] &= ~uMask;
+        pLateRecv[lateTurnNumber & kLateMask] &= ~uMask;
         lateTurnNumber++;
     }
     netIsLateTurn = false;
@@ -3016,6 +3065,11 @@ void ClearNetEvents()
 void NetGame::CreateEvent_CreateOrdnance(const OrdnanceClass* pClass,
                                          const OrdnanceDesc& desc)
 {
+    ++suShots;
+    if (netIsLateTurn)
+    {
+        ++suReplayShots;
+    }
     NetEvent& record = sServerNetEvents[netEventHead];
     record.mType = 0;
     NetEvent::U::OrdnanceEvent& data = record.u.ordnance;
@@ -3039,8 +3093,13 @@ void NetGame::CreateEvent_CreateOrdnance(const OrdnanceClass* pClass,
     data.mTarget = desc.mTarget;
     data.mTargetId = desc.mTarget ? desc.mTarget->GetHandleId() : 0;
     data.mFireWeapon = desc.mFireWeapon;
+    sauNetEventTurn[netEventHead] = hostTurnNumber;
+    for (int iPlayer = 0; iPlayer < 64; ++iPlayer)
+    {
+        sauEventSent[iPlayer][netEventHead >> 5] &= ~(1u << (netEventHead & 31));
+    }
     ++netEventHead;
-    if (netEventHead >= 128)
+    if (netEventHead >= kNetEventRing)
     {
         netEventHead = 0;
     }
@@ -4141,8 +4200,16 @@ int NetGame::GetRandomHeroTeam()
     return PblRandom::GetGlobalInt() % 2 + 1;
 }
 
+extern float gNetCorrSum;
+extern float gNetCorrMax;
+extern unsigned int gNetCorrCount;
+
 // -netstats: once a second, log the numbers the QOS display shows (ping, updates, kbit/s,
-// loss, lag in turns, timescale) so test runs can read them from the log.
+// loss, lag in turns, timescale) so test runs can read them from the log. OpenSWBF2 adds, per
+// second: on clients, how far remote soldiers jumped when an update corrected their predicted
+// position (corr= average/maximum, metres); on hosts, per player the turns filled with a guess
+// because the move was missing, the late moves that matched the guess or were replayed, and
+// those never repaired (lost_s=), plus turns replayed and shots (all / on replayed turns).
 static void LogNetStats()
 {
     static float sfNext;
@@ -4150,6 +4217,16 @@ static void LogNetStats()
     static unsigned int suLastOut;
     static int siLastUpdates;
     static unsigned int sauLastPlayerUpdates[64];
+    static unsigned int sauLastFills[64];
+    static unsigned int sauLastSame[64];
+    static unsigned int sauLastFixed[64];
+    static unsigned int sauLastFire[64];
+    static unsigned int suLastReplayTurns;
+    static unsigned int suLastShots;
+    static unsigned int suLastReplayShots;
+    static unsigned int suLastEventsSent;
+    static unsigned int suLastEventsStale;
+    static unsigned int suLastSplitUpdates;
     const float fNow = NetComm::GetTime();
     if (fNow < sfNext && fNow > sfNext - 2.0f)
     {
@@ -4179,9 +4256,15 @@ static void LogNetStats()
         int iLoss;
         const int iLocal = NetComm::GetLocalIndex(0);
         NetGame::GetPlayerQOS(iLocal, uUpdates, uFills, iLoss);
+        const float fCorrAvg = gNetCorrCount ? gNetCorrSum / (float)gNetCorrCount : 0.0f;
         LOG(LogNet, Inform,
-            "OPENSWBF2 NET STATS client player=%d ping=%d updates=%d in=%d out=%d loss=%d lag=%d ts=%.2f",
-            iLocal, NetComm::GetPing(iLocal), iUpdates, iInKbit, iOutKbit, iLoss, iLag, NetGame::GetTimeScale());
+            "OPENSWBF2 NET STATS client player=%d ping=%d updates=%d in=%d out=%d loss=%d lag=%d ts=%.2f "
+            "corr=%.2f/%.2f",
+            iLocal, NetComm::GetPing(iLocal), iUpdates, iInKbit, iOutKbit, iLoss, iLag, NetGame::GetTimeScale(),
+            fCorrAvg, gNetCorrMax);
+        gNetCorrSum = 0.0f;
+        gNetCorrMax = 0.0f;
+        gNetCorrCount = 0;
         return;
     }
 
@@ -4199,12 +4282,34 @@ static void LogNetStats()
         NetGame::GetPlayerQOS(i, uUpdates, uFills, iLoss);
         if (i != NetComm::GetLocalIndex(0))
         {
-            LOG(LogNet, Inform, "OPENSWBF2 NET STATS player=%d ping=%d updates=%d fills=%u loss=%d", i,
-                NetComm::GetPing(i), (int)(uUpdates - sauLastPlayerUpdates[i]), uFills, iLoss);
+            const int iFills = (int)(uFills - sauLastFills[i]);
+            const int iSame = (int)(sauLateSame[i] - sauLastSame[i]);
+            const int iFixed = (int)(sauLateFixed[i] - sauLastFixed[i]);
+            const int iLost = iFills - iSame - iFixed;
+            LOG(LogNet, Inform,
+                "OPENSWBF2 NET STATS player=%d ping=%d updates=%d fills=%u loss=%d fills_s=%d same_s=%d fixed_s=%d "
+                "lost_s=%d fire_s=%d",
+                i, NetComm::GetPing(i), (int)(uUpdates - sauLastPlayerUpdates[i]), uFills, iLoss, iFills, iSame,
+                iFixed, iLost > 0 ? iLost : 0, (int)(sauLateFire[i] - sauLastFire[i]));
         }
         sauLastPlayerUpdates[i] = uUpdates;
+        sauLastFills[i] = uFills;
+        sauLastSame[i] = sauLateSame[i];
+        sauLastFixed[i] = sauLateFixed[i];
+        sauLastFire[i] = sauLateFire[i];
     }
-    LOG(LogNet, Inform, "OPENSWBF2 NET STATS host players=%d in=%d out=%d", iPlaying, iInKbit, iOutKbit);
+    LOG(LogNet, Inform,
+        "OPENSWBF2 NET STATS host players=%d in=%d out=%d replays_s=%u shots_s=%u replay_shots_s=%u events_s=%u "
+        "stale_s=%u split_s=%u",
+        iPlaying, iInKbit, iOutKbit, suReplayTurns - suLastReplayTurns, suShots - suLastShots,
+        suReplayShots - suLastReplayShots, suEventsSent - suLastEventsSent, suEventsStale - suLastEventsStale,
+        suSplitUpdates - suLastSplitUpdates);
+    suLastReplayTurns = suReplayTurns;
+    suLastShots = suShots;
+    suLastReplayShots = suReplayShots;
+    suLastEventsSent = suEventsSent;
+    suLastEventsStale = suEventsStale;
+    suLastSplitUpdates = suSplitUpdates;
 }
 
 // FUNCTION: SWBF2 0x005cfa10
@@ -5014,12 +5119,13 @@ void NetGame::FinishTurn()
     unsigned int uEnd = hostTurnNumber + stepTurns;
     while ((unsigned int)hostTurnNumber < uEnd)
     {
-        if ((unsigned int)hostTurnNumber > 3)
+        const unsigned int uWindow = LateWindowTurns();
+        if ((unsigned int)hostTurnNumber > uWindow)
         {
-            int iSlot = (hostTurnNumber - 3) & 0x1f;
+            int iSlot = (hostTurnNumber - uWindow) & kHostTurnMask;
             hostRecv[iSlot * 2] = 0;
             hostRecv[iSlot * 2 + 1] = 0;
-            iSlot = (hostTurnNumber - 3) & 7;
+            iSlot = (hostTurnNumber - uWindow) & kLateMask;
             lateRecv[iSlot * 2] = 0;
             lateRecv[iSlot * 2 + 1] = 0;
         }
@@ -5337,6 +5443,51 @@ void NetGame::UpdatePreGame()
     {
         netPreGameTime = netPreGameTimeMax - iElapsed;
     }
+}
+
+// OpenSWBF2 -nettestplayer (headless client test runs): spawn whenever dead, then play a fixed
+// pattern of moves (walk, strafe, steady aim changes, fire, the odd jump), so the host gets
+// real, changing inputs to fill, replay and lose. Keyed to the turn number, so every run plays
+// the same.
+static void NetTestPlayerMove(ProcessedInputs& rInputs)
+{
+    const int iLocal = NetComm::GetLocalIndex(0);
+    Character* pChr = iLocal >= 0 ? Character::FindPlayer(iLocal) : 0;
+    if (!pChr)
+    {
+        return;
+    }
+    if (!pChr->GetUnit())
+    {
+        if (clientTurnNumber % (unsigned int)(2 * netTurnsPerSecond) == 0)
+        {
+            // the side the host gave this player (its character has no team until it spawns)
+            int iTeam = pChr->GetTeamNumber();
+            if (iTeam != 1 && iTeam != 2)
+            {
+                iTeam = NetGame::GetStartTeam(iLocal);
+            }
+            NetGame::SelectSpawn(0, iTeam, 0, 0);
+            LOG(LogNet, Inform, "OPENSWBF2 NET test player spawn team=%d", iTeam);
+        }
+        return;
+    }
+    const float fTime = (float)clientTurnNumber / (float)netTurnsPerSecond;
+    rInputs.mFloatInputs[0] = fmodf(fTime, 2.6f) < 1.3f ? 0.7f : -0.7f; // strafe
+    rInputs.mFloatInputs[1] = fmodf(fTime, 1.6f) < 1.1f ? 1.0f : -0.5f; // move
+    // aim moves every turn, as a mouse does, so a repeated guess is rarely right
+    rInputs.mFloatInputs[2] = 0.4f * sinf(fTime * 3.1f);  // turn
+    rInputs.mFloatInputs[3] = 0.15f * sinf(fTime * 1.7f); // pitch
+    unsigned int uBits = 0;
+    if (fmodf(fTime, 1.2f) < 0.5f)
+    {
+        uBits |= 0x1; // primary fire
+    }
+    if (fmodf(fTime, 4.0f) < 0.05f)
+    {
+        uBits |= 0x8; // jump
+    }
+    rInputs.bits.mBoolInputs = uBits;
 }
 
 // FUNCTION: SWBF2 0x005c4080
@@ -5794,6 +5945,11 @@ void NetGame::SubmitMove(int iTurns)
             {
                 localClientTurns[iSlot][i].Clear();
             }
+            // after the clears above: a headless client has no active player controller
+            if (gNetTestPlayer && i == 0)
+            {
+                NetTestPlayerMove(localClientTurns[iSlot][i]);
+            }
         }
         ++clientTurnNumber;
     }
@@ -5835,7 +5991,7 @@ bool NetGame::IsTurnReady()
         {
             break;
         }
-        int iSlot = uTurn & 0x1f;
+        int iSlot = uTurn & kHostTurnMask;
         bool bReady = (puRecv[iSlot] & hostNextPlayingMask) == hostNextPlayingMask;
         bReady = bReady & NetGame::IsReadyToPlay();
         unsigned int uDelay = 3;
@@ -5870,7 +6026,7 @@ bool NetGame::IsTurnReady()
                     }
                     if (hostPlayingMask & ((unsigned __int64)1 << i))
                     {
-                        hostTurns[iSlot].moves[i] = hostTurns[(uTurn - 1) & 0x1f].moves[i];
+                        hostTurns[iSlot].moves[i] = hostTurns[(uTurn - 1) & kHostTurnMask].moves[i];
                         ++netPlayers[i].filledCount;
                     }
                     else
@@ -5927,7 +6083,7 @@ bool NetGame::IsTurnReady()
         }
     }
 
-    int iSlot = hostTurnNumber & 0x1f;
+    int iSlot = hostTurnNumber & kHostTurnMask;
     for (int i = 0; i < netCurMaxPlayers; ++i)
     {
         if (hostPlayingMask & ((unsigned __int64)1 << i))
@@ -5956,7 +6112,7 @@ void NetGame::SaveLateState()
         return;
     }
 
-    int iSlot = hostTurnNumber & 7;
+    int iSlot = hostTurnNumber & kLateMask;
     NetPktGroup* pGroup = &lateState[iSlot];
     pGroup->Free();
     pGroup->BeginWrite();
@@ -5987,6 +6143,18 @@ void NetGame::SaveLateState()
         pObject->WriteLateState(*pGroup);
     }
     pGroup->EndWrite();
+
+    // OpenSWBF2: keep only the turns a late move can still reach, window + 1 of the ring's 32
+    // (retail kept all 8), so saved state doesn't tie up the shared packet pool
+    const unsigned int uWindow = LateWindowTurns();
+    if ((unsigned int)hostTurnNumber > uWindow)
+    {
+        NetPktGroup& rOld = lateState[(hostTurnNumber - uWindow - 1) & kLateMask];
+        if (rOld.GetFront())
+        {
+            rOld.Free();
+        }
+    }
 }
 
 // FUNCTION: SWBF2 0x005c4510
@@ -6741,11 +6909,11 @@ void FillTurns(int player, unsigned int endTurn)
     const unsigned __int64 playerBit = (unsigned __int64)1 << player;
     for (unsigned int turn = hostTurnNumber; turn < endTurn; ++turn)
     {
-        unsigned int slot = turn & 31;
+        unsigned int slot = turn & kHostTurnMask;
         unsigned __int64* received = (unsigned __int64*)hostRecv;
         if (!(received[slot] & playerBit))
         {
-            hostTurns[slot].moves[player] = hostTurns[(turn - 1) & 31].moves[player];
+            hostTurns[slot].moves[player] = hostTurns[(turn - 1) & kHostTurnMask].moves[player];
             received[slot] |= playerBit;
             ++netPlayers[player].filledCount;
         }
@@ -8464,7 +8632,7 @@ void HandleEvent_UpdateInvincibility(ReliableNetEvent& event)
 void RecordTurn(unsigned int turn)
 {
     PblJournal::Record(hostPlayingMask, PJT_MOVES);
-    NetTurn& turnData = hostTurns[turn & 31];
+    NetTurn& turnData = hostTurns[turn & kHostTurnMask];
     for (unsigned int player = 0; player < 64; ++player)
     {
         if (hostPlayingMask & (1ui64 << player))
@@ -8595,7 +8763,7 @@ unsigned int ReadMoves(NetPktGroup& group, int player, unsigned int turn)
     ProcessedInputs* previous = &noInputs;
     for (;;)
     {
-        unsigned int slot = turn & 31;
+        unsigned int slot = turn & kHostTurnMask;
         ProcessedInputs& current = hostTurns[slot].moves[player];
         if (!ReadMove(group, *previous, current))
         {
@@ -9614,7 +9782,7 @@ void ReceiveReplica()
             unsigned int next = turn;
             do
             {
-                unsigned __int64 mask = ((unsigned __int64*)hostRecv)[next & 31] & hostPlayingMask;
+                unsigned __int64 mask = ((unsigned __int64*)hostRecv)[next & kHostTurnMask] & hostPlayingMask;
                 if (mask != hostPlayingMask)
                 {
                     break;
@@ -10865,6 +11033,7 @@ void ReceivePrimary()
         }
     }
 
+    const unsigned int uWindow = LateWindowTurns();
     unsigned int lag[64];
     unsigned int lastTurn[64];
     unsigned int firstTurn[64];
@@ -10902,14 +11071,14 @@ void ReceivePrimary()
         if (isLate)
         {
             unsigned int lateTurn = hostTurnNumber;
-            unsigned int slot = lateTurn & 31;
+            unsigned int slot = lateTurn & kHostTurnMask;
             for (i = 0; i < 4; ++i)
             {
                 if (!(received[slot] & ((unsigned __int64)1 << player)))
                 {
                     break;
                 }
-                slot = ++lateTurn & 31;
+                slot = ++lateTurn & kHostTurnMask;
             }
             if (i < 4)
             {
@@ -11047,11 +11216,11 @@ void ReceivePrimary()
                 StatsManager::ReadStatsResponse();
                 group.Read(cockpitCams[curDst]);
                 turn = moveTurn;
-                if (turn + 3 < (unsigned int)hostTurnNumber)
+                if (turn + uWindow < (unsigned int)hostTurnNumber)
                 {
                     break;
                 }
-                if (turn + 32 > (unsigned int)hostTurnNumber + 48)
+                if (turn > (unsigned int)hostTurnNumber + (kHostTurnRing - uWindow - 4))
                 {
                     break;
                 }
@@ -11059,7 +11228,7 @@ void ReceivePrimary()
                 {
                     firstTurn[curDst] = turn;
                 }
-                unsigned int slot = turn & 31;
+                unsigned int slot = turn & kHostTurnMask;
                 ProcessedInputs* inputs = &hostTurns[slot].moves[curDst];
                 if (turn < (unsigned int)hostTurnNumber)
                 {
@@ -11070,7 +11239,7 @@ void ReceivePrimary()
                 {
                     break;
                 }
-                if (turn + 3 >= (unsigned int)hostTurnNumber)
+                if (turn + uWindow >= (unsigned int)hostTurnNumber)
                 {
                     if (turn >= (unsigned int)hostTurnNumber)
                     {
@@ -11084,6 +11253,7 @@ void ReceivePrimary()
                             if (IsSame(inputs, hostInputs))
                             {
                                 received[slot] |= (unsigned __int64)1 << curDst;
+                                ++sauLateSame[curDst];
                             }
                             else
                             {
@@ -11092,9 +11262,14 @@ void ReceivePrimary()
                                 if (unit)
                                 {
                                     received[slot] |= (unsigned __int64)1 << curDst;
-                                    slot = turn & 7;
+                                    slot = turn & kLateMask;
                                     lateMoves[slot] |= (unsigned __int64)1 << curDst;
+                                    if ((hostInputs->bits.mBoolInputs ^ inputs->bits.mBoolInputs) & 0x3)
+                                    {
+                                        ++sauLateFire[curDst];
+                                    }
                                     *hostInputs = *inputs;
+                                    ++sauLateFixed[curDst];
                                 }
                                 else
                                 {
@@ -11116,7 +11291,7 @@ void ReceivePrimary()
                     {
                         firstTurn[curDst] = turn;
                     }
-                    slot = turn & 31;
+                    slot = turn & kHostTurnMask;
                     ProcessedInputs* next = &hostTurns[slot].moves[curDst];
                     if (turn < (unsigned int)hostTurnNumber)
                     {
@@ -11127,7 +11302,7 @@ void ReceivePrimary()
                         break;
                     }
                     inputs = next;
-                    if (turn + 3 < (unsigned int)hostTurnNumber)
+                    if (turn + uWindow < (unsigned int)hostTurnNumber)
                     {
                         continue;
                     }
@@ -11144,6 +11319,7 @@ void ReceivePrimary()
                     if (IsSame(next, inputs))
                     {
                         received[slot] |= (unsigned __int64)1 << curDst;
+                        ++sauLateSame[curDst];
                         continue;
                     }
                     Character* character = Character::FindPlayer(curDst);
@@ -11151,9 +11327,14 @@ void ReceivePrimary()
                     if (unit)
                     {
                         received[slot] |= (unsigned __int64)1 << curDst;
-                        slot = turn & 7;
+                        slot = turn & kLateMask;
                         lateMoves[slot] |= (unsigned __int64)1 << curDst;
+                        if ((next->bits.mBoolInputs ^ inputs->bits.mBoolInputs) & 0x3)
+                        {
+                            ++sauLateFire[curDst];
+                        }
                         *next = *inputs;
+                        ++sauLateFixed[curDst];
                     }
                     else
                     {
@@ -11637,10 +11818,10 @@ void NetGameP::FreePackets()
     {
         return;
     }
-    const unsigned int count = Min(hostTurnNumber, 3);
+    const unsigned int count = Min(hostTurnNumber, kLateRing);
     for (unsigned int turn = hostTurnNumber - count; turn < (unsigned int)hostTurnNumber; ++turn)
     {
-        NetPktGroup& group = lateState[turn & 7];
+        NetPktGroup& group = lateState[turn & kLateMask];
         if (group.GetFront())
         {
             group.Free();
@@ -13032,8 +13213,15 @@ int GetLag(int iPlayer)
     case 4:
         return (int)((float)netTurnsPerSecond * player.avgLag);
     default:
-        return (int)((player.avgLag + player.errLag) *
-                     (float)netTurnsPerSecond);
+    {
+        // OpenSWBF2: the client steers its clock until this reads 0 or less. Retail asked for
+        // moves early by one average deviation, rounded down, so on a jittery link many still
+        // arrived after their turn and were guessed. Ask for two deviations (at most 100 ms
+        // more), rounded up so there is always a turn of margin. Host side, so stock clients
+        // follow it too.
+        const float fMargin = player.errLag * 2.0f < 0.1f ? player.errLag * 2.0f : 0.1f;
+        return (int)ceilf((player.avgLag + fMargin) * (float)netTurnsPerSecond);
+    }
     }
 }
 
@@ -13578,11 +13766,12 @@ void WriteCommandPost(NetPktGroup& group, const CommandPost* pPost)
 // FUNCTION: SWBF2 0x005d2e40
 bool IsMissingMoves(int iPlayer)
 {
-    if ((unsigned int)hostTurnNumber < 3)
+    const unsigned int uWindow = LateWindowTurns();
+    if ((unsigned int)hostTurnNumber < uWindow)
     {
         return false;
     }
-    unsigned int uTurn = hostTurnNumber - 3;
+    unsigned int uTurn = hostTurnNumber - uWindow;
     if (uTurn <= netPlayers[iPlayer].lateFenceTurn)
     {
         uTurn = netPlayers[iPlayer].lateFenceTurn + 1;
@@ -13591,7 +13780,7 @@ bool IsMissingMoves(int iPlayer)
     const unsigned __int64* pReceived = (const unsigned __int64*)hostRecv;
     while (uTurn < (unsigned int)hostTurnNumber)
     {
-        if (!(pReceived[uTurn & 31] & uPlayer))
+        if (!(pReceived[uTurn & kHostTurnMask] & uPlayer))
         {
             return true;
         }
@@ -14796,7 +14985,7 @@ void WriteMoves(NetPktGroup& group, int iPlayer, unsigned int uTurn)
     const unsigned __int64 uPlayer = 1ui64 << iPlayer;
     for (;;)
     {
-        const unsigned int iSlot = uTurn & 31;
+        const unsigned int iSlot = uTurn & kHostTurnMask;
         if (uTurn >= (unsigned int)hostTurnNumber &&
             !(pReceived[iSlot] & uPlayer))
         {
@@ -15101,7 +15290,7 @@ void WritePlayerMoves(NetPktGroup& group)
         nearest.Push(iPlayer, -distance);
     }
 
-    const int iTurn = (hostTurnNumber - 1) & 31;
+    const int iTurn = (hostTurnNumber - 1) & kHostTurnMask;
     for (int i = 0; i < 5 && !nearest.IsEmpty(); ++i)
     {
         const int iPlayer = nearest.Get(0);
@@ -16131,6 +16320,10 @@ void WriteObjects(NetPktGroup& group)
         }
 
         int maxBytes = netUpdateSize * 800 / 1024;
+        if (saiObjectBudget[curDst] > 0 && saiObjectBudget[curDst] < maxBytes)
+        {
+            maxBytes = saiObjectBudget[curDst]; // OpenSWBF2: see SendUpdate
+        }
         if (hostCommProblems)
         {
             maxBytes = 0;
@@ -16322,24 +16515,46 @@ void WriteUpdate(NetPktGroup& group)
     MarkWriteAlign(group);
 }
 
+// OpenSWBF2: a big packet holds 1012 bytes; events stop short of that, with room for the last
+// event to run over and for what follows them, so an update is one datagram and a lost
+// fragment can't take the rest with it.
+const int kUpdateEventLimit = 1012 - 64;
+
 // FUNCTION: SWBF2 0x005bede0
 void SendNetEvents(NetPktGroup& group)
 {
     PblHeap<int, float>::RECORD records[65];
     PblHeap<int, float> heap(64, 1000000.0f, records);
-    for (int i = (int)netPlayers[curDst].netEventTail; i != netEventHead; i = (i + 1) % 128)
+    unsigned int* const puSent = sauEventSent[curDst];
+    const unsigned int uMaxAge = (unsigned int)(kNetEventMaxAge * (float)netTurnsPerSecond) + 1;
+    // pending: relevant to this client, not yet sent to it and not stale, oldest first
+    int aiPending[kNetEventRing];
+    int iPending = 0;
+    for (int i = (int)netPlayers[curDst].netEventTail; i != netEventHead; i = (i + 1) % kNetEventRing)
     {
+        if (puSent[i >> 5] & (1u << (i & 31)))
+        {
+            continue;
+        }
+        if (hostTurnNumber - sauNetEventTurn[i] > uMaxAge)
+        {
+            if (GetNetEventScore(sServerNetEvents[i]) >= 0.0f)
+            {
+                ++suEventsStale;
+            }
+            continue;
+        }
         float fScore = GetNetEventScore(sServerNetEvents[i]);
         if (fScore >= 0.0f)
         {
-            heap.Push(i, -fScore);
-            if (heap.IsFull())
+            aiPending[iPending++] = i;
+            if (!heap.IsFull())
             {
-                break;
+                heap.Push(i, -fScore);
             }
         }
     }
-    int iLimit = netUpdateSize - 8;
+    int iLimit = (netUpdateSize < kUpdateEventLimit + 8 ? netUpdateSize : kUpdateEventLimit + 8) - 8;
     if (hostCommProblems)
     {
         iLimit = 0;
@@ -16350,10 +16565,23 @@ void SendNetEvents(NetPktGroup& group)
         {
             break;
         }
-        WriteNetEvent(sServerNetEvents[heap.Get(0)], group);
+        const int iEvent = heap.Get(0);
+        WriteNetEvent(sServerNetEvents[iEvent], group);
+        puSent[iEvent >> 5] |= 1u << (iEvent & 31);
+        ++suEventsSent;
         heap.Pop();
     }
-    netPlayers[curDst].netEventTail = netEventHead;
+    // the next update starts at the oldest event still pending
+    int iTail = netEventHead;
+    for (int i = 0; i < iPending; ++i)
+    {
+        if (!(puSent[aiPending[i] >> 5] & (1u << (aiPending[i] & 31))))
+        {
+            iTail = aiPending[i];
+            break;
+        }
+    }
+    netPlayers[curDst].netEventTail = iTail;
     group.Write(false);
 }
 
@@ -16383,8 +16611,31 @@ void SendUpdate(int iPlayer)
     group.EndWrite();
     int iBytes = group.GetBytes();
     int iBytes2 = group.GetBytes();
-    (void)iBytes;
     (void)iBytes2;
+    if (iBytes > 1012)
+    {
+        ++suSplitUpdates;
+    }
+    // shrink this client's object budget by the overshoot when an update needed a second
+    // packet, and let it creep back while updates fit
+    const int iFullBudget = netUpdateSize * 800 / 1024;
+    int& riBudget = saiObjectBudget[curDst];
+    if (riBudget <= 0 || riBudget > iFullBudget)
+    {
+        riBudget = iFullBudget;
+    }
+    if (iBytes > 1012)
+    {
+        riBudget -= iBytes - 1012 + 32;
+        if (riBudget < iFullBudget / 2)
+        {
+            riBudget = iFullBudget / 2;
+        }
+    }
+    else if (riBudget < iFullBudget)
+    {
+        riBudget += 4;
+    }
     if (NetGame::IsOneWorld() &&
         (curDst == NetGame::GetLocalIndex(0) || curDst == NetGame::GetLocalIndex(1)))
     {

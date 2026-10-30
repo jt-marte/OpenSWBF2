@@ -30,6 +30,8 @@ extern bool gAllowUploads;
 extern bool gNetStatsLog;
 extern bool gAIStatsLog;
 extern bool gAITestHuman;
+// -nettestplayer: a client spawns by itself and plays a fixed pattern of moves (NetGame.cpp)
+extern bool gNetTestPlayer;
 extern bool gLogStdout;
 extern bool gLogConsole;
 extern bool gDedicatedShorthand;

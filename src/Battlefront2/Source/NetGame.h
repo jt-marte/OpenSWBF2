@@ -60,7 +60,7 @@ struct NetEvent
         } ordnance;
     } u;
 };
-extern NetEvent sServerNetEvents[128];
+extern NetEvent sServerNetEvents[]; // kNetEventRing (NetGame.cpp)
 
 class NetGame
 {
