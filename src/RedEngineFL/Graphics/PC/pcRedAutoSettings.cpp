@@ -763,6 +763,20 @@ void VidConfig::SaveConfigFile()
     }
 }
 
+// OpenSWBF2: forgets the loaded configs, so a second VidMode_Init (the
+// renderer falling back from Vulkan to D3D9) reads vidmode.ini afresh instead
+// of saving every section twice.
+void VidConfig::ClearConfigs()
+{
+    while (sConfigs.GetCount() > 0)
+    {
+        VidConfig* pConfig = sConfigs.GetFirst()->_pObject;
+        pConfig->VidModeList.Clear();
+        sConfigs.Remove(&pConfig->mNode);
+        delete pConfig;
+    }
+}
+
 namespace RedVideoConfig
 {
 

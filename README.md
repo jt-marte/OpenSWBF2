@@ -7,6 +7,7 @@
 ### Graphics
 - **Sharp at 1440p and 4K**: crisp text, sharp front-end menus, in-game menus that scale with the screen, and a correct reticle, HUD icons and scope lens at high resolutions.
 - **HUD scale** (50–150%) and **field of view** (55–100°) in Options → Video.
+- **Vulkan renderer** by default, through [DXVK](https://github.com/doitsujin/dxvk) 3.1.1, shipped in a `dxvk` folder beside the exe with its zlib licence (`dxvk\LICENSE.txt`). Options → Video → Renderer switches to DirectX 9 from the next start, `-vulkan` and `-d3d9` pick one for a single run, and the game falls back to DirectX 9 by itself when Vulkan can't start.
 - New profiles start on the **highest video settings**.
 
 ### Controller
@@ -56,7 +57,7 @@ You need Visual Studio 2013 (Update 5) with the v120_xp toolset and the DirectX 
 powershell -ExecutionPolicy Bypass -File tools\setup.ps1
 ```
 
-It installs VS2013 from the offline ISO and extracts the SDK headers and libs. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
+It installs VS2013 from the offline ISO, extracts the SDK headers and libs, and fetches DXVK into `third_party\dxvk`. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
 
 ## Build and run
 

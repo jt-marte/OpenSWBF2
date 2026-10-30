@@ -524,6 +524,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         case DisplayCfg::kHashSwCursor:
             DisplayCfg::SetFlag(DisplayCfg::gCliDisplay, DisplayCfg::kSoftwareCursor);
             break;
+        case DisplayCfg::kHashVulkan: // OpenSWBF2: renderer for this run only, over display.ini
+            DisplayCfg::SetFromText(DisplayCfg::gCliDisplay, DisplayCfg::kRenderer, "vulkan", "command line");
+            break;
+        case DisplayCfg::kHashD3d9:
+            DisplayCfg::SetFromText(DisplayCfg::gCliDisplay, DisplayCfg::kRenderer, "d3d9", "command line");
+            break;
         case XInputPad::kHashNoXInput:
             XInputPad::gDisabled = true;
             break;

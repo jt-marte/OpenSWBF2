@@ -16,6 +16,7 @@
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/Graphics/PC/pcDxvk.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
 #include "RedEngineFL/Util/RedLog.h"
 
@@ -641,6 +642,34 @@ static int ScriptCB_SetFov(lua_State*)
     return 0;
 }
 
+// Renderer for Options -> Video: the saved choice (0 Vulkan, 1 DirectX 9),
+// then the one this run started on (2 headless).
+static int ScriptCB_GetRenderer(lua_State*)
+{
+    lua_pushnumber(LuaHelper::mState, (float)DisplayCfg::gIniDisplay.uiRenderer);
+    lua_pushnumber(LuaHelper::mState, (float)Dxvk::Running());
+    return 2;
+}
+
+// Saves to display.ini for the next start (the running renderer stays). True
+// when that differs from the one running, so the menu says to restart.
+static int ScriptCB_SetRenderer(lua_State*)
+{
+    const unsigned int uiRenderer = (int)luaL_checknumber(LuaHelper::mState, 1) == DisplayLogic::kRendererD3D9
+                                        ? DisplayLogic::kRendererD3D9
+                                        : DisplayLogic::kRendererVulkan;
+    if (uiRenderer != DisplayCfg::gIniDisplay.uiRenderer || !(DisplayCfg::gIniDisplay.uiSet & DisplayCfg::kRenderer))
+    {
+        if (!DisplayCfg::SaveRenderer(uiRenderer))
+        {
+            LOG(LogCore, Warning, "OPENSWBF2 RENDERER %s not saved",
+                uiRenderer == DisplayLogic::kRendererD3D9 ? "d3d9" : "vulkan");
+        }
+    }
+    lua_pushboolean(LuaHelper::mState, uiRenderer != (unsigned int)Dxvk::Running());
+    return 1;
+}
+
 // GLOBAL: SWBF2 0x007e8270
 static const CallbackEntryT sPCCallbacks[] =
 {
@@ -699,6 +728,8 @@ static const CallbackEntryT sPCCallbacks[] =
     { "ScriptCB_SetPadLookSpeed", ScriptCB_SetPadLookSpeed },
     { "ScriptCB_GetFov", ScriptCB_GetFov },
     { "ScriptCB_SetFov", ScriptCB_SetFov },
+    { "ScriptCB_GetRenderer", ScriptCB_GetRenderer },
+    { "ScriptCB_SetRenderer", ScriptCB_SetRenderer },
 };
 
 // FUNCTION: SWBF2 0x00599170
