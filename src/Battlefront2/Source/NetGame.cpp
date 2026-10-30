@@ -2030,6 +2030,8 @@ void NetGame::Create(bool bMission)
 
     if (netEnabledNext)
     {
+        LOG(LogNet, Inform, "OPENSWBF2 NET mission start host=%d dedicated=%d tps=%d game=%d",
+            NetComm::IsHost() ? 1 : 0, IsDedicated() ? 1 : 0, netTurnsPerSecond, netGameCount);
         PblRandom::GetSim().SetSeed(0);
         netEntities = new NetEntityList;
         hostPlayingMask = 0;
@@ -4138,6 +4140,72 @@ int NetGame::GetRandomHeroTeam()
     return PblRandom::GetGlobalInt() % 2 + 1;
 }
 
+// -netstats: once a second, log the numbers the QOS display shows (ping, updates, kbit/s,
+// loss, lag in turns, timescale) so test runs can read them from the log.
+static void LogNetStats()
+{
+    static float sfNext;
+    static unsigned int suLastIn;
+    static unsigned int suLastOut;
+    static int siLastUpdates;
+    static unsigned int sauLastPlayerUpdates[64];
+    const float fNow = NetComm::GetTime();
+    if (fNow < sfNext && fNow > sfNext - 2.0f)
+    {
+        return;
+    }
+    sfNext = fNow + 1.0f;
+
+    unsigned int uIn;
+    unsigned int uOut;
+    NetComm::GetBytes(uIn, uOut);
+    const int iInKbit = (int)((uIn - suLastIn) * 8 / 1024);
+    const int iOutKbit = (int)((uOut - suLastOut) * 8 / 1024);
+    suLastIn = uIn;
+    suLastOut = uOut;
+
+    if (!NetGame::IsHost())
+    {
+        const int iUpdates = clientUpdateCount - siLastUpdates;
+        siLastUpdates = clientUpdateCount;
+        int iLag = (int)(clientTurnNumber - clientHostTurnNumber);
+        if (iLag < netTurnsPerSecond)
+        {
+            iLag = clientAhead;
+        }
+        unsigned int uUpdates;
+        unsigned int uFills;
+        int iLoss;
+        const int iLocal = NetComm::GetLocalIndex(0);
+        NetGame::GetPlayerQOS(iLocal, uUpdates, uFills, iLoss);
+        LOG(LogNet, Inform,
+            "OPENSWBF2 NET STATS client player=%d ping=%d updates=%d in=%d out=%d loss=%d lag=%d ts=%.2f",
+            iLocal, NetComm::GetPing(iLocal), iUpdates, iInKbit, iOutKbit, iLoss, iLag, NetGame::GetTimeScale());
+        return;
+    }
+
+    int iPlaying = 0;
+    for (int i = 0; i < netCurMaxPlayers && i < 64; ++i)
+    {
+        if (!NetGame::IsPlaying(i, false))
+        {
+            continue;
+        }
+        ++iPlaying;
+        unsigned int uUpdates;
+        unsigned int uFills;
+        int iLoss;
+        NetGame::GetPlayerQOS(i, uUpdates, uFills, iLoss);
+        if (i != NetComm::GetLocalIndex(0))
+        {
+            LOG(LogNet, Inform, "OPENSWBF2 NET STATS player=%d ping=%d updates=%d fills=%u loss=%d", i,
+                NetComm::GetPing(i), (int)(uUpdates - sauLastPlayerUpdates[i]), uFills, iLoss);
+        }
+        sauLastPlayerUpdates[i] = uUpdates;
+    }
+    LOG(LogNet, Inform, "OPENSWBF2 NET STATS host players=%d in=%d out=%d", iPlaying, iInKbit, iOutKbit);
+}
+
 // FUNCTION: SWBF2 0x005cfa10
 void NetGame::Update()
 {
@@ -4182,6 +4250,10 @@ void NetGame::Update()
         if (g_bNoRender)
         {
             AutoBootLagger();
+        }
+        if (gNetStatsLog && !InShell())
+        {
+            LogNetStats();
         }
 
         char cEnd = '*';
@@ -4678,6 +4750,8 @@ unsigned int* handleToIndexMapPtr;
 bool isFullState;
 // GLOBAL: SWBF2 0x01fa88c8
 unsigned int alignCount;
+// Entity type of the object the update reader is on, for the align mismatch log.
+static int sLastReadType = -1;
 
 // FUNCTION: SWBF2 0x005c3870
 int NetGame::GetMyGuest(int iPlayer, int iSlot)
@@ -4840,6 +4914,15 @@ void CheckReadAlign(NetPktGroup& group)
     if (uBits != 32)
     {
         uExpected &= (1u << uBits) - 1;
+    }
+    // Retail release builds read the marker and ignore it. A mismatch means the reader and
+    // writer disagree on an object's layout; log the first few so desyncs show in the log.
+    static int siMismatchLogs;
+    if (uRead != uExpected && siMismatchLogs < 8)
+    {
+        ++siMismatchLogs;
+        LOG(LogNet, Warning, "OPENSWBF2 NET align mismatch count=%u read=%u expected=%u type=%d", alignCount, uRead,
+            uExpected, sLastReadType);
     }
     ++alignCount;
 }
@@ -5563,6 +5646,8 @@ void NetGame::ReceiveHost()
             }
             if (fSilent > fLimit)
             {
+                LOG(LogNet, Inform, "OPENSWBF2 NET drop player=%d reason=%s silent=%.1f", i,
+                    netPlayers[i].requestedQuit ? "quit" : "timeout", fSilent);
                 NetGameP::SetNotPlaying(i);
             }
         }
@@ -6144,6 +6229,7 @@ void NetGame::ReceiveClient()
         float silent = NetComm::GetTime() - NetComm::GetLastRecv(host + 64);
         if (doTimeOut && silent > 15.0f)
         {
+            LOG(LogNet, Inform, "OPENSWBF2 NET host lost silent=%.1f", silent);
             netInGame = false;
             NetMatch::SetGameError("ifs.mp.joinerrors.connectlost", 6);
             NetComm::Disconnect(host + 64);
@@ -6459,7 +6545,7 @@ void CleanReliableNetEvents(int player)
 }
 
 // GLOBAL: SWBF2 0x007e8e80
-int lastFilledTurn;
+int lastFilledTurn = 123;
 
 // FUNCTION: SWBF2 0x005c8b00
 void FillTurn(unsigned int value)
@@ -7290,7 +7376,8 @@ void NetGame::CreateEvent_UpdateDoorState(unsigned int entityID, unsigned __int6
 }
 
 // GLOBAL: SWBF2 0x007e8e78
-unsigned char BOOT_JOYSTICK_BITS;
+// Retail .data holds 2: the boot request carries a 2-bit guest slot.
+unsigned char BOOT_JOYSTICK_BITS = 2;
 // GLOBAL: SWBF2 0x01fa65a8
 unsigned __int64 hostBootAgreeMask;
 // GLOBAL: SWBF2 0x01fa87c0
@@ -8012,7 +8099,8 @@ void ReadLockedTargets(NetPktGroup& group, int player)
 }
 
 // GLOBAL: SWBF2 0x007e8e8c
-int archFilter;
+// Retail .data holds 3 (any arch); a zero here made a first LAN host answer only PS2 finds.
+int archFilter = NET_ARCH_ANY;
 
 // FUNCTION: SWBF2 0x005d78a0
 void NetMatch::SetRegisterArchFilter()
@@ -10223,6 +10311,10 @@ void ReCreate(NetObjState* state, unsigned int uniqId)
 bool ReadObject(NetPktGroup& group)
 {
     readObj = 0;
+    if (group.IsBad())
+    {
+        return false;
+    }
     bool isND;
     group.Read(isND);
     if (isND)
@@ -10236,6 +10328,7 @@ bool ReadObject(NetPktGroup& group)
         {
             return false;
         }
+        sLastReadType = object->GetEntityType();
         object->ReadObject(group, 0);
         ClearSkippedND(object);
     }
@@ -10268,6 +10361,7 @@ bool ReadObject(NetPktGroup& group)
         {
             last = index == 63 ? 0 : clientLastObjState->stateMap[index];
         }
+        sLastReadType = object->GetEntityType();
         object->ReadObject(group, last);
         if (!isFullState && saveObjState)
         {

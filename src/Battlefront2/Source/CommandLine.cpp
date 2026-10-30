@@ -69,6 +69,7 @@ int gDigestTrace;
 bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
+bool gNetStatsLog;
 bool gSeedSet;
 unsigned int gSeed;
 int gBootLaggerPing = 300;
@@ -368,6 +369,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "allowuploads") == 0)
         {
             gAllowUploads = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "netstats") == 0)
+        {
+            gNetStatsLog = true;
             continue;
         }
 

@@ -27,6 +27,7 @@ extern int gDigestTrace;
 extern bool gFactoryLog;
 extern bool gNoFocusPause;
 extern bool gAllowUploads;
+extern bool gNetStatsLog;
 extern bool gSeedSet;
 extern unsigned int gSeed;
 extern int gBootLaggerPing;

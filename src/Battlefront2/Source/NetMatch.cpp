@@ -7,12 +7,14 @@
 #include "NetComm.h"
 #include "NetGame.h"
 #include "NetPacket.h"
+#include "NetWire.h"
 #include "PebbleFL/Common/PblJournal.h"
 #include "PebbleFL/Common/PblUnicode.h"
 #include "Steam/gfGalaxy.h"
 
 #include "Steam/gfSteamAuth.h"
 #include "Steam/utf8.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 void* GetGalaxyFriends();
 void* GetGalaxyUser();
@@ -144,6 +146,13 @@ void NetMatch::StartRegisterGame(bool)
                 netLanRegisterState = 1;
                 ResetLanRegistration();
                 netMatchOperation = 1;
+                const unsigned char* pucIP = (const unsigned char*)&addr->privAddr;
+                LOG(LogNet, Inform, "OPENSWBF2 NET host registered lan addr=%u.%u.%u.%u:%d", pucIP[0],
+                    pucIP[1], pucIP[2], pucIP[3], addr->privPort);
+            }
+            else
+            {
+                LOG(LogNet, Warning, "OPENSWBF2 NET host not registered: no private LAN address");
             }
         }
         return;
@@ -243,7 +252,8 @@ char __fastcall NetMatch::StartJoinGame(const NetSessionId* id)
         }
         else
         {
-            __debugbreak();
+            // Retail hit a breakpoint here; with no private address the join just cannot start.
+            LOG(LogNet, Warning, "OPENSWBF2 NET join not started: no private LAN address");
         }
     }
     else if (gf::isInitialized())
@@ -398,6 +408,7 @@ void __fastcall HandleFindPacket(NetPacket* packet)
         accepted = archFilter == 3 || type == (unsigned int)archFilter;
     }
     packet->Free();
+    LOG(LogNet, Verbose, "OPENSWBF2 NET lan find challenge=%u answered=%d", challenge, accepted ? 1 : 0);
     if (accepted)
     {
         group.BeginWrite();
@@ -460,7 +471,10 @@ void __fastcall HandleFoundPacket(NetPacket* packet, const void* source)
                     addressOk = from.hasPriv;
                 }
                 group.ReadBits((unsigned int&)data.mMaxPlayers, 6);
+                data.mMaxPlayers = NetWire::DecodeLanMaxPlayers((unsigned int)data.mMaxPlayers);
                 group.ReadBits((unsigned int&)data.mNumPlayers, 6);
+                LOG(LogNet, Verbose, "OPENSWBF2 NET lan found name=%s port=%d players=%d/%d usable=%d",
+                    data.mName, (int)address.privPort, data.mNumPlayers, data.mMaxPlayers, addressOk ? 1 : 0);
                 if (addressOk)
                 {
                     NetSetupP::AddGame(&address);

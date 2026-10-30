@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdio.h>
 #include <winsock2.h>
 #include <windows.h>
 
@@ -420,6 +421,30 @@ unsigned __int64* __fastcall NetCommP::GetAddr(int iDest)
     }
 
     return (unsigned __int64*)&joinSlots[(iDest - 69) * 7 + 1];
+}
+
+// Formats a destination's address for log lines: "a.b.c.d:port" on LAN, "galaxy:<id>" online.
+// Four rotating buffers, so one log line can show a few addresses.
+const char* NetCommP::DescribeAddr(int iDest)
+{
+    static char sacText[4][32];
+    static unsigned int suNext;
+    char* pcText = sacText[suNext++ & 3];
+    const unsigned __int64* pAddr = GetAddr(iDest);
+    if (NetComm::IsLAN())
+    {
+        int iIP = 0;
+        int iPort = 0;
+        NetSocket::GetAddr(pAddr, iIP, iPort);
+        const unsigned char* pucIP = (const unsigned char*)&iIP;
+        _snprintf(pcText, 32, "%u.%u.%u.%u:%d", pucIP[0], pucIP[1], pucIP[2], pucIP[3], iPort);
+    }
+    else
+    {
+        _snprintf(pcText, 32, "galaxy:%I64x", *pAddr);
+    }
+    pcText[31] = 0;
+    return pcText;
 }
 
 // FUNCTION: SWBF2 0x005b35a0

@@ -208,5 +208,6 @@ public:
     static void FreePackets();
     static void __fastcall Connect(int iDest, const void* pAddress);
     static unsigned __int64* __fastcall GetAddr(int iDest);
+    static const char* DescribeAddr(int iDest);
     static int __fastcall FindJoinSource(const int* pAddress);
 };

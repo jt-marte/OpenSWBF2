@@ -8,6 +8,8 @@ const unsigned int kChatMax = 276;
 const unsigned int kUploadChunkMax = 1012;
 const unsigned int kRconLineMax = 63;
 const unsigned int kMaxPlayers = 64;
+// PC joins carry at most one guest; the JOIN packet has room to claim seven.
+const unsigned int kMaxGuests = 1;
 
 struct LoginLimiter
 {
@@ -34,6 +36,8 @@ void DiscardUpload(NetPktGroup& group, bool bHeader);
 int ReadRconLine(const char* pcData, int iAvail, unsigned int uLength, unsigned short* pusOut);
 bool IsRconAuthorized(const char* pcData, int iAvail, char cKey0, char cKey1);
 int ClampPlayerCount(unsigned int uWire);
+bool IsValidGuestCount(unsigned int uGuests);
+int DecodeLanMaxPlayers(unsigned int uWire);
 bool IsValidTurnRate(int iDuration, int iTurns);
 
 void WriteString(NetPktGroup& group, const char* pcText, unsigned int uCapacity);
