@@ -116,6 +116,7 @@
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcWeatherEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIDebug.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIDifficulty.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\AITuning.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIGoal.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIGoalManager.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AILowLevel.cpp" />
@@ -927,6 +928,7 @@
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcSunFlare.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcVideoEffect.h" />
     <ClInclude Include="src\Battlefront2\Source\AIDifficulty.h" />
+    <ClInclude Include="src\Battlefront2\Source\AITuning.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />
     <ClInclude Include="src\Battlefront2\Source\AILowLevel.h" />

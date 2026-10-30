@@ -241,7 +241,7 @@ int ScriptCB_SetDifficulty(lua_State* L)
     if ((iArgs == 1 || iArgs == 2) && lua_isnumber(LuaHelper::mState, 1))
     {
         int iDifficulty = (int)luaL_checknumber(LuaHelper::mState, 1);
-        if (iDifficulty < eDIFFICULTY_EASY || iDifficulty > eDIFFICULTY_HARD)
+        if (iDifficulty < eDIFFICULTY_EASY || iDifficulty > eDIFFICULTY_OVERHAUL)
         {
             iDifficulty = eDIFFICULTY_MEDIUM;
         }
@@ -269,7 +269,7 @@ int ScriptCB_GetDifficulty(lua_State* L)
 {
     PlayerProfile::tProfile* pProfile = PlayerProfile::GetProfile(PauseMenu::GetPausingJoystick());
     int iDifficulty = pProfile ? pProfile->mGameOptions.mCurDiffLevel : PlayerPrefs::mAllUserPrefs[0].mDifficulty;
-    if (iDifficulty < eDIFFICULTY_EASY || iDifficulty > eDIFFICULTY_HARD)
+    if (iDifficulty < eDIFFICULTY_EASY || iDifficulty > eDIFFICULTY_OVERHAUL)
     {
         iDifficulty = eDIFFICULTY_MEDIUM;
     }
@@ -952,9 +952,9 @@ int ScriptCB_GetNetGameDefaults(lua_State* L)
     {
         iDifficulty = eDIFFICULTY_EASY;
     }
-    else if (iDifficulty > eDIFFICULTY_HARD)
+    else if (iDifficulty > eDIFFICULTY_OVERHAUL)
     {
-        iDifficulty = eDIFFICULTY_HARD;
+        iDifficulty = eDIFFICULTY_OVERHAUL;
     }
 
     if (NetGame::IsHost())

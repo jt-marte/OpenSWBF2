@@ -66,6 +66,7 @@ ifs_login_diff_listbox_contents = {
 --	{ showstr = "ifs.difficulty.easy" },
 	{ showstr = "ifs.difficulty.medium" },
 	{ showstr = "ifs.difficulty.hard" },
+	{ showstr = "ifs.difficulty.overhaul" }, -- OpenSWBF2
 }
 
 ifs_login_diff_listbox_layout = {	

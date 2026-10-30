@@ -652,7 +652,7 @@ function ifs_io_GetElementLayoutFor(tagName, screen)
 		myTitle = "ifs.mp.createopts.difficulty"
 		mySelValue = this.GamePrefs.iDifficulty - 1
 		myControl = "dropdown"
-		myValues = {"ifs.difficulty.medium", "ifs.difficulty.hard" }
+		myValues = {"ifs.difficulty.medium", "ifs.difficulty.hard", "ifs.difficulty.overhaul" }
 
 	-- host opts	
 	elseif(tagName == "dedicated") then
@@ -907,6 +907,8 @@ function ifs_instant_options_PopulateItem(Dest, Tag, bSelected, iColorR, iColorG
             ShowUStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",EasyStr)
         elseif (this.GamePrefs.iDifficulty==2) then
             ShowUStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",MediumStr)
+        elseif (this.GamePrefs.iDifficulty==4) then
+            ShowUStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",ScriptCB_getlocalizestr("ifs.difficulty.overhaul"))
         else
             ShowUStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",HardStr)
         end
@@ -1262,8 +1264,18 @@ function ifs_instant_options_fnAdjustItem(this, Tag, iAdjust)
        this.GamePrefs.iASSNumBots = this.GamePrefs.iNumBots
     end
     elseif (Tag == "aidifficulty") then
-        -- Toggle between 2 & 3 for now.
-        this.GamePrefs.iDifficulty = 5 - this.GamePrefs.iDifficulty
+        -- OpenSWBF2: step through Normal (2), Elite (3) and Overhaul (4), wrapping. Retail
+        -- toggled 2 and 3 with 5 - x, which would turn Easy into Overhaul.
+        local iNew = this.GamePrefs.iDifficulty + 1
+        if (iAdjust < 0) then
+            iNew = this.GamePrefs.iDifficulty - 1
+        end
+        if (iNew > 4) then
+            iNew = 2
+        elseif (iNew < 2) then
+            iNew = 4
+        end
+        this.GamePrefs.iDifficulty = iNew
         print("Diff "..this.GamePrefs.iDifficulty)
 --      this.GamePrefs.iDifficulty = Clamp(this.GamePrefs.iDifficulty + iAdjust, 2, 3)
     elseif (Tag == "dm_mult") then

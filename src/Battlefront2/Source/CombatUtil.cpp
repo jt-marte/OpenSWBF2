@@ -1026,10 +1026,12 @@ void CombatUtil::sRegularInfantryAttackPattern(Controllable* pMe, const GameObje
         AttackPatterns::STATE_STATIONARY, AttackPatterns::STATE_SIMPLE,
         AttackPatterns::STATE_SERPENTINE, AttackPatterns::STATE_FLANK
     };
-    static const int kWeights[3][4] = {
+    // Rows by difficulty: Easy, Normal, Elite, then OpenSWBF2's Overhaul (more flanking).
+    static const int kWeights[4][4] = {
         { 3, 1, 1, 1 },
         { 2, 2, 1, 1 },
-        { 1, 1, 5, 1 }
+        { 1, 1, 5, 1 },
+        { 1, 2, 4, 3 }
     };
 
     *pDesc->mCoverPercent = 0.5f;
