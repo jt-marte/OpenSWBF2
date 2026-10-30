@@ -8,3 +8,4 @@ ipch/
 *.suo
 *.user
 /third_party/
+/dist/
