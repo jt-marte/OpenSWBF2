@@ -9,11 +9,14 @@ param(
     [string]$ServerArgs = '',
     [string]$ClientArgs = '',
     [string]$OutDir,
-    [ValidateSet('Win32','x64')][string]$Platform = 'Win32'
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32',
+    [ValidateSet('Win32','x64')][string]$ClientPlatform
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
 # each in its own worker folder (-Direct: clients join 127.0.0.1 by address instead of LAN
-# discovery). Reads the OPENSWBF2 NET markers and -netstats lines from every
+# discovery, and every socket listens on loopback only, so Windows Firewall never prompts).
+# -ClientPlatform runs the clients on the other build (mixed Win32/x64 games).
+# Reads the OPENSWBF2 NET markers and -netstats lines from every
 # run.log and prints one [PASS]/[FAIL] line per profile. See tests\README.md, "Network pair runs".
 $ErrorActionPreference = 'Stop'
 $testsDir = $PSScriptRoot
@@ -25,6 +28,12 @@ $Platform = $script:SmokePlatform
 $exeDir = Get-GameExeDir $root $Configuration
 $gameData = Find-GameDataRoot
 $skip = Get-SmokePrecheck $gameData $exeDir
+if (-not $ClientPlatform) { $ClientPlatform = $Platform }
+Set-SmokePlatform $ClientPlatform
+$ClientPlatform = $script:SmokePlatform
+$clientExeDir = Get-GameExeDir $root $Configuration
+if (-not $skip) { $skip = Get-SmokePrecheck $gameData $clientExeDir }
+Set-SmokePlatform $Platform
 if (-not $skip) {
     $private = @([Net.Dns]::GetHostAddresses([Net.Dns]::GetHostName()) | Where-Object {
             $b = $_.GetAddressBytes()
@@ -65,13 +74,19 @@ function Invoke-NetPair($name, $drag) {
     New-Item -ItemType Directory -Force -Path $caseDir | Out-Null
     $gameName = "NETPAIR$PID$name"
     $common = '-norender -nosound -nowait -nofocuspause -netstats -logcmds "all Warning, LogNet Inform"'
+    if ($Direct) { $common += ' -netloopback' }
     $procs = @()
     $dirs = @()
     try {
         $names = @('server') + @(1..$Clients | ForEach-Object { "client$_" })
         foreach ($n in $names) {
             $d = Join-Path $caseDir "w-$n"
-            New-SmokeWorkerDir $exeDir $d
+            if ($n -eq 'server') { New-SmokeWorkerDir $exeDir $d }
+            else {
+                Set-SmokePlatform $ClientPlatform
+                New-SmokeWorkerDir $clientExeDir $d
+                Set-SmokePlatform $Platform
+            }
             Set-Content -Path (Join-Path $d 'steam_appid.txt') -Value '6060' -Encoding ASCII
             $dirs += $d
         }

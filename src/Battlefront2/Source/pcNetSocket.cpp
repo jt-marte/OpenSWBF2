@@ -13,6 +13,15 @@ extern unsigned int netBroadcastRecvSocket;
 extern int hostshort;
 
 extern int netSocketErrorCount;
+extern bool gNetLoopback;
+
+// OpenSWBF2 -netloopback: sockets listen on 127.0.0.1 only, so only this PC can reach them (Direct
+// joins to 127.0.0.1; LAN discovery cannot work). Windows Firewall does not prompt for a loopback
+// socket, which matters for test runs that start the exe from fresh folders.
+static unsigned long ListenAddress()
+{
+    return gNetLoopback ? htonl(INADDR_LOOPBACK) : INADDR_ANY;
+}
 
 // FUNCTION: SWBF2 0x00618540
 void NetSocket::GetAddr(const void* pPeer, int& iIP, int& iPort)
@@ -64,7 +73,7 @@ void NetSocket::OpenBroadcastSockets()
     setsockopt((SOCKET)netBroadcastRecvSocket, SOL_SOCKET, SO_REUSEADDR, (const char*)&bReuse,
                sizeof(bReuse));
     addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;
+    addr.sin_addr.s_addr = ListenAddress();
     addr.sin_port = htons(3656);
     if (bind((SOCKET)netBroadcastRecvSocket, (const sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
     {
@@ -99,7 +108,7 @@ int NetSocket::OpenDirectSocket(bool bHost)
     {
         sockaddr_in addr;
         addr.sin_family = AF_INET;
-        addr.sin_addr.s_addr = INADDR_ANY;
+        addr.sin_addr.s_addr = ListenAddress();
         addr.sin_port = htons((u_short)iPort);
         if (bind((SOCKET)netDirectSocket, (const sockaddr*)&addr, sizeof(addr)) != SOCKET_ERROR)
         {
@@ -126,7 +135,8 @@ int NetSocket::OpenDirectSocket(bool bHost)
             iPort = ntohs(bound.sin_port);
         }
     }
-    LOG(LogNet, Inform, "OPENSWBF2 NET socket open host=%d port=%d", bHost ? 1 : 0, iPort);
+    LOG(LogNet, Inform, "OPENSWBF2 NET socket open host=%d port=%d%s", bHost ? 1 : 0, iPort,
+        gNetLoopback ? " loopback=1" : "");
     int iSize = 0x8000;
     setsockopt((SOCKET)netDirectSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&iSize, sizeof(iSize));
     iSize = 0x10000;

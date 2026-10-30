@@ -85,6 +85,7 @@ The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the 
 | `/configdir dir` | folder with `ServerSettings.cfg` and `ServerRotation.cfg`: one admin command per line, such as `/addmap geo1c_con` |
 | `-console` | open a console window for the log |
 | `-netstats` | log ping, updates and bandwidth once a second |
+| `-netloopback` | listen on 127.0.0.1 only: just this PC can join, by Direct Connect to 127.0.0.1 |
 | `-log file` | also write the log to a file |
 
 The command line overrides the config files.

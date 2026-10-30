@@ -70,6 +70,7 @@ bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
 bool gNetStatsLog;
+bool gNetLoopback;
 bool gAIStatsLog;
 bool gAITestHuman;
 bool gNetTestPlayer;
@@ -383,6 +384,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "netstats") == 0)
         {
             gNetStatsLog = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "netloopback") == 0)
+        {
+            gNetLoopback = true;
             continue;
         }
 
