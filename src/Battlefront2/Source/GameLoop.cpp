@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "GameLoop.h"
+#include "PoolBlockSizes.h"
 #include "pcCrash.h"
 #include "RedEngineFL/Application/pc/pcFrameLimiter.h"
 #include "BootDisplay.h"
@@ -40,6 +41,7 @@
 #include "SoldierAnimatorLowRes.h"
 #include "VehicleSpawn.h"
 #include "ItemTimerDisplay.h"
+#include "EntityWater.h"
 #include "LoadDisplay.h"
 #include "LuaHelper.h"
 #include "MessageDisplay.h"
@@ -127,13 +129,6 @@ namespace Lua_Callbacks { void Cleanup(); }
 namespace RedMissionLog { bool Enabled(); }
 namespace SimDigest { unsigned int StateHash(); void TraceTurn(); void LogFactories(); void LogFactoryCounts(); void Reset(); }
 
-class EntityWater
-{
-public:
-    EntityWater();
-
-    unsigned char mOpaqueWaterState[0xa4];
-};
 
 class EntitySoldier
 {
@@ -839,6 +834,9 @@ int Init()
     Weapon::UpdateMemoryPoolSize(0x120);
     Weapon::UpdateMemoryPoolSize(0x1a0);
     Weapon::UpdateMemoryPoolSize(0x170);
+#ifdef _WIN64
+    Weapon::UpdateMemoryPoolSize(WEAPON_POOL_BLOCK); // the sizes above are Win32 ones
+#endif
 
     StickInfo::SetupMemoryPool(60, StickInfo::sMemoryPool.GetSize(), StickInfo::sMemoryPool.GetGrow());
     Ordnance::SetupMemoryPool(120, Ordnance::sMemoryPool.GetSize(), Ordnance::sMemoryPool.GetGrow());
@@ -854,6 +852,9 @@ int Init()
     Ordnance::UpdateMemoryPoolSize(360);
     Ordnance::UpdateMemoryPoolSize(304);
     Ordnance::UpdateMemoryPoolSize(320);
+#ifdef _WIN64
+    Ordnance::UpdateMemoryPoolSize(ORDNANCE_POOL_BLOCK); // the sizes above are Win32 ones
+#endif
 
     LightFlash::SetupMemoryPool(16, LightFlash::sMemoryPool.GetSize(), LightFlash::sMemoryPool.GetGrow());
     EntityLight::SetupMemoryPool(100, EntityLight::sMemoryPool.GetSize(), EntityLight::sMemoryPool.GetGrow());

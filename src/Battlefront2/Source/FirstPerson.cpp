@@ -51,7 +51,7 @@ char sModelName[64][256];
 // GLOBAL: SWBF2 0x01e51e28
 namespace FirstPerson { int sModelCount; }
 // GLOBAL: SWBF2 0x01e55f04
-namespace FirstPerson { int sModel; }
+namespace FirstPerson { intptr_t sModel; }
 // GLOBAL: SWBF2 0x01e55f08
 namespace FirstPerson { int sModelId; }
 
@@ -1354,7 +1354,7 @@ void FirstPerson::Update(unsigned int uPlayer, eViewObjectType eType, int iArg,
         else
         {
             const RedModel* pModel = LoadDynamicModel(sModelName[iArg], true);
-            (&FirstPerson::sModel)[uPlayer] = (int)pModel;
+            (&FirstPerson::sModel)[uPlayer] = (intptr_t)pModel;
             if (pModel)
             {
                 pRenderable->bStreamingModel = false;

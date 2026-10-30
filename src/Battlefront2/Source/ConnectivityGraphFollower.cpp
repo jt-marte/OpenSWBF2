@@ -10,7 +10,7 @@
 // `dynamic initializer for 'ConnectivityGraphFollower::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766eb0
 // `dynamic atexit destructor for 'ConnectivityGraphFollower::sMemoryPool''
-MemoryPool ConnectivityGraphFollower::sMemoryPool("ConnectivityGraphFollower", 0x3c);
+MemoryPool ConnectivityGraphFollower::sMemoryPool("ConnectivityGraphFollower", RED_POOL_SIZE(0x3c, ConnectivityGraphFollower));
 
 static inline float DistSq(const PblVector3& a, const PblVector3& b)
 {

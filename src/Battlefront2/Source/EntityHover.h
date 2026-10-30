@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "Aimer.h"
 #include "CollisionModel.h"
 #include "Controllable.h"
@@ -294,7 +296,7 @@ public:
 
     virtual ~EntityHover();
 
-    static void* operator new(unsigned int uSize);
+    static void* operator new(size_t uSize);
     static void operator delete(void* pBlock);
 
     virtual bool IsRtti(unsigned int uRtti) const;
@@ -445,7 +447,7 @@ public:
     float mGroundBank;
     float mGroundPitchVel;
     float mGroundBankVel;
-    char mEnergyBar[12];
+    PBL_RAW_ALIGN char mEnergyBar[PBL_RAW_SIZE(12, 16)];
     float mEjectTimer;
     float mTimeSinceLastHack;
     float mJumpTimer;

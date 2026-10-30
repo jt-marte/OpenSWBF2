@@ -1765,7 +1765,7 @@ float EntityPathFollower::Roll(const EntityPathFollowerClass* const pClass, floa
     }
 
     float fWeave = 1.0f;
-    float fTime = GameLoop::GetMissionTime() + (float)(((unsigned int)this >> 2) & 0xf);
+    float fTime = GameLoop::GetMissionTime() + (float)(((uintptr_t)this >> 2) & 0xf);
     if (!AIUtil::gGroundFlyerMap)
     {
         fWeave = 2.0f;

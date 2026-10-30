@@ -71,7 +71,7 @@ namespace CombatUtil
 // `dynamic initializer for 'VisionManager::RayRequest::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769770
 // `dynamic atexit destructor for 'VisionManager::RayRequest::sMemoryPool''
-MemoryPool VisionManager::RayRequest::sMemoryPool("RayRequest", 0x14);
+MemoryPool VisionManager::RayRequest::sMemoryPool("RayRequest", RED_POOL_SIZE(0x14, VisionManager::RayRequest));
 
 namespace VisionManager
 {

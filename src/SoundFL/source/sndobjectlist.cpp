@@ -8,7 +8,7 @@ namespace Snd
 // `dynamic initializer for 'Snd::ObjectList::Node::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a360
 // `dynamic atexit destructor for 'Snd::ObjectList::Node::smFreeList''
-FreeList ObjectList::Node::smFreeList(8, 1, 16, 1);
+FreeList ObjectList::Node::smFreeList(SND_FREELIST_SIZE(8, ObjectList::Node), 1, 16, 1);
 
 // FUNCTION: SWBF2 0x007388d0
 void ObjectList::Remove(void* pObject)

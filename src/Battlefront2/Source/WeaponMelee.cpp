@@ -1297,7 +1297,7 @@ bool WeaponMelee::Deflect(const Ordnance* pOrdnance, const PblVector3& pos, cons
 
     unsigned char uiAnim;
 
-    if (!((Combo::Deflect*)pDeflect)->TestDeflect(&mOwner->GetMatrix().m[0][0], &vVelocity.x, &dir.x, reinterpret_cast<int>(&pos), m_uiAnimIndex, &uiAnim))
+    if (!((Combo::Deflect*)pDeflect)->TestDeflect(&mOwner->GetMatrix().m[0][0], &vVelocity.x, &dir.x, &pos, m_uiAnimIndex, &uiAnim))
     {
         m_uiAnimIndex = state.m_uiAnimIndex;
         return false;
@@ -2566,7 +2566,7 @@ void WeaponMeleeClass::_InitDeflectMatrices(int eMap)
     char* pRaw = uiSize > 0xffffffefu ? 0 : new char[uiSize + 16];
     if (pRaw)
     {
-        unsigned char uiOffset = 16 - (reinterpret_cast<unsigned int>(pRaw) & 15);
+        unsigned char uiOffset = 16 - (unsigned char)(reinterpret_cast<uintptr_t>(pRaw) & 15);
         pRaw += uiOffset;
         pRaw[-1] = uiOffset;
     }

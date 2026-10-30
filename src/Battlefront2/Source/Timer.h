@@ -18,7 +18,7 @@ public:
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     // FUNCTION: SWBF2 0x0058aa70
-    static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+    static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
 
     // FUNCTION: SWBF2 0x0058aab0
     void SetRate(float fRate) { mRate = fRate; }

@@ -142,7 +142,7 @@ float Engine::smMinStreamBufferSize = 100.0f;
 ThreadUpdate sndEngineThreadUpdate(0, 0x2000);
 
 // GLOBAL: SWBF2 0x009cf4b0
-unsigned char gSoftOutputStorage[2288];
+__declspec(align(16)) unsigned char gSoftOutputStorage[sizeof(SoftOutput)];
 
 // FUNCTION: SWBF2 0x00731c90
 bool Engine::Failed(long hr, const char* pcFile, unsigned int uiLine)
@@ -1241,7 +1241,7 @@ bool Engine::Open(HWND hwnd, MixConfig eMixConfig, bool bEnable,
             (unsigned int)(fMinStreamBufferSizeMs * 0.25f));
     }
 
-    EngineBase::smSoundRAMAllocator.Initialize((unsigned int)smSampleRAM,
+    EngineBase::smSoundRAMAllocator.Initialize((uintptr_t)smSampleRAM,
                                                0x2000000, 0x80,
                                                smSampleRAMBitmap);
 

@@ -1,4 +1,5 @@
 #include <math.h>
+#include "PebbleFL/Common/PblRawStorage.h"
 
 #include "MuzzleFlash.h"
 #include "RedEngineFL/Application/pc/pcRedParticle.h"
@@ -12,7 +13,7 @@ class Aimer
 {
 public:
 
-    char mUnmodeledPrefix[0x88];
+    char mUnmodeledPrefix[PBL_RAW_SIZE(0x88, 0xB0)];
     PblVector3 mFirePos;
 };
 

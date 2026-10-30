@@ -296,6 +296,7 @@ UnitAgent::UnitAgent(UnitController* pCtrl)
     : mCtrl(pCtrl),
       mCheckNearbyUnitsTime(-1.0f)
 {
+    static_assert(sizeof(AttackHelper) <= sizeof(mAttackHelper), "mAttackHelper storage");
     new (mAttackHelper) AttackHelper(this);
 }
 

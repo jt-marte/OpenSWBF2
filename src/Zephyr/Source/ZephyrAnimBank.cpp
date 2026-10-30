@@ -28,7 +28,11 @@ bool ZephyrAnimBank::Open(char* pcMem, unsigned int uiMemSize, const char* pcDat
 
     m_pkAnims = (ZephyrAnim*)pcMem;
     char* pcJoints = (char*)(m_pkAnims + m_u16NumAnims);
-    char* pcJointData = pcJoints + 56 * pkHeader->u32NumTotalJoints;
+    // runtime joints are ZephyrAnimJoints (56 bytes on Win32, as retail wrote it); the file's
+    // ZephyrAnimJointD records are 48 bytes on every platform
+    static_assert(sizeof(void*) != 4 || sizeof(ZephyrAnimJoint) == 56, "ZephyrAnimJoint layout");
+    static_assert(sizeof(ZephyrAnimJointD) == 48, "ZephyrAnimJointD layout");
+    char* pcJointData = pcJoints + sizeof(ZephyrAnimJoint) * pkHeader->u32NumTotalJoints;
 
     m_kHashCRC2Anim.Clear();
     m_kHashCRC2AnimNumEntries = 0;
@@ -49,7 +53,7 @@ bool ZephyrAnimBank::Open(char* pcMem, unsigned int uiMemSize, const char* pcDat
         ++pkAnim;
         ++pkAnimD;
         pkJointD = (const ZephyrAnimJointD*)((const char*)pkJointD + 48 * u16NumJoints);
-        pcJoints += 56 * u16NumJoints;
+        pcJoints += sizeof(ZephyrAnimJoint) * u16NumJoints;
     }
     return true;
 }

@@ -165,7 +165,7 @@ void PlayerPrefs::InitAll()
     PlayerPrefs::mAllUserPrefs[0].mJoystick = 0;
 
     PlayerPrefs::mAllUserPrefs[0].pProfile = PlayerProfile::GetProfile(0);
-    *(PlayerProfile::tProfile**)((char*)&mDefaultProfile + 0x10) = PlayerProfile::GetProfile(1);
+    *(unsigned int*)((char*)&mDefaultProfile + 0x10) = (unsigned int)(uintptr_t)PlayerProfile::GetProfile(1);
 }
 
 // FUNCTION: SWBF2 0x0061c4d0
@@ -275,13 +275,13 @@ void PlayerProfile::tGameOpt::ApplySettings(int iPort, int  )
         Damageable::SetTeamDamageScale(mFriendlyFire / 100.0f);
     }
 
+    // OpenSWBF2: written with members; retail wrote Win32 byte offsets from the start of the
+    // object (0x20bc, 0x000c, 0x2610, 0x2638, 0x263d, 0x2642), which move on x64.
     RawControllerInputs* pJoystick = FLInputManager::s_instance.GetPlayerJoystick(iPort);
-    unsigned char* pRaw = (unsigned char*)pJoystick;
 
     for (int iMode = 0; iMode < 5; ++iMode)
     {
-        memcpy(pRaw + 0x20bc + iMode * sizeof(mKeyboardBindings[0]), mKeyboardBindings[iMode],
-               sizeof(mKeyboardBindings[0]));
+        memcpy(pJoystick->mCurKeyboardBindings[iMode], mKeyboardBindings[iMode], sizeof(mKeyboardBindings[0]));
     }
 
     for (int iMode = 0; iMode < 5; ++iMode)
@@ -295,13 +295,13 @@ void PlayerProfile::tGameOpt::ApplySettings(int iPort, int  )
             mControllerScale[1][iMode] = 4;
         }
 
-        pRaw[0x2638 + iMode] = mControllerScale[0][iMode];
-        pRaw[0x263d + iMode] = mControllerScale[1][iMode];
-        pRaw[0x000c + iMode] = mFlip[iMode];
-        *(double*)(pRaw + 0x2610 + iMode * 8) = ConvertMouseScaleToRawScale(mMouseSensitivity[iMode] / 10.0f, iMode);
-        pRaw[0x2638 + iMode] = mJoystickSensitivityX[iMode];
-        pRaw[0x263d + iMode] = mJoystickSensitivityY[iMode];
-        pRaw[0x2642 + iMode] = mMouseAssist[iMode];
+        pJoystick->mJoystickSensitivityX[iMode] = mControllerScale[0][iMode];
+        pJoystick->mJoystickSensitivityY[iMode] = mControllerScale[1][iMode];
+        *(unsigned char*)&pJoystick->mFlip[iMode] = (unsigned char)mFlip[iMode];
+        *(double*)pJoystick->mMouseSensitivity[iMode] = ConvertMouseScaleToRawScale(mMouseSensitivity[iMode] / 10.0f, iMode);
+        pJoystick->mJoystickSensitivityX[iMode] = mJoystickSensitivityX[iMode];
+        pJoystick->mJoystickSensitivityY[iMode] = mJoystickSensitivityY[iMode];
+        *(unsigned char*)&pJoystick->mMouseAssist[iMode] = (unsigned char)mMouseAssist[iMode];
 
         pJoystick->ApplyDeadZone(mDeadZone);
     }

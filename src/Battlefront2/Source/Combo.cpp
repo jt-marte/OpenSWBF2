@@ -44,7 +44,7 @@ const Combo* Combo::ResolveForWeapon(const WeaponMelee* pWeapon,
     {
         return 0;
     }
-    Combo* pResolved = static_cast<Combo*>(sMemoryPool.Allocate(0x24));
+    Combo* pResolved = static_cast<Combo*>(sMemoryPool.Allocate(sizeof(Combo)));
     if (pResolved)
     {
         pResolved->CopyConstructor(*this);
@@ -120,7 +120,7 @@ resolve_damage:
 }
 
 // FUNCTION: SWBF2 0x00473840
-bool Combo::Deflect::TestDeflect(const float* pMatrix, const float* pRight, const float* pAttack, int iUnused, unsigned char uiFallback, unsigned char* pResult) const
+bool Combo::Deflect::TestDeflect(const float* pMatrix, const float* pRight, const float* pAttack, const void* pUnused, unsigned char uiFallback, unsigned char* pResult) const
 {
     const Combo::Deflect* pDeflect = (const Combo::Deflect*)this;
     const int iMin = (static_cast<int>(pDeflect->m_auiPackedData[0] << 19)) >> 23;
@@ -575,25 +575,25 @@ unsigned char Combo::GetOffhandAnimIndex(int eState) const
 // `dynamic initializer for 'Combo::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e10
 // `dynamic atexit destructor for 'Combo::sMemoryPool''
-MemoryPool Combo::sMemoryPool("Combo", 0x24);
+MemoryPool Combo::sMemoryPool("Combo", RED_POOL_SIZE(0x24, Combo));
 // GLOBAL: SWBF2 0x01eb9360
 // SYNTHETIC: SWBF2 0x00402600
 // `dynamic initializer for 'Combo::Deflect::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e70
 // `dynamic atexit destructor for 'Combo::Deflect::sMemoryPool''
-MemoryPool Combo::Deflect::sMemoryPool("Combo::Deflect", 0x24);
+MemoryPool Combo::Deflect::sMemoryPool("Combo::Deflect", RED_POOL_SIZE(0x24, Combo::Deflect));
 // GLOBAL: SWBF2 0x01eb93b0
 // SYNTHETIC: SWBF2 0x00402580
 // `dynamic initializer for 'Combo::Transition::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e30
 // `dynamic atexit destructor for 'Combo::Transition::sMemoryPool''
-MemoryPool Combo::Transition::sMemoryPool("Combo::Transition", 0x0c);
+MemoryPool Combo::Transition::sMemoryPool("Combo::Transition", RED_POOL_SIZE(0x0c, Combo::Transition));
 // GLOBAL: SWBF2 0x01eb9400
 // SYNTHETIC: SWBF2 0x004025a0
 // `dynamic initializer for 'Combo::Condition::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e40
 // `dynamic atexit destructor for 'Combo::Condition::sMemoryPool''
-MemoryPool Combo::Condition::sMemoryPool("Combo::Condition", 0x14);
+MemoryPool Combo::Condition::sMemoryPool("Combo::Condition", RED_POOL_SIZE(0x14, Combo::Condition));
 
 int Combo::s_ComboTableNumEntries;
 // GLOBAL: SWBF2 0x01eb9454
@@ -607,19 +607,19 @@ PblHashTable<const Combo, 32> Combo::s_ComboTable;
 // `dynamic initializer for 'Combo::DamageSample::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e60
 // `dynamic atexit destructor for 'Combo::DamageSample::sMemoryPool''
-MemoryPool Combo::DamageSample::sMemoryPool("Combo::DamageSample", 0x1c);
+MemoryPool Combo::DamageSample::sMemoryPool("Combo::DamageSample", RED_POOL_SIZE(0x1c, Combo::DamageSample));
 // GLOBAL: SWBF2 0x01eb95a8
 // SYNTHETIC: SWBF2 0x004025c0
 // `dynamic initializer for 'Combo::Attack::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e50
 // `dynamic atexit destructor for 'Combo::Attack::sMemoryPool''
-MemoryPool Combo::Attack::sMemoryPool("Combo::Attack", 0x10);
+MemoryPool Combo::Attack::sMemoryPool("Combo::Attack", RED_POOL_SIZE(0x10, Combo::Attack));
 // GLOBAL: SWBF2 0x01eb95f8
 // SYNTHETIC: SWBF2 0x00402560
 // `dynamic initializer for 'Combo::State::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e20
 // `dynamic atexit destructor for 'Combo::State::sMemoryPool''
-MemoryPool Combo::State::sMemoryPool("Combo::State", 0x34);
+MemoryPool Combo::State::sMemoryPool("Combo::State", RED_POOL_SIZE(0x34, Combo::State));
 
 const float Combo::Condition::TIME_SCALE_INV = 100.0f;
 const float Combo::Condition::TIME_SCALE = 1.0f / Combo::Condition::TIME_SCALE_INV;

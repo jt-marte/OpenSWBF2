@@ -26,7 +26,7 @@
 // `dynamic initializer for 'BaseHint::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768b10
 // `dynamic atexit destructor for 'BaseHint::sMemoryPool''
-MemoryPool BaseHint::sMemoryPool("BaseHint", 0x40);
+MemoryPool BaseHint::sMemoryPool("BaseHint", RED_POOL_SIZE(0x40, BaseHint));
 
 extern int WORLD_EXTENTS;
 

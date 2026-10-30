@@ -296,7 +296,7 @@ EntityClass* AsteroidClass::Derive(unsigned int uHash)
 // `dynamic initializer for 'Asteroid::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766d80
 // `dynamic atexit destructor for 'Asteroid::sMemoryPool''
-MemoryPool Asteroid::sMemoryPool("Asteroid", 0x280);
+MemoryPool Asteroid::sMemoryPool("Asteroid", RED_POOL_SIZE(0x280, Asteroid));
 
 // GLOBAL: SWBF2 0x01eb0248
 // SYNTHETIC: SWBF2 0x004022c0

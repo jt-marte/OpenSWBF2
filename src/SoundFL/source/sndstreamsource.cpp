@@ -36,7 +36,7 @@ void __cdecl StreamSource::FileOpComplete(File* pFile, void* pCallbackData,
     {
 
         pPacket->mBufferUsed =
-            pThis->mReadSize - (unsigned int)(unsigned long)pPacket->mCallbackData;
+            pThis->mReadSize - (unsigned int)(uintptr_t)pPacket->mCallbackData;
         pPacket->mCallback = 0;
         pPacket->mCallbackData = 0;
 
@@ -364,7 +364,7 @@ void StreamSource::Update()
                 }
                 mFlags |= (unsigned char)flags_LastPacket;
                 pPacket->mCallback = 0;
-                pPacket->mCallbackData = (void*)(unsigned long)mSegment.mPadding;
+                pPacket->mCallbackData = (void*)(uintptr_t)mSegment.mPadding;
                 uiReadSize = mSegment.mOffset + mSegment.mLength - mFile.GetPos();
             }
         }

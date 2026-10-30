@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "CameraManager.h"
+#include "PebbleFL/Common/PblPtrOrder.h"
 #include "ChaseCamera.h"
 #include "DeathCamera.h"
 #include "FreeCamera.h"
@@ -193,7 +194,7 @@ bool Tracker::IsFirstPersonView()
 {
     Trackable* pTrackable = mTrackable;
     if (pTrackable && pTrackable != (Trackable*)-1 &&
-        (unsigned int)pTrackable->mTracker != 0xDDDDDDDDu &&
+        (uintptr_t)pTrackable->mTracker != kPblFreedPtr &&
         pTrackable->GetControllable())
     {
         Controllable* pCtrl = pTrackable->GetControllable();

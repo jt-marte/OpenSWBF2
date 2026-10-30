@@ -4,6 +4,13 @@
 #include "sndallocbitmap.h"
 #include "PebbleFL/Common/PblListSingle.h"
 
+// A free list's entry size: retail's Win32 size, and on x64 at least the type's own size.
+#ifdef _WIN64
+#define SND_FREELIST_SIZE(uiWin32Size, Type) (sizeof(Type) > (uiWin32Size) ? (unsigned int)sizeof(Type) : (unsigned int)(uiWin32Size))
+#else
+#define SND_FREELIST_SIZE(uiWin32Size, Type) (uiWin32Size)
+#endif
+
 namespace Snd
 {
 
@@ -58,7 +65,7 @@ public:
     unsigned int mAlignment;
     unsigned int mEntriesPerBlock;
     PblListSingle mBlockList;
-    void* (__cdecl* mAllocFunc)(unsigned int);
+    void* (__cdecl* mAllocFunc)(size_t);
     void (__cdecl* mFreeFunc)(void*);
     unsigned char mFlags;
 };

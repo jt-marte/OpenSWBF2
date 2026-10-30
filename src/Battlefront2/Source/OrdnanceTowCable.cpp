@@ -44,7 +44,7 @@ char OrdnanceTowCableClass::rttiNameOrdnanceTowCableClass[] = "OrdnanceTowCableC
 // `dynamic initializer for 'OrdnanceTowCable::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769200
 // `dynamic atexit destructor for 'OrdnanceTowCable::sMemoryPool''
-MemoryPool OrdnanceTowCable::sMemoryPool("OrdnanceTowCable", 0x670);
+MemoryPool OrdnanceTowCable::sMemoryPool("OrdnanceTowCable", RED_POOL_SIZE(0x670, OrdnanceTowCable));
 
 // GLOBAL: SWBF2 0x01eaed60
 unsigned int OrdnanceTowCable::sTextureHash;

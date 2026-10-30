@@ -165,7 +165,7 @@ void PblFileChunk::Realign()
 
 void PblMemChunk::Realign()
 {
-    _pData = _pData + ((-(int)_pData) & 3);
+    _pData = _pData + ((-(intptr_t)_pData) & 3);
 }
 
 int PblMemChunk::GetSize() const

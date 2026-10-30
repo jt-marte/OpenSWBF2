@@ -10,7 +10,7 @@
 class RedOmniLight : public RedLight
 {
 public:
-    static void* operator new(unsigned int uiSize) { return sMemoryPool.Allocate(uiSize); }
+    static void* operator new(size_t uiSize) { return sMemoryPool.Allocate(uiSize); }
 
     // FUNCTION: SWBF2 0x004bd970
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }

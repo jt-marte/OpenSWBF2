@@ -428,7 +428,7 @@ const char* EntityFlyer::GetDerivedRttiName() const
 // `dynamic initializer for 'EntityFlyer::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f50
 // `dynamic atexit destructor for 'EntityFlyer::sMemoryPool''
-MemoryPool EntityFlyer::sMemoryPool("EntityFlyer", 0x1d90);
+MemoryPool EntityFlyer::sMemoryPool("EntityFlyer", RED_POOL_SIZE(0x1d90, EntityFlyer));
 
 // FUNCTION: SWBF2 0x00477680
 bool EntityFlyer::IsRtti(unsigned int uRtti) const
@@ -1446,7 +1446,7 @@ void Event<Character, GameObject>::Trigger(Character& item, GameObject& param)
 
 extern PblVector3 gVectorZero;
 
-void* EntityFlyer::operator new(unsigned int uSize)
+void* EntityFlyer::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }
@@ -3191,7 +3191,7 @@ EntityPathFollower::BranchParams EntityFlyer::GetBranchParams()
                              fHigh);
     float fBase = (mCharacter && mCharacter->mCarriedFlagPtr) ? (fHigh - fLow) * 0.5f + fLow : fLow;
 
-    float fTime = GameLoop::GetMissionTime() + (float)(((unsigned int)this >> 2) & 0xf);
+    float fTime = GameLoop::GetMissionTime() + (float)(((uintptr_t)this >> 2) & 0xf);
     float fWave = PblMath::Cos(fTime * 2.33f) * PblMath::Sin(fTime * 1.17f);
     float fBeat = PblMath::Sin(fTime * 0.43f) * fWave * 0.5f + 0.5f;
     float fSpeed = fBeat * fBeat * (fHigh - fBase) + fBase;
@@ -5725,3 +5725,6 @@ bool bRenderContrails = true;
 // SYNTHETIC: SWBF2 0x00402af0
 // `dynamic initializer for 'cvRenderContrails''
 RedCommandConsole cvRenderContrails("flyer.contrailsActive", MultiVar(&bRenderContrails));
+
+// MountedTurret.cpp's EntityFlyer stand-in pads up to mState
+static_assert(offsetof(EntityFlyer, mState) == (sizeof(void*) == 4 ? 0x564 : 0x7EC), "EntityFlyer stand-in layout");

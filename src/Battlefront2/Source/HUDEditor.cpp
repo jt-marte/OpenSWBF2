@@ -79,7 +79,7 @@ EditHeap::~EditHeap()
 
 static RedKeyboard* GetInputsKeyboard(RawControllerInputs* const pInputs)
 {
-    return *(RedKeyboard**)&pInputs->mRawInputStorage[0x2608 - 4];
+    return pInputs->_redKeyboard; // retail: mRawInputStorage + 0x2604
 }
 
 namespace FLRenderer

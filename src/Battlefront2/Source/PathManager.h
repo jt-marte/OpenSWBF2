@@ -52,7 +52,7 @@ public:
     // FUNCTION: SWBF2 0x00614310
     const PblList<AIPathNode>& GetNodeList() const { return mNodes; }
 
-    static void* operator new(unsigned int uiSize);
+    static void* operator new(size_t uiSize);
 
     AIPath();
 

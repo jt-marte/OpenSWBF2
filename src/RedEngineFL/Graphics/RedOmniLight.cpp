@@ -16,7 +16,7 @@ static const float POINT_LIGHT_VISIBILITY_RADIUS_FUDGE = 10.0f;
 // `dynamic initializer for 'RedOmniLight::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769b10
 // `dynamic atexit destructor for 'RedOmniLight::sMemoryPool''
-MemoryPool RedOmniLight::sMemoryPool("RedOmniLight", 0x120);
+MemoryPool RedOmniLight::sMemoryPool("RedOmniLight", RED_POOL_SIZE(0x120, RedOmniLight));
 
 // GLOBAL: SWBF2 0x009acc00
 // SYNTHETIC: SWBF2 0x00408d40

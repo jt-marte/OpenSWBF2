@@ -96,8 +96,8 @@ public:
     virtual void DeactivateThread();
     virtual bool IsThreadActive();
 
-    typedef PblOrderedList<Thread, int>::Node ThreadListNode;
-    typedef PblOrderedList<Thread, int> ThreadList;
+    typedef PblOrderedList<Thread, intptr_t>::Node ThreadListNode; // ordered by address
+    typedef PblOrderedList<Thread, intptr_t> ThreadList;
 
     ThreadListNode mThreadListNode;
 
@@ -135,7 +135,7 @@ public:
     int mPriority;
     ThreadGroup* mNext;
     ThreadGroup* mPrev;
-    PblOrderedList<Thread, int> mThreads;
+    PblOrderedList<Thread, intptr_t> mThreads;
 };
  
  

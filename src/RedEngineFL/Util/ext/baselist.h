@@ -13,7 +13,7 @@ public:
 
     SLNode(const T& rElem) : elem_(rElem), next_(0) {}
 
-    static void* operator new(unsigned int uiSize, IAllocator& rAlloc)
+    static void* operator new(size_t uiSize, IAllocator& rAlloc)
     {
         Buffer buf(0, uiSize);
         rAlloc.Allocate(buf);
@@ -36,7 +36,7 @@ class DLNode
 public:
     DLNode() : next_(0), prev_(0) {}
 
-    static void* operator new(unsigned int uiSize, IAllocator& rAlloc)
+    static void* operator new(size_t uiSize, IAllocator& rAlloc)
     {
         Buffer buf(0, uiSize);
         rAlloc.Allocate(buf);

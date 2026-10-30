@@ -29,7 +29,16 @@ public:
                         unsigned int uiUnused, bool bFlagBit0, bool bFlagBit1,
                         unsigned int uiPos);
 
+#ifdef _WIN64
+    StreamPacket* mPackets; // retail kept this in mProducer[0], which x64 leaves unused
     unsigned int mProducer[5];
+#else
+    union
+    {
+        StreamPacket* mPackets; // the same word as mProducer[0], as retail laid it out
+        unsigned int mProducer[5];
+    };
+#endif
 
     unsigned int GetNumQueuedPackets() const;
 };

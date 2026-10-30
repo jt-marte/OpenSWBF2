@@ -81,7 +81,7 @@ char EntitySoundStream::rttiNameEntitySoundStream[] = "EntitySoundStream";
 // `dynamic initializer for 'EntitySoundStream::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00767000
 // `dynamic atexit destructor for 'EntitySoundStream::sMemoryPool''
-MemoryPool EntitySoundStream::sMemoryPool("EntitySoundStream", 0x10c);
+MemoryPool EntitySoundStream::sMemoryPool("EntitySoundStream", RED_POOL_SIZE(0x10c, EntitySoundStream));
 
 // FUNCTION: SWBF2 0x004fb9b0
 bool EntitySoundStream::IsRtti(unsigned int uRtti) const

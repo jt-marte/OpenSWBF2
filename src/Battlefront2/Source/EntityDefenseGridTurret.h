@@ -45,7 +45,7 @@ public:
     virtual const char* GetDerivedRttiName() const;
     virtual bool Update(float fDeltaTime);
 
-    static void* operator new(unsigned int uSize);
+    static void* operator new(size_t uSize);
     static void operator delete(void* pBlock);
 
     static MemoryPool sMemoryPool;

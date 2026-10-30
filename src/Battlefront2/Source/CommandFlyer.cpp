@@ -9,7 +9,7 @@
 // `dynamic initializer for 'CommandFlyer::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e80
 // `dynamic atexit destructor for 'CommandFlyer::sMemoryPool''
-MemoryPool CommandFlyer::sMemoryPool("CommandFlyer", 0x1da0);
+MemoryPool CommandFlyer::sMemoryPool("CommandFlyer", RED_POOL_SIZE(0x1da0, CommandFlyer));
 
 // GLOBAL: SWBF2 0x01eb9698
 // SYNTHETIC: SWBF2 0x004026a0

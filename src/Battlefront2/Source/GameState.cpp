@@ -1258,7 +1258,7 @@ void GameState::MissionState::Enter()
     GameLoop::Init();
     GameLoop::PostLoad();
 
-    unsigned int uiCount = *(unsigned int*)((char*)CameraManager::sInstance + 0x1c);
+    unsigned int uiCount = (unsigned int)CameraManager::sInstance->m_iNumCam; // retail: +0x1c
     for (unsigned int i = 0; i < uiCount; ++i)
     {
         int iIndex = FLInputManager::s_instance.GetHWPort(i);
@@ -1688,7 +1688,7 @@ void InsertStatsLeaderboardBuckets(StatsLeaderboardBucketVector* pThis, void*** 
             {
                 std::_Xbad_alloc();
             }
-            ppNew = (void**)::operator new(uiCapacity * 4);
+            ppNew = (void**)::operator new(uiCapacity * sizeof(void*));
             if (!ppNew)
             {
                 std::_Xbad_alloc();

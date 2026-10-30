@@ -132,7 +132,7 @@ static unsigned int AddWorldObjects(unsigned int uHash)
     int iVisited = 0;
     for (int i = 0; i < 1024; ++i)
     {
-        unsigned int uKey = kMap._table[i];
+        unsigned int uKey = (unsigned int)kMap._table[i];
         if (!uKey)
         {
             continue;

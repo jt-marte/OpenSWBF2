@@ -183,10 +183,10 @@ void Thread::UpdateAll(float fDeltaTime, bool bFrame, bool bLocalTurn)
 }
 
 // FUNCTION: SWBF2 0x00657860
-template void PblOrderedList<Thread, int>::Add(PblOrderedList<Thread, int>::Node*, Thread*, int);
+template void PblOrderedList<Thread, intptr_t>::Add(PblOrderedList<Thread, intptr_t>::Node*, Thread*, intptr_t);
 
 // FUNCTION: SWBF2 0x006578c0
-template void PblOrderedList<Thread, int>::Clear();
+template void PblOrderedList<Thread, intptr_t>::Clear();
 
 // GLOBAL: SWBF2 0x01f993f0
 // SYNTHETIC: SWBF2 0x004069f0

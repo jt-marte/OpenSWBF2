@@ -28,7 +28,7 @@ void ZephyrAnimInst<N>::SetAnim(const ZephyrAnim* pkAnim, const ZephyrSkeleton<N
 
     for (unsigned short j = 0; j < m_pkAnim->m_u16NumJoints; j++)
     {
-        short iSkel = (short)((int)pSkel->m_pShared->m_kHashCRC2Joint.Find(
+        short iSkel = (short)((int)(intptr_t)pSkel->m_pShared->m_kHashCRC2Joint.Find(
                                   m_pkAnim->m_pkJoints[j].GetNameCRC()) - 1);
         if (iSkel >= 0)
         {

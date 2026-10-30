@@ -4,6 +4,14 @@
 
 #include "PebbleFL/Common/PblList.h"
 
+// A pool's block size: retail's Win32 size, and on x64 at least the class's own size (x64
+// objects outgrow the sizes retail wrote down). See also MemoryPool::Allocate.
+#ifdef _WIN64
+#define RED_POOL_SIZE(iWin32Size, Type) ((int)sizeof(Type) > (iWin32Size) ? (int)sizeof(Type) : (iWin32Size))
+#else
+#define RED_POOL_SIZE(iWin32Size, Type) (iWin32Size)
+#endif
+
 class MemoryPool
 {
 public:

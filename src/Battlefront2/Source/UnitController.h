@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "Controller.h"
 #include "CommandFsm.h"
 #include "UnitCmdInfo.h"
@@ -80,7 +82,7 @@ public:
 
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
-    static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+    static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
     static MemoryPool sMemoryPool;
 
     static unsigned int GetRtti() { return rttiHashUnitController; }
@@ -108,26 +110,26 @@ protected:
     void UseAutoTurrets();
 
 public:
-    unsigned char mManagerNode[20];
+    PBL_RAW_ALIGN unsigned char mManagerNode[PBL_RAW_SIZE(20, 40)];
     float mNextUpdateTime;
     float mLastUpdateTime;
     float mUpdateRate;
     char mLowLevelUpdateSkips;
     float mLowLevelUpdateSkipDt;
-    unsigned char mThreatManager[204];
+    PBL_RAW_ALIGN unsigned char mThreatManager[PBL_RAW_SIZE(204, 256)];
     UnitAgent* mAgent;
-    unsigned char mLowLevel[232];
+    PBL_RAW_ALIGN unsigned char mLowLevel[PBL_RAW_SIZE(232, 296)];
     int mLodState;
     Character* mLodHumanPlayer;
     float mLodStateUpdateTime;
-    unsigned char mLastSquadCommand[20];
+    PBL_RAW_ALIGN unsigned char mLastSquadCommand[PBL_RAW_SIZE(20, 32)];
     bool mJustEnteredVehicleGoToPickupAgent;
     bool mLookAheadOnly;
     PblVector3 mOriginalAheadDir;
     int mSeed;
     float mCrowdCheckTime;
     int mFriendlyCount;
-    unsigned char mFriendly[64];
+    PBL_RAW_ALIGN unsigned char mFriendly[PBL_RAW_SIZE(64, 128)]; // 8 PblHandle<const GameObject>
     bool mSkip;
     int mVisionSkip;
     float mLastShotDistSq;

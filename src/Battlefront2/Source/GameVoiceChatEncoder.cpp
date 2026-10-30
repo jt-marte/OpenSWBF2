@@ -52,7 +52,7 @@ bool GameVoiceChat::Encoder::Open(float fMaxPacketMs)
         return false;
     }
 
-    unsigned char* pCursor = (unsigned char*)(((unsigned long)mCaptureBuffer + 3u) & ~3u);
+    unsigned char* pCursor = (unsigned char*)(((uintptr_t)mCaptureBuffer + 3u) & ~(uintptr_t)3);
     mEncoderBuffer = pCursor + uiAlignedFrame * 2u;
     mCapturePackets = (Snd::StreamPacket*)(mEncoderBuffer + uiAlignedEncoded);
     mEncoderPackets = mCapturePackets + 2;

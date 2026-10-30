@@ -30,7 +30,7 @@ void LightningBoltEffect::Create()
 // `dynamic initializer for 'LightningBoltEffectObject::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768c50
 // `dynamic atexit destructor for 'LightningBoltEffectObject::sMemoryPool''
-MemoryPool LightningBoltEffectObject::sMemoryPool("LightningBoltEffectObject", 0x120);
+MemoryPool LightningBoltEffectObject::sMemoryPool("LightningBoltEffectObject", RED_POOL_SIZE(0x120, LightningBoltEffectObject));
 
 namespace
 {

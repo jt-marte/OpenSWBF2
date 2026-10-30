@@ -1,4 +1,5 @@
 #include <windows.h>
+#include <math.h>
 
 #include <d3d9.h>
 #include <process.h>
@@ -134,14 +135,14 @@ static void ReleaseMutex()
 void Startup_InitApplicationMemory()
 {
     pcCrash::ReserveLowAddressSpace();
-    s_memoryArena = malloc(0x4000000);
+    s_memoryArena = malloc(GameMemory::kArenaSize);
     if (!s_memoryArena || pcCrash::SimulateAllocFailure("arenaoom"))
     {
-        pcCrash::FatalInit("arena", 0x4000000);
+        pcCrash::FatalInit("arena", GameMemory::kArenaSize);
     }
 
     GameMemory::InitApplicationMemory((char*)s_memoryArena,
-                                      (char*)s_memoryArena + 0x4000000);
+                                      (char*)s_memoryArena + GameMemory::kArenaSize);
 }
 
 // FUNCTION: SWBF2 0x006171d0
@@ -239,7 +240,7 @@ static BOOL WINAPI DedicatedConsoleHandler(DWORD dwType)
 }
 
 // FUNCTION: SWBF2 0x006172a0
-long __stdcall WindowProc(HWND__* hWnd, unsigned int Msg, unsigned int wParam, long lParam)
+LRESULT __stdcall WindowProc(HWND__* hWnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
     switch (Msg)
     {
@@ -437,6 +438,11 @@ static __int64 DrainNow(void*)
 // FUNCTION: SWBF2 0x006175d0
 int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
 {
+#ifdef _WIN64
+    // The x64 CRT's math library takes FMA3 paths on CPUs that have them, which changes
+    // sin/pow/etc. in the last bit; keep one result on every machine (tests/corpus/mathfn/x64).
+    _set_FMA3_enable(0);
+#endif
 
     char szKey[64];
     strncpy(szKey, "952F41D039DB4507A84B40488E76932F 0123456789ABCDECAT0123456IPA", 0x3D);
@@ -558,12 +564,12 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
                                              (RedWarning::RED_ERROR_SEVERITY)RedLog::MinVerbosity());
         RedLog::Apply(pcCrash::GetBuildId());
         LOG(LogCore, Inform,
-            "OPENSWBF2 ADDRSPACE arena=0x%08X arena_end=0x%08X laa=%d steam=%d steam_api=0x%08X "
-            "Galaxy=0x%08X GalaxyPeer=0x%08X binkw32=0x%08X",
-            (unsigned int)s_memoryArena, (unsigned int)s_memoryArena + 0x4000000,
+            "OPENSWBF2 ADDRSPACE arena=0x%p arena_end=0x%p laa=%d steam=%d steam_api=0x%p "
+            "Galaxy=0x%p GalaxyPeer=0x%p binkw32=0x%p", // %p is %08X on Win32
+            s_memoryArena, (char*)s_memoryArena + GameMemory::kArenaSize,
             pcCrash::IsLargeAddressAware() ? 1 : 0, gf::_sap()->IsInitialized() ? 1 : 0,
-            (unsigned int)GetModuleHandleA("steam_api.dll"), (unsigned int)GetModuleHandleA("Galaxy.dll"),
-            (unsigned int)GetModuleHandleA("GalaxyPeer.dll"), (unsigned int)GetModuleHandleA("binkw32.dll"));
+            (void*)GetModuleHandleA("steam_api.dll"), (void*)GetModuleHandleA("Galaxy.dll"),
+            (void*)GetModuleHandleA("GalaxyPeer.dll"), (void*)GetModuleHandleA("binkw32.dll"));
     }
 
     const unsigned int uiPaceFps = DisplayCfg::gDisplay.uiFps;

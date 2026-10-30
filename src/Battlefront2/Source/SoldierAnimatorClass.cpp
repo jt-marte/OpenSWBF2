@@ -364,7 +364,7 @@ bool SoldierAnimatorClass::_GetAnimationBoneMatrix(const ZephyrSkeletonShared* p
     {
         return false;
     }
-    int iJoint = (int)pSkel->m_kHashCRC2Joint.Find(uiJointCrc) - 1;
+    int iJoint = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(uiJointCrc) - 1;
     if (iJoint < 0)
     {
         return false;
@@ -420,11 +420,11 @@ void SoldierAnimatorClass::SetupJointTransformAnimationFlag(ZephyrSkeletonShared
     }
 
     const unsigned int* auiJoints;
-    if ((int)pSkel->m_kHashCRC2Joint.Find(0x7a89c91f) - 1 >= 0)
+    if ((int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x7a89c91f) - 1 >= 0)
     {
         auiJoints = s_auiAnimatedJoints_7a89c91f;
     }
-    else if ((int)pSkel->m_kHashCRC2Joint.Find(0x93e93819) - 1 >= 0)
+    else if ((int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x93e93819) - 1 >= 0)
     {
         auiJoints = s_auiAnimatedJoints_93e93819;
     }
@@ -435,7 +435,7 @@ void SoldierAnimatorClass::SetupJointTransformAnimationFlag(ZephyrSkeletonShared
 
     for (int i = 0; auiJoints[i]; ++i)
     {
-        int iJoint = (int)pSkel->m_kHashCRC2Joint.Find(auiJoints[i]) - 1;
+        int iJoint = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(auiJoints[i]) - 1;
         pSkel->SetJointTransformAnimationFlag(iJoint, true);
     }
 }
@@ -444,7 +444,7 @@ void SoldierAnimatorClass::SetupJointTransformAnimationFlag(ZephyrSkeletonShared
 void SoldierAnimatorClass::SetupBodyMasks(const ZephyrSkeletonShared* pSkel, PblBitVector<32>& upperBodyMask,
                                           PblBitVector<32>& lowerBodyMask)
 {
-    bool bHasJoint = (int)pSkel->m_kHashCRC2Joint.Find(0xb70e2184) - 1 >= 0;
+    bool bHasJoint = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0xb70e2184) - 1 >= 0;
     upperBodyMask.SetAll();
     lowerBodyMask.ClearAll();
     upperBodyMask.m_auiData[0] &= ~1u;
@@ -463,7 +463,7 @@ void SoldierAnimatorClass::SetupBodyMasks(const ZephyrSkeletonShared* pSkel, Pbl
     }
     for (; pJoint < pEnd; ++pJoint)
     {
-        int iJoint = (int)pSkel->m_kHashCRC2Joint.Find(*pJoint) - 1;
+        int iJoint = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(*pJoint) - 1;
         unsigned int uiBit = 1u << (iJoint & 31);
         upperBodyMask.m_auiData[0] &= ~uiBit;
         lowerBodyMask.m_auiData[0] |= uiBit;
@@ -664,7 +664,7 @@ static void SetupVelocity(SoldierAnimation* pAnim, ZephyrPoseDyn<32>& tempPose)
     unsigned short uiRoot = 0;
     if (SoldierAnimatorClass::Instance())
     {
-        uiRoot = (unsigned short)((int)SoldierAnimatorClass::Instance()->GetDefaultSkeleton()->m_kHashCRC2Joint.Find(
+        uiRoot = (unsigned short)((int)(intptr_t)SoldierAnimatorClass::Instance()->GetDefaultSkeleton()->m_kHashCRC2Joint.Find(
                                       0x4446e9b8) -
                                   1);
     }
@@ -973,7 +973,7 @@ public:
  
  
 
-void* SoldierAnimation::operator new(unsigned int uiSize)
+void* SoldierAnimation::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }

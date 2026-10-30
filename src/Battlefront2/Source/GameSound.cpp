@@ -86,7 +86,7 @@ unsigned int GameSound::sNumDeferredSounds;
 // FUNCTION: SWBF2 0x00537f00
 void GameSound::InitDeferred()
 {
-    sDeferredSounds = (GameSound**)RedAllocFromHeap(GameMemory::TempLoadHeap, 2000, 0);
+    sDeferredSounds = (GameSound**)RedAllocFromHeap(GameMemory::TempLoadHeap, 500 * (unsigned int)sizeof(GameSound*), 0);
     sNumDeferredSounds = 0;
 }
 
@@ -200,7 +200,7 @@ void GameSound::Play(const PblVector3* pPos, const PblVector3* pVel, bool bArg3,
             return;
         }
         case type_ID:
-            const_cast<GameSound*>(this)->SetID((unsigned int)mSoundDescription, false, false);
+            const_cast<GameSound*>(this)->SetID((unsigned int)(uintptr_t)mSoundDescription, false, false);
             if (mType == type_ID)
             {
                 return;
@@ -239,7 +239,7 @@ void GameSound::SetID(const char* pName, bool, bool bDeferred)
     if ((strlen(pModifier) && PblHash(pModifier) == 0x1A01FB3B) || bDeferred)
     {
         mType = type_ID;
-        mSoundDescription = (char*)uID;
+        mSoundDescription = (char*)(uintptr_t)uID;
         AddDeferred(this);
     }
     else
@@ -282,7 +282,7 @@ unsigned int GameSound::GetPropertiesHashID() const
     case type_soundStream:
         return ((const Snd::SoundStream::Properties*)GetProperties())->mHashID;
     case type_ID:
-        return (unsigned int)GetProperties();
+        return (unsigned int)(uintptr_t)GetProperties();
     default:
         return 0;
     }
@@ -324,7 +324,7 @@ GameSound& GameSound::operator=(const GameSound& other)
 {
     if (other.GetPropertiesType() == type_ID)
     {
-        const_cast<GameSound&>(other).SetID((unsigned int)other.GetProperties(), false, false);
+        const_cast<GameSound&>(other).SetID((unsigned int)(uintptr_t)other.GetProperties(), false, false);
     }
     mSoundDescription = other.mSoundDescription;
     mType = other.mType;
@@ -425,7 +425,7 @@ void GameSoundControllable::Play(const GameSound* pSound, const PblVector3* pPos
         mFlags = flags_playing;
         break;
     case GameSound::type_ID:
-        const_cast<GameSound*>(pSound)->SetID((unsigned int)pProps, false, false);
+        const_cast<GameSound*>(pSound)->SetID((unsigned int)(uintptr_t)pProps, false, false);
         if (pSound->GetPropertiesType() != GameSound::type_ID)
         {
             Play(pSound, pPos, pVel, true);

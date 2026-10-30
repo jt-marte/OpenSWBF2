@@ -131,7 +131,7 @@ char EntitySoldier::rttiNameEntitySoldier[] = "EntitySoldier";
 // `dynamic initializer for 'EntitySoldier::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766fb0
 // `dynamic atexit destructor for 'EntitySoldier::sMemoryPool''
-MemoryPool EntitySoldier::sMemoryPool("EntitySoldier", 0xfd0);
+MemoryPool EntitySoldier::sMemoryPool("EntitySoldier", RED_POOL_SIZE(0xfd0, EntitySoldier));
 
 // GLOBAL: SWBF2 0x01ebc0f8
 // SYNTHETIC: SWBF2 0x00402d70
@@ -144,7 +144,7 @@ static char rttiNameEntitySoldierClass[] = "EntitySoldierClass";
 // `dynamic initializer for 'AcklayData::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766fc0
 // `dynamic atexit destructor for 'AcklayData::sMemoryPool''
-MemoryPool AcklayData::sMemoryPool("AcklayData", 0x13d0);
+MemoryPool AcklayData::sMemoryPool("AcklayData", RED_POOL_SIZE(0x13d0, AcklayData));
 
 // GLOBAL: SWBF2 0x01e51e04
 static int sWeaponSection;
@@ -839,6 +839,7 @@ EntitySoldier::EntitySoldier(EntitySoldierClass* pClass, const EntityDesc& desc)
     , mDebuffDamageOwner(0, 0, 0, 0, 0, 1.0f)
     , mSmolderDamageOwner(0, 0, 0, 0, 0, 1.0f)
 {
+    static_assert(sizeof(EnergyBar) <= sizeof(mEnergyBar), "mEnergyBar storage");
     new (mEnergyBar) EnergyBar(&pClass->mEnergyBarClass);
 
     mStandingOnObj = NULL;
@@ -4697,7 +4698,7 @@ void EntitySoldierClass::PostReadSetup()
         mSkeletonRootScale = 0.6f;
         if (mSpecialSkeleton && mSpecialSkeleton != SoldierAnimatorClass::Instance()->GetDefaultSkeleton())
         {
-            int iJoint = (int)mSpecialSkeleton->m_kHashCRC2Joint.Find(0x16e27226) - 1;
+            int iJoint = (int)(intptr_t)mSpecialSkeleton->m_kHashCRC2Joint.Find(0x16e27226) - 1;
             mSpecialSkeleton->SetJointScale(iJoint, mSkeletonRootScale);
         }
 
@@ -5716,7 +5717,7 @@ void EntitySoldierClass::SetProperty(unsigned int uProperty, const char* pszValu
         if (mSpecialSkeleton && mSpecialSkeleton != SoldierAnimatorClass::Instance()->GetDefaultSkeleton() &&
             mSkeletonRootScale != 1.0f)
         {
-            int iJoint = (int)mSpecialSkeleton->m_kHashCRC2Joint.Find(0x16E27226) - 1;
+            int iJoint = (int)(intptr_t)mSpecialSkeleton->m_kHashCRC2Joint.Find(0x16E27226) - 1;
             mSpecialSkeleton->SetJointScale(iJoint, mSkeletonRootScale);
         }
         break;
@@ -5728,7 +5729,7 @@ void EntitySoldierClass::SetProperty(unsigned int uProperty, const char* pszValu
         if (mSpecialSkeletonLowRes && mSpecialSkeletonLowRes != SoldierAnimatorLowResClass::GetDefaultSkeleton() &&
             mSkeletonRootScaleLowRes != 1.0f)
         {
-            int iJoint = (int)mSpecialSkeletonLowRes->m_kHashCRC2Joint.Find(0xE6E47876) - 1;
+            int iJoint = (int)(intptr_t)mSpecialSkeletonLowRes->m_kHashCRC2Joint.Find(0xE6E47876) - 1;
             mSpecialSkeletonLowRes->SetJointScale(iJoint, mSkeletonRootScaleLowRes);
         }
         break;

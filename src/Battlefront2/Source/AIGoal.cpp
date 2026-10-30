@@ -22,7 +22,7 @@ char AI::AIGoal::rttiNameAIGoal[] = "AIGoal";
 // `dynamic initializer for 'AI::AIGoal::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766d40
 // `dynamic atexit destructor for 'AI::AIGoal::sMemoryPool''
-MemoryPool AI::AIGoal::sMemoryPool("AIGoal", 0x20);
+MemoryPool AI::AIGoal::sMemoryPool("AIGoal", RED_POOL_SIZE(0x20, AI::AIGoal));
 
 // FUNCTION: SWBF2 0x00439ab0
 bool AI::AIGoal::IsRtti(unsigned int uRtti) const

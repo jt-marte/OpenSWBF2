@@ -1,4 +1,5 @@
 #include "FLInputManager.h"
+#include "lglcd/lgLcd.h"
 
 #include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Interface/RedFont.h"
@@ -142,27 +143,26 @@ void FLInputManager::InitCustomFontData()
     }
 }
 
-#define FLIM_AT(T, off) (*reinterpret_cast<T*>(reinterpret_cast<unsigned char*>(&FLInputManager::s_instance) + (off)))
-typedef RedJoystick* tJoystickPorts10[10];
+// OpenSWBF2: these name members of s_instance; retail reached them at Win32 byte offsets
+// (0x428 + 0x25c8, 0x25cc and 0x25d0; 0x29fc; 0x2cc8; 0x2d14; 0x2e7c), which move on x64.
 typedef unsigned char tBytes4C[0x4c];
 typedef unsigned char tBytes168[0x168];
 
 // GLOBAL: SWBF2 0x01ebe078
 RawControllerInputs& gPrimaryRawInputs = FLInputManager::s_instance.mJoysticks[0];
 // GLOBAL: SWBF2 0x01ec0640
-void*& gGuiInputTarget = FLIM_AT(void*, 0x428 + 0x25c8);
+void*& gGuiInputTarget = reinterpret_cast<void*&>(FLInputManager::s_instance.mJoysticks[0].m_pGuiInputs);
 // GLOBAL: SWBF2 0x01ec0644
-bool& gProcessAfterReading = FLIM_AT(bool, 0x428 + 0x25cc);
+bool& gProcessAfterReading = FLInputManager::s_instance.mJoysticks[0].mProcessAfterReading;
 // GLOBAL: SWBF2 0x01ec0648
-void*& gProcessedInputTarget = FLIM_AT(void*, 0x428 + 0x25d0);
+void*& gProcessedInputTarget = reinterpret_cast<void*&>(FLInputManager::s_instance.mJoysticks[0].mProcessDestination);
 
-RedJoystick* (&gJoystickPorts)[10] = FLIM_AT(tJoystickPorts10, 0x29fc);
+RedJoystick* (&gJoystickPorts)[10] = FLInputManager::s_instance.mJoysticks[0].mAttachedJoysticks;
 
-unsigned char (&gProcessedInputStorage)[0x4c] = FLIM_AT(tBytes4C, 0x2cc8);
-unsigned char (&gGuiInputStorage)[0x168] = FLIM_AT(tBytes168, 0x2d14);
+unsigned char (&gProcessedInputStorage)[0x4c] = reinterpret_cast<tBytes4C&>(FLInputManager::s_instance.m_inputs);
+unsigned char (&gGuiInputStorage)[0x168] = reinterpret_cast<tBytes168&>(FLInputManager::s_instance.m_guiInputs);
 // GLOBAL: SWBF2 0x01ec0acc
-bool& gControllerMissingFlag = FLIM_AT(bool, 0x2e7c);
-#undef FLIM_AT
+bool& gControllerMissingFlag = FLInputManager::s_instance.m_bIsMissing[0];
 
 struct ProcessedInputMap
 {
@@ -366,9 +366,8 @@ void FLInputManager::ProcessChatMessageInput(const unsigned short* pwText)
 // FUNCTION: SWBF2 0x0052a260
 bool CanProcessChatMessage(void)
 {
-    const unsigned char* pObj =
-        *(const unsigned char* const*)((const unsigned char*)&FLInputManager::s_instance + 0x2a24);
-    return pObj && pObj[5];
+    const RedLogitechLCD* pLCD = FLInputManager::s_instance.mJoysticks[0].mLCDPanel; // retail: +0x2a24
+    return pLCD && pLCD->mOpened;
 }
 
 // GLOBAL: SWBF2 0x009cef76

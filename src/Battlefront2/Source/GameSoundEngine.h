@@ -27,9 +27,9 @@ void Term(bool);
 
 }
 
-void* __cdecl SndAlloc(unsigned int uiSize);
+void* __cdecl SndAlloc(size_t uiSize);
 void __cdecl SndFree(void* pBlock);
-void* __cdecl SndTempAlloc(unsigned int uiSize);
+void* __cdecl SndTempAlloc(size_t uiSize);
 void __cdecl SndTempFree(void* pBlock);
 
 void __cdecl PrintDebugString(char const* pcMessage);

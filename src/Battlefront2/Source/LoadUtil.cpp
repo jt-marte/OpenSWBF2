@@ -714,7 +714,7 @@ void LoadUtil::ProcessRegion(PblFileChunk& chunk)
             pRegion = ProcessRegionInfo(child);
             break;
         case 0x504F5250:
-            if ((unsigned int)pRegion > 1)
+            if ((uintptr_t)pRegion > 1)
             {
                 const unsigned int uProperty = child._pFile->Read32();
                 pRegion->SetProperty(uProperty, child.ReadString(acValue, sizeof(acValue)));
@@ -726,7 +726,7 @@ void LoadUtil::ProcessRegion(PblFileChunk& chunk)
 
 bool __cdecl IsCoverHintFilteringEnabled();
 
-void* BaseHint::operator new(unsigned int uSize)
+void* BaseHint::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

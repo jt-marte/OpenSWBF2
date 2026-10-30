@@ -58,6 +58,24 @@
 #include <math.h>
 #include <string.h>
 #include "EntityProp.h"
+#include "PoolBlockSizes.h"
+#include "WeaponBinoculars.h"
+#include "WeaponCatapult.h"
+#include "WeaponDestruct.h"
+#include "WeaponRepair.h"
+#include "WeaponShield.h"
+#include "OrdnanceBeacon.h"
+#include "OrdnanceBeam.h"
+#include "OrdnanceBullet.h"
+#include "OrdnanceFatRay.h"
+#include "OrdnanceGrapplingHook.h"
+#include "OrdnanceGrenade.h"
+#include "OrdnanceHaywire.h"
+#include "OrdnanceLaser.h"
+#include "OrdnanceMeleeThrow.h"
+#include "OrdnanceMissile.h"
+#include "OrdnanceShell.h"
+#include "OrdnanceSticky.h"
 
 extern "C" PblQuaternion* __stdcall D3DXQuaternionNormalize(PblQuaternion* pOut,
                                                               const PblQuaternion* pQ);
@@ -176,7 +194,7 @@ void ReadUnitVector(NetPktGroup& group, PblVector3& value);
 void WriteCharacter(NetPktGroup& group, Character* pCharacter);
 Character* ReadCharacter(NetPktGroup& group);
 void WritePilots(NetPktGroup& group, GameObject& owner);
-int ComputeNetLOD(int position, int playerId);
+int ComputeNetLOD(const void* position, int playerId);
 void ReadPilots(NetPktGroup& group, GameObject& owner);
 bool IsNeverDies(EntityType type);
 void CheckReadAlign(NetPktGroup& group);
@@ -1063,7 +1081,7 @@ void EntityWalker::WriteObject(NetPktGroup& group, NetObjState*)
     const PblMatrix& matrix = GetMatrix();
     if (!NetGame::IsFullState())
     {
-        SetNetLOD(ComputeNetLOD((int)&matrix.m[3][0], mPlayerId) != 0);
+        SetNetLOD(ComputeNetLOD(&matrix.m[3][0], mPlayerId) != 0);
         SetNetPrecision(group);
     }
     WriteMatrix(group, matrix);
@@ -1325,7 +1343,7 @@ void EntityDroid::WriteObject(NetPktGroup& group, NetObjState*)
     const PblMatrix& matrix = GetMatrix();
     if (!NetGame::IsFullState())
     {
-        SetNetLOD(ComputeNetLOD((int)&matrix.m[3][0], mPlayerId) != 0);
+        SetNetLOD(ComputeNetLOD(&matrix.m[3][0], mPlayerId) != 0);
         SetNetPrecision(group);
     }
     WriteMatrix(group, matrix);
@@ -1460,7 +1478,7 @@ void EntityHover::WriteObject(NetPktGroup& group, NetObjState*)
     const PblMatrix& matrix = GetMatrix();
     if (!NetGame::IsFullState())
     {
-        SetNetLOD(ComputeNetLOD((int)&matrix.m[3][0], mPlayerId) != 0);
+        SetNetLOD(ComputeNetLOD(&matrix.m[3][0], mPlayerId) != 0);
         SetNetPrecision(group);
     }
     WriteMatrix(group, matrix);
@@ -3858,7 +3876,7 @@ void EntityFlyer::WriteObject(NetPktGroup& group, NetObjState* pState)
     const PblMatrix& matrix = GetMatrix();
     if (!NetGame::IsFullState())
     {
-        SetNetLOD(ComputeNetLOD((int)&matrix.m[3][0], mPlayerId) != 0);
+        SetNetLOD(ComputeNetLOD(&matrix.m[3][0], mPlayerId) != 0);
         SetNetPrecision(group);
     }
     WriteMatrix(group, matrix);
@@ -4681,7 +4699,7 @@ void EntityDroideka::WriteObject(NetPktGroup& group, NetObjState*)
     const PblMatrix& matrix = static_cast<CollisionObject*>(this)->GetMatrix();
     if (!NetGame::IsFullState())
     {
-        SetNetLOD(ComputeNetLOD((int)&matrix.m[3][0], mPlayerId) != 0);
+        SetNetLOD(ComputeNetLOD(&matrix.m[3][0], mPlayerId) != 0);
         SetNetPrecision(group);
     }
     group.WriteBits(mCtrl != 0, 1);
@@ -4801,7 +4819,7 @@ void EntitySoldier::WriteObject(NetPktGroup& group, NetObjState*)
     if (!NetGame::IsFullState())
     {
         const PblVector3& position = *(const PblVector3*)&matrix.m[3][0];
-        int precision = ComputeNetLOD((int)&position, mPlayerId);
+        int precision = ComputeNetLOD(&position, mPlayerId);
         if (!precision && gSoldierLodCount < 3)
         {
             const float dx = gCameraFrontPos.x - position.x;
@@ -6191,3 +6209,36 @@ GameObject* CommandBuildingAnimatedArmed::AddToClient()
     NetGame::LeaveClient();
     return client->GetGameObject();
 }
+
+// every subclass fits its pool's blocks (PoolBlockSizes.h)
+static_assert(sizeof(WeaponAreaEffect) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponBinoculars) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponCannon) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponCatapult) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponDestruct) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponDetonator) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponDisguise) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponDispenser) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponGrapplingHook) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponGrenade) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponInvisibility) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponLaser) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponLauncher) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponMelee) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponMeleeThrow) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponRemote) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponRepair) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponShield) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(WeaponTowCable) <= WEAPON_POOL_BLOCK, "Weapon pool block");
+static_assert(sizeof(OrdnanceBeacon) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceBeam) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceBullet) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceFatRay) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceGrapplingHook) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceGrenade) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceHaywire) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceLaser) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceMeleeThrow) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceMissile) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceShell) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");
+static_assert(sizeof(OrdnanceSticky) <= ORDNANCE_POOL_BLOCK, "Ordnance pool block");

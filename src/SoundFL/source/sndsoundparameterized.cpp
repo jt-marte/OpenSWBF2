@@ -15,21 +15,21 @@ namespace Snd
 // `dynamic initializer for 'Snd::SoundParameterized::Controller::Properties::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a260
 // `dynamic atexit destructor for 'Snd::SoundParameterized::Controller::Properties::smFreeList''
-FreeList SoundParameterized::Controller::Properties::smFreeList(0x10, 1, 0x10, 1);
+FreeList SoundParameterized::Controller::Properties::smFreeList(SND_FREELIST_SIZE(0x10, SoundParameterized::Controller::Properties), 1, 0x10, 1);
 
 // GLOBAL: SWBF2 0x007e34e8
 // SYNTHETIC: SWBF2 0x0040b830
 // `dynamic initializer for 'Snd::SoundParameterized::Layer::Properties::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a270
 // `dynamic atexit destructor for 'Snd::SoundParameterized::Layer::Properties::smFreeList''
-FreeList SoundParameterized::Layer::Properties::smFreeList(0x0c, 1, 0x10, 1);
+FreeList SoundParameterized::Layer::Properties::smFreeList(SND_FREELIST_SIZE(0x0c, SoundParameterized::Layer::Properties), 1, 0x10, 1);
 
 // GLOBAL: SWBF2 0x007e3520
 // SYNTHETIC: SWBF2 0x0040b850
 // `dynamic initializer for 'Snd::SoundParameterized::Properties::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a280
 // `dynamic atexit destructor for 'Snd::SoundParameterized::Properties::smFreeList''
-FreeList SoundParameterized::Properties::smFreeList(0x10, 1, 0x10, 1);
+FreeList SoundParameterized::Properties::smFreeList(SND_FREELIST_SIZE(0x10, SoundParameterized::Properties), 1, 0x10, 1);
 
 // GLOBAL: SWBF2 0x007e353c
 // SYNTHETIC: SWBF2 0x0040b870
@@ -136,7 +136,7 @@ void __cdecl SoundParameterized::Free()
     }
 }
 
-void* __cdecl SoundParameterized::Layer::operator new(unsigned int)
+void* __cdecl SoundParameterized::Layer::operator new(size_t)
 {
     return Snd::SoundParameterized::Layer::smFreeList.Alloc();
 }

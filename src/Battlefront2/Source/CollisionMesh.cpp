@@ -497,7 +497,9 @@ void CollisionMesh::_Read(PblFileChunk& chunk)
         }
         case 0x45455254:
         {
-            int iBytes = 2 * (iNumIndices + 6 * (iNumNodes + iNumLeafs));
+            // retail sizes nodes at 12 bytes; an x64 node holds an 8-byte pointer
+            static_assert(sizeof(void*) != 4 || sizeof(CollisionTreeNode) == 12, "CollisionTreeNode layout");
+            int iBytes = 2 * iNumIndices + (int)sizeof(CollisionTreeNode) * (iNumNodes + iNumLeafs);
             if (iBytes > mTopCollision[0].mSize)
             {
                 strlcpy(mTopCollision[0].mName, sCurrentCollision, 32);

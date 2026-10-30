@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "GameSound.h"
 #include "RedEngineFL/Graphics/RedPose.h"
 #include "RedEngineFL/Memory/RedMemoryPool.h"
@@ -736,7 +738,7 @@ public:
     float mLeftFootElevation;
     float mRightFootElevation;
 
-    unsigned char mEnergyBar[12];
+    PBL_RAW_ALIGN unsigned char mEnergyBar[PBL_RAW_SIZE(12, 16)];
     int mCameraSettingPrev;
     float mCameraSettingTimer;
     float mDrownTime;
@@ -771,7 +773,7 @@ public:
     PblMatrix mSafeMatrix;
     CollisionState mCollisionState;
 
-    unsigned char mCollisionMeshCache[3][316];
+    PBL_RAW_ALIGN unsigned char mCollisionMeshCache[3][PBL_RAW_SIZE(316, 600)]; // CollisionMeshCache[3]
     float mBuffOffenseTimer;
     float mBuffOffenseMult;
     float mBuffDefenseTimer;

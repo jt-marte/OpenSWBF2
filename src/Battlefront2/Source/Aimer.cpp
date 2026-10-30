@@ -1,4 +1,5 @@
 #include <math.h>
+#include "PebbleFL/Common/PblRawStorage.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@
 // `dynamic initializer for 'Aimer::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766d50
 // `dynamic atexit destructor for 'Aimer::sMemoryPool''
-MemoryPool Aimer::sMemoryPool("Aimer", 0x220);
+MemoryPool Aimer::sMemoryPool("Aimer", RED_POOL_SIZE(0x220, Aimer));
 
 extern PblVector3 gVectorZero;
 
@@ -53,7 +54,7 @@ public:
     virtual float GetOrdnanceVelocity();
     virtual float GetOrdnanceGravity();
 
-    char mWeaponState[0x104 - 0x18];
+    char mWeaponState[PBL_RAW_SIZE(0x104 - 0x18, 0x130)];
     PblHandle<const GameObject> mTarget;
 };
 
@@ -866,3 +867,6 @@ bool Aimer::WeaponShouldFire() const
 {
     return mWithinLimitsFlag || mClass->mFireOutsideLimits;
 }
+
+// MuzzleFlash.cpp's Aimer stand-in pads up to mFirePos
+static_assert(offsetof(Aimer, mFirePos) == (sizeof(void*) == 4 ? 0x88 : 0xB0), "Aimer stand-in layout");

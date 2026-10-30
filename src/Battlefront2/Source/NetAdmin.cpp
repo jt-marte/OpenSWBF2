@@ -2298,9 +2298,10 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                 }
 
                 Trackable* pTrackable = pCharacter->mUnit;
-                unsigned int* puFlags =
-                    (unsigned int*)((char*)pTrackable->GetGameObject() + 0x1fc);
-                *puFlags = (*puFlags & ~8u) | 0x10;
+                // retail: the Damageable flags word at +0x1fc, clearing bit 3 and setting bit 4
+                GameObject* pObject = pTrackable->GetGameObject();
+                pObject->mIsAlive = 0;
+                pObject->mVanishing = 1;
             }
             break;
         }

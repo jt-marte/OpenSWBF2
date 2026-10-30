@@ -793,11 +793,11 @@ static const unsigned int s_auiRootJoints[2] = { 0x16e27226, 0 };
 // FUNCTION: SWBF2 0x00649380
 void SoldierAnimatorLowResClass::SetupJointTransformAnimationFlag(ZephyrSkeletonShared* pSkeleton)
 {
-    if ((int)pSkeleton->m_kHashCRC2Joint.Find(0x7a89c91f) - 1 >= 0)
+    if ((int)(intptr_t)pSkeleton->m_kHashCRC2Joint.Find(0x7a89c91f) - 1 >= 0)
     {
         for (int i = 0; s_auiRootJoints[i]; ++i)
         {
-            int iJoint = (int)pSkeleton->m_kHashCRC2Joint.Find(s_auiRootJoints[i]) - 1;
+            int iJoint = (int)(intptr_t)pSkeleton->m_kHashCRC2Joint.Find(s_auiRootJoints[i]) - 1;
             pSkeleton->SetJointTransformAnimationFlag(iJoint, true);
         }
     }
@@ -810,7 +810,7 @@ void SoldierAnimatorLowResClass::SetupJointTransformAnimationFlag(ZephyrSkeleton
 
         for (int i = 0; i < 2; ++i)
         {
-            int iJoint = (int)pSkeleton->m_kHashCRC2Joint.Find(s_auiNoRootJoints[i]) - 1;
+            int iJoint = (int)(intptr_t)pSkeleton->m_kHashCRC2Joint.Find(s_auiNoRootJoints[i]) - 1;
             pSkeleton->SetJointTransformAnimationFlag(iJoint, true);
         }
     }
@@ -830,7 +830,7 @@ void SoldierAnimatorLowResClass::SetupJointMask(const ZephyrSkeletonShared* pSke
     kMask.ClearAll();
     for (int i = 0; i < (int)pSource->m_uNumJoints; ++i)
     {
-        int iJoint = (int)pSkeleton->m_kHashCRC2Joint.Find(pSource->m_pJoints[i].m_kCrc) - 1;
+        int iJoint = (int)(intptr_t)pSkeleton->m_kHashCRC2Joint.Find(pSource->m_pJoints[i].m_kCrc) - 1;
         if (iJoint >= 0)
         {
             kMask.SetBit(iJoint);

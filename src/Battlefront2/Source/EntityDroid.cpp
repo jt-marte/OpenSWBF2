@@ -521,7 +521,7 @@ void GameObject::SetNetUniqueId(int iNetUniqueId)
 // `dynamic initializer for 'EntityDroid::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f30
 // `dynamic atexit destructor for 'EntityDroid::sMemoryPool''
-MemoryPool EntityDroid::sMemoryPool("EntityDroid", 0x460);
+MemoryPool EntityDroid::sMemoryPool("EntityDroid", RED_POOL_SIZE(0x460, EntityDroid));
 
 // FUNCTION: SWBF2 0x00499370
 unsigned int EntityDroid::GetDerivedRtti() const
@@ -812,6 +812,7 @@ EntityDroid::EntityDroid(EntityDroidClass* pClass, const EntityDesc& desc)
     , Controllable(pClass, desc.mPlayerId)
     , mPostCollision(this)
 {
+    static_assert(sizeof(EnergyBar) <= sizeof(mEnergyBar), "mEnergyBar storage");
     new (mEnergyBar) EnergyBar(&pClass->mEnergyBarClass);
     mDestructChargeEffectHandle = NULL;
 

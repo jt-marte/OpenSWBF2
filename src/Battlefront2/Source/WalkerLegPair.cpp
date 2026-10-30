@@ -16,7 +16,7 @@
 // `dynamic initializer for 'WalkerLegPair::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007697c0
 // `dynamic atexit destructor for 'WalkerLegPair::sMemoryPool''
-MemoryPool WalkerLegPair::sMemoryPool("WalkerLegPair", 0x130);
+MemoryPool WalkerLegPair::sMemoryPool("WalkerLegPair", RED_POOL_SIZE(0x130, WalkerLegPair));
 
 static PblMatrix _IdentityMatrix(
     PblVector4{ 1.0f, 0.0f, 0.0f, 0.0f },

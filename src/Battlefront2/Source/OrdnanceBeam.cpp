@@ -1,4 +1,5 @@
 #include "OrdnanceBeam.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 
 #include <float.h>
 
@@ -21,7 +22,7 @@ class Weapon
 {
 public:
 
-    char mWeaponState[0x70];
+    char mWeaponState[PBL_RAW_SIZE(0x70, 0x90)];
     Aimer* mAimer;
 };
 

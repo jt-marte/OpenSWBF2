@@ -470,7 +470,7 @@ char EntityDroideka::rttiNameEntityDroideka[] = "EntityDroideka";
 // `dynamic initializer for 'EntityDroideka::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f40
 // `dynamic atexit destructor for 'EntityDroideka::sMemoryPool''
-MemoryPool EntityDroideka::sMemoryPool("EntityDroideka", 0x1b70);
+MemoryPool EntityDroideka::sMemoryPool("EntityDroideka", RED_POOL_SIZE(0x1b70, EntityDroideka));
 
 // FUNCTION: SWBF2 0x0049e370
 bool EntityDroideka::IsRtti(unsigned int uRtti) const
@@ -1683,12 +1683,12 @@ bool EntityDroidekaClass::InitAnimations(const char* pszBank)
         -0.52359879f / (mTimeTotals[EntityDroideka::TurnRight] * 6.0f);
 
     const ZephyrSkeletonShared* pSkel = mAnimObj->_pSkeletonShared;
-    mSpineIdx = (int)pSkel->m_kHashCRC2Joint.Find(0x48FAD19F) - 1;
-    mJointIdx[0] = (int)pSkel->m_kHashCRC2Joint.Find(0x6008D6E4) - 1;
-    mJointIdx[1] = (int)pSkel->m_kHashCRC2Joint.Find(0x6D4BF03D) - 1;
-    mJointIdx[2] = (int)pSkel->m_kHashCRC2Joint.Find(0x698AED8A) - 1;
-    mArmJointIdx[0] = (int)pSkel->m_kHashCRC2Joint.Find(0xA5C0332D) - 1;
-    mArmJointIdx[1] = (int)pSkel->m_kHashCRC2Joint.Find(0x9031BDCA) - 1;
+    mSpineIdx = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x48FAD19F) - 1;
+    mJointIdx[0] = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x6008D6E4) - 1;
+    mJointIdx[1] = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x6D4BF03D) - 1;
+    mJointIdx[2] = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x698AED8A) - 1;
+    mArmJointIdx[0] = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0xA5C0332D) - 1;
+    mArmJointIdx[1] = (int)(intptr_t)pSkel->m_kHashCRC2Joint.Find(0x9031BDCA) - 1;
     return true;
 }
 
@@ -1711,6 +1711,7 @@ EntityDroideka::EntityDroideka(EntityDroidekaClass* pClass, const EntityDesc& de
     , mFallTimer(0.0f)
     , mDebuffDamageOwner(0, 0, 0, 0, 0, 1.0f)
 {
+    static_assert(sizeof(EnergyBar) <= sizeof(mEnergyBar), "mEnergyBar storage");
     new (mEnergyBar) EnergyBar(&pClass->mEnergyBarClass);
 
     mHealthGainEffectHandle = NULL;

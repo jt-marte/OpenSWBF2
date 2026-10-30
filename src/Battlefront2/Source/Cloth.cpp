@@ -78,13 +78,13 @@
 // `dynamic initializer for 'EntityCloth::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766df0
 // `dynamic atexit destructor for 'EntityCloth::sMemoryPool''
-MemoryPool EntityCloth::sMemoryPool("EntityCloth", 0x120);
+MemoryPool EntityCloth::sMemoryPool("EntityCloth", RED_POOL_SIZE(0x120, EntityCloth));
 // GLOBAL: SWBF2 0x01eb10d0
 // SYNTHETIC: SWBF2 0x004023c0
 // `dynamic initializer for 'ClothData::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766de0
 // `dynamic atexit destructor for 'ClothData::sMemoryPool''
-MemoryPool ClothData::sMemoryPool("ClothData", 0xa0);
+MemoryPool ClothData::sMemoryPool("ClothData", RED_POOL_SIZE(0xa0, ClothData));
 
 // GLOBAL: SWBF2 0x01eb1120
 int ClothData::s_clothDataHashTableNumEntries;

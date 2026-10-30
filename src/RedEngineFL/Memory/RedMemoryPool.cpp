@@ -2,6 +2,11 @@
 
 #include "RedMemoryPool.h"
 #include "RedMemory.h"
+#include "RedEngineFL/Util/RedLog.h"
+
+// -heapcheck (set by RedMemory.cpp's heap setup)
+extern "C" bool gRedHeapCheck;
+bool gRedHeapCheck;
 
 // FUNCTION: SWBF2 0x006dc640
 PblList<MemoryPool>* GetMemoryPoolList()
@@ -32,7 +37,8 @@ void MemoryPool::Create(unsigned int uiCount, unsigned int uiSize, unsigned int 
         return;
     }
 
-    uiSize = (uiSize + 3) & ~3u;
+    // free blocks hold the next-free pointer, so a block is at least pointer-sized (4 on Win32)
+    uiSize = (uiSize + (unsigned int)sizeof(void*) - 1) & ~((unsigned int)sizeof(void*) - 1);
     mSize = uiSize;
     mCount = uiCount;
     if (uiSize != 0 && uiGrow == 0)
@@ -64,7 +70,35 @@ bool MemoryPool::sErrorOnExpansion;
 // FUNCTION: SWBF2 0x006dc370
 void* MemoryPool::Allocate(unsigned int uiSize)
 {
+#ifdef _WIN64
+    // OpenSWBF2: a block is mSize whatever the caller asks for, and retail's sizes are Win32 ones.
+    // A pool not yet carved takes the size its caller needs; once carved, a larger request comes
+    // from the heap instead of overrunning a block (freeing it gives the pool a bigger block).
+    if (uiSize > mSize)
+    {
+        if (mPool == 0)
+        {
+            mSize = (uiSize + (unsigned int)sizeof(void*) - 1) & ~((unsigned int)sizeof(void*) - 1);
+        }
+        else
+        {
+            static int siWarnings;
+            if (siWarnings < 32)
+            {
+                ++siWarnings;
+                LOG(LogMemory, Warning, "OPENSWBF2 POOL %s blocks are %u bytes, %u requested", mLabel, mSize, uiSize);
+            }
+            void* pBlock = RedAllocFromHeap(mHeap, uiSize, 0);
+            if (pBlock)
+            {
+                ++mUsed;
+            }
+            return pBlock;
+        }
+    }
+#else
     (void)uiSize;
+#endif
 
     if (mPool == 0)
     {
@@ -103,6 +137,14 @@ void* MemoryPool::Allocate(unsigned int uiSize)
 
     void* pBlock = mFree;
     mFree = *(void**)pBlock;
+#ifdef _WIN64
+    if (gRedHeapCheck && mFree && ((uintptr_t)mFree >> 32) != ((uintptr_t)pBlock >> 32))
+    {
+        // -heapcheck: a free block's link no longer points near the pool (something wrote a
+        // truncated pointer or other data into a free block)
+        LOG(LogMemory, Error, "OPENSWBF2 HEAPCHECK pool %s: block %p links to %p", mLabel, pBlock, mFree);
+    }
+#endif
     ++mUsed;
     return pBlock;
 }
@@ -156,7 +198,12 @@ void MemoryPool::Setup(unsigned int uiCount, unsigned int uiSize,
     if (mPool == 0)
     {
         mCount = uiCount;
+#ifdef _WIN64
+        // keep a size already raised for x64 objects (callers pass retail's Win32 sizes)
+        mSize = uiSize > mSize ? uiSize : mSize;
+#else
         mSize = uiSize;
+#endif
         mGrow = uiGrow;
     }
 }

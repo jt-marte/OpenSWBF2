@@ -584,12 +584,17 @@ void pcCrash::ReserveLowAddressSpace()
     {
         return;
     }
-    const unsigned int kLimit = 0x80000000u;
-    const unsigned int kMinRegion = 0x100000u;
+#ifdef _WIN64
+    // x64: every allocation lands above 4 GB, so a pointer squeezed through 32 bits faults
+    const uintptr_t kLimit = 0x100000000ull;
+#else
+    const uintptr_t kLimit = 0x80000000u;
+#endif
+    const uintptr_t kMinRegion = 0x100000u;
     SYSTEM_INFO si;
     GetSystemInfo(&si);
-    const unsigned int uiGran = si.dwAllocationGranularity;
-    unsigned int uiAt = (unsigned int)si.lpMinimumApplicationAddress;
+    const uintptr_t uiGran = si.dwAllocationGranularity;
+    uintptr_t uiAt = (uintptr_t)si.lpMinimumApplicationAddress;
     int iRetry = 0;
     while (uiAt < kLimit)
     {
@@ -598,15 +603,15 @@ void pcCrash::ReserveLowAddressSpace()
         {
             break;
         }
-        unsigned int uiBase = (unsigned int)mbi.BaseAddress;
-        unsigned int uiEnd = uiBase + (unsigned int)mbi.RegionSize;
+        uintptr_t uiBase = (uintptr_t)mbi.BaseAddress;
+        uintptr_t uiEnd = uiBase + mbi.RegionSize;
         if (uiEnd < uiBase || uiEnd > kLimit)
         {
             uiEnd = kLimit;
         }
         if (mbi.State == MEM_FREE)
         {
-            unsigned int uiFrom = (uiBase + uiGran - 1) & ~(uiGran - 1);
+            uintptr_t uiFrom = (uiBase + uiGran - 1) & ~(uiGran - 1);
             if (uiEnd > uiFrom && (uiEnd - uiFrom >= kMinRegion || uiEnd == kLimit))
             {
                 if (!VirtualAlloc((void*)uiFrom, uiEnd - uiFrom, MEM_RESERVE, PAGE_NOACCESS) && iRetry < 16)

@@ -209,7 +209,7 @@ EntityClass* PowerupItemClass::Derive(unsigned int uHash)
 // `dynamic initializer for 'PowerupItem::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769340
 // `dynamic atexit destructor for 'PowerupItem::sMemoryPool''
-MemoryPool PowerupItem::sMemoryPool("PowerupItem", 0x290);
+MemoryPool PowerupItem::sMemoryPool("PowerupItem", RED_POOL_SIZE(0x290, PowerupItem));
 
 // GLOBAL: SWBF2 0x01efa1d4
 // SYNTHETIC: SWBF2 0x00405f80

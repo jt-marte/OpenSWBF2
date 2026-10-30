@@ -1,4 +1,5 @@
 #include "ScopeDisplay.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 #include "ScopeBlurEffect.h"
 #include "CameraManager.h"
 #include "Character.h"
@@ -18,7 +19,7 @@ class Weapon : public Thread
 public:
     bool ZoomFirstPerson() const;
 
-    char mWeaponState[0x64 - sizeof(Thread)];
+    char mWeaponState[PBL_RAW_SIZE(0x64, 0x78) - sizeof(Thread)];
     WeaponClass* mClass;
 };
  

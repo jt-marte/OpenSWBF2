@@ -3787,9 +3787,9 @@ void __stdcall sub_530150(unsigned int) {}
 void __stdcall sub_530160(unsigned int) {}
 
 // FUNCTION: SWBF2 0x00530170
-int __fastcall FillWordRange(unsigned int first, unsigned int last, const int* value)
+int __fastcall FillWordRange(uintptr_t first, uintptr_t last, const int* value)
 {
-    unsigned int count = first > last ? 0 : (last - first + 3) >> 2;
+    unsigned int count = first > last ? 0 : (unsigned int)((last - first + 3) >> 2);
     int result = 0;
     for (unsigned int i = 0; i < count; ++i)
     {

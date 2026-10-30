@@ -4074,17 +4074,17 @@ int ScriptCB_SetBinding(lua_State* L)
         }
     }
 
-    unsigned char* const pRaw = (unsigned char*)pJoystick;
+    // retail: Win32 byte offsets 0x25d4, 0x14 and 0xbf4 from the start of the object
     for (unsigned char ucDevice = 0; ucDevice < 10; ++ucDevice)
     {
-        void* const* ppDevices = (void* const*)(pRaw + 0x25d4);
+        void* const* ppDevices = (void* const*)pJoystick->mAttachedJoysticks;
         if (ucDevice && !ppDevices[ucDevice])
         {
             continue;
         }
         const int iEnd = ucDevice ? 64 : 76;
-        const float* pfValue = (const float*)(pRaw + 0x14) + ucDevice * 76;
-        const float* pfLast = (const float*)(pRaw + 0xbf4) + ucDevice * 76;
+        const float* pfValue = pJoystick->mRawInputFloat[ucDevice];
+        const float* pfLast = pJoystick->mLastRawInputFloat[ucDevice];
 
         for (int iInput = ppDevices[ucDevice] ? 0 : 64; iInput < iEnd; ++iInput)
         {

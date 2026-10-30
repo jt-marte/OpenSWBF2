@@ -73,7 +73,7 @@ const char* EntitySoundStaticClass::GetDerivedRttiName()
 // `dynamic initializer for 'EntitySoundStatic::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766ff0
 // `dynamic atexit destructor for 'EntitySoundStatic::sMemoryPool''
-MemoryPool EntitySoundStatic::sMemoryPool("EntitySoundStatic", 0x4c);
+MemoryPool EntitySoundStatic::sMemoryPool("EntitySoundStatic", RED_POOL_SIZE(0x4c, EntitySoundStatic));
 
 // GLOBAL: SWBF2 0x01ebc1f8
 // SYNTHETIC: SWBF2 0x00402e40
@@ -99,7 +99,7 @@ const char* EntitySoundStatic::GetDerivedRttiName() const
     return rttiNameEntitySoundStatic;
 }
 
-void* EntitySoundStatic::operator new(unsigned int uSize)
+void* EntitySoundStatic::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

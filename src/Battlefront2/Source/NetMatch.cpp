@@ -133,7 +133,7 @@ bool NetMatch::ResolveAddress(const char* pcText, NetAddr& address)
 }
 
 // FUNCTION: SWBF2 0x005d5a60
-char NetAddr::GetAddr(void* pOut, int) const
+char NetAddr::GetAddr(void* pOut, const void*) const
 {
     unsigned int* pWords = (unsigned int*)pOut;
     pWords[0] = (unsigned int)pubAddr;
@@ -548,7 +548,7 @@ void UpdateFindLanGames()
 }
 
 // FUNCTION: SWBF2 0x005d7770
-unsigned int NetMatch::HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest)
+uintptr_t NetMatch::HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest)
 {
     unsigned __int64* peer = NetCommP::GetAddr(iDest);
     if (!NetComm::IsLAN())
@@ -578,7 +578,7 @@ unsigned int NetMatch::HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest)
         output->privPort = port;
     }
     myAddr.CopyFieldsFrom(pAddr);
-    return (unsigned int)&myAddr;
+    return (uintptr_t)&myAddr;
 }
 
 // FUNCTION: SWBF2 0x005d7830

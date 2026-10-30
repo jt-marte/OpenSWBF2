@@ -40,7 +40,7 @@ char EntityLightClass::rttiNameEntityLightClass[] = "EntityLightClass";
 // `dynamic initializer for 'EntityLight::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f70
 // `dynamic atexit destructor for 'EntityLight::sMemoryPool''
-MemoryPool EntityLight::sMemoryPool("EntityLight", 0x2e0);
+MemoryPool EntityLight::sMemoryPool("EntityLight", RED_POOL_SIZE(0x2e0, EntityLight));
 // GLOBAL: SWBF2 0x01ebbe88
 int EntityLightClass::sLightClassTableNumEntries;
 // GLOBAL: SWBF2 0x01ebbe8c

@@ -48,7 +48,7 @@ public:
 
     static MemoryPool sMemoryPool;
 
-    static void* operator new(unsigned int uSize);
+    static void* operator new(size_t uSize);
 
     void Reserve(const GameObject* pObj) const;
 

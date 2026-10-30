@@ -31,7 +31,7 @@ class CollisionTreeNode
 {
 public:
 
-    static void* operator new(unsigned int uSize)
+    static void* operator new(size_t uSize)
     {
         void* p = memblock + membytes;
         membytes += uSize;
@@ -47,7 +47,7 @@ public:
     static int nodes;
     static int leafs;
 
-    unsigned int data;
+    uintptr_t data; // child node or index pointer
     CompressedAABB aabb;
     unsigned char numVerts;
     unsigned char isleaf;
@@ -65,7 +65,7 @@ public:
         data = 0;
     }
     void SetLChild(CollisionTreeNode*) {}
-    void SetGChild(CollisionTreeNode* pChild) { data = (unsigned int)pChild; }
+    void SetGChild(CollisionTreeNode* pChild) { data = (uintptr_t)pChild; }
 };
 
 class CollisionTreeLeaf : public CollisionTreeNode
@@ -76,7 +76,7 @@ public:
     {
         ++leafs;
         numVerts = uNumVerts;
-        data = (unsigned int)indexpool;
+        data = (uintptr_t)indexpool;
         indexpool += uNumVerts;
         isleaf = 1;
     }

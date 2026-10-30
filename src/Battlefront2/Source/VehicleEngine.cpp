@@ -43,7 +43,7 @@ void VehicleEngineClass::Boost::operator delete(void* p)
     smFreeList.Free(p);
 }
 
-void* VehicleEngineClass::Boost::operator new(unsigned int)
+void* VehicleEngineClass::Boost::operator new(size_t)
 {
     return smFreeList.Alloc();
 }

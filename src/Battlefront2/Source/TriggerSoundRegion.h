@@ -42,7 +42,7 @@ public:
 
         static void Load(PblFileChunk& chunk);
 
-        static void* operator new(unsigned int)
+        static void* operator new(size_t)
         {
             if (!sMemoryPool.mCount)
             {
@@ -80,7 +80,7 @@ public:
 
         static Group* FindByID(unsigned int uID);
 
-        static void* operator new(unsigned int)
+        static void* operator new(size_t)
         {
             if (!sMemoryPool.mCount)
             {
@@ -128,7 +128,7 @@ public:
 
     TriggerSoundRegion(RedRegionDesc& desc, const Properties* const pProperties);
 
-    static void* operator new(unsigned int)
+    static void* operator new(size_t)
     {
         if (!sMemoryPool.mCount)
         {

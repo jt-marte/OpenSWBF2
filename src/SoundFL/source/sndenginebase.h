@@ -65,8 +65,10 @@ public:
     static Stream* smStreams;
     static Voice* smVoices;
     static bool smOpened;
-    static unsigned char smVoiceStorage[0xA800];
-    static unsigned char smStreamStorage[0x1446A68];
+    static const unsigned int kNumVoices = 32;
+    static const unsigned int kNumStreams = 6;
+    static unsigned char smVoiceStorage[]; // kNumVoices Voices
+    static unsigned char smStreamStorage[]; // kNumStreams Streams
 
     static float smTimeElapsed;
 

@@ -1270,3 +1270,7 @@ void Event<GameObject, char>::Callback::Trigger(GameObject& item, char& param)
 
 // SYNTHETIC: SWBF2 0x00446e14
 // [thunk]:GameObject::GetGameObject`adjustor{12}'
+
+// the GameObject stand-ins in FLEffect.cpp and AttachedEffects.cpp pad up to these
+static_assert(offsetof(GameObject, mHandleId) == (sizeof(void*) == 4 ? 0x204 : 0x2F8), "GameObject stand-in layout");
+static_assert(offsetof(GameObject, mNetUniqueId) == (sizeof(void*) == 4 ? 0x21C : 0x328), "GameObject stand-in layout");

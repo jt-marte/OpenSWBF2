@@ -115,7 +115,7 @@ private:
 public:
 
     static FireForget* smVoiceVirtuals;
-    static unsigned char smVoiceVirtualStorage[12800];
+    static unsigned char smVoiceVirtualStorage[64 * sizeof(FireForget)];
     static Source3D smSource3Ds[64];
 
     static ::PblVector3 smSource3DPositions[64];
@@ -155,7 +155,7 @@ class Sound::Properties : public SoundProperties,
 public:
     Properties();
 
-    static void* operator new(unsigned int)
+    static void* operator new(size_t)
     {
         return smFreeList.Alloc();
     }

@@ -56,7 +56,7 @@ SpaceAssault* SpaceAssault::mInstance;
 // `dynamic initializer for 'SpaceAssault::ViewportData::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007694c0
 // `dynamic atexit destructor for 'SpaceAssault::ViewportData::sMemoryPool''
-MemoryPool SpaceAssault::ViewportData::sMemoryPool("SpaceAssault::ViewportData", 0x2410);
+MemoryPool SpaceAssault::ViewportData::sMemoryPool("SpaceAssault::ViewportData", RED_POOL_SIZE(0x2410, SpaceAssault::ViewportData));
 
 // FUNCTION: SWBF2 0x0064b7c0
 SpaceAssault::ViewportData::ViewportData()

@@ -62,7 +62,7 @@ char OrdnanceClass::rttiNameOrdnanceClass[] = "OrdnanceClass";
 // `dynamic initializer for 'Ordnance::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007691f0
 // `dynamic atexit destructor for 'Ordnance::sMemoryPool''
-MemoryPool Ordnance::sMemoryPool("Ordnance", 0x98);
+MemoryPool Ordnance::sMemoryPool("Ordnance", RED_POOL_SIZE(0x98, Ordnance));
 
 // FUNCTION: SWBF2 0x005f7e70
 OrdnanceClass::OrdnanceClass(unsigned int uHash)
@@ -731,3 +731,6 @@ template Factory<Ordnance, OrdnanceClass, OrdnanceDesc>::Factory(OrdnanceClass*,
 
 // SYNTHETIC: SWBF2 0x005fa2d0
 // OrdnanceBeamClass::~OrdnanceBeamClass
+
+// CollisionManager.cpp's Ordnance stand-in pads up to mCollisionManagerNode
+static_assert(offsetof(Ordnance, mCollisionManagerNode) == (sizeof(void*) == 4 ? 0x78 : 0xD0), "Ordnance stand-in layout");

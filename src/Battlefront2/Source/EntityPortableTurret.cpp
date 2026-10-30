@@ -37,7 +37,7 @@ char EntityPortableTurret::rttiNameEntityPortableTurret[] = "EntityPortableTurre
 // `dynamic initializer for 'EntityPortableTurret::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f90
 // `dynamic atexit destructor for 'EntityPortableTurret::sMemoryPool''
-MemoryPool EntityPortableTurret::sMemoryPool("EntityPortableTurret", 0x6d0);
+MemoryPool EntityPortableTurret::sMemoryPool("EntityPortableTurret", RED_POOL_SIZE(0x6d0, EntityPortableTurret));
 
 extern "C" PblVector3* __stdcall D3DXVec3Normalize(PblVector3* pOut, const PblVector3* pV);
 

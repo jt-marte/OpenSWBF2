@@ -1,4 +1,5 @@
 #include "SaveFsm.h"
+#include <stdarg.h>
 #include "PebbleFL/Common/PblJournal.h"
 #include "PebbleFL/Common/PblUnicode.h"
 #include "RedEngineFL/Interface/RedInterfaceElement.h"
@@ -11,32 +12,22 @@ extern void sub_631640();
 extern unsigned int CalcCRC(void const* pData, unsigned int uiSize, unsigned int uiSeed);
 namespace RedLocalizeDB { const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing); }
 
-extern int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, int iArg);
-
-extern int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat,
-                       void const* pArg1, int iArg2);
+extern int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, ...);
 
 // FUNCTION: SWBF2 0x00631550
-int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, int iArg)
+// OpenSWBF2: one variadic function in place of retail's (int) and (pointer, int) overloads, which
+// passed uvsnprintf the address of their own parameters as the argument list. On Win32 the stack
+// layout is the same; x64 passes those parameters in registers.
+int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, ...)
 {
     const unsigned short* pusFormat = RedLocalizeDB::Find(PblHash(pcFormat), false);
     if (pusFormat)
     {
-        return PblUnicode::uvsnprintf((unsigned short*)pDest, unsigned int(-1), pusFormat,
-                                      (char*)&iArg);
-    }
-    PblUnicode::ustrncnv((unsigned short*)pDest, pcFormat, uiSize);
-    return 0;
-}
-
-int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat,
-               void const* pArg1, int iArg2)
-{
-    const unsigned short* pusFormat = RedLocalizeDB::Find(PblHash(pcFormat), false);
-    if (pusFormat)
-    {
-        return PblUnicode::uvsnprintf((unsigned short*)pDest, unsigned int(-1), pusFormat,
-                                      (char*)&pArg1);
+        va_list args;
+        va_start(args, pcFormat);
+        const int iResult = PblUnicode::uvsnprintf((unsigned short*)pDest, unsigned int(-1), pusFormat, args);
+        va_end(args);
+        return iResult;
     }
     PblUnicode::ustrncnv((unsigned short*)pDest, pcFormat, uiSize);
     return 0;
@@ -243,7 +234,7 @@ void SaveFsm::EnterState()
         return;
 
     case 0xC:
-        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save10", (int)mFailOpStr);
+        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save10", mFailOpStr);
         SafeLocalizeStrcpy(mBtnB, "common.no", 100);
         SafeLocalizeStrcpy(mBtnC, "common.yes", 100);
         mBtns = 6;
@@ -267,13 +258,13 @@ void SaveFsm::EnterState()
                 }
 
                 const unsigned short* pJoy = RedLocalizeDB::Find(0x7CF9A572u, false);
-                SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save13", (int)pJoy);
+                SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save13", pJoy);
                 SafeLocalizeStrcpy(mBtnB, "common.ok", 100);
             }
             else
             {
                 const unsigned short* pJoy = RedLocalizeDB::Find(0x7CF9A572u, false);
-                SafeLocalizeSPrintf(mMsgStr1, 400, iResult == -2 ? "ifs.loadsave_pc.save04" : "ifs.loadsave_pc.save13", (int)pJoy);
+                SafeLocalizeSPrintf(mMsgStr1, 400, iResult == -2 ? "ifs.loadsave_pc.save04" : "ifs.loadsave_pc.save13", pJoy);
                 SafeLocalizeStrcpy(mBtnB, "common.ok", 100);
             }
         }
@@ -549,7 +540,7 @@ void SaveFsm::Enter_PreOp()
     int iResult = mSaveDevice.GetStatus();
     if (iResult == -2)
     {
-        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save04", (int)mFailOpStr);
+        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save04", mFailOpStr);
         SafeLocalizeStrcpy(mBtnB, "common.ok", 100);
         mBtns = 2;
         mBtnDefault = 2;
@@ -560,7 +551,7 @@ void SaveFsm::Enter_PreOp()
     {
         if (!m_preop_AllowFormat)
         {
-            SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save05", (int)mFailOpStr);
+            SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save05", mFailOpStr);
             SafeLocalizeStrcpy(mBtnB, "common.ok", 100);
             mBtns = 2;
             mBtnDefault = 2;
@@ -805,7 +796,7 @@ void SaveFsm::Update_PreOp_Format()
     {
 
         const unsigned short* pJoy = RedLocalizeDB::Find(0x7CF9A572u, false);
-        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save13", (int)pJoy);
+        SafeLocalizeSPrintf(mMsgStr1, 400, "ifs.loadsave_pc.save13", pJoy);
         SafeLocalizeStrcpy(mBtnB, "common.ok", 100);
         mBtns = 2;
         mBtnDefault = 2;

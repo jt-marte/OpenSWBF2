@@ -21,7 +21,7 @@ static const float EPSILON = 0.0001f;
 // `dynamic atexit destructor for 'TreeGridStack::sMemoryPool''
 MemoryPool TreeGridStack::sMemoryPool("TreeGridStack", sizeof(TreeGridStack));
 
-void* TreeGridStack::operator new(unsigned int uiSize)
+void* TreeGridStack::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }

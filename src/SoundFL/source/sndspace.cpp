@@ -28,7 +28,7 @@ PblListSingle Space::smSpaceList;
 // `dynamic initializer for 'Snd::Space::Connected::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a1c0
 // `dynamic atexit destructor for 'Snd::Space::Connected::smFreeList''
-FreeList Space::Connected::smFreeList(8, 1, 8, 1);
+FreeList Space::Connected::smFreeList(SND_FREELIST_SIZE(8, Space::Connected), 1, 8, 1);
 
 // GLOBAL: SWBF2 0x007e3400
 // SYNTHETIC: SWBF2 0x0040b6b0

@@ -30,7 +30,7 @@ static const float gTentacleAngle = 0.52359879f;
 // `dynamic initializer for 'TentacleSimulator::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769590
 // `dynamic atexit destructor for 'TentacleSimulator::sMemoryPool''
-MemoryPool TentacleSimulator::sMemoryPool("TentacleSimulator", 0x268);
+MemoryPool TentacleSimulator::sMemoryPool("TentacleSimulator", RED_POOL_SIZE(0x268, TentacleSimulator));
 
 // FUNCTION: SWBF2 0x00656e70
 void TentacleSimulator::EnforceBoxCollision(const PblMatrix& matrix, float fX, float fY, float fZ)

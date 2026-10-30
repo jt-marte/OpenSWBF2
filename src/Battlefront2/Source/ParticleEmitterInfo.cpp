@@ -5,4 +5,4 @@
 // `dynamic initializer for 'ParticleEmitterInfoData::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769230
 // `dynamic atexit destructor for 'ParticleEmitterInfoData::sMemoryPool''
-MemoryPool ParticleEmitterInfoData::sMemoryPool("ParticleEmitterInfoData", 0x80);
+MemoryPool ParticleEmitterInfoData::sMemoryPool("ParticleEmitterInfoData", RED_POOL_SIZE(0x80, ParticleEmitterInfoData));

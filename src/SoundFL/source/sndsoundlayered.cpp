@@ -10,7 +10,7 @@ namespace Snd
 {
 
 template <>
-void Allocator<SoundLayered::FireForgetLayer>::operator delete(void* p, unsigned int uiSize)
+void Allocator<SoundLayered::FireForgetLayer>::operator delete(void* p, size_t uiSize)
 {
     (void)uiSize;
     switch (((SoundLayered::FireForgetLayer*)p)->GetAllocType())
@@ -32,7 +32,7 @@ namespace Snd
 
 SoundLayered::FireForgetLayer* SoundLayered::smFireForgetLayers;
 bool SoundLayered::smIsOpen;
-unsigned char SoundLayered::smFireForgetLayerStorage[5888];
+__declspec(align(16)) unsigned char SoundLayered::smFireForgetLayerStorage[64 * sizeof(FireForgetLayer)];
 // GLOBAL: SWBF2 0x007e36bc
 // SYNTHETIC: SWBF2 0x0040bbb0
 // `dynamic initializer for 'Snd::SoundLayered::FireForgetLayer::smInactiveList''
@@ -59,7 +59,7 @@ FreeList SoundLayered::Properties::Layer::smFreeList(sizeof(SoundLayered::Proper
 // `dynamic initializer for 'Snd::SoundLayered::Properties::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a3a0
 // `dynamic atexit destructor for 'Snd::SoundLayered::Properties::smFreeList''
-FreeList SoundLayered::Properties::smFreeList(0x0c, 1, 8, 1);
+FreeList SoundLayered::Properties::smFreeList(SND_FREELIST_SIZE(0x0c, SoundLayered::Properties), 1, 8, 1);
 
 // GLOBAL: SWBF2 0x007e365c
 // SYNTHETIC: SWBF2 0x0040bb90

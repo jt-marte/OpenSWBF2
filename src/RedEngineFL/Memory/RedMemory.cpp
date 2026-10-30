@@ -1,3 +1,4 @@
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -14,6 +15,84 @@ extern "C"
     int __RedTempHeap = -1;
     void (*OnFailure)(int heap, unsigned int size);
     int sRecursionDepth;
+}
+
+// OpenSWBF2 -heapcheck: every block keeps the code addresses that allocated it (as image RVAs) in
+// the header bytes its Tag leaves spare, and an allocation that meets a free-list entry outside
+// its heap stops and reports the heap. Blocks sit end to end, so the last intact block before the
+// first broken Tag in address order is the one that ran over it.
+extern "C" __declspec(dllimport) unsigned short __stdcall RtlCaptureStackBackTrace(unsigned long, unsigned long, void**, unsigned long*);
+extern "C" __declspec(dllimport) void* __stdcall GetModuleHandleA(const char*);
+extern "C" __declspec(dllimport) char* __stdcall GetCommandLineA();
+extern "C" __declspec(dllimport) void __stdcall OutputDebugStringA(const char*);
+extern "C" bool gRedHeapCheck; // RedMemoryPool.cpp
+
+static unsigned int HeapCheckSlots(unsigned int hdr)
+{
+    const unsigned int uiSpare = hdr > sizeof(Tag) ? hdr - (unsigned int)sizeof(Tag) : 0;
+    return uiSpare / 4 < 2 ? uiSpare / 4 : 2;
+}
+
+static void HeapCheckRecord(Tag* tag, unsigned int hdr)
+{
+    void* apFrames[4] = {0, 0, 0, 0};
+    RtlCaptureStackBackTrace(0, 4, apFrames, 0);
+    const char* pBase = (const char*)GetModuleHandleA(0);
+    unsigned int* puSlots = (unsigned int*)((char*)tag + sizeof(Tag));
+    const unsigned int uiSlots = HeapCheckSlots(hdr);
+    for (unsigned int i = 0; i < uiSlots; ++i)
+    {
+        // frames 0-1 are the allocator itself; 2-3 are its caller and theirs
+        puSlots[i] = (unsigned int)((const char*)apFrames[2 + i] - pBase);
+    }
+}
+
+static bool HeapCheckTagOk(const HeapObj& h, const Tag* tag)
+{
+    const char* p = (const char*)tag;
+    return p >= (const char*)h.start && p < (const char*)h.start + h.size &&
+           tag->size != 0 && tag->size <= h.size;
+}
+
+static void HeapCheckReport(int heap, const Tag* pBad)
+{
+    const HeapObj& h = heapobj[heap];
+    const unsigned int hdr = (h.align + sizeof(Tag) - 1) & ~(h.align - 1);
+    const unsigned int uiSlots = HeapCheckSlots(hdr);
+    char acLine[256];
+    _snprintf(acLine, sizeof(acLine), "OPENSWBF2 HEAPCHECK heap %d (%s): bad free-list entry %p\n", heap,
+              h.name ? h.name : "?", pBad);
+    OutputDebugStringA(acLine);
+    fputs(acLine, stderr);
+
+    const char* p = (const char*)h.start;
+    const char* const pEnd = p + h.size;
+    const Tag* apLast[3] = {0, 0, 0};
+    while (p < pEnd)
+    {
+        const Tag* tag = (const Tag*)p;
+        if (tag->size == 0 || tag->size > (unsigned int)(pEnd - p) || (tag->size & (h.align - 1)) != 0)
+        {
+            break;
+        }
+        apLast[2] = apLast[1];
+        apLast[1] = apLast[0];
+        apLast[0] = tag;
+        p += tag->size;
+    }
+    _snprintf(acLine, sizeof(acLine), "OPENSWBF2 HEAPCHECK first broken tag at %p (size %u); blocks before it:\n",
+              p, p < pEnd ? ((const Tag*)p)->size : 0);
+    OutputDebugStringA(acLine);
+    fputs(acLine, stderr);
+    for (int i = 0; i < 3 && apLast[i]; ++i)
+    {
+        const unsigned int* puSlots = (const unsigned int*)((const char*)apLast[i] + sizeof(Tag));
+        _snprintf(acLine, sizeof(acLine), "OPENSWBF2 HEAPCHECK   %p size %u user %u allocated from rva 0x%X / 0x%X\n",
+                  apLast[i], apLast[i]->size, apLast[i]->size - hdr, uiSlots > 0 ? puSlots[0] : 0,
+                  uiSlots > 1 ? puSlots[1] : 0);
+        OutputDebugStringA(acLine);
+        fputs(acLine, stderr);
+    }
 }
 
 // FUNCTION: SWBF2 0x006c3a50
@@ -49,7 +128,7 @@ void TagMergeIntoList(TagList* list, Tag* tag);
 void TagRemoveList(TagList* list, Tag* tag);
 
 // FUNCTION: SWBF2 0x006c3540
-void* __cdecl operator new(unsigned int size)
+void* __cdecl operator new(size_t size)
 {
     return RedAllocFromHeap(__RedCurrHeap, size, 0);
 }
@@ -64,7 +143,7 @@ void __cdecl operator delete(void* block)
 }
 
 // FUNCTION: SWBF2 0x006c3580
-void* __cdecl operator new[](unsigned int size)
+void* __cdecl operator new[](size_t size)
 {
     return RedAllocFromHeap(__RedCurrHeap, size, 0);
 }
@@ -100,6 +179,11 @@ void* RedAllocFromHeapInternal(int heap, unsigned int size, int bTop)
     {
         for (tag = h.free.last; tag; tag = tag->prev_)
         {
+            if (gRedHeapCheck && !HeapCheckTagOk(h, tag))
+            {
+                HeapCheckReport(heap, tag);
+                return 0;
+            }
             if (need <= tag->size)
             {
                 break;
@@ -110,6 +194,11 @@ void* RedAllocFromHeapInternal(int heap, unsigned int size, int bTop)
     {
         for (tag = h.free.first; tag; tag = tag->next_)
         {
+            if (gRedHeapCheck && !HeapCheckTagOk(h, tag))
+            {
+                HeapCheckReport(heap, tag);
+                return 0;
+            }
             if (need <= tag->size)
             {
                 break;
@@ -167,6 +256,10 @@ void* RedAllocFromHeapInternal(int heap, unsigned int size, int bTop)
         }
     }
     TagAddList(&h.used, tag);
+    if (gRedHeapCheck)
+    {
+        HeapCheckRecord(tag, hdr);
+    }
     return (char*)tag + hdr;
 }
 
@@ -311,9 +404,9 @@ void* RedAllocFromHeap(int heap, unsigned int size, int bTop)
 // FUNCTION: SWBF2 0x006c3900
 int RedCreateHeap(void* start, void* end, int align, char const* name)
 {
-    unsigned int mask = ~(align - 1);
-    char* s = (char*)(((unsigned int)start + align - 1) & mask);
-    char* e = (char*)((unsigned int)end & mask);
+    const uintptr_t mask = ~(uintptr_t)(align - 1);
+    char* s = (char*)(((uintptr_t)start + align - 1) & mask);
+    char* e = (char*)((uintptr_t)end & mask);
     unsigned int size = e - s;
     if (size)
     {
@@ -387,8 +480,8 @@ char* RedInitHeap(void* start, void* end, int maxheaps)
 {
     (void)end;
     ::maxheaps = maxheaps;
-    heapobj = (HeapObj*)(((unsigned int)start + 3) & ~3);
-    char* pNext = (char*)(((unsigned int)heapobj + maxheaps * sizeof(HeapObj) + 3) & ~3);
+    heapobj = (HeapObj*)(((uintptr_t)start + 3) & ~(uintptr_t)3);
+    char* pNext = (char*)(((uintptr_t)heapobj + maxheaps * sizeof(HeapObj) + 3) & ~(uintptr_t)3);
     for (int i = 0; i < maxheaps; ++i)
     {
         HeapObj& h = heapobj[i];
@@ -403,6 +496,7 @@ char* RedInitHeap(void* start, void* end, int maxheaps)
         h.name = 0;
     }
     isHeapObjInitialized = true;
+    gRedHeapCheck = strstr(GetCommandLineA(), "-heapcheck") != 0;
     return pNext;
 }
 

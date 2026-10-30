@@ -36,7 +36,7 @@ bool g_InputRepeatEnable = true;
 // `dynamic initializer for 'GuiManager::Event::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768760
 // `dynamic atexit destructor for 'GuiManager::Event::sMemoryPool''
-MemoryPool GuiManager::Event::sMemoryPool("GuiManager::Event", 0x4c);
+MemoryPool GuiManager::Event::sMemoryPool("GuiManager::Event", RED_POOL_SIZE(0x4c, GuiManager::Event));
 
 // GLOBAL: SWBF2 0x01ebda00
 // SYNTHETIC: SWBF2 0x00403970

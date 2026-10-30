@@ -12,7 +12,7 @@ public:
 
     SoundSpaceRegion(const RedRegion& rRegion) : Region(rRegion) {}
 
-    static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+    static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
 
     ~SoundSpaceRegion() {}
 
@@ -41,7 +41,7 @@ char EntitySoundClass::rttiNameEntitySoundClass[] = "EntitySoundClass";
 // `dynamic initializer for 'SoundSpaceRegion::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766fe0
 // `dynamic atexit destructor for 'SoundSpaceRegion::sMemoryPool''
-MemoryPool SoundSpaceRegion::sMemoryPool("SoundSpaceRegion", 0x70);
+MemoryPool SoundSpaceRegion::sMemoryPool("SoundSpaceRegion", RED_POOL_SIZE(0x70, SoundSpaceRegion));
 
 // GLOBAL: SWBF2 0x007eb884
 // SYNTHETIC: SWBF2 0x00402de0

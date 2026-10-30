@@ -31,7 +31,7 @@ bool FreeList::AllocBlocks(unsigned int uiNumBlocks, Block** ppFirstBlock)
         }
 
         char* const pEntries =
-            (char*)((((unsigned int)pAllocAddress + mAlignment - 1) / mAlignment)
+            (char*)((((uintptr_t)pAllocAddress + mAlignment - 1) / mAlignment)
                     * mAlignment);
         Block* const pBlock = (Block*)(pEntries + uiBlockBytes);
 
@@ -61,7 +61,8 @@ void* FreeList::Block::AllocEntry(unsigned int uiEntrySize, unsigned int uiEntri
     {
         return 0;
     }
-    return (char*)this + (handle.mStartEntry - uiEntriesPerBlock) * uiEntrySize;
+    // entries sit before the Block; retail wrote this as an unsigned offset that wraps on Win32
+    return (char*)this - (ptrdiff_t)(uiEntriesPerBlock - handle.mStartEntry) * (ptrdiff_t)uiEntrySize;
 }
 
 // FUNCTION: SWBF2 0x00738560

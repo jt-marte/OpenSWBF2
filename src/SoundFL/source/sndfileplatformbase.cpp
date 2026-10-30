@@ -42,7 +42,7 @@ unsigned int FilePlatformBase::BufferedReadWrite(void* pBuffer, unsigned int uiS
         unsigned int uiLeft = uiSize - uiDone;
         unsigned int uiSectors = uiLeft & ~(mSectorSize - 1);
 
-        if ((uiSectors && !((unsigned int)pBuffer & (mAlignment - 1)) && !(GetPos() & (mSectorSize - 1)))
+        if ((uiSectors && !((uintptr_t)pBuffer & (mAlignment - 1)) && !(GetPos() & (mSectorSize - 1)))
             || (mAccess & 8))
         {
 
@@ -198,7 +198,7 @@ bool FilePlatformBase::Open(char const* pcFileName, unsigned int uiAccessFlags, 
         {
             return false;
         }
-        mBuffer.Init((void*)(((unsigned int)mBufferAlloc + uiAlignment - 1) / uiAlignment * uiAlignment),
+        mBuffer.Init((void*)(((uintptr_t)mBufferAlloc + uiAlignment - 1) / uiAlignment * uiAlignment),
                      uiBufferSize);
     }
 

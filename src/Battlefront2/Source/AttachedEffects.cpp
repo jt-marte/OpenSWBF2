@@ -1,4 +1,5 @@
 #include "AttachedEffects.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 #include "PebbleFL/Common/PblVector.h"
 
 #include <stdio.h>
@@ -16,7 +17,7 @@ class GameObject
 {
 public:
 
-    char mInheritedObjectStorage[0x204];
+    char mInheritedObjectStorage[PBL_RAW_SIZE(0x204, 0x2F8)];
     unsigned int mHandleId;
 };
 
