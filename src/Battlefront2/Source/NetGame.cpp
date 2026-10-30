@@ -5636,6 +5636,47 @@ void SpawnDisplay::AcceptSideSelect()
 }
 
 // FUNCTION: SWBF2 0x005cc000
+// OpenSWBF2: a mission made for the unofficial 1.3 patch can name its sides on the team
+// buttons: SupportsCustomEraTeams with CustomEraTeam1/CustomEraTeam2 set to a localize key or
+// plain text. False when it doesn't.
+static bool CustomEraTeamName(int iTeam, unsigned short* pusOut, int iSize)
+{
+    LuaHelper::GetGlobal("SupportsCustomEraTeams");
+    const bool bOn = lua_toboolean(LuaHelper::mState, -1) != 0;
+    lua_pop(LuaHelper::mState, 1);
+    if (!bOn)
+    {
+        return false;
+    }
+
+    LuaHelper::GetGlobal(iTeam == 1 ? "CustomEraTeam1" : "CustomEraTeam2");
+    const char* pcName = lua_isstring(LuaHelper::mState, -1) ? lua_tostring(LuaHelper::mState, -1) : 0;
+    bool bFound = false;
+    if (pcName && pcName[0])
+    {
+        const unsigned short* pusLocalized = RedLocalizeDB::Find(PblHash(pcName), true);
+        int i = 0;
+        if (pusLocalized)
+        {
+            for (; pusLocalized[i] && i < iSize - 1; ++i)
+            {
+                pusOut[i] = pusLocalized[i];
+            }
+        }
+        else
+        {
+            for (; pcName[i] && i < iSize - 1; ++i)
+            {
+                pusOut[i] = (unsigned char)pcName[i];
+            }
+        }
+        pusOut[i] = 0;
+        bFound = true;
+    }
+    lua_pop(LuaHelper::mState, 1);
+    return bFound;
+}
+
 void SpawnDisplay::UpdateSideSelectText(int iScreen)
 {
     int aiCount[2];
@@ -5681,15 +5722,18 @@ void SpawnDisplay::UpdateSideSelectText(int iScreen)
         if (pLabel)
         {
             Team* pTeam = Team::GetPtr(j + 1);
+            unsigned short ausCustom[64];
+            const unsigned short* pusName =
+                CustomEraTeamName(j + 1, ausCustom, 64) ? ausCustom : pTeam->GetName();
             unsigned short ausText[128];
             if (NetGame::IsEnabled())
             {
                 const unsigned short* pusFormat = RedLocalizeDB::Find(0x5071dc6b, false);
-                PblUnicode::usnprintf(ausText, 127, pusFormat, pTeam->GetName(), aiCount[j]);
+                PblUnicode::usnprintf(ausText, 127, pusFormat, pusName, aiCount[j]);
             }
             else
             {
-                PblUnicode::usnprintf(ausText, 127, pTeam->GetName());
+                PblUnicode::usnprintf(ausText, 127, pusName);
             }
             pLabel->SetText(ausText, true);
         }

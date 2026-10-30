@@ -13,7 +13,7 @@ ifspausemenu_vbutton_layout = {
 		{ tag = "lobby", string = "game.pause.playerlist", },
 		{ tag = "friends", string = "ifs.onlinelobby.friendslist", },
 		{ tag = "freecam", string = "game.pause.freecam", },
-		{ tag = "console", string = "Fake Console", },
+		{ tag = "console", string = "game.pause.console", },
 		{ tag = "opts", string = "ifs.main.options", },
 		{ tag = "suicide", string = "game.pause.suicide", },
 		{ tag = "recent", string = "common.mp.recent", },
@@ -229,8 +229,11 @@ function ifs_pausemenu_fnEnter(this, bFwd, iInstance)
 		this.buttons.restart.hidden = ScriptCB_InNetGame()
 	end
 
-	this.buttons.exit.hidden = (gPlatformStr ~= "PC" or ScriptCB_InNetGame()) 
-	this.buttons.freecam.hidden = gFinalBuild
+	this.buttons.exit.hidden = (gPlatformStr ~= "PC" or ScriptCB_InNetGame())
+	-- OpenSWBF2: the free camera and the console (with mods' own commands, as with the 1.3
+	-- patch) in single player and for a multiplayer host, not only in debug builds
+	local bNoTools = ScriptCB_InNetGame() and not ScriptCB_GetAmHost()
+	this.buttons.freecam.hidden = bNoTools
 
 	local bShowFriends
 	if(gPlatformStr == "XBox") then
@@ -248,7 +251,7 @@ function ifs_pausemenu_fnEnter(this, bFwd, iInstance)
 	if(this.buttons.recent) then
 		this.buttons.recent.hidden = not ((ScriptCB_InNetGame()) and (gOnlineServiceStr == "XLive"))
 	end
-	this.buttons.console.hidden = gFinalBuild
+	this.buttons.console.hidden = bNoTools
 
 	if(ScriptCB_IsDedicated()) then
 		this.buttons.freecam.hidden = 1

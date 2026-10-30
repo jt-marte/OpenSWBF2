@@ -334,6 +334,129 @@ TEST_CASE("mission select offers and adds every era and mode a map has" * doctes
     CHECK(lua.Global("top") == "0");
 }
 
+TEST_CASE("in-game mod API wraps class and data calls without changing them" * doctest::test_suite("unit"))
+{
+    const std::string sGame = ReadScript("../data/scripts/ingame/game_interface.lua");
+    const std::string sApi = Between(sGame, "__utility_functions__ = 1", "-- user_script_<n> script mods");
+    REQUIRE(!sApi.empty());
+
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(
+        // the engine's functions: they report how many arguments they got
+        "function AddUnitClass(...) return arg.n .. ' args' end\n"
+        "function SetHeroClass(...) return 'hero ' .. arg[2] end\n"
+        "function ReadDataFile(...) return 'read ' .. arg[1], arg.n end\n"
+        "props = ''\n"
+        "function FindEntityClass(c) return c == 'rep_inf_trooper' end\n"
+        "function SetClassProperty(c, p, v) props = props .. c .. '.' .. p .. '=' .. v .. ';' end\n"
+        "engine_add = AddUnitClass\n" +
+        sApi +
+        "\n"
+        "added = AddUnitClass(1, 'rep_inf_trooper', 1, 4)\n"
+        "hero = SetHeroClass(1, 'rep_hero_yoda')\n"
+        "AddUnitClass(2, 'rep_inf_trooper', 1, 4)\n" // already known
+        "known = table.getn(uf_classes) .. ' ' .. tostring(uf_isKnownClass('rep_hero_yoda')) .. ' ' .. tostring(uf_isKnownClass('x'))\n"
+        "local r, n = ReadDataFile('side\\\\rep.lvl', 'rep_inf_trooper')\n"
+        "read = r .. ' ' .. n\n"
+        "code_side = tostring(__thisMapsCode__)\n"
+        "ReadDataFile('dc:ABC\\\\ABC.lvl', 'ABC_Conquest')\n"
+        "code = __thisMapsCode__ .. ' ' .. __thisMapsMode__\n"
+        "ReadDataFile('tat\\\\tat2.lvl', 'tat2_con')\n"
+        "stock = __thisMapsCode__ .. ' ' .. __thisMapsMode__\n"
+        "uf_changeClassProperties({ 'rep_inf_trooper', 'missing' }, { { name = 'MaxHealth', value = '500' } })\n"
+        // running game_interface's API again wraps nothing twice
+        "wrapped_once = tostring(RetailAddUnitClass == engine_add)\n" +
+        sApi +
+        "\n"
+        "again = tostring(RetailAddUnitClass == engine_add) .. ' ' .. AddUnitClass(1, 'x', 1, 2)\n"
+        "other = uf_GetOtherTeam(1) .. uf_GetOtherTeam(2)\n"));
+
+    CHECK(lua.Global("added") == "4 args");
+    CHECK(lua.Global("hero") == "hero rep_hero_yoda");
+    CHECK(lua.Global("known") == "2 2 false");
+    CHECK(lua.Global("read") == "read side\\rep.lvl 2");
+    CHECK(lua.Global("code_side") == "nil");
+    CHECK(lua.Global("code") == "abc abc_conquest");
+    CHECK(lua.Global("stock") == "tat tat2_con");
+    CHECK(lua.Global("props") == "rep_inf_trooper.MaxHealth=500;");
+    CHECK(lua.Global("wrapped_once") == "true");
+    CHECK(lua.Global("again") == "true 4 args");
+    CHECK(lua.Global("other") == "21");
+}
+
+TEST_CASE("console lists mods' commands after the engine's" * doctest::test_suite("unit"))
+{
+    const std::string sConsole = ReadScript("../data/scripts/ingame/ifs_fakeconsole.lua");
+    const std::string sApi = Between(sConsole, "__fakeconsole_functions__ = 1", "ifs_fakeconsole = NewIFShellScreen {");
+    REQUIRE(!sApi.empty());
+
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(
+        "engine = ''\n"
+        "function ScriptCB_GetConsoleCmds() gConsoleCmdList = { { ShowStr = 'fps' } } end\n"
+        "function ScriptCB_DoConsoleCmd(s) engine = engine .. s .. ';' end\n" +
+        sApi +
+        "\n"
+        "ff_rebuildFakeConsoleList()\n"
+        "plain = table.getn(gConsoleCmdList)\n"
+        // a user_script mod's commands, as the ISM Skinchanger adds them
+        "SupportsCustomFCCommands = true\n"
+        "function AddFCCommands() ff_AddCommand('Swap skins', nil, function() ran = 'swapped' end) end\n"
+        "ff_rebuildFakeConsoleList()\n"
+        "ff_rebuildFakeConsoleList()\n" // opening the console again doesn't double them
+        "local l = gConsoleCmdList\n"
+        "list = table.getn(l) .. ' ' .. l[1].ShowStr .. ' ' .. tostring(l[2].bHeader) .. ' ' .. l[3].ShowStr\n"
+        "found = tostring(ff_DoCommand('Swap skins'))\n"
+        "ff_DoCommand('fps')\n"));
+
+    CHECK(lua.Global("plain") == "1");
+    CHECK(lua.Global("list") == "3 fps 1 Swap skins");
+    CHECK(lua.Global("found") == "true");
+    CHECK(lua.Global("ran") == "swapped");
+    CHECK(lua.Global("engine") == "fps;");
+}
+
+TEST_CASE("mod support is wired into the game" * doctest::test_suite("regression"))
+{
+    const std::string sGame = ReadScript("../data/scripts/ingame/game_interface.lua");
+    const std::string sConsole = ReadScript("../data/scripts/ingame/ifs_fakeconsole.lua");
+    const std::string sPause = ReadScript("../data/scripts/common/ifs_pausemenu.lua");
+    const std::string sNet = ReadScript("../src/Battlefront2/Source/NetGame.cpp");
+    const std::string sText = ReadScript("../src/RedEngineFL/Util/RedLocalizeDB.cpp");
+    const std::string sMission = ReadScript("../src/Battlefront2/Source/LuaCallbacks_Mission.cpp");
+
+    // user_script mods load after globals (ScriptSlots_Load) and the utility API
+    const size_t uiGlobals = sGame.find("ScriptCB_DoFile(\"globals\")");
+    const size_t uiApi = sGame.find("RetailAddUnitClass = AddUnitClass");
+    const size_t uiSlots = sGame.find("ScriptSlots_Load(\"user_script_\")");
+    REQUIRE(uiGlobals != std::string::npos);
+    REQUIRE(uiApi != std::string::npos);
+    REQUIRE(uiSlots != std::string::npos);
+    CHECK(uiGlobals < uiApi);
+    CHECK(uiApi < uiSlots);
+
+    // the console builds its list with the mods' commands and runs a mod's command as Lua
+    CHECK(Has(sConsole, "ff_rebuildFakeConsoleList() -- the engine's commands, then the mods'"));
+    CHECK(Has(sConsole, "if(Selection.bLua) then"));
+
+    // free camera and console for single player and a multiplayer host
+    CHECK(Has(sPause, "local bNoTools = ScriptCB_InNetGame() and not ScriptCB_GetAmHost()"));
+    CHECK(Has(sPause, "this.buttons.freecam.hidden = bNoTools"));
+    CHECK(Has(sPause, "this.buttons.console.hidden = bNoTools"));
+    CHECK(Has(sPause, "{ tag = \"console\", string = \"game.pause.console\", },"));
+    CHECK(Has(sText, "{ 0x74e7a80c, L\"Console\" },"));
+
+    // the 1.3 patch's custom side names on the team buttons
+    CHECK(Has(sNet, "LuaHelper::GetGlobal(\"SupportsCustomEraTeams\");"));
+    CHECK(Has(sNet, "CustomEraTeamName(j + 1, ausCustom, 64) ? ausCustom : pTeam->GetName();"));
+
+    // a script can't leave a class with no model (the ISM Skinchanger names models only another
+    // mod loads; the first command post built then crashed)
+    CHECK(Has(sMission, "if (PblHash(pcProperty) == 0x47c86b4a && !GameModel::Find(PblHash(pcSafe))) // GeometryName"));
+}
+
 TEST_CASE("mod support is wired into the shell" * doctest::test_suite("regression"))
 {
     const std::string sShell = ReadScript("../data/scripts/shell/shell_interface.lua");

@@ -55,6 +55,7 @@
 #include "EntityHover.h"
 #include "EntityFlyer.h"
 #include "GameModel.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Graphics/RedModel.h"
 #include "RedEngineFL/Graphics/RedPose.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
@@ -3782,6 +3783,14 @@ int SetClassProperty(lua_State* L)
         char acScratch[1024];
         const char* pcSafe =
             OdfValue::SanitizeCopy(PblHash(pcProperty), pcValue, acScratch, sizeof(acScratch));
+        // OpenSWBF2: a script that points a class at a model that isn't loaded would leave it
+        // with no model, and the first object built from it crashes. Keep the old one.
+        if (PblHash(pcProperty) == 0x47c86b4a && !GameModel::Find(PblHash(pcSafe))) // GeometryName
+        {
+            LOG(LogLua, Warning, "SetClassProperty: model %s is not loaded, %s keeps its own", pcSafe,
+                lua_isstring(LuaHelper::mState, 1) ? lua_tostring(LuaHelper::mState, 1) : "class");
+            return 0;
+        }
         pClass->SetProperty(PblHash(pcProperty), pcSafe);
     }
     return 0;

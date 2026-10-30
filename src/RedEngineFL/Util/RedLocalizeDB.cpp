@@ -129,6 +129,7 @@ static const OpenText sOpenText[] = {
     { 0xc068200c, L"Vulkan" },                         // ifs.videoopt.vulkan
     { 0xf97df20d, L"DirectX 9" },                      // ifs.videoopt.directx9
     { 0x5357afdf, L"Restart the game to use the new renderer." }, // ifs.videoopt.rendererrestart
+    { 0x74e7a80c, L"Console" },                        // game.pause.console
 };
 
 // FUNCTION: SWBF2 0x006c5b30
