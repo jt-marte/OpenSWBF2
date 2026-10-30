@@ -12,12 +12,16 @@
 
 #include "Battlefront2/Source/LuaMemory.h"
 
+// Lua_Red_realloc and Lua_Red_Free take 32-bit sizes. luaM_realloc refuses
+// bigger blocks on Win64, so these casts never drop bits.
+#define MAX_REDBLOCK	cast(lu_mem, UINT_MAX)
+
 #ifndef l_realloc
-#define l_realloc(b,os,s)	Lua_Red_realloc(b, os, s)
+#define l_realloc(b,os,s)	Lua_Red_realloc(b, cast(unsigned int, os), cast(unsigned int, s))
 #endif
 
 #ifndef l_free
-#define l_free(b,os)	Lua_Red_Free(b, os)
+#define l_free(b,os)	Lua_Red_Free(b, cast(unsigned int, os))
 #endif
 
 #define MINSIZEARRAY	4
@@ -53,7 +57,7 @@ void *luaM_realloc (lua_State *L, void *block, lu_mem oldsize, lu_mem size) {
     }
     else return NULL;
   }
-  else if (size >= MAX_SIZET)
+  else if (size >= MAX_SIZET || size > MAX_REDBLOCK)
     luaG_runerror(L, "memory allocation error: block too big");
   else {
     block = l_realloc(block, oldsize, size);
