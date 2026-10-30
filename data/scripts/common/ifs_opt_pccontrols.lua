@@ -1448,7 +1448,7 @@ function ifs_opt_pcpad_fnBuildScreen(this)
 	Form_CreateVertical(this.formcontainer, ifs_opt_pcpad_layout)
 	this.formcontainer.form.radiobuttons.x = 0
 	this.formcontainer.form.sliders.x = ifs_opt_pcpad_layout.width * 0.5
-	this.formcontainer.form.buttons.x = ifs_opt_pcpad_layout.width + 35 + ifs_opt_pcpad_layout.width * 0.06
+	Form_PlaceSliderValues(this.formcontainer.form, ifs_opt_pcpad_layout)
 
 	-- the button list: action on the left, button on the right
 	local iRowH = 15

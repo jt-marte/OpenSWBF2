@@ -527,7 +527,7 @@ function ifs_opt_general_fnBuildScreen(this)
 	Form_CreateVertical(this.formcontainergeneral, ifs_opt_general_layout)
 	this.formcontainergeneral.form.radiobuttons.x = 0
 	this.formcontainergeneral.form.sliders.x = ifs_opt_general_layout.width * 0.5 
-	this.formcontainergeneral.form.buttons.x = ifs_opt_general_layout.width + 35 + ifs_opt_general_layout.width * 0.06 -- OpenSWBF2: clear of the slider ends
+	Form_PlaceSliderValues(this.formcontainergeneral.form, ifs_opt_general_layout)
 
 	if( not ScriptCB_GetShellActive() ) then	
 		this.Background = NewIFImage 
