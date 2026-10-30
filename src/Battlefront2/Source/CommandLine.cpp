@@ -70,6 +70,8 @@ bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
 bool gNetStatsLog;
+bool gAIStatsLog;
+bool gAITestHuman;
 bool gLogStdout;
 bool gLogConsole;
 // Set by GameWinMain when "-dedicated" expanded into the autonet dedicated switches.
@@ -380,6 +382,18 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "netstats") == 0)
         {
             gNetStatsLog = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "aistats") == 0)
+        {
+            gAIStatsLog = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "aitesthuman") == 0)
+        {
+            gAITestHuman = true;
             continue;
         }
 

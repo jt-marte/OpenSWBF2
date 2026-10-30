@@ -4,6 +4,7 @@
 #include <float.h>
 #include <new>
 
+#include "AIDifficulty.h"
 #include "AIGoal.h"
 #include "AILowLevel.h"
 #include "AIUtil.h"
@@ -693,6 +694,15 @@ void UnitController::UpdateLodState()
                 iLod = 4;
             }
         }
+    }
+
+    // OpenSWBF2 Overhaul: retail thinks least for bots far from every human, so fights between
+    // bots slow down wherever no player is watching. A bot with an enemy in sight thinks at
+    // least at the mid-range rate.
+    if (iLod < 3 && AIDifficulty::IsOverhaul() &&
+        reinterpret_cast<AI::UnitThreatManager*>(mThreatManager)->GetVisibleObject())
+    {
+        iLod = 3;
     }
 
     mLodState = iLod;

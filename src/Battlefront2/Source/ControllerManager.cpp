@@ -6,6 +6,7 @@
 #include "PlayerController.h"
 #include "Thread.h"
 #include "UnitController.h"
+#include "AIStats.h"
 #include "AIUtil.h"
 #include "AIVisRegion.h"
 #include "Adrenaline.h"
@@ -736,6 +737,7 @@ void ControllerManager::DoPeriodicUpdate(float fDeltaTime)
 // FUNCTION: SWBF2 0x00486370
 void ControllerManager::Update(float fDeltaTime)
 {
+    AIStats::BeginFrame();
     for (PblList<PlayerController>::Node* pNode = sPlayerCtrls->_head._pNext; PlayerController* pCtrl = pNode->_pObject; )
     {
         pNode = pNode->_pNext;
@@ -790,6 +792,7 @@ void ControllerManager::Update(float fDeltaTime)
     {
         PathManager::Update(1.0f);
     }
+    AIStats::EndFrame();
 }
 
 // FUNCTION: SWBF2 0x00486730

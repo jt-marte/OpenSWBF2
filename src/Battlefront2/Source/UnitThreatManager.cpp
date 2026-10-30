@@ -3,6 +3,10 @@
 
 #include "UnitThreatManager.h"
 #include "AIDifficulty.h"
+#include "AIOverhaul.h"
+#include "AIStats.h"
+#include "AITuning.h"
+#include "CommandLine.h"
 #include "AIUtil.h"
 #include "Controllable.h"
 #include "ControllerManager.h"
@@ -82,6 +86,33 @@ unsigned char Threat::GetPriority(float fTime, Controllable* pMe) const
     if (mThreatStatus == TS_LOCKED)
     {
         return (fTime - mLastSeenTime < 4.0f) ? 255 : 0;
+    }
+
+    if (AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2: humans and bots are scored by the same rules (AITuning::OverhaulThreatScore).
+        AITuning::ThreatInputs in;
+        in.iStatus = mThreatStatus;
+        in.iVisualKey = VisionManager::GetVisualPriority(pMe, mThreatObject);
+        const PblVector3& vHisFwd = mThreatObject->GetMatrix().GetZAxis();
+        in.fFacing = vDir.x * vHisFwd.x + vDir.y * vHisFwd.y + vDir.z * vHisFwd.z;
+        in.bRecentAttacker = AIOverhaul::IsRecentAttacker(pMe, mThreatObject);
+        const float fMaxHealth = mThreatObject->GetMaxHealth();
+        in.fHealthFraction = fMaxHealth > 0.0f ? mThreatObject->mCurHealth / fMaxHealth : 1.0f;
+        in.bFlagCarrier = false;
+        if (Controllable* pHim = mThreatObject->mControllableList.GetFirst()->_pObject)
+        {
+            for (PblList<FlagItem>::Itor it(*FlagItem::sList); (FlagItem*)it; ++it)
+            {
+                if (reinterpret_cast<EntityItem*>((FlagItem*)it)->mOwner == pHim->mCharacter)
+                {
+                    in.bFlagCarrier = true;
+                    break;
+                }
+            }
+        }
+        in.fSinceSeen = fTime - mLastSeenTime;
+        return (unsigned char)AITuning::OverhaulThreatScore(in);
     }
 
     int iPriority = 18 * mThreatStatus + 100;
@@ -194,6 +225,22 @@ void UnitThreatManager::Update(float dt, UnitController* pCtrl)
                 }
             }
         }
+    }
+
+    if (gAIStatsLog)
+    {
+        bool bHumanSeen = false;
+        bool bBotSeen = false;
+        for (int i = 0; i < MAX_THREATS; ++i)
+        {
+            const Threat& threat = mThreats[i];
+            if (threat.mThreatObject && (threat.mThreatStatus == TS_SEEN || threat.mThreatStatus == TS_FORCEDSEEN ||
+                                         threat.mThreatStatus == TS_LOCKED))
+            {
+                (AIStats::HasHuman(threat.mThreatObject) ? bHumanSeen : bBotSeen) = true;
+            }
+        }
+        AIStats::OnThink(mMyCtrl->mOwner, GetVisibleObject(), bHumanSeen, bBotSeen, dt);
     }
 }
 
@@ -331,6 +378,9 @@ void UnitThreatManager::UpdateThreat(GameObject* pObj, ThreatStatus eStatus)
     }
 
     Threat& threat = mThreats[iIndex];
+    const bool bWasSeen = threat.mThreatObject == pObj &&
+                          (threat.mThreatStatus == TS_SEEN || threat.mThreatStatus == TS_FORCEDSEEN ||
+                           threat.mThreatStatus == TS_LOCKED);
     threat.mThreatObject = pObj;
     threat.mLastStatusTime = GameLoop::GetMissionTime();
     threat.mThreatStatus = eStatus;
@@ -340,7 +390,15 @@ void UnitThreatManager::UpdateThreat(GameObject* pObj, ThreatStatus eStatus)
         threat.mLastSeenPos = pObj->GetMatrix().GetTranslation();
     }
 
-    if (PlayerControllerPtr(pObj->GetControllable()))
+    if (AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2: think again at once for any newly seen enemy, not only for humans.
+        if ((eStatus == TS_SEEN || eStatus == TS_FORCEDSEEN) && !bWasSeen && pObj != GetVisibleObject())
+        {
+            ControllerManager::RequestControllerUpdateASAP(mMyCtrl);
+        }
+    }
+    else if (PlayerControllerPtr(pObj->GetControllable()))
     {
         ControllerManager::RequestControllerUpdateASAP(mMyCtrl);
     }
@@ -370,7 +428,8 @@ bool UnitThreatManager::ShouldRaytestUnit(const GameObject* pObj) const
     }
 
     float fRaytestInterval[5] = { 4.0f, 4.0f, 2.0f, 1.0f, 1.0f };
-    if (!bPlayer)
+    // OpenSWBF2 Overhaul: a bot aiming at a human keeps looking for bot enemies too.
+    if (!bPlayer && !AIDifficulty::IsOverhaul())
     {
         const GameObject* pVisible = GetVisibleObject();
         if (!pVisible)
@@ -392,6 +451,12 @@ bool UnitThreatManager::ShouldRaytestUnit(const GameObject* pObj) const
 void AI::UnitThreatManager::AddThreat(GameObject* pObj)
 {
     Controllable* pHim = pObj->mControllableList.GetFirst()->_pObject;
+    if (AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2: an attacker is seen whether it is a human or a bot.
+        UpdateThreat(pObj, AI::TS_SEEN);
+        return;
+    }
     if (pHim && pHim->mPlayerId >= 0)
     {
         if (GetVisibleObject() &&

@@ -1,4 +1,5 @@
 #include "VisionManager.h"
+#include "AIDifficulty.h"
 #include "AIUtil.h"
 #include "NetGame.h"
 #include "UnitController.h"
@@ -122,7 +123,9 @@ float MaxVisibleDist(const GameObject* pSeer, const GameObject* pTarget)
     {
         fModifier *= pTarget->GetControllable()->mCtrl->mTotalVisFactor;
     }
-    if (pTarget->GetControllable() && pTarget->GetControllable()->GetPlayerId() >= 0)
+    // Retail sees humans from twice as far as bots; OpenSWBF2 Overhaul sees every enemy that far.
+    if ((pTarget->GetControllable() && pTarget->GetControllable()->GetPlayerId() >= 0) ||
+        AIDifficulty::IsOverhaul())
     {
         fModifier *= 2.0f;
     }
@@ -388,8 +391,9 @@ int GetVisualPriority(const Controllable* pMe, const GameObject* pObj)
     }
     int iKey = (21 - iPriority) * iDist;
 
+    // OpenSWBF2 Overhaul: humans don't count as half the distance.
     if (pObj->GetControllable() && pObj->GetControllable()->GetPlayerId() >= 0 &&
-        !AIUtil::IsVehicle(pMe->GetGameObject()))
+        !AIUtil::IsVehicle(pMe->GetGameObject()) && !AIDifficulty::IsOverhaul())
     {
         return iKey;
     }
