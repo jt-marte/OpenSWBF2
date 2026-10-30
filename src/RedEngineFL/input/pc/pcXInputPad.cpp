@@ -277,6 +277,61 @@ int DefaultSlot(int iLayout, int iMode, int iAction)
     }
 }
 
+const char* SlotLabel(int iSlot)
+{
+    switch (iSlot)
+    {
+    case kBitA:             return "A";
+    case kBitB:             return "B";
+    case kBitX:             return "X";
+    case kBitY:             return "Y";
+    case kBitLB:            return "LB";
+    case kBitRB:            return "RB";
+    case kBitBack:          return "Back";
+    case kBitStart:         return "Start";
+    case kBitLS:            return "Click LS";
+    case kBitRS:            return "Click RS";
+    case kBitDPadUp:        return "D-pad Up";
+    case kBitDPadRight:     return "D-pad Right";
+    case kBitDPadDown:      return "D-pad Down";
+    case kBitDPadLeft:      return "D-pad Left";
+    case kSlotLeftRight:
+    case kSlotLeftLeft:     return "Left stick (left/right)";
+    case kSlotLeftDown:
+    case kSlotLeftUp:       return "Left stick (up/down)";
+    case kSlotRightRight:
+    case kSlotRightLeft:    return "Right stick (left/right)";
+    case kSlotRightDown:
+    case kSlotRightUp:      return "Right stick (up/down)";
+    case kSlotLeftTrigger:  return "LT";
+    case kSlotRightTrigger: return "RT";
+    default:                return 0;
+    }
+}
+
+const char* ActionLabel(int iLayout, int iMode, int iAction)
+{
+    const bool bModern = iLayout == kLayoutModern;
+    const bool bOnFoot = iMode == 0 || iMode == 3;
+    if (bModern && iAction == kActReload)
+    {
+        return "Tap X";
+    }
+    if (bModern && iAction == kActUse)
+    {
+        return "Hold X";
+    }
+    if (bModern && iAction == kActZoom && iMode == 0)
+    {
+        return "Hold LT (RS: next zoom)";
+    }
+    if (iAction == kActRoll)
+    {
+        return bOnFoot ? "Double-tap B + move" : 0;
+    }
+    return SlotLabel(DefaultSlot(iLayout, iMode, iAction));
+}
+
 int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs)
 {
     if (bDown)

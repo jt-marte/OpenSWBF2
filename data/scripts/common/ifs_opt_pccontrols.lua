@@ -1221,3 +1221,306 @@ vbutton_layout = nil
 -- snap navigation (ifelem_tabmanager.lua)
 ifs_opt_pccontrols.bPadSnap = 1
 AddIFScreen(ifs_opt_pccontrols, "ifs_opt_pccontrols")
+
+
+------------------------------------------------------------------------
+-- OpenSWBF2: Options -> Controller. The built-in XInput pad layouts (an
+-- XInput pad always plays with one of them; the Controls page is for the
+-- keyboard and mouse), the controller sensitivity, and every button of the
+-- chosen layout per input mode, read from the game (ScriptCB_GetPadBindings).
+-- Lives here because new script files can't be added to common.lvl.
+
+ifs_opt_pcpad_kRows = 24
+
+function ifs_opt_pcpad_fnFillBindings(this)
+	local form = this.formcontainer.form
+	local iLayout = form.elements["padlayout"].selValue - 1
+	local iMode = form.elements["padmode"].selValue - 1
+	local rows = {}
+	if ( ScriptCB_GetPadBindings ) then
+		rows = ScriptCB_GetPadBindings(iLayout, iMode)
+	end
+	local i
+	for i = 1, ifs_opt_pcpad_kRows do
+		local row = rows[i]
+		local line = this.bindings[i]
+		if ( row ) then
+			IFText_fnSetUString(line.actionStr, row.actionStr)
+			IFText_fnSetUString(line.keyStr, ScriptCB_tounicode(row.keyStr))
+		end
+		IFObj_fnSetVis(line, row)
+	end
+end
+
+function ifs_opt_pcpad_fnApplySettings(this)
+	local form = this.formcontainer.form
+	if ( ScriptCB_GetPadLayout ) then
+		form.elements["padlayout"].selValue = ScriptCB_GetPadLayout() + 1
+	end
+	if ( ScriptCB_GetPadLookSpeed ) then
+		local iLevel, iStep, iMin, iMax = ScriptCB_GetPadLookSpeed()
+		form.elements["padlook"].selValue = iLevel / iMax
+	end
+	Form_SetValues(form)
+	ifs_opt_pcpad_fnFillBindings(this)
+end
+
+ifs_opt_pcpad = NewIFShellScreen {
+	nologo = 1,
+	movieIntro = nil,
+	movieBackground = nil,
+	bNohelptext_backPC = 1,
+	bg_texture = image_background,
+
+	Enter = function(this, bFwd)
+		this.bShellMode =
+			ScriptCB_GetShellActive() and
+			ScriptCB_GetGameRules() ~= "metagame" and
+			ScriptCB_GetGameRules() ~= "campaign"
+
+		if ( this.bShellMode ) then
+			IFObj_fnSetVis(this.donebutton, 1)
+			IFObj_fnSetVis(this.cancelbutton, false)
+			ifs_main.option_mp = nil
+			ifelem_tabmanager_SetSelected(this, gPCMainTabsLayout, "_tab_options")
+			ifelem_tabmanager_SetSelected(this, gPCOptionsTabsLayout, "_tab_pad", 1)
+			UpdatePCTitleText(this)
+		else
+			IFObj_fnSetVis(this.donebutton, true)
+			IFObj_fnSetVis(this.cancelbutton, true)
+			ifelem_tabmanager_SelectTabGroup(this, nil, 1, nil)
+			ifelem_tabmanager_SetSelected(this, gPCOptionsTabsLayout, "_tab_pad", 1)
+			HidePCTitleText(this)
+		end
+		ifs_DimTabsPCDemo(this)
+
+		local form = this.formcontainer.form
+		gIFShellScreenTemplate_fnEnter(this, bFwd)
+		Form_Enter(form, bFwd)
+		SetCurButton(this.CurButton)
+		Form_ShowHideElements(form)
+		ifs_opt_pcpad_fnApplySettings(this)
+	end,
+
+	Exit = function(this)
+		if ( gCurHiliteButton ) then
+			IFButton_fnSelect(gCurHiliteButton, nil)
+		end
+	end,
+
+	Input_Accept = function(this)
+		-- tabs first; the pad settings are already saved (display.ini), so
+		-- there is no profile to save on the way out
+		local NextScreen = ifelem_tabmanager_HandleInputAccept(this, gPCOptionsTabsLayout, 1, 1)
+		if ( not NextScreen ) then
+			NextScreen = ifelem_tabmanager_HandleInputAccept(this, gPCMainTabsLayout, nil, 1)
+		end
+		if ( NextScreen == -1 ) then
+			return
+		end
+		if ( NextScreen ) then
+			ScriptCB_SetIFScreen(NextScreen)
+			return
+		end
+
+		if ( Form_InputAccept(this.formcontainer.form) == true ) then
+			return
+		end
+
+		if ( this.CurButton == "_back" or this.CurButton == "_ok" ) then
+			ifelm_shellscreen_fnPlaySound(this.acceptSound)
+			this:Input_Back(1)
+		elseif ( this.CurButton == "reset" ) then
+			ifelm_shellscreen_fnPlaySound(this.acceptSound)
+			if ( ScriptCB_SetPadLayout ) then
+				ScriptCB_SetPadLayout(0)
+			end
+			if ( ScriptCB_SetPadLookSpeed ) then
+				local iLevel, iStep, iMin, iMax, iDefault = ScriptCB_GetPadLookSpeed()
+				ScriptCB_SetPadLookSpeed(iDefault)
+			end
+			ifs_opt_pcpad_fnApplySettings(this)
+		end
+	end,
+
+	Input_Back = function(this)
+		if ( this.bShellMode ) then
+			this:Exit(false)
+			this:Enter(true)
+		else
+			ScriptCB_PopScreen()
+		end
+	end,
+
+	Input_Start = function(this)
+		if not this.bShellMode then
+			ScriptCB_PopScreen()
+		end
+	end,
+
+	OnRadioChanged = function(buttongroup, btnNum)
+		local this = ifs_opt_pcpad
+		local form = this.formcontainer.form
+		form.elements[buttongroup.tag].selValue = btnNum
+		if ( buttongroup.tag == "padlayout" and ScriptCB_SetPadLayout ) then
+			-- applies at once and saves to display.ini (1 Modern, 2 Legacy)
+			ScriptCB_SetPadLayout(btnNum - 1)
+		end
+		Form_SetValues(form)
+		ifs_opt_pcpad_fnFillBindings(this)
+	end,
+
+	OnElementChanged = function(form, element)
+		local this = ifs_opt_pcpad
+		if ( element.tag == "padmode" ) then
+			Form_SetValues(this.formcontainer.form)
+			ifs_opt_pcpad_fnFillBindings(this)
+			return
+		end
+		if ( element.tag == "padlook" and ScriptCB_SetPadLookSpeed ) then
+			-- whole levels, applied at once and saved to display.ini; a pad step
+			-- (a twentieth of the bar) is less than a level, so it moves one
+			local iCur, iStep, iMin, iMax = ScriptCB_GetPadLookSpeed()
+			local fRaw = element.selValue * iMax
+			local iLevel = math.floor(fRaw + 0.5)
+			if ( iLevel == iCur ) then
+				if ( fRaw > iCur + 0.25 ) then
+					iLevel = iCur + 1
+				elseif ( fRaw < iCur - 0.25 ) then
+					iLevel = iCur - 1
+				end
+			end
+			iLevel = math.max(iMin, math.min(iMax, iLevel))
+			ScriptCB_SetPadLookSpeed(iLevel)
+			element.selValue = iLevel / iMax
+		end
+		Form_SetValues(this.formcontainer.form)
+	end,
+
+	Input_GeneralUp = function(this)
+		if ( gShellScreen_fnDefaultInputUp(this) ) then
+			return
+		end
+		gDefault_Input_GeneralUp(this)
+	end,
+
+	Input_GeneralDown = function(this)
+		if ( gShellScreen_fnDefaultInputDown(this) ) then
+			return
+		end
+		gDefault_Input_GeneralDown(this)
+	end,
+
+	Update = function(this, fDt)
+		gIFShellScreenTemplate_fnUpdate(this, fDt)
+		Form_Update(this.formcontainer.form, fDt)
+	end,
+}
+
+ifs_opt_pcpad_layout = {
+	yTop = 0,
+	yHeight = 30,
+	ySpacing = 5,
+	bUseYSpacing = 1,
+	xSpacing = 20,
+	font = "gamefont_small",
+	flashy = 0,
+	width = 300,
+	elements = {
+		{ tag = "padlayout", title = "Controller layout", fnChanged = ifs_opt_pcpad.OnRadioChanged, selValue = 1, control = "radio", values = {"Modern", "Legacy"}, },
+		{ tag = "padlook", title = "Controller sensitivity", fnChanged = ifs_opt_pcpad.OnElementChanged, selValue = 0.4, control = "slider", minValue = 0.1, maxValue = 1.0, sliderMultiplier = 10 },
+		{ tag = "padmode", title = "Show buttons for", fnChanged = ifs_opt_pcpad.OnElementChanged, selValue = 1, control = "dropdown", values = {"Soldier", "Vehicle", "Flyer", "Jedi", "Turret"}, },
+	}
+}
+
+function ifs_opt_pcpad_fnBuildScreen(this)
+	local w, h = ScriptCB_GetSafeScreenInfo()
+
+	AddPCTitleText(this)
+
+	ifs_opt_pcpad_layout.width = w * 0.5
+	this.formcontainer = NewIFContainer {
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0.16,
+		x = 0,
+		y = 0,
+	}
+	Form_CreateVertical(this.formcontainer, ifs_opt_pcpad_layout)
+	this.formcontainer.form.radiobuttons.x = 0
+	this.formcontainer.form.sliders.x = ifs_opt_pcpad_layout.width * 0.5
+	this.formcontainer.form.buttons.x = ifs_opt_pcpad_layout.width + 35 + ifs_opt_pcpad_layout.width * 0.06
+
+	-- the button list: action on the left, button on the right
+	local iRowH = 15
+	this.bindings = NewIFContainer {
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0.36,
+		x = 0,
+		y = 0,
+	}
+	local i
+	for i = 1, ifs_opt_pcpad_kRows do
+		local line = NewIFContainer { x = 0, y = (i - 1) * iRowH }
+		line.actionStr = NewIFText {
+			x = -w * 0.42, y = 0, textw = w * 0.4, texth = iRowH,
+			halign = "right", valign = "vcenter",
+			font = "gamefont_tiny", flashy = 0, nocreatebackground = 1,
+		}
+		line.keyStr = NewIFText {
+			x = w * 0.02, y = 0, textw = w * 0.4, texth = iRowH,
+			halign = "left", valign = "vcenter",
+			font = "gamefont_tiny", flashy = 0, nocreatebackground = 1,
+			ColorR = 255, ColorG = 220, ColorB = 80,
+		}
+		this.bindings[i] = line
+	end
+
+	if ( not ScriptCB_GetShellActive() ) then
+		this.Background = NewIFImage {
+			ZPos = 255,
+			x = w / 2, y = h / 2,
+			alpha = 1,
+			localpos_l = -w / 1.5, localpos_t = -h / 1.5,
+			localpos_r = w / 1.5, localpos_b = h / 1.5,
+			texture = "opaque_black",
+			ColorR = 0, ColorG = 0, ColorB = 0,
+		}
+	end
+
+	ifelem_tabmanager_Create(this, gPCMainTabsLayout, gPCOptionsTabsLayout)
+
+	local BackButtonW = 150
+	local BackButtonH = 25
+	this.cancelbutton = NewPCIFButton {
+		ScreenRelativeX = 0.0, ScreenRelativeY = 1.0,
+		y = -15, x = BackButtonW * 0.5,
+		btnw = BackButtonW, btnh = BackButtonH,
+		font = "gamefont_medium", bg_width = BackButtonW,
+		noTransitionFlash = 1,
+		tag = "_back",
+		string = "common.cancel",
+	}
+	this.resetbutton = NewPCIFButton {
+		ScreenRelativeX = 0.5, ScreenRelativeY = 1.0,
+		x = 0, y = -15,
+		btnw = BackButtonW * 1.5, btnh = BackButtonH,
+		font = "gamefont_medium",
+		noTransitionFlash = 1,
+		tag = "reset",
+		string = "common.reset",
+	}
+	this.donebutton = NewPCIFButton {
+		ScreenRelativeX = 1.0, ScreenRelativeY = 1.0,
+		y = -15, x = -BackButtonW * 0.5,
+		btnw = BackButtonW, btnh = BackButtonH,
+		font = "gamefont_medium", bg_width = BackButtonW,
+		noTransitionFlash = 1,
+		tag = "_ok",
+		string = "common.accept",
+	}
+end
+
+ifs_opt_pcpad_fnBuildScreen(ifs_opt_pcpad)
+ifs_opt_pcpad_fnBuildScreen = nil
+ifs_opt_pcpad.bPadSnap = 1
+AddIFScreen(ifs_opt_pcpad, "ifs_opt_pcpad")

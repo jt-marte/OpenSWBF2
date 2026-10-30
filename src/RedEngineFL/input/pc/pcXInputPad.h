@@ -184,6 +184,12 @@ const int kModeCount = 5;
 const int kActionCount = 43;
 int DefaultSlot(int iLayout, int iMode, int iAction);
 
+// The Options -> Controller page: a raw pad slot as button text ("A", "LB",
+// "D-pad Up", "Left stick"), and what a layout puts on an action in an input
+// mode ("RT", "Tap X", "Hold LT", "Double-tap B + move"); 0 when unbound.
+const char* SlotLabel(int iSlot);
+const char* ActionLabel(int iLayout, int iMode, int iAction);
+
 // Modern X: a tap (released within kUseHoldMs) reloads, a hold uses (get in
 // or out of a vehicle). Each press gives one result.
 const unsigned int kUseHoldMs = 500;
