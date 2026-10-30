@@ -7,6 +7,7 @@
 #include "FLGuiManager.h"
 #include "FLInputManager.h"
 #include "PlayerProfile.h"
+#include "RecentServers.h"
 #include "ColorControl.h"
 #include "LuaFL/include/lauxlib.h"
 #include "PebbleFL/Common/PblHashTable.h"
@@ -177,6 +178,94 @@ int ScriptCB_SetProfileJoinIP(lua_State*)
         memset(pProfile->mPCOptions.mJoinIp, 0, sizeof(pProfile->mPCOptions.mJoinIp));
         strlcpy(pProfile->mPCOptions.mJoinIp, pcIp, sizeof(pProfile->mPCOptions.mJoinIp));
         pProfile->UpdateProfCRC();
+    }
+    return 0;
+}
+
+// OpenSWBF2: recentservers.txt sits next to the exe, like display.ini; the profile format is
+// retail's and has room for one address only.
+static bool RecentServersPath(char* pcPath, unsigned int uSize)
+{
+    DWORD dwLen = GetModuleFileNameA(0, pcPath, uSize);
+    char* pcSlash = (dwLen > 0 && dwLen < uSize) ? strrchr(pcPath, '\\') : 0;
+    if (!pcSlash || (unsigned int)(pcSlash + 1 - pcPath) + sizeof("recentservers.txt") > uSize)
+    {
+        return false;
+    }
+    strcpy(pcSlash + 1, "recentservers.txt");
+    return true;
+}
+
+static void LoadRecentServers(RecentServers::List& list)
+{
+    RecentServers::Clear(list);
+    char acPath[MAX_PATH];
+    FILE* pFile = RecentServersPath(acPath, sizeof(acPath)) ? fopen(acPath, "rb") : 0;
+    if (!pFile)
+    {
+        return;
+    }
+    char acText[RecentServers::kTextMax];
+    size_t uRead = fread(acText, 1, sizeof(acText) - 1, pFile);
+    fclose(pFile);
+    acText[uRead] = 0;
+    RecentServers::Parse(acText, list);
+}
+
+static void SaveRecentServers(const RecentServers::List& list)
+{
+    char acPath[MAX_PATH];
+    char acTemp[MAX_PATH + 8];
+    char acText[RecentServers::kTextMax];
+    const int iLen = RecentServers::Serialize(list, acText, sizeof(acText));
+    if (iLen < 0 || !RecentServersPath(acPath, sizeof(acPath)))
+    {
+        return;
+    }
+    sprintf(acTemp, "%s.tmp", acPath);
+    FILE* pFile = fopen(acTemp, "wb");
+    if (!pFile)
+    {
+        return;
+    }
+    const bool bOk = fwrite(acText, 1, iLen, pFile) == (size_t)iLen;
+    if (fclose(pFile) == 0 && bOk && MoveFileExA(acTemp, acPath, MOVEFILE_REPLACE_EXISTING))
+    {
+        return;
+    }
+    DeleteFileA(acTemp);
+}
+
+// OpenSWBF2: the Direct Connect tab's recent servers, newest first: { {addr=, name=}, ... }
+int ScriptCB_GetRecentServers(lua_State*)
+{
+    RecentServers::List list;
+    LoadRecentServers(list);
+    lua_newtable(LuaHelper::mState);
+    for (int i = 0; i < list.miCount; ++i)
+    {
+        lua_newtable(LuaHelper::mState);
+        LuaHelper::TableWriteVal("addr", list.maEntries[i].acAddr);
+        LuaHelper::TableWriteVal("name", list.maEntries[i].acName);
+        lua_rawseti(LuaHelper::mState, -2, i + 1);
+    }
+    return 1;
+}
+
+// OpenSWBF2: (address [, server name]) puts a server first in recentservers.txt.
+int ScriptCB_AddRecentServer(lua_State*)
+{
+    lua_State* L = LuaHelper::mState;
+    if (lua_gettop(L) < 1 || !lua_isstring(L, 1))
+    {
+        return 0;
+    }
+    const char* pcName = (lua_gettop(L) >= 2 && lua_isstring(L, 2)) ? lua_tostring(L, 2) : "";
+    RecentServers::List list;
+    LoadRecentServers(list);
+    if (RecentServers::Add(list, lua_tostring(L, 1), pcName))
+    {
+        SaveRecentServers(list);
     }
     return 0;
 }
@@ -553,7 +642,7 @@ static int ScriptCB_SetFov(lua_State*)
 }
 
 // GLOBAL: SWBF2 0x007e8270
-static const CallbackEntryT sPCCallbacks[53] =
+static const CallbackEntryT sPCCallbacks[] =
 {
     { "ScriptCB_GetMouseSensitivity", ScriptCB_GetMouseSensitivity },
     { "ScriptCB_GetJoySensitivity", ScriptCB_GetJoySensitivity },
@@ -578,6 +667,8 @@ static const CallbackEntryT sPCCallbacks[53] =
     { "ScriptCB_IsPCVideoFixedFunction", ScriptCB_IsPCVideoFixedFunction },
     { "ScriptCB_GetProfileJoinIP", ScriptCB_GetProfileJoinIP },
     { "ScriptCB_SetProfileJoinIP", ScriptCB_SetProfileJoinIP },
+    { "ScriptCB_GetRecentServers", ScriptCB_GetRecentServers },
+    { "ScriptCB_AddRecentServer", ScriptCB_AddRecentServer },
     { "ScriptCB_ResetPCVideoOptionsToDefault", ScriptCB_ResetPCVideoOptionsToDefault },
     { "IsVideoModeSupported", ScriptCB_IsVideoModeSupported },
     { "IsMultisamplingModeForcedFromDriver", ScriptCB_IsMultisamplingModeForcedFromDriver },
@@ -1099,7 +1190,7 @@ int ScriptCB_IsPCVideoFixedFunction(lua_State* L)
 // FUNCTION: SWBF2 0x0059b170
 void InitPC()
 {
-    for (int i = 0; i < 53; ++i)
+    for (int i = 0; i < (int)(sizeof(sPCCallbacks) / sizeof(sPCCallbacks[0])); ++i)
     {
         LuaHelper::Register(sPCCallbacks[i].pcName, sPCCallbacks[i].pfnCallback, 0);
     }

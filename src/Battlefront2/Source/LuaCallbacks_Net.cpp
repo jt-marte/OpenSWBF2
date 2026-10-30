@@ -1268,7 +1268,7 @@ namespace Lua_Callbacks
 {
 
 // GLOBAL: SWBF2 0x007e7a60
-static const CallbackEntryT sNetCallbacks[135] =
+static const CallbackEntryT sNetCallbacks[] =
 {
     { "ScriptCB_AutoNetJoin", ScriptCB_AutoNetJoin },
     { "ScriptCB_GetOnlineService", ScriptCB_GetOnlineService },
@@ -1355,6 +1355,7 @@ static const CallbackEntryT sNetCallbacks[135] =
     { "ScriptCB_CancelQuickmatch", ScriptCB_CancelQuickmatch },
     { "ScriptCB_IsQuickmatchDone", ScriptCB_IsQuickmatchDone },
     { "ScriptCB_IsQuickmatchPassworded", ScriptCB_IsQuickmatchPassworded },
+    { "ScriptCB_GetQuickmatchName", ScriptCB_GetQuickmatchName },
     { "ScriptCB_IsBadNetworkConnection", ScriptCB_IsBadNetworkConnection },
     { "ScriptCB_CanSupportMaxPlayers", ScriptCB_CanSupportMaxPlayers },
     { "ScriptCB_BeginJoin", ScriptCB_BeginJoin },
@@ -1410,7 +1411,7 @@ static const CallbackEntryT sNetCallbacks[135] =
 // FUNCTION: SWBF2 0x005969a0
 void InitNet()
 {
-    for (int i = 0; i < 135; ++i)
+    for (int i = 0; i < (int)(sizeof(sNetCallbacks) / sizeof(sNetCallbacks[0])); ++i)
     {
         LuaHelper::Register(sNetCallbacks[i].pcName, sNetCallbacks[i].pfnCallback, 0);
     }
@@ -2047,6 +2048,36 @@ int ScriptCB_IsQuickmatchPassworded(lua_State*)
                           ping, arg7, arg8, passworded, arg10, arg11, arg12);
     }
     lua_pushboolean(LuaHelper::mState, passworded);
+    return 1;
+}
+
+// OpenSWBF2: the name of the server a Join IP find reached (for the Direct Connect tab's
+// recent servers), or nil while there is none.
+int ScriptCB_GetQuickmatchName(lua_State*)
+{
+    if (findGame && findGame->IsReady())
+    {
+        char* name = 0;
+        char* mission = 0;
+        int numPlayers = 0;
+        int maxPlayers = 0;
+        bool flag = false;
+        float ping = 0.0f;
+        int arg7 = 0;
+        int arg8 = 0;
+        bool passworded = false;
+        bool arg10 = false;
+        char* arg11 = 0;
+        bool arg12 = false;
+        findGame->GetInfo(name, mission, numPlayers, maxPlayers, flag,
+                          ping, arg7, arg8, passworded, arg10, arg11, arg12);
+        if (name && name[0])
+        {
+            lua_pushstring(LuaHelper::mState, name);
+            return 1;
+        }
+    }
+    lua_pushnil(LuaHelper::mState);
     return 1;
 }
 

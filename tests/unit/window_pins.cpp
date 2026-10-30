@@ -598,8 +598,9 @@ TEST_CASE("display apply source pins" * doctest::test_suite("unit"))
 
     CHECK(!Has(sLua, "Reset("));
     CHECK(!Has(sLua, "pcApplyDisplayMode"));
-    CHECK(Has(sLua, "sPCCallbacks[53]"));
-    CHECK(Has(sLua, "i < 53"));
+    // the registration loop counts the table itself, so a new callback can't be left out
+    CHECK(Has(sLua, "static const CallbackEntryT sPCCallbacks[] ="));
+    CHECK(Has(sLua, "i < (int)(sizeof(sPCCallbacks) / sizeof(sPCCallbacks[0]))"));
     const std::string sVideo = FunctionBody(sLua, "int ScriptCB_SetPCVideoOptions(");
     REQUIRE(!sVideo.empty());
     size_t uiChanged = sVideo.find("if (bChanged)\n    {\n        pProfile->UpdateProfCRC();\n"
@@ -753,6 +754,42 @@ TEST_CASE("display menu lua source pins" * doctest::test_suite("unit"))
     CHECK(!Has(sInputBack, "ScriptCB_PopScreen("));
     CHECK(!Has(sInputBack, "this:Exit("));
     CHECK(CountOf(sVideo, "ifs_opt_pcvideo_fnSaveDisplay(") == 4);
+}
+
+TEST_CASE("multiplayer: Modern first and by default with a Direct Connect tab and no Join IP button" *
+          doctest::test_suite("regression"))
+{
+    std::string sListRaw;
+    std::string sCreateRaw;
+    REQUIRE(ReadSource("../data/scripts/shell/ifs_mp_sessionlist.lua", sListRaw));
+    REQUIRE(ReadSource("../data/scripts/shell/ifs_missionselect_pcmulti.lua", sCreateRaw));
+    const std::string sList = StripCr(sListRaw);
+    const std::string sCreate = StripCr(sCreateRaw);
+
+    // the picker rows are the source values: Modern is row 1 and the starting choice
+    const size_t uModern = sList.find("{ string = \"ifs.mp.join.modern\" }, -- MP_SOURCE_MODERN");
+    const size_t uLegacy = sList.find("{ string = \"ifs.mp.join.legacy\" }, -- MP_SOURCE_LEGACY");
+    REQUIRE(uModern != std::string::npos);
+    REQUIRE(uLegacy != std::string::npos);
+    CHECK(uModern < uLegacy);
+    CHECK(Has(sList, "MP_SOURCE_MODERN = 1\nMP_SOURCE_LEGACY = 2\ngMPSourceValue = MP_SOURCE_MODERN\n"));
+    CHECK(!Has(sList, "ifs.mp.join.internet\" }"));
+    // Create used to start on Internet (row 1) whenever Galaxy was signed in
+    CHECK(Has(sCreate, "if( ScriptCB_IsLoggedIn() ) then\n\t\t\tthis.source_value = gMPSourceValue\n"
+                       "\t\telse\n\t\t\tthis.source_value = MP_SOURCE_MODERN\n"));
+    CHECK(Has(sCreate, "this.source_value == MP_SOURCE_LEGACY"));
+
+    const std::string sTab = LineWith(sList, "tag = \"_tab_direct\"");
+    REQUIRE(!sTab.empty());
+    CHECK(Has(sTab, "string = \"ifs.mp.tabs.direct\""));
+    CHECK(Has(sTab, "screen = \"ifs_mp_direct\""));
+    CHECK(Has(sList, "AddIFScreen(ifs_mp_direct, \"ifs_mp_direct\")"));
+    CHECK(Has(sList, "ifs_mp_direct.bPadSnap = 1"));
+
+    CHECK(!Has(sList, "_joinip"));
+    CHECK(!Has(sList, "bJoinIPMode"));
+    // the command-line /connect join still goes through the Join screen
+    CHECK(Has(sList, "ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString)"));
 }
 
 TEST_CASE("pad snap lands on a dropdown box like a slider bar" * doctest::test_suite("regression"))
