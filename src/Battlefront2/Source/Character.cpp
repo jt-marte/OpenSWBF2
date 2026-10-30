@@ -569,9 +569,13 @@ bool Character::Update(float fDeltaTime)
     // spawn point the AI would get) and then stands still, a stand-in human for headless AI runs.
     if (gAITestHuman && mPlayerId >= 0 && !NetGame::IsEnabled() && !mSpawnReady)
     {
+        // No class (-1, as in hero modes) is left unselected: the spawn screen indexes by it.
         const int iClassIndex = mTeamPtr->PickRandomClassIndex(this);
-        SelectClass(iClassIndex);
-        SetSpawnReady(iClassIndex >= 0);
+        if (iClassIndex >= 0)
+        {
+            SelectClass(iClassIndex);
+            SetSpawnReady(true);
+        }
     }
 
     if (gNoAIRespawn && mPlayerId < 0)
