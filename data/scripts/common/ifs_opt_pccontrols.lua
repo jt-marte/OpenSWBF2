@@ -1299,6 +1299,10 @@ ifs_opt_pcpad = NewIFShellScreen {
 		Form_Enter(form, bFwd)
 		SetCurButton(this.CurButton)
 		Form_ShowHideElements(form)
+		-- OpenSWBF2: in the Game page's column, where Form_ShowHideElements
+		-- puts its radio buttons and slider (x 0 of their containers)
+		IFObj_fnSetPos(form.radiobuttons.padlayout, 0, form.buttons.padlayout.y)
+		IFObj_fnSetPos(form.sliders.padlook, 0, form.buttons.padlook.y)
 		ifs_opt_pcpad_fnApplySettings(this)
 	end,
 
@@ -1448,6 +1452,7 @@ function ifs_opt_pcpad_fnBuildScreen(this)
 	Form_CreateVertical(this.formcontainer, ifs_opt_pcpad_layout)
 	this.formcontainer.form.radiobuttons.x = 0
 	this.formcontainer.form.sliders.x = ifs_opt_pcpad_layout.width * 0.5
+	this.formcontainer.form.dropdowns.x = 0 -- starts in the same column
 	Form_PlaceSliderValues(this.formcontainer.form, ifs_opt_pcpad_layout)
 
 	-- the button list: action on the left, button on the right
