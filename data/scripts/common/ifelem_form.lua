@@ -116,7 +116,7 @@ function Form_ShowHideElements(form)
 			if(form.elements[key].control == "slider") then
 				IFObj_fnSetVis(form.sliders[key], 1)
 				IFObj_fnSetVis(form.buttons[key], 1)
-				IFObj_fnSetPos(form.sliders[key], nil, form.buttons[key].y, nil)
+				IFObj_fnSetPos(form.sliders[key], form.sliders[key].fHomeX, form.buttons[key].y, nil)
 			elseif( form.elements[key].control == "dropdown") then
 				IFObj_fnSetVis(form.dropdowns[key].button, 1)
 				IFObj_fnSetPos(form.dropdowns[key].button, nil, form.buttons[key].y, nil)
@@ -422,6 +422,14 @@ function Form_GetMouseOverTag(this)
 end
 -- end mouseover bit
 
+-- OpenSWBF2: puts a vertical form's slider values (its buttons' labels, left-
+-- aligned in buttons layout.width / 4 wide) just right of its sliders' ends,
+-- thumb included, whatever the UI width (800 in the shell, 1920 in game).
+-- Call after Form_CreateVertical and setting form.sliders.x.
+function Form_PlaceSliderValues(form, layout)
+	form.buttons.x = form.sliders.x + layout.width * (1.05 + 0.125 + 0.04)
+end
+
 function Form_CreateVertical(container, layout)
 	layout.buttonlist = {}
 	layout.width = layout.width / 2
@@ -519,6 +527,9 @@ function Form_CreateVertical(container, layout)
 			}
 			local Item = form.sliders[layout.elements[i].tag]
 			Item.tag = Tag
+			-- OpenSWBF2: creating the screen clears x, and Form_ShowHideElements
+			-- moving the slider to its row would otherwise put it at 0
+			Item.fHomeX = elementWidth/2
 		elseif (layout.elements[i].control == "radio") then
 			local Tag = layout.elements[i].tag
 
