@@ -230,6 +230,7 @@ public:
                                 unsigned long ulHint);
     static void LoadConfigFile();
     static void SaveConfigFile();
+    static void ClearConfigs();
 
     void AddVidMode(int iWidth, int iHeight, D3DMULTISAMPLE_TYPE eMultiSampleType,
                     unsigned long ulMultiSampleQuality, bool bSupported);

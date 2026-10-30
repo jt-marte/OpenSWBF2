@@ -49,6 +49,8 @@ static const char* KeyName(unsigned int uiKey)
         return "Fov";
     case kCrispFonts:
         return "CrispFonts";
+    case kRenderer:
+        return "Renderer";
     }
     return "?";
 }
@@ -83,6 +85,7 @@ void SetDefaults(DisplaySettings& kSettings)
     kSettings.uiHudScale = DisplayLogic::kHudScaleDefault;
     kSettings.uiFov = DisplayLogic::kFovDefault;
     kSettings.bCrispFonts = true;
+    kSettings.uiRenderer = DisplayLogic::kRendererVulkan;
 }
 
 bool ParseUInt(const char* pcText, unsigned int uiLo, unsigned int uiHi, unsigned int& uiOut)
@@ -259,6 +262,18 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
             kSettings.bCrispFonts = bBool;
         }
         break;
+    case kRenderer:
+        if (pcValue != 0 && (_stricmp(pcValue, "vulkan") == 0 || strcmp(pcValue, "0") == 0))
+        {
+            kSettings.uiRenderer = DisplayLogic::kRendererVulkan;
+            bValid = true;
+        }
+        else if (pcValue != 0 && (_stricmp(pcValue, "d3d9") == 0 || strcmp(pcValue, "1") == 0))
+        {
+            kSettings.uiRenderer = DisplayLogic::kRendererD3D9;
+            bValid = true;
+        }
+        break;
     case kDisplayIni:
         bValid = pcValue != 0 && pcValue[0] != '\0' && strlen(pcValue) < sizeof(kSettings.acDisplayIni);
         if (bValid)
@@ -364,6 +379,10 @@ void Merge(DisplaySettings& dst, const DisplaySettings& cli)
     {
         dst.bCrispFonts = cli.bCrispFonts;
     }
+    if (cli.uiSet & kRenderer)
+    {
+        dst.uiRenderer = cli.uiRenderer;
+    }
     if (cli.uiSet & kDisplayIni)
     {
         strcpy(dst.acDisplayIni, cli.acDisplayIni);
@@ -381,7 +400,8 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath)
     }
     static const unsigned int auiKeys[] = {kAdapter, kAdapterName, kBorderless, kRefresh,
                                            kVsync,   kFps,         kNoWaitQuery, kNoDpi,
-                                           kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov, kCrispFonts};
+                                           kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov, kCrispFonts,
+                                           kRenderer};
     for (unsigned int i = 0; i < sizeof(auiKeys) / sizeof(auiKeys[0]); ++i)
     {
         char acValue[256];
@@ -476,6 +496,10 @@ bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFra
     if (ShouldWrite(kSettings, kCrispFonts))
     {
         bOk = PutKey("CrispFonts", kSettings.bCrispFonts ? "1" : "0", acTemp) && bOk;
+    }
+    if (ShouldWrite(kSettings, kRenderer))
+    {
+        bOk = PutKey("Renderer", kSettings.uiRenderer == DisplayLogic::kRendererD3D9 ? "d3d9" : "vulkan", acTemp) && bOk;
     }
     WritePrivateProfileStringA(0, 0, 0, acTemp);
     if (bOk)
@@ -613,6 +637,27 @@ bool SaveHudScale(unsigned int uiPercent)
 bool SaveFov(unsigned int uiDegrees)
 {
     return SaveUIntKey(kFov, uiDegrees, &DisplaySettings::uiFov);
+}
+
+// The renderer from Options -> Video, written on its own like the layout. Only
+// the ini copy changes: the running renderer was picked at startup and stays.
+bool SaveRenderer(unsigned int uiRenderer)
+{
+    char acPath[MAX_PATH];
+    if (!DisplayIniPath(acPath, sizeof(acPath)))
+    {
+        return false;
+    }
+    DisplaySettings kSave;
+    SetDefaults(kSave);
+    if (!SetFromText(kSave, kRenderer, uiRenderer == DisplayLogic::kRendererD3D9 ? "d3d9" : "vulkan", "lua") ||
+        !SaveIni(kSave, acPath, true))
+    {
+        return false;
+    }
+    gIniDisplay.uiRenderer = kSave.uiRenderer;
+    gIniDisplay.uiSet |= kRenderer;
+    return true;
 }
 
 static PendingAdapter sPendingAdapter;

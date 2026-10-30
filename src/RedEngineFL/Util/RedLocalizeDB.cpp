@@ -125,6 +125,10 @@ static const OpenText sOpenText[] = {
     { 0xbc7dd8b6, L"Recent servers" },                 // ifs.mp.direct.recent
     { 0x6a6bc3b3, L"Servers you join show up here." }, // ifs.mp.direct.none
     { 0x7e6a8238, L"This server needs a password." },  // ifs.mp.direct.needpass
+    { 0xf22a2be4, L"Renderer" },                       // ifs.videoopt.renderer
+    { 0xc068200c, L"Vulkan" },                         // ifs.videoopt.vulkan
+    { 0xf97df20d, L"DirectX 9" },                      // ifs.videoopt.directx9
+    { 0x5357afdf, L"Restart the game to use the new renderer." }, // ifs.videoopt.rendererrestart
 };
 
 // FUNCTION: SWBF2 0x006c5b30

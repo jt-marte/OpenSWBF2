@@ -515,6 +515,12 @@ void pcCrash::SetLogPath(char const* pcPath)
     gDumpDir[iLen] = 0;
 }
 
+// The -log file, "" without one.
+char const* pcCrash::GetLogPath()
+{
+    return gLogPath;
+}
+
 void __cdecl pcCrash::Exit(int iCode)
 {
     HwCursor::ReleaseClip();

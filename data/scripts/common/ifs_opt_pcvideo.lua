@@ -478,6 +478,7 @@ ifs_opt_pcvideo = NewIFShellScreen {
 			customForm.elements["multisample"].hidden = 1
 			generalForm.elements["displaymode"].hidden = 1
 			generalForm.elements["adapter"].hidden = 1
+			generalForm.elements["renderer"].hidden = 1
 			generalForm.elements["vsync"].hidden = 1
 			generalForm.elements["framecap"].hidden = 1
 			generalForm.elements["futureframes"].hidden = 1
@@ -527,6 +528,9 @@ ifs_opt_pcvideo = NewIFShellScreen {
 		generalForm.elements["hudscale"].selValue = math.floor(ScriptCB_GetHUDScale() * 100 + 0.5)
 		if ( ScriptCB_GetFov ) then
 			generalForm.elements["fov"].selValue = ScriptCB_GetFov()
+		end
+		if ( ScriptCB_GetRenderer ) then
+			generalForm.elements["renderer"].selValue = ScriptCB_GetRenderer() + 1
 		end
 
 		ifs_opt_pcvideo_fnReadDisplay(this)
@@ -819,6 +823,16 @@ ifs_opt_pcvideo = NewIFShellScreen {
 			return
 		end
 
+		if( element.tag == "renderer" ) then
+			-- OpenSWBF2: saved to display.ini at once, used from the next start
+			if( ScriptCB_SetRenderer and ScriptCB_SetRenderer(element.selValue - 1) ) then
+				Popup_Ok.fnDone = nil
+				Popup_Ok:fnActivate(1)
+				gPopup_fnSetTitleStr(Popup_Ok, "ifs.videoopt.rendererrestart")
+			end
+			return
+		end
+
 		if( element.tag == "overallquality" )  then
 			this:UpdateOverallQuality(form.elements["overallquality"].selValue)				
 		elseif( element.tag == "multisample" ) then
@@ -1019,6 +1033,8 @@ ifs_opt_pcvideo_general_options_layout = {
         --{ tag = "overallquality", title = "ifs.videoopt.overallquality", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {"ifs.VideoOpt.low", "ifs.VideoOpt.med", "ifs.VideoOpt.high", "ifs.VideoOpt.custom"} },
         { tag = "displaymode", title = "Display mode", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {"Fullscreen", "Windowed", "Borderless"} },
         { tag = "adapter", title = "Monitor", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {} },
+        -- OpenSWBF2: Vulkan (DXVK) or DirectX 9, saved to display.ini and used from the next start
+        { tag = "renderer", title = "ifs.videoopt.renderer", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {"ifs.videoopt.vulkan", "ifs.videoopt.directx9"} },
         { tag = "vsync", title = "ifs.VideoOpt.vsync", fnChanged = ifs_opt_pcvideo.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"} },
         { tag = "framecap", title = "Frame cap", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {} },
         { tag = "futureframes", title = "Future Frame Rendering", fnChanged = ifs_opt_pcvideo.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"} },

@@ -707,6 +707,7 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcCrispFont.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp" />
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDxvk.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcGammaPass.cpp" />
     <ClCompile Include="src\RedEngineFL\Application\pc\pcFrameLimiter.cpp" />
     <ClCompile Include="src\RedEngineFL\Application\pc\pcWindow.cpp" />
@@ -1191,6 +1192,7 @@
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcCrispFont.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.h" />
+    <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDxvk.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPass.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPassPS.h" />
     <None Include="src\RedEngineFL\Graphics\PC\pcGammaPass.hlsl" />
@@ -1695,5 +1697,16 @@
     <Copy SourceFiles="@(GameDataFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
     <WriteLinesToFile File="$(OutDir)steam_appid.txt" Lines="6060" Overwrite="true" />
     <MakeDir Directories="$(OutDir)SaveGames" />
+  </Target>
+  <!-- OpenSWBF2: DXVK for the Vulkan renderer, as dxvk\d3d9.dll. Never beside the exe: there it would
+       replace the system d3d9.dll for the DirectX 9 renderer too. tools\setup.ps1 fetches it into
+       third_party\dxvk; without it the build still succeeds and the game falls back to DirectX 9. -->
+  <PropertyGroup>
+    <DxvkArch Condition="'$(Platform)' == 'Win32'">x32</DxvkArch>
+    <DxvkDll>$(ProjectDir)third_party\dxvk\$(DxvkArch)\d3d9.dll</DxvkDll>
+  </PropertyGroup>
+  <Target Name="CopyDxvk" AfterTargets="Build" Condition="'$(DxvkArch)' != ''">
+    <Warning Condition="!Exists('$(DxvkDll)')" Text="DXVK not found at $(DxvkDll), run tools\setup.ps1. The game will run on DirectX 9." />
+    <Copy Condition="Exists('$(DxvkDll)')" SourceFiles="$(DxvkDll);$(ProjectDir)lib\dxvk\LICENSE.txt" DestinationFolder="$(OutDir)dxvk" SkipUnchangedFiles="true" />
   </Target>
 </Project>

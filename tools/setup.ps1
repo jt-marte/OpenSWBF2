@@ -15,6 +15,11 @@ $vsIsoSha = '7DE2340D9570895451C5F5D9F2081DB860A4F753E7596E31B2742390A6D0E6BC'
 $dxSdkUrl = 'https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe'
 $dxSdkSha = '705271DC83BFEE54D9B94E028426E288D5F070784B7446D164F48ECFBB2A02CB'
 $dxRedistUrl = 'https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe'
+# DXVK, the Vulkan renderer: the build copies x32\d3d9.dll to <exe dir>\dxvk\d3d9.dll.
+$dxvkVersion = '3.1.1'
+$dxvkUrl = "https://github.com/doitsujin/dxvk/releases/download/v$dxvkVersion/dxvk-$dxvkVersion.tar.gz"
+$dxvkSha = '40565B4A724AADC4433FA4E010B4B23916D9B1F1BAEEE64E17186DB94F54E608'
+$dxvkX32Sha = '265888C31CA78DFFA290C39CB7E50BFB02762590E41927906E46FB32F01497FA'
 # Depot 6061 manifest whose lvls match the hashes pinned in tools\lvl_build.cpp.
 $stockDepot = 6061
 $stockManifest = '6184123930358608135'
@@ -149,6 +154,32 @@ function Install-DxRedist {
     if ($code -ne 0) { throw "DXSETUP exited with $code." }
 }
 
+# 'ok' (the pinned build), 'other' (both DLLs there, a different build) or 'missing'.
+function Get-DxvkState([string]$dir) {
+    $x32 = Join-Path $dir 'x32\d3d9.dll'
+    if (-not (Test-Path $x32) -or -not (Test-Path (Join-Path $dir 'x64\d3d9.dll'))) { return 'missing' }
+    if ((Get-FileHash $x32 -Algorithm SHA256).Hash -ne $dxvkX32Sha) { return 'other' }
+    return 'ok'
+}
+
+# Unpacks the release tarball's x32 and x64 folders into $dir (beside it first, so a failed
+# unpack never leaves a half-filled $dir behind).
+function Install-Dxvk([string]$dir) {
+    $tar = Join-Path $env:windir 'System32\tar.exe'
+    if (-not (Test-Path $tar)) { throw 'tar.exe not found (needs Windows 10 1803 or newer).' }
+    if (Test-Path $dir) { throw "$dir already exists but is incomplete, remove it and run setup again." }
+    $file = Get-Download $dxvkUrl $dxvkSha
+    $tmp = "$dir.part"
+    if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
+    New-Item -ItemType Directory -Force -Path $tmp | Out-Null
+    & $tar -xzf $file -C $tmp --strip-components 1
+    if ($LASTEXITCODE -ne 0) { throw "tar could not unpack $file (exit $LASTEXITCODE)." }
+    foreach ($f in 'x32\d3d9.dll', 'x64\d3d9.dll') {
+        if (-not (Test-Path (Join-Path $tmp $f))) { throw "$file has no $f." }
+    }
+    Rename-Item $tmp (Split-Path $dir -Leaf)
+}
+
 function Get-KnownLvlHashes {
     $src = Get-Content -Raw (Join-Path $root 'tools\lvl_build.cpp')
     $known = @{}
@@ -209,6 +240,17 @@ try {
     else { Add-Result 'DirectX runtime' 'OK' 'd3dx9_43.dll' }
     if (Test-Path (Join-Path $sys 'msvcr120.dll')) { Add-Result 'VC++ 2013 runtime' 'OK' 'msvcr120.dll' }
     else { Add-Result 'VC++ 2013 runtime' 'MISSING' 'msvcr120.dll not in SysWOW64; install vcredist 2013 x86 (Visual Studio 2013 includes it)' }
+
+    $dxvkDir = Join-Path $root 'third_party\dxvk'
+    $dxvkState = Get-DxvkState $dxvkDir
+    if ($dxvkState -eq 'ok') { Add-Result 'DXVK' 'OK' "$dxvkVersion in $dxvkDir" }
+    elseif ($dxvkState -eq 'other') { Add-Result 'DXVK' 'OK' "$dxvkDir holds a build other than $dxvkVersion (delete it and run setup again to get $dxvkVersion)" }
+    elseif ($CheckOnly) { Add-Result 'DXVK' 'MISSING' "run without -CheckOnly to fetch DXVK $dxvkVersion into $dxvkDir (without it the game runs on DirectX 9 only)" }
+    else {
+        Install-Dxvk $dxvkDir
+        if ((Get-DxvkState $dxvkDir) -eq 'ok') { Add-Result 'DXVK' 'FIX' "fetched DXVK $dxvkVersion into $dxvkDir" }
+        else { Add-Result 'DXVK' 'MISSING' "$dxvkDir does not hold the DXVK $dxvkVersion DLLs after unpacking" }
+    }
 
     $known = Get-KnownLvlHashes
     $steam = Get-SteamPath

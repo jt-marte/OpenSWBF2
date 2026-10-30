@@ -1824,6 +1824,9 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDxvk.cpp">
+      <Filter>src\RedEngineFL\Graphics\PC</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcGammaPass.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>
@@ -3201,6 +3204,9 @@
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.h">
+      <Filter>src\RedEngineFL\Graphics\PC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDxvk.h">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPass.h">

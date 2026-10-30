@@ -493,4 +493,52 @@ const unsigned int kFovDefault = 61;
 float FovTanScale(unsigned int uiDegrees);
 float ScaleFov(float fFov, float fTanScale);
 
+// OpenSWBF2: the renderer (Options -> Video, display.ini Renderer, -vulkan /
+// -d3d9). Vulkan runs the D3D9 renderer through DXVK, loaded by full path from
+// <exe dir>\dxvk\d3d9.dll; D3D9 is the system d3d9.dll the exe links. Read
+// once at startup, so a change applies on the next start. Headless runs
+// (-norender, -dedicated) keep the fake device and load neither.
+enum Renderer
+{
+    kRendererVulkan = 0,
+    kRendererD3D9 = 1,
+    kRendererNone = 2
+};
+
+Renderer ChooseRenderer(unsigned int uiSetting, bool bNoRender);
+
+// The steps of starting Vulkan, in order. The first that fails sends the run
+// to D3D9 (kVulkanOk: Vulkan runs).
+enum VulkanFail
+{
+    kVulkanOk = 0,
+    kVulkanNoDll = 1,       // <exe dir>\dxvk\d3d9.dll is missing
+    kVulkanLoadFailed = 2,  // LoadLibrary refused it (code: GetLastError)
+    kVulkanNoEntry = 3,     // it has no Direct3DCreate9
+    kVulkanNoInterface = 4, // Direct3DCreate9 gave nothing: no Vulkan loader or driver
+    kVulkanNoAdapter = 5,   // no adapter DXVK can run on
+    kVulkanNoDevice = 6     // CreateDevice failed (code: its HRESULT)
+};
+
+// Where a step that worked leaves the run: the next step, or Vulkan running.
+// A step that failed always falls back (the run goes on with D3D9).
+VulkanFail VulkanCheck(bool bDll, bool bLoaded, bool bEntry, bool bInterface, unsigned int uiAdapters,
+                       long hrDevice);
+
+// The text after "OPENSWBF2 RENDERER" in the log: "vulkan (DXVK 3.1.1)",
+// "d3d9 (setting)", "d3d9 (-d3d9)", "d3d9 (fallback: <why>)" or
+// "none (headless)". uiCode is the GetLastError or HRESULT of the failed step.
+const char* const kDxvkVersion = "3.1.1";
+void RendererLogText(Renderer eChosen, bool bFromCli, VulkanFail eFail, unsigned long ulCode,
+                     char* pcOut, unsigned int uiSize);
+
+// <exe dir>\dxvk\d3d9.dll for the full exe path; false if it has no folder or
+// the result doesn't fit.
+bool DxvkDllPath(const char* pcExePath, char* pcOut, unsigned int uiSize);
+
+// Where DXVK writes its log (DXVK_LOG_PATH): beside the game's log when
+// -log gave one (pcGameLog, a full path), else the dxvk folder, so it never
+// lands loose in the game folder.
+bool DxvkLogDir(const char* pcGameLog, const char* pcExePath, char* pcOut, unsigned int uiSize);
+
 }
