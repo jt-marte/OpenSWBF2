@@ -967,7 +967,7 @@ function ifs_mp_main_fnBuildScreen(this)
 				font = "gamefont_medium",
 				--		string = "Player 1",
 				MaxLen = EditBoxW - 30,
-				MaxChars = 19,
+				MaxChars = 31, -- OpenSWBF2: room for host names and ":port" (the profile keeps 31)
 			},
 
 			passtitle = NewIFText {

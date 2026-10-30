@@ -29,6 +29,7 @@
 #include "LuaCallbacks_Options.h"
 #include "SoundFL/source/win/sndengine.h"
 #include "NetMatch.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "Steam/gfGalaxy.h"
 #include "BootDisplay.h"
 
@@ -788,12 +789,44 @@ int ScriptCB_IsSessionReady(lua_State* L)
 }
 
 // FUNCTION: SWBF2 0x00591450
+static NetFindGame* BeginDirectFind(const char* pcAddr);
+
 int ScriptCB_AutoNetJoin(lua_State* L)
 {
     if (joinGame)
     {
         joinGame->Update();
         lua_pushboolean(LuaHelper::mState, 1);
+        return 1;
+    }
+
+    // OpenSWBF2: /connect host[:port] joins that address instead of searching by game name.
+    if (gGamespyAutoConnectAddr[0])
+    {
+        // The autonet client opened a normal session list first; swap it for the fixed find.
+        if (findGame && findGame->GetFindType() != FT_FIXED)
+        {
+            findGame->Cancel();
+            delete findGame;
+            findGame = 0;
+        }
+        if (!findGame)
+        {
+            findGame = BeginDirectFind(gGamespyAutoConnectAddr);
+        }
+        if (findGame)
+        {
+            findGame->Update();
+            if (findGame->IsReady())
+            {
+                if (netRequestedCameraCount > 0)
+                {
+                    GameLoop::mNumCameras = netRequestedCameraCount;
+                }
+                joinGame = NetSetup::JoinGame(findGame);
+            }
+        }
+        lua_pushboolean(LuaHelper::mState, 0);
         return 1;
     }
 
@@ -984,7 +1017,9 @@ int ScriptCB_SetConnectType(lua_State* L)
         return 0;
     }
 
-    if (strcmp(luaL_checkstring(LuaHelper::mState, 1), "lan") == 0)
+    // OpenSWBF2: "direct" is the LAN transport (any address, Join IP); retail sent it to Galaxy.
+    const char* pcType = luaL_checkstring(LuaHelper::mState, 1);
+    if (strcmp(pcType, "lan") == 0 || strcmp(pcType, "direct") == 0)
     {
         NetComm::SetConnectType(CT_LAN);
         NetSetup::EnableOnlineService(false);
@@ -1903,9 +1938,60 @@ int ScriptCB_GetSessionSortMode(lua_State*)
     return 1;
 }
 
+// Password typed next to a Join IP address, used when the join launches without one.
+static char sJoinIPPassword[64];
+
+// Edit boxes hand Lua plain strings and the virtual keyboard UTF-16 ones; take either.
+static void ReadLuaText(int iArg, char* pcOut, unsigned int uCap)
+{
+    pcOut[0] = 0;
+    lua_State* L = LuaHelper::mState;
+    if (lua_gettop(L) < iArg || !lua_isstring(L, iArg))
+    {
+        return;
+    }
+    size_t uLen = 0;
+    const char* pcText = luaL_checklstring(L, iArg, &uLen);
+    const bool bWide = uLen >= 2 && pcText[0] && !pcText[1];
+    unsigned int uOut = 0;
+    for (size_t i = 0; i < uLen && pcText[i] && uOut + 1 < uCap; i += bWide ? 2 : 1)
+    {
+        pcOut[uOut++] = pcText[i];
+    }
+    pcOut[uOut] = 0;
+}
+
+// A fixed find aimed at one address, or 0 when the text is not a usable address.
+static NetFindGame* BeginDirectFind(const char* pcAddr)
+{
+    NetAddr address;
+    if (!NetMatch::ResolveAddress(pcAddr, address))
+    {
+        LOG(LogNet, Warning, "OPENSWBF2 NET join ip: cannot use address '%s'", pcAddr);
+        return 0;
+    }
+    CNetFindGame* pFind = (CNetFindGame*)NetSetup::FindGame(FT_FIXED, 0, 0);
+    pFind->SetDirectTarget(address);
+    return pFind;
+}
+
 // FUNCTION: SWBF2 0x00594df0
+// Retail left Join IP empty. OpenSWBF2: ("host[:port]" [, password]) over the LAN transport;
+// the quickmatch callbacks poll the fixed find and launch the join once it answers.
 int ScriptCB_BeginJoinIP(lua_State*)
 {
+    char acAddr[64];
+    ReadLuaText(1, acAddr, sizeof(acAddr));
+    ReadLuaText(2, sJoinIPPassword, sizeof(sJoinIPPassword));
+    NetComm::SetConnectType(CT_LAN);
+    NetSetup::EnableOnlineService(false);
+    if (findGame)
+    {
+        findGame->Cancel();
+        delete findGame;
+        findGame = 0;
+    }
+    findGame = BeginDirectFind(acAddr);
     return 0;
 }
 
@@ -2246,7 +2332,12 @@ int ScriptCB_LaunchQuickmatch(lua_State*)
             password = 0;
         }
     }
+    if (!password && sJoinIPPassword[0])
+    {
+        password = sJoinIPPassword;
+    }
     NetSetup::SetPassword(password);
+    sJoinIPPassword[0] = 0;
     joinGame = NetSetup::JoinGame(findGame);
     return 0;
 }

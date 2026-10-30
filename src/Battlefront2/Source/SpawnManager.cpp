@@ -1,4 +1,5 @@
 #include "SpawnManager.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 #include <float.h>
 
@@ -227,6 +228,11 @@ int SpawnManager::GetTotalCharacterCount()
     if (iCount > 600)
     {
         iCount = 600;
+    }
+    if (NetGame::IsEnabled())
+    {
+        // Host and clients must agree on this exactly: soldier state names characters by index.
+        LOG(LogNet, Inform, "OPENSWBF2 NET characters total=%d players=%d bots=%d", iCount, netPlayerLimit, netNumBots);
     }
     return iCount;
 }

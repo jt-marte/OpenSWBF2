@@ -946,6 +946,51 @@ function ifs_mp_sessionlist_fnAskCreateDone(bResult)
 end
 
 -- Returns -1, 0, or 1, depending on error, busy, or success
+-- Join IP (AddrStr, "host" or "host:port") or, with no address, a pending special join.
+-- The busy popup polls the find and joins once the server answers.
+function ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr)
+	Popup_Busy:fnActivate(nil)
+	ScriptCB_SetAmHost(nil)
+	ScriptCB_SetDedicated(nil)
+	if(AddrStr) then
+		ScriptCB_BeginJoinIP(AddrStr)
+	else
+		ScriptCB_BeginJoinSpecial()
+	end
+	ifs_mp_sessionlist_fnShowHideInterface(this, 1) -- hide interface
+
+	Popup_Busy.fnCheckDone = ifs_mp_sessionlist_buddymatch_fnCheckDone
+	Popup_Busy.fnOnSuccess = ifs_mp_sessionlist_buddymatch_fnOnSuccess
+	Popup_Busy.fnOnFail = ifs_mp_sessionlist_buddymatch_fnOnFail
+	Popup_Busy.fnOnCancel = ifs_mp_sessionlist_buddymatch_fnOnCancel
+	Popup_Busy.bNoCancel = nil
+	Popup_Busy.fTimeout = 15 -- seconds
+	Popup_Busy.bCallerSetsString = nil -- we'll manage the text ourselves
+
+--	IFText_fnSetString(Popup_Busy.title,"ifs.subHardDrive.busy")
+	IFText_fnSetString(Popup_Busy.title,"common.mp.joining")
+	Popup_Busy:fnActivate(1)
+end
+
+-- OpenSWBF2: the password box doubles as the Join IP address box (plain text, last address)
+function ifs_mp_sessionlist_fnShowJoinIPBox(this, bShow)
+	this.bJoinIPMode = bShow
+	this.bPasswordMode = bShow -- routes Enter and Back to the box
+	this.PassBox.passedit.bPasswordMode = not bShow
+	ifs_mp_sessionlist_fnShowHideInterface(this, bShow)
+	IFObj_fnSetVis(this.PassBox, bShow)
+	this.PassBox.passedit.bKeepsFocus = bShow
+	if(bShow) then
+		IFText_fnSetString(this.PassBox.title, "common.mp.joinip_prompt")
+		IFEditbox_fnSetString(this.PassBox.passedit, ScriptCB_GetProfileJoinIP() or "")
+		gCurEditbox = this.PassBox.passedit
+	else
+		IFText_fnSetString(this.PassBox.title, "ifs.vkeyboard.title_password")
+		IFEditbox_fnSetString(this.PassBox.passedit, "")
+		gCurEditbox = nil
+	end
+end
+
 function ifs_mp_sessionlist_buddymatch_fnCheckDone()
 --	local this = ifs_mp_sessionlist_buddymatch
 	ScriptCB_UpdateQuickmatch() -- think...
@@ -957,6 +1002,16 @@ function ifs_mp_sessionlist_buddymatch_fnOnSuccess()
 	local this = ifs_mp_sessionlist
 
 	Popup_Busy:fnActivate(nil)
+	-- OpenSWBF2: a passworded server reached by Join IP asks for its password first
+	if((gPlatformStr == "PC") and ScriptCB_IsQuickmatchPassworded()) then
+		this.bSpecialJoinPass = 1
+		this.bPasswordMode = 1
+		ifs_mp_sessionlist_fnShowHideInterface(this, 1)
+		IFObj_fnSetVis(this.PassBox, 1)
+		this.PassBox.passedit.bKeepsFocus = 1
+		gCurEditbox = this.PassBox.passedit
+		return
+	end
 	ScriptCB_LaunchQuickmatch()
 	ifs_missionselect.bForMP = 1
 	ifs_movietrans_PushScreen(ifs_mp_lobby_quick)
@@ -1284,6 +1339,9 @@ function ifs_mp_sessionlist_fnShowHideInterface(this, bHideInterface)
 --	IFObj_fnSetVis(this.filtertitle, not bHideInterface)
 	IFObj_fnSetVis(this.refreshbutton, not bHideInterface)
 	IFObj_fnSetVis(this.donebutton, not bHideInterface)
+	if(this.joinipbutton) then
+		IFObj_fnSetVis(this.joinipbutton, (not bHideInterface) and (gOnlineServiceStr == "LAN"))
+	end
 	
 	--IFObj_fnSetVis(this.ProfileNameText, not bHideInterface)
 	IFObj_fnSetVis(this.ProfileNameText, nil)
@@ -1930,29 +1988,11 @@ ifs_mp_sessionlist = NewIFShellScreen {
 		-- See if we need to do a JoinIP (or an XLive join friend)
 		if(this.bJoinIPOnEntry or bSpecialJoinPending) then
 --			print(" ** Begin special join!")
-			Popup_Busy:fnActivate(nil)
-			ScriptCB_SetAmHost(nil)
-			ScriptCB_SetDedicated(nil)
 			if(this.bJoinIPOnEntry) then
-				ScriptCB_BeginJoinIP(ifs_vkeyboard.CurString)
+				ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString)
 			else
-				ScriptCB_BeginJoinSpecial()
+				ifs_mp_sessionlist_fnBeginSpecialJoin(this, nil)
 			end
-			ifs_mp_sessionlist_fnShowHideInterface(this, 1) -- hide interface
-
-			Popup_Busy.fnCheckDone = ifs_mp_sessionlist_buddymatch_fnCheckDone
-			Popup_Busy.fnOnSuccess = ifs_mp_sessionlist_buddymatch_fnOnSuccess
-			Popup_Busy.fnOnFail = ifs_mp_sessionlist_buddymatch_fnOnFail
-			Popup_Busy.fnOnCancel = ifs_mp_sessionlist_buddymatch_fnOnCancel
-			Popup_Busy.bNoCancel = nil
-			Popup_Busy.fTimeout = 15 -- seconds
-			Popup_Busy.bCallerSetsString = nil -- we'll manage the text ourselves
-
---			IFText_fnSetString(Popup_Busy.title,"ifs.subHardDrive.busy")
-			IFText_fnSetString(Popup_Busy.title,"common.mp.joining")
-			Popup_Busy:fnActivate(1)
---			print(" ** Special join - popup open")
-
 			this.bJoinIPOnEntry = nil
 		end
 	end,
@@ -2044,6 +2084,19 @@ ifs_mp_sessionlist = NewIFShellScreen {
 			end
 		end
 
+		if(this.CurButton == "_joinip") then
+			ifs_mp_sessionlist_fnShowJoinIPBox(this, 1)
+			return
+		end
+		if(this.bJoinIPMode and ((this.CurButton == "_passback") or (this.CurButton == "_passok"))) then
+			local AddrStr = IFEditbox_fnGetString(this.PassBox.passedit)
+			ifs_mp_sessionlist_fnShowJoinIPBox(this, nil)
+			if(this.CurButton == "_passok") then
+				ScriptCB_SetProfileJoinIP(AddrStr)
+				ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr)
+			end
+			return
+		end
 		if((this.CurButton == "_passback") or (this.CurButton == "_passok")) then
 			this.bPasswordMode = nil
 			ifs_mp_sessionlist_fnShowHideInterface(this, nil)
@@ -2178,7 +2231,9 @@ ifs_mp_sessionlist = NewIFShellScreen {
 
 
 	Input_Back = function(this)
-		if(this.bPasswordMode) then
+		if(this.bJoinIPMode) then
+			ifs_mp_sessionlist_fnShowJoinIPBox(this, nil)
+		elseif(this.bPasswordMode) then
 			ifs_mp_sessionlist_fnShowHideInterface(this,nil)
 			IFObj_fnSetVis(this.PassBox, nil)
 			this.PassBox.passedit.bKeepsFocus = nil
@@ -2206,7 +2261,11 @@ ifs_mp_sessionlist = NewIFShellScreen {
 		if(gCurEditbox) then
 			this.bKeyPressed = 1
 			if((iKey == 10) or (iKey == 13)) then -- handle Enter different
-				if(this.bPasswordMode) then
+				if(this.bJoinIPMode or this.bSpecialJoinPass) then
+					-- Input_Accept does the whole join; the list join below would start a second one
+					this.CurButton = "_passok"
+					this:Input_Accept(1)
+				elseif(this.bPasswordMode) then
 					this.CurButton = "_passok"
 					this:Input_Accept(1)
 
@@ -3327,6 +3386,20 @@ function ifs_mp_sessionlist_fnBuildScreen(this)
 		font = "gamefont_medium",
 		tag = "_refresh",
 		string = "ifs.mp.sessionlist.refresh",
+	}
+
+	-- OpenSWBF2: join a server by address, from the LAN list (any IP, VPN or internet)
+	this.joinipbutton =	NewPCIFButton
+	{
+		ScreenRelativeX = 0.65, -- left
+		ScreenRelativeY = 1.0, -- bottom
+		y = launch_button_y, -- just above bottom
+		x = -10 - BackButtonW - 20,
+		btnw = BackButtonW,
+		btnh = BackButtonH,
+		font = "gamefont_medium",
+		tag = "_joinip",
+		string = "common.mp.joinip",
 	}
 
 	mpsessionlist_serverinfo_layout.FirstShownIdx = 1

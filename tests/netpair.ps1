@@ -5,10 +5,12 @@ param(
     [ValidateRange(10, 3600)][int]$Seconds = 45,
     [ValidateSet('clean', 'lag100', 'lag200', 'all')][string]$Profile = 'clean',
     [ValidateRange(30, 600)][int]$JoinTimeout = 120,
+    [switch]$Direct,
     [string]$OutDir
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
-# each in its own worker folder. Reads the OPENSWBF2 NET markers and -netstats lines from every
+# each in its own worker folder (-Direct: clients join 127.0.0.1 by address instead of LAN
+# discovery). Reads the OPENSWBF2 NET markers and -netstats lines from every
 # run.log and prints one [PASS]/[FAIL] line per profile. See tests\README.md, "Network pair runs".
 $ErrorActionPreference = 'Stop'
 $testsDir = $PSScriptRoot
@@ -78,7 +80,8 @@ function Invoke-NetPair($name, $drag) {
         for ($i = 1; $i -le $Clients; ++$i) {
             $cliLog = Join-Path $caseDir "client$i.log"
             $cliLogs += $cliLog
-            $cliArgs = "/autonet client -lan /gamename $gameName $common -log `"$cliLog`""
+            $join = if ($Direct) { '/connect 127.0.0.1' } else { '' }
+            $cliArgs = "/autonet client -lan /gamename $gameName $join $common -log `"$cliLog`""
             $procs += Start-Process -FilePath (Join-Path $dirs[$i] 'BattlefrontII.exe') -ArgumentList $cliArgs -WorkingDirectory $dirs[$i] -PassThru
         }
         $joined = $false
@@ -112,6 +115,12 @@ function Invoke-NetPair($name, $drag) {
         if (-not (Test-Path $log)) { $problems += "missing $(Split-Path $log -Leaf)"; continue }
         foreach ($m in (Read-Stats $log $badRx)) { $problems += "$(Split-Path $log -Leaf): $($m.Value)" }
     }
+    # Soldier state names characters by index, so every peer must build the same table.
+    $tables = @()
+    foreach ($log in @($srvLog) + $cliLogs) {
+        if (Test-Path $log) { $tables += @(Read-Stats $log 'OPENSWBF2 NET characters (total=\d+ players=\d+ bots=\d+)' | Select-Object -First 1 | ForEach-Object { $_.Groups[1].Value }) }
+    }
+    if (@($tables | Select-Object -Unique).Count -gt 1) { $problems += "character tables differ: $($tables -join ' / ')" }
     foreach ($log in $cliLogs) {
         if (-not (Test-Path $log)) { continue }
         # Skip the first two stats lines: the first second after load is still catching up.
@@ -128,7 +137,8 @@ function Invoke-NetPair($name, $drag) {
     $l = & $avg $loss
     if ($joined -and $updates.Count -lt 5) { $problems += "only $($updates.Count) stats seconds" }
     if ($updates.Count -and $u -lt $profiles[$name].MinUpdates) { $problems += "updates/s $u below $($profiles[$name].MinUpdates)" }
-    $summary = "netpair:$name clients=$Clients updates=$u ping=$p loss=$l seconds=$($updates.Count)"
+    $mode = if ($Direct) { 'direct' } else { 'lan' }
+    $summary = "netpair:$name join=$mode clients=$Clients updates=$u ping=$p loss=$l seconds=$($updates.Count)"
     $problems = @($problems | Select-Object -Unique)
     $token = if ($problems.Count) { 'FAIL' } else { 'PASS' }
     $text = "[$token] $summary"

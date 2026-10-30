@@ -2674,6 +2674,15 @@ bool CNetFindGame::IsReady()
 
     case FT_FIXED:
     case FT_CURRENT:
+        if (mDirectTarget)
+        {
+            // Wait for the target's query answer (name, map, player limit, password flag).
+            PblList<NetGameDesc>::Node* node = gameList._head._pNext;
+            if (!node->_pObject || !node->_pObject->mValid || !node->_pObject->mHasSessionData)
+            {
+                return false;
+            }
+        }
         if (GetGameCount() > 0)
         {
             SelectFirst();
@@ -2705,7 +2714,7 @@ NetAddr::NetAddr(int addr, int port, int overridePort)
     hasPriv = false;
     privAddr = 0;
     privPort = 0;
-    if (!IsPrivateIP((unsigned long)addr))
+    if (!NetWire::IsUsableIPv4((unsigned long)addr))
     {
         NetRejectCount(NET_REJECT_BAD_ADDR);
         return;
@@ -3248,6 +3257,27 @@ CNetFindGame::CNetFindGame(FindType type, const char*, NetSessionId* id)
     NetMatch::StartFindGames(0, (const NetSessionId*)(mDirectJoinState + 32));
     mWaitingForQueries = false;
     mQueryFinishTime = 0.0f;
+    mDirectTarget = false;
+}
+
+// Join IP: list and query only this address. IsReady then waits for its query answer, which
+// carries the player limit the client sizes its character table from.
+void CNetFindGame::SetDirectTarget(const NetAddr& address)
+{
+    mDirectTarget = true;
+    memcpy(mDirectJoinState + 8, &address, sizeof(address));
+    FindGameData data;
+    memset(&data, 0, sizeof(data));
+    const unsigned char* pucIP = (const unsigned char*)&address.privAddr;
+    _snprintf(data.mName, sizeof(data.mName) - 1, "%u.%u.%u.%u:%d", pucIP[0], pucIP[1], pucIP[2], pucIP[3],
+              address.privPort);
+    NetKey key;
+    memset(&key, 0, sizeof(key));
+    NetSessionId session;
+    memset(&session, 0, sizeof(session));
+    AddGame(&address);
+    UpdateGame(&address, &key, &session, NetSetup::GetGameVersion(), &data, 0);
+    LOG(LogNet, Inform, "OPENSWBF2 NET direct find %s", data.mName);
 }
 
 // FUNCTION: SWBF2 0x005dd8d0
@@ -3781,6 +3811,15 @@ void CNetFindGame::AddGame(const NetAddr* address)
     }
     NetGameDesc probeDesc(*address);
     NetGameDesc* probe = &probeDesc;
+    if (mDirectTarget)
+    {
+        // LAN broadcasts keep answering during a Join IP find; list only the target.
+        NetGameDesc target(*(const NetAddr*)(mDirectJoinState + 8));
+        if (!(target == *probe))
+        {
+            return;
+        }
+    }
     for (PblList<NetGameDesc>::Node* node = find->gameList._head._pNext;
          node->_pObject; node = node->_pNext)
     {
@@ -3813,7 +3852,8 @@ void CNetFindGame::UpdateGame(const NetAddr* address, const void* session, const
         }
         find->mDirty = true;
         ((NetGameDesc*)game)->Update(address, (const NetKey*)session, (const NetSessionId*)key, version, (const FindGameData*)playerData, (const FindGameRules*)extra);
-        if (find->findType == 3 || find->findType == 2)
+        // A Join IP target only has session data once its query answer arrives.
+        if ((find->findType == 3 || find->findType == 2) && !find->mDirectTarget)
         {
             game->mHasSessionData = true;
         }
@@ -5728,7 +5768,7 @@ bool CNetFindGame::Update()
                 NetAddr address;
                 FindGameData data;
                 FindGameRules rules;
-                if (findType == 2)
+                if (findType == 2 && !mDirectTarget)
                 {
                     mDirectJoinState[4] = true;
                     NetMatch::SetAddr((unsigned int*)&address, (const unsigned int*)(mDirectJoinState + 8));
@@ -5802,7 +5842,7 @@ bool CNetFindGame::Update()
                 group.EndRead();
                 response->Free();
 
-                if (findType == 2)
+                if (findType == 2 && !mDirectTarget)
                 {
                     UpdateGame(&address, 0, 0, NetSetup::GetGameVersion(), &data, &rules);
                 }
