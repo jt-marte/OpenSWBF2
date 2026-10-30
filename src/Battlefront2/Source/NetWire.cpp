@@ -263,6 +263,23 @@ bool LoginLimiter::Allow(unsigned int uKey, float fNow)
     return true;
 }
 
+bool IsValidGuestCount(unsigned int uGuests)
+{
+    if (uGuests > kMaxGuests)
+    {
+        NetRejectCount(NET_REJECT_GUEST_COUNT);
+        return false;
+    }
+    return true;
+}
+
+// The LAN FOUND reply packs the player limit into 6 bits, so a 64-player host sends 0. Limits run
+// 1..64, and the joining client sizes its character table from this value, which must match the host.
+int DecodeLanMaxPlayers(unsigned int uWire)
+{
+    return uWire == 0 ? (int)kMaxPlayers : (int)uWire;
+}
+
 int ClampPlayerCount(unsigned int uWire)
 {
     int iCount = uWire > kMaxPlayers ? (int)kMaxPlayers : (int)uWire;

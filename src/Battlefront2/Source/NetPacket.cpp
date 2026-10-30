@@ -50,7 +50,9 @@ static const char* const sRejectNames[] =
     "rcon_login_rate",
     "player_count",
     "turn_rate",
-    "bad_addr"
+    "bad_addr",
+    "guest_count",
+    "object_state"
 };
 
 static_assert(sizeof(sRejectNames) / sizeof(sRejectNames[0]) == NET_REJECT_COUNT, "sRejectNames size");

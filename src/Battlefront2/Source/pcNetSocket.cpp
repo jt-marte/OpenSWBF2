@@ -5,6 +5,7 @@
 #include "NetPacket.h"
 #include "NetComm.h"
 #include "Steam/galaxy_api.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 extern unsigned int netDirectSocket;
 extern unsigned int netBroadcastSendSocket;
@@ -65,7 +66,14 @@ void NetSocket::OpenBroadcastSockets()
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port = htons(3656);
-    bind((SOCKET)netBroadcastRecvSocket, (const sockaddr*)&addr, sizeof(addr));
+    if (bind((SOCKET)netBroadcastRecvSocket, (const sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR)
+    {
+        LOG(LogNet, Warning, "OPENSWBF2 NET broadcast bind failed port=3656 err=%d", WSAGetLastError());
+    }
+    else
+    {
+        LOG(LogNet, Inform, "OPENSWBF2 NET broadcast open port=3656");
+    }
     u_long ulNonBlocking = 1;
     ioctlsocket((SOCKET)netBroadcastRecvSocket, FIONBIO, &ulNonBlocking);
 }
@@ -79,6 +87,14 @@ int NetSocket::OpenDirectSocket(bool bHost)
     {
         ++iPort;
     }
+    if ((SOCKET)netDirectSocket == INVALID_SOCKET)
+    {
+        LOG(LogNet, Error, "OPENSWBF2 NET socket failed err=%d", WSAGetLastError());
+        netDirectSocket = 0;
+        return iPort;
+    }
+    // Retail tried ports upward with no end; stop after 64 and let the system pick one.
+    const int iFirstPort = iPort;
     for (;;)
     {
         sockaddr_in addr;
@@ -90,8 +106,27 @@ int NetSocket::OpenDirectSocket(bool bHost)
             break;
         }
         DecodeError(WSAGetLastError());
-        ++iPort;
+        if (iPort == 0)
+        {
+            LOG(LogNet, Error, "OPENSWBF2 NET socket bind failed err=%d", WSAGetLastError());
+            break;
+        }
+        if (++iPort - iFirstPort >= 64)
+        {
+            LOG(LogNet, Warning, "OPENSWBF2 NET no free port in %d..%d, using any", iFirstPort, iPort - 1);
+            iPort = 0;
+        }
     }
+    if (iPort == 0)
+    {
+        sockaddr_in bound;
+        int iLen = sizeof(bound);
+        if (getsockname((SOCKET)netDirectSocket, (sockaddr*)&bound, &iLen) != SOCKET_ERROR)
+        {
+            iPort = ntohs(bound.sin_port);
+        }
+    }
+    LOG(LogNet, Inform, "OPENSWBF2 NET socket open host=%d port=%d", bHost ? 1 : 0, iPort);
     int iSize = 0x8000;
     setsockopt((SOCKET)netDirectSocket, SOL_SOCKET, SO_RCVBUF, (const char*)&iSize, sizeof(iSize));
     iSize = 0x10000;

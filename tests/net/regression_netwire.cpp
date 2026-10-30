@@ -429,6 +429,27 @@ TEST_CASE("player count is clamped to 1 through 64" * doctest::test_suite("regre
     CHECK(capture.Contains("net reject player_count"));
 }
 
+TEST_CASE("join guest count above one is rejected" * doctest::test_suite("regression"))
+{
+    NetTestReset();
+    LogCapture capture;
+    CHECK(NetWire::IsValidGuestCount(0));
+    CHECK(NetWire::IsValidGuestCount(1));
+    CHECK(netRejectCounts[NET_REJECT_GUEST_COUNT] == 0);
+    CHECK(!NetWire::IsValidGuestCount(2));
+    CHECK(!NetWire::IsValidGuestCount(7));
+    CHECK(netRejectCounts[NET_REJECT_GUEST_COUNT] == 2);
+    CHECK(capture.Contains("net reject guest_count"));
+}
+
+TEST_CASE("lan player limit zero means a 64 player host" * doctest::test_suite("regression"))
+{
+    CHECK(NetWire::DecodeLanMaxPlayers(0) == 64);
+    CHECK(NetWire::DecodeLanMaxPlayers(1) == 1);
+    CHECK(NetWire::DecodeLanMaxPlayers(32) == 32);
+    CHECK(NetWire::DecodeLanMaxPlayers(63) == 63);
+}
+
 TEST_CASE("turn rate outside the retail range is rejected" * doctest::test_suite("regression"))
 {
     NetTestReset();

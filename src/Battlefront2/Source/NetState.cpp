@@ -29,6 +29,7 @@
 #include "WalkerLegPair.h"
 #include "MountedTurret.h"
 #include "NetWire.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Graphics/RedPose.h"
 #include "PowerupItem.h"
 #include "NetGame.h"
@@ -641,7 +642,19 @@ void PowerupStation::ReadObject(NetPktGroup& group, NetObjState*)
             static_cast<Damageable*>(this)->Kill();
         }
     }
-    if (mState == STATE_ALIVE)
+    // Read the timer exactly when the host wrote it: when the state it sent is alive. Retail
+    // tested the local state after Respawn/Kill, which need not end up equal to the sent state,
+    // and any difference shifts every object read after this one.
+    if (state != mState)
+    {
+        static int siLogs;
+        if (siLogs < 4)
+        {
+            ++siLogs;
+            LOG(LogNet, Warning, "OPENSWBF2 NET powerup station state host=%d local=%d", state, mState);
+        }
+    }
+    if (state == STATE_ALIVE)
     {
         group.ReadFixed(mPowerupTimer, -0.1f, mClass->mPowerupDelay, 8);
     }
@@ -1153,6 +1166,16 @@ void EntityWalker::ReadObject(NetPktGroup& group, NetObjState*)
     mDirection = (eDirection)direction;
     group.ReadBits(state, 4);
     const bool reversed = mDirection == (eDirection)2;
+    // A state with no animation for this walker class means the stream no longer matches the
+    // object; retail dereferenced the missing animation and crashed.
+    const int iAnimIndex = state == 4 ? 3 : (int)state;
+    if (iAnimIndex >= mClass->mAnimationCount || !mClass->mAnimations[iAnimIndex])
+    {
+        LOG(LogNet, Warning, "OPENSWBF2 NET bad walker state state=%u anims=%d player=%d", state,
+            mClass->mAnimationCount, mPlayerId);
+        group.SetBad(NET_REJECT_OBJECT_STATE);
+        return;
+    }
     if ((int)state != mState)
     {
         const float blendDuration = mClass->GetAnimationBlendDuration((eState)mState, (eState)state);
@@ -1675,6 +1698,16 @@ void EntityWalker::ReadLateState(NetPktGroup& group)
     mDirection = (eDirection)direction;
     group.ReadBits(state, 4);
     const bool reversed = mDirection == (eDirection)2;
+    // A state with no animation for this walker class means the stream no longer matches the
+    // object; retail dereferenced the missing animation and crashed.
+    const int iAnimIndex = state == 4 ? 3 : (int)state;
+    if (iAnimIndex >= mClass->mAnimationCount || !mClass->mAnimations[iAnimIndex])
+    {
+        LOG(LogNet, Warning, "OPENSWBF2 NET bad walker state state=%u anims=%d player=%d", state,
+            mClass->mAnimationCount, mPlayerId);
+        group.SetBad(NET_REJECT_OBJECT_STATE);
+        return;
+    }
     if ((int)state != mState)
     {
         const float blendDuration = mClass->GetAnimationBlendDuration((eState)mState, (eState)state);
@@ -5389,6 +5422,15 @@ void EntitySoldier::ReadObject(NetPktGroup& group, NetObjState*)
         group.ReadBits(value, 3);
         if (mWeaponIndex[i] != (char)value)
         {
+            // A slot this soldier has no weapon in means the stream no longer matches the object;
+            // retail dereferenced the empty slot and crashed.
+            if (!mWeapon[value])
+            {
+                LOG(LogNet, Warning, "OPENSWBF2 NET bad soldier state weapon=%u channel=%d player=%d", value, i,
+                    mPlayerId);
+                group.SetBad(NET_REJECT_OBJECT_STATE);
+                return;
+            }
             mWeapon[mWeaponIndex[i]]->Deselect(i, false);
             mWeaponIndex[i] = (char)value;
             mWeapon[mWeaponIndex[i]]->Select(i, false);

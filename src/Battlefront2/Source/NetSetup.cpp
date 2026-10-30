@@ -28,6 +28,7 @@
 #include "NetGame.h"
 #include "NetPacket.h"
 #include "NetWire.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "LocalLimits.h"
 #include "Character.h"
 #include "GameVoiceChat.h"
@@ -3640,9 +3641,10 @@ bool ReadShellMove(NetPktGroup& group, int player, ShellMove& move, ShellState& 
 }
 
 // GLOBAL: SWBF2 0x007e8e52
-bool netReplicaOk;
+// Retail .data holds true for both; they go out in every JOIN.
+bool netReplicaOk = true;
 // GLOBAL: SWBF2 0x007e8e53
-bool netRelayOk;
+bool netRelayOk = true;
 extern bool g_SpectatorEnabled[1];
 
 // FUNCTION: SWBF2 0x005e54b0
@@ -4978,6 +4980,10 @@ void CNetJoinGame::Update()
                 guestCount = GameLoop::GetNumCameras() - 1;
                 WriteJoin(group, guestCount);
                 group.EndWrite();
+                if (tryCount == 1)
+                {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join sent to=%s", NetCommP::DescribeAddr(64));
+                }
                 NetComm::Send(64, PKT_JOIN, group.pktPtr);
                 int joinMark = 735;
                 PblJournal::Record(joinMark, PJT_FULL);
@@ -5043,6 +5049,7 @@ void CNetJoinGame::Update()
             if (!joinFailed)
             {
                 ReadJoinReject(group, *(JoinRejectReason*)&rejectReason);
+                LOG(LogNet, Inform, "OPENSWBF2 NET join refused reason=%d", rejectReason);
                 if (rejectReason == JRR_BUSY)
                 {
                     rejectReason = 0;
@@ -5095,6 +5102,7 @@ void CNetJoinGame::Update()
             int newLocal = NetComm::GetLocalIndex(0);
             if (newLocal != oldLocal)
             {
+                LOG(LogNet, Inform, "OPENSWBF2 NET joined player=%d", newLocal);
                 timer = 0.0f;
                 tryCount = 0;
                 int joystick = FLInputManager::Instance()->GetHWPort(0);
@@ -5161,6 +5169,8 @@ void CNetJoinGame::Update()
         float timeout = NetComm::GetLocalIndex(0) < 0 ? 60.0f : 15.0f;
         if (NetComm::IsConnected(64) && now - NetComm::GetLastRecv(64) >= timeout)
         {
+            LOG(LogNet, Inform, "OPENSWBF2 NET join lost silent=%.1f player=%d", now - NetComm::GetLastRecv(64),
+                NetComm::GetLocalIndex(0));
             NetComm::Disconnect(64);
             ++changeCount;
             shellUpdate.connectMask = 0;
@@ -5344,8 +5354,9 @@ void CNetHostGame::Update()
                 group.ReadBits(password, 32);
                 unsigned int guestCount;
                 group.ReadBits(guestCount, 3);
-                bool hasRoom = player != -1;
-                for (j = 0; j < guestCount; ++j)
+                // guests[] holds kMaxGuests slots; a larger claimed count read and connected past it.
+                bool hasRoom = player != -1 && NetWire::IsValidGuestCount(guestCount);
+                for (j = 0; hasRoom && j < guestCount; ++j)
                 {
                     if (guests[j] == -1)
                     {
@@ -5354,6 +5365,8 @@ void CNetHostGame::Update()
                 }
                 if (!hasRoom)
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=full guests=%u",
+                        NetCommP::DescribeAddr(from), guestCount);
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -5364,6 +5377,8 @@ void CNetHostGame::Update()
                 }
                 else if (password != (unsigned int)NetSetup::GetPassword())
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=password",
+                        NetCommP::DescribeAddr(from));
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -5374,6 +5389,8 @@ void CNetHostGame::Update()
                 }
                 else if (version != 1)
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=version version=%u",
+                        NetCommP::DescribeAddr(from), version);
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -5398,7 +5415,10 @@ void CNetHostGame::Update()
                     join->Free();
                     join = 0;
                     ++changeCount;
-                    needSendMask |= 1ULL << from;
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join accepted from=%s player=%d guests=%u",
+                        NetCommP::DescribeAddr(player), player, guestCount);
+                    // Retail shifted by the join slot (69 and up), which set no bit at all.
+                    needSendMask |= 1ULL << player;
                     if (NetGame::IsDedicated())
                     {
                         launchTimer = NetComm::GetTime();
@@ -5519,11 +5539,14 @@ void CNetHostGame::Update()
         }
         if (elapsed > timeout)
         {
+            LOG(LogNet, Inform, "OPENSWBF2 NET drop player=%d reason=%s silent=%.1f", i,
+                shellState.players[i].quitRequested ? "quit" : "timeout", elapsed);
             DropPlayer(i);
             ++changeCount;
         }
         else if ((bootMask & (1ULL << i)) && now > bootTime[i])
         {
+            LOG(LogNet, Inform, "OPENSWBF2 NET drop player=%d reason=boot", i);
             DropPlayer(i);
             ++changeCount;
         }
@@ -6195,8 +6218,9 @@ void CNetPostLoadHostGame::Update()
                 group.ReadBits(password, 32);
                 unsigned int guestCount;
                 group.ReadBits(guestCount, 3);
-                bool hasRoom = player != -1;
-                for (j = 0; j < guestCount; ++j)
+                // guests[] holds kMaxGuests slots; a larger claimed count read and connected past it.
+                bool hasRoom = player != -1 && NetWire::IsValidGuestCount(guestCount);
+                for (j = 0; hasRoom && j < guestCount; ++j)
                 {
                     if (guests[j] == -1)
                     {
@@ -6205,6 +6229,8 @@ void CNetPostLoadHostGame::Update()
                 }
                 if (!hasRoom)
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=full guests=%u",
+                        NetCommP::DescribeAddr(from), guestCount);
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -6215,6 +6241,8 @@ void CNetPostLoadHostGame::Update()
                 }
                 else if (password != (unsigned int)NetSetup::GetPassword())
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=password",
+                        NetCommP::DescribeAddr(from));
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -6225,6 +6253,8 @@ void CNetPostLoadHostGame::Update()
                 }
                 else if (version != 1)
                 {
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=version version=%u",
+                        NetCommP::DescribeAddr(from), version);
                     group.EndRead();
                     join->Free();
                     join = 0;
@@ -6248,6 +6278,8 @@ void CNetPostLoadHostGame::Update()
                     group.EndRead();
                     join->Free();
                     join = 0;
+                    LOG(LogNet, Inform, "OPENSWBF2 NET join accepted from=%s player=%d guests=%u late=1",
+                        NetCommP::DescribeAddr(player), player, guestCount);
                     needSendMask |= 1ULL << player;
                 }
             }
@@ -6361,6 +6393,9 @@ void CNetPostLoadHostGame::Update()
         }
         if (elapsed > timeout)
         {
+            LOG(LogNet, Inform, "OPENSWBF2 NET drop player=%d reason=%s silent=%.1f", i,
+                shellState.players[i].quitRequested ? "quit" : ((loadingMask & (1ULL << i)) ? "load" : "timeout"),
+                elapsed);
             NetGameP::SetPlayerName(i, "");
             NetGame::SetPlayerGSID(i, 0);
             NetGame::ClearPlayerCDKey(i);

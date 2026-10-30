@@ -267,7 +267,8 @@ TEST_CASE("fuzz netwire readers" * doctest::test_suite("fuzz"))
 {
     const unsigned int auSeeds[4] = {1, 2, 3, 0xC0FFEE};
     const unsigned int auSums[4] = {0xd6d39bb0, 0xef022552, 0x2f8008ad, 0x61d4df43};
-    const unsigned int auRejectSums[4] = {0x417379d8, 0xccc283c8, 0x152728f0, 0xe4a8ac38};
+    // Hashes every reject counter, so adding a reason (guest_count, object_state) moves these pins.
+    const unsigned int auRejectSums[4] = {0xf9bb5c00, 0x76dcf580, 0x0ac41008, 0x15ec8d20};
     for (int i = 0; i < 4; ++i)
     {
         unsigned int uSum = 0;
