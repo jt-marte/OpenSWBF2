@@ -2438,7 +2438,9 @@ void __fastcall ParseAutoNetCommandLine(char* pCmdLine)
     {
         return;
     }
-    if (strstr(pCmdLine, "/gamename "))
+    // Retail skipped the server config files when a game name came on the command line;
+    // -dedicated always loads them (the command line still wins, it is parsed afterwards).
+    if (strstr(pCmdLine, "/gamename ") && !gDedicatedShorthand)
     {
         return;
     }
@@ -2486,7 +2488,9 @@ void __fastcall ParseAutoNetCommandLine(char* pCmdLine)
         fprintf(Stream, "%d - start\n", dwStart);
     }
 
-    while (GetTickCount() - dwStart < 0x4E20)
+    // Retail waited up to 20 s here for a remote /status; networking is not up yet, so with
+    // -dedicated the server starts at once.
+    while (!gDedicatedShorthand && GetTickCount() - dwStart < 0x4E20)
     {
         if (adminStatusRequested)
         {

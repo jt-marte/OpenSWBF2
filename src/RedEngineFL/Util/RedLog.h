@@ -42,6 +42,17 @@ extern int gFrame;
 void __cdecl Write(Category eCategory, Severity eSeverity, char const* pcFile, int iLine,
                    char const* pcFormat, ...);
 void NextFrame();
+// Also write every log line to stdout (dedicated servers: console, launcher pipe, container
+// log). A process without stdout then attaches to its parent's console (StdoutAttach) or
+// attaches or opens one (StdoutConsole).
+enum StdoutMode
+{
+    StdoutOff,
+    StdoutRedirectOnly,
+    StdoutAttach,
+    StdoutConsole
+};
+void SetStdout(StdoutMode eMode);
 void ParseCmds(char const* pcArgs);
 void Apply(char const* pcBuildId);
 int MinVerbosity();

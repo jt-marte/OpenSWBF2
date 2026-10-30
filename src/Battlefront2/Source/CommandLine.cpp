@@ -70,6 +70,11 @@ bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
 bool gNetStatsLog;
+bool gLogStdout;
+bool gLogConsole;
+// Set by GameWinMain when "-dedicated" expanded into the autonet dedicated switches.
+bool gDedicatedShorthand;
+extern int hostshort;
 bool gSeedSet;
 unsigned int gSeed;
 int gBootLaggerPing = 300;
@@ -375,6 +380,40 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "netstats") == 0)
         {
             gNetStatsLog = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "dedicated") == 0)
+        {
+            continue; // expanded by GameWinMain
+        }
+
+        // Game port (host binds it, clients bind it plus one); ServerSettings' gameport also sets it.
+        if (_stricmp(pcArg + 1, "port") == 0)
+        {
+            const int iPort = i + 1 < iArgc ? atoi(apcArgv[i + 1]) : 0;
+            if (iPort < 1 || iPort > 65534)
+            {
+                LOG(LogCore, Warning, "-port needs a number from 1 to 65534, ignored");
+            }
+            else
+            {
+                ++i;
+                hostshort = iPort;
+            }
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "logstdout") == 0)
+        {
+            gLogStdout = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "console") == 0)
+        {
+            gLogStdout = true;
+            gLogConsole = true;
             continue;
         }
 

@@ -26,3 +26,24 @@ The exe is written to `bin\{Platform}\{Config}\BattlefrontII.exe`.
 ## Run
 
 The build automatically finds the Steam install's GameData through Steam's registry entry, or set `SWBF2_GAMEDATA` to the desired GameData directory to use another copy.
+
+## Multiplayer
+
+**Direct connect.** In Multiplayer > Join, set the source to LAN: the list shows servers found on the local network, and **Join IP** joins any address (`1.2.3.4`, `1.2.3.4:3700` or a host name; the port defaults to 3658). Private, VPN (Tailscale, Hamachi), public and loopback addresses all work. Hosting from Create with the LAN source makes a server others can join the same way; players outside your network need UDP 3658 forwarded to you. `BattlefrontII.exe /autonet client -lan /connect <address>` joins headlessly. The Internet source is the Galaxy list, shared with the stock Steam game.
+
+**Dedicated server.** `BattlefrontII.exe -dedicated <map> [<map> ...]` starts a headless Direct server: no window, renderer or sound, no Steam sign-in needed, logs to stdout (and to the parent console when started from one). Maps use mission names such as `geo1c_con`, optionally followed by both teams' reinforcements (`geo1c_con 150 150`).
+
+| Switch | Meaning |
+|--------|---------|
+| `-port N` | game port, UDP (default 3658; LAN discovery stays on 3656) |
+| `/gamename "Name"` | server name (default `OpenSWBF2 Server`) |
+| `/playerlimit N` | player limit, 1 to 64 |
+| `/password text` | join password |
+| `/bots N` | AI units per team |
+| `/tps N` | simulation turns per second (default 20) |
+| `/configdir dir` | folder holding `ServerSettings.cfg` and `ServerRotation.cfg` (default `settings`); each line is an admin command such as `/gamename My Server` or `/addmap geo1c_con` |
+| `-console` | open a console window for the log when there is no stdout |
+| `-netstats` | log ping, updates per second and bandwidth once a second |
+| `-log file` | also write the log to a file |
+
+Ctrl+C, Ctrl+Break or closing the console stops the server cleanly. The command line overrides the config files.
