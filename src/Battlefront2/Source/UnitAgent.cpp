@@ -5,6 +5,7 @@
 #include "AIDifficulty.h"
 #include "AILowLevel.h"
 #include "AIOverhaul.h"
+#include "AITuning.h"
 #include "AIUtil.h"
 #include "AttackHelper.h"
 #include "Character.h"
@@ -614,6 +615,10 @@ int UnitAgent::HandleDamagedEvent(AI::EventInfo* pEvent)
     PblVector3 vMyPos = GetTrans(GetMe()->GetMatrix());
     PblVector3 vAttackerPos = GetTrans(pOwner->GetControllable()->GetMatrix());
     float fRange = VisionManager::MaxVisibleDist(pAttacker, pMe);
+    if (AIDifficulty::IsOverhaul())
+    {
+        fRange *= AITuning::kTurnOnShooterRangeScale;
+    }
     float fDX = vAttackerPos.x - vMyPos.x;
     float fDY = vAttackerPos.y - vMyPos.y;
     float fDZ = vAttackerPos.z - vMyPos.z;
@@ -640,6 +645,12 @@ int UnitAgent::HandleDamagedEvent(AI::EventInfo* pEvent)
     }
 
     bool bAllowRoll = pInfo->mAmountLost > 0.0f;
+    if (AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2: get away from the far shooter (the flee source), not in a random direction.
+        pInfo->mNextCmd = UnitCombatInfo(UnitCombatInfo::FLEE_EVENT, vAttackerPos, bAllowRoll);
+        return 1;
+    }
     PblVector3 vRand = PblRandom::GetGlobalVector3();
     pInfo->mNextCmd = UnitCombatInfo(UnitCombatInfo::FLEE_EVENT,
                                      PblVector3(vRand.x + vMyPos.x, vRand.y + vMyPos.y, vRand.z + vMyPos.z),

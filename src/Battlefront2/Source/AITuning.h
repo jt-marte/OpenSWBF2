@@ -40,4 +40,31 @@ const float kRecentAttackerSeconds = 4.0f;
 // Overhaul aim: retail shrinks the miss "bubble" to 0.3 against bots and leaves it whole against
 // humans, so bots snipe each other and spray at players. Overhaul uses one scale for every target.
 const float kOverhaulBubbleScale = 0.6f;
+
+// Overhaul command-post choice. Retail picks a post at random by its strategic value alone, so
+// bots cross the map past nearer posts and pile onto one. Overhaul also weighs the distance and
+// how many teammates are already headed there, with a soft cap at half the team.
+float OverhaulPostWeight(float fImportance, float fDistance, int iTeammatesThere, int iTeamSize);
+// Overhaul: once a post is taken, a bot that helped leaves for the next one unless fewer than
+// this many teammates are left holding it. Retail bots that arrived mid-capture guard for good.
+const int kPostGuards = 2;
+
+// Overhaul fliers: the chance to turn on an attacker 300-700 m away, and to jink when shot at.
+const float kOverhaulFlyerTurnOnAttacker = 0.4f;
+const float kOverhaulFlyerEvade = 0.3f;
+
+// Overhaul: a badly hurt soldier backs off toward cover while firing (retail's RETREAT pattern,
+// which retail never picks), unless the enemy is hurt worse.
+const float kRetreatHealth = 0.3f;
+bool ShouldRetreat(float fMyHealth, float fEnemyHealth);
+
+// Overhaul attack-pattern roll: stable for one bot, target and 15 s epoch, different otherwise.
+unsigned int PatternSeed(unsigned int uBotSeed, unsigned int uTargetId, float fMissionTime);
+
+// Overhaul: seconds a bot keeps an enemy that dropped out of sight (and goes looking for it at
+// its last known position) before giving up. Retail drops it on the first missed sight line.
+const float kTargetMemorySeconds = 6.0f;
+// Overhaul: a bot hit from beyond sight range still turns on a shooter this many times sight
+// range away; past that it moves away from the shooter rather than in a random direction.
+const float kTurnOnShooterRangeScale = 3.0f;
 }

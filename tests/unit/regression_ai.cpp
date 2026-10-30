@@ -97,6 +97,49 @@ TEST_CASE("overhaul threat score stays below a locked target and fades unseen" *
     CHECK(AITuning::OverhaulThreatScore(old) == 0);
 }
 
+TEST_CASE("overhaul attack pattern roll holds within an engagement" * doctest::test_suite("regression"))
+{
+    // The pattern choice runs on every combat update, so it must not change from one to the next.
+    CHECK(AITuning::PatternSeed(7, 1234, 31.0f) == AITuning::PatternSeed(7, 1234, 44.9f));
+    // A new target or the next 15 s epoch may pick another pattern; over many targets every
+    // pattern of a four-way roll comes up.
+    CHECK(AITuning::PatternSeed(7, 1234, 31.0f) != AITuning::PatternSeed(7, 1234, 45.0f));
+    CHECK(AITuning::PatternSeed(7, 1234, 31.0f) != AITuning::PatternSeed(7, 1235, 31.0f));
+    int aiSeen[4] = { 0, 0, 0, 0 };
+    for (unsigned int uTarget = 1; uTarget <= 64; ++uTarget)
+    {
+        ++aiSeen[AITuning::PatternSeed(7, uTarget, 0.0f) % 4];
+    }
+    CHECK(aiSeen[0] > 0);
+    CHECK(aiSeen[1] > 0);
+    CHECK(aiSeen[2] > 0);
+    CHECK(aiSeen[3] > 0);
+}
+
+TEST_CASE("overhaul post choice prefers near posts with few teammates" * doctest::test_suite("regression"))
+{
+    // Same strategic value: the nearer post weighs more, and teammates already headed there
+    // push the weight down, hard past half the team.
+    CHECK(AITuning::OverhaulPostWeight(100.0f, 50.0f, 0, 20) > AITuning::OverhaulPostWeight(100.0f, 400.0f, 0, 20));
+    CHECK(AITuning::OverhaulPostWeight(100.0f, 50.0f, 0, 20) > AITuning::OverhaulPostWeight(100.0f, 50.0f, 4, 20));
+    CHECK(AITuning::OverhaulPostWeight(100.0f, 50.0f, 10, 20) <
+          AITuning::OverhaulPostWeight(100.0f, 50.0f, 9, 20) * 0.5f);
+    // A far, empty post can still beat a near, crowded one.
+    CHECK(AITuning::OverhaulPostWeight(100.0f, 300.0f, 0, 20) > AITuning::OverhaulPostWeight(100.0f, 30.0f, 10, 20));
+    // Retail's zero value still means never.
+    CHECK(AITuning::OverhaulPostWeight(0.0f, 10.0f, 0, 20) == 0.0f);
+    CHECK(AITuning::OverhaulPostWeight(100.0f, -5.0f, 0, 0) == 100.0f);
+}
+
+TEST_CASE("overhaul bots back off when badly hurt unless the enemy is worse" * doctest::test_suite("regression"))
+{
+    CHECK(AITuning::ShouldRetreat(0.2f, 1.0f));
+    CHECK(AITuning::ShouldRetreat(0.29f, 0.3f));
+    CHECK(!AITuning::ShouldRetreat(0.2f, 0.1f));
+    CHECK(!AITuning::ShouldRetreat(0.3f, 1.0f));
+    CHECK(!AITuning::ShouldRetreat(0.9f, 1.0f));
+}
+
 TEST_CASE("hash pin ifs.difficulty.overhaul" * doctest::test_suite("unit"))
 {
     // RedLocalizeDB::Find answers this hash with "Overhaul"; the retail keys sit beside it.

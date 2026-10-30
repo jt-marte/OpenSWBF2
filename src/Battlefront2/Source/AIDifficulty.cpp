@@ -317,12 +317,23 @@ float AIDifficulty::GetGrenadeReactionTime()
 // FUNCTION: SWBF2 0x00439020
 float AIDifficulty::GetFlyerTurnAndAttackFrequency()
 {
+    // Retail: 0 at every skill, so an AI flier never turns on a far attacker. OpenSWBF2 Overhaul:
+    // 40% of the time.
+    if (IsOverhaul())
+    {
+        return AITuning::kOverhaulFlyerTurnOnAttacker;
+    }
     return GetFloatSkill_RangedLinear(0, 0.0f, 0.0f, true);
 }
 
 // FUNCTION: SWBF2 0x00439040
 float AIDifficulty::GetFlyerEvasiveFrequency()
 {
+    // Retail: 0, so an AI flier never jinks when shot at. OpenSWBF2 Overhaul: 30% of the time.
+    if (IsOverhaul())
+    {
+        return AITuning::kOverhaulFlyerEvade;
+    }
     return GetFloatSkill_RangedLinear(0, 0.0f, 0.0f, true);
 }
 
@@ -341,6 +352,12 @@ float AIDifficulty::GetFlyerFreeFlyOnDamage()
 // FUNCTION: SWBF2 0x004390a0
 float AIDifficulty::GetFlyerReactionTime()
 {
+    // The delay before a targeted AI flier reacts. Retail lengthens it as skill rises; OpenSWBF2
+    // Overhaul uses retail's quickest.
+    if (IsOverhaul())
+    {
+        return 0.5f;
+    }
     return GetFloatSkill_RangedLinear(0, 0.5f, 1.5f, true);
 }
 

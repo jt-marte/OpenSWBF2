@@ -1,4 +1,5 @@
 #include "UnitDefendAgent.h"
+#include "AIDifficulty.h"
 #include "EventInfo.h"
 #include "UnitCmdInfo.h"
 #include "UnitController.h"
@@ -162,6 +163,16 @@ int UnitDefendAgent::EventHandler(AI::EventInfo* pInfo)
     case AI::EVT_EndInvisibility:
         if (UnitAgent::EventHandler(pInfo) == AI::EVT_Handled)
         {
+            // OpenSWBF2 Overhaul: retail clears the command before keeping it, so a defender always
+            // falls back to a plain Engage and never turns on a shooter or runs from a grenade.
+            if (AIDifficulty::IsOverhaul() && mCurState != 3 && pInfo->mNextCmd.GetCmdType() == CMD_COMBAT)
+            {
+                mCombatCmd = pInfo->mNextCmd;
+                pInfo->mNextCmd = UnitCmdInfo(CMD_NONE, PblHandle<GameObject>(),
+                                              PblVector3(0, 0, 0), PblHandle<GameObject>());
+                SetNextState(3);
+                return AI::EVT_Handled;
+            }
             pInfo->mNextCmd = UnitCmdInfo(CMD_NONE, PblHandle<GameObject>(),
                                           PblVector3(0, 0, 0), PblHandle<GameObject>());
             if (mCurState != 3)

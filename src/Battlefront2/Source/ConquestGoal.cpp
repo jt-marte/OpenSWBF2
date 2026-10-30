@@ -1,9 +1,13 @@
+#include <math.h>
+
 #include "ConquestGoal.h"
 #include "Character.h"
 #include "CommandPost.h"
 #include "CommandPostManager.h"
 #include "ConnectivityGraph.h"
 #include "Controllable.h"
+#include "AIDifficulty.h"
+#include "AITuning.h"
 #include "AIUtil.h"
 #include "GameObject.h"
 #include "Team.h"
@@ -151,8 +155,10 @@ void AI::ConquestGoal::sIssueCmd(Character* pChr, const CommandPost* pPost)
 const CommandPost* AI::ConquestGoal::sGenerateCP(Character* pChr, const CommandPost* pPost, bool bSecondPass)
 {
     bool bValid[16] = {};
+    float afWeight[16] = {};
     float fTotal = 0.0f;
     const int iTeam = pChr->mTeamNumber;
+    const bool bOverhaul = AIDifficulty::IsOverhaul();
 
     bool* pValid = bValid;
     for (CommandPostItor it = CommandPostManager::Instance()->GetItor(); it; ++it, ++pValid)
@@ -194,6 +200,11 @@ const CommandPost* AI::ConquestGoal::sGenerateCP(Character* pChr, const CommandP
             *pValid = false;
             continue;
         }
+        if (bOverhaul)
+        {
+            fImportance = sOverhaulWeight(pChr, pCP, fImportance);
+            afWeight[pValid - bValid] = fImportance;
+        }
         fTotal += fImportance;
     }
 
@@ -209,7 +220,7 @@ const CommandPost* AI::ConquestGoal::sGenerateCP(Character* pChr, const CommandP
                 continue;
             }
             CommandPost* pCP = *it;
-            fSum += sGetImportance(pCP, iTeam);
+            fSum += bOverhaul ? afWeight[pValid - bValid] : sGetImportance(pCP, iTeam);
             if (fSum >= fPick)
             {
                 return pCP;
@@ -239,6 +250,32 @@ const CommandPost* AI::ConquestGoal::sGenerateCP(Character* pChr, const CommandP
         pPick = pPosts[AIUtil::GetRandomInt(0, iCount - 1)];
     } while (pPick == pPost);
     return pPick;
+}
+
+// OpenSWBF2 Overhaul: weigh a post by distance and by how many teammates already head there
+// (AITuning::OverhaulPostWeight).
+float AI::ConquestGoal::sOverhaulWeight(Character* pChr, const CommandPost* pCP, float fImportance)
+{
+    float fDistance = 0.0f;
+    if (pChr->GetControllable())
+    {
+        const PblVector3& vMe = pChr->GetControllable()->GetMatrix().GetTranslation();
+        const PblVector3 vPost = AIUtil::GetCommandPostPos(pCP);
+        const float fDX = vPost.x - vMe.x;
+        const float fDZ = vPost.z - vMe.z;
+        fDistance = sqrtf(fDX * fDX + fDZ * fDZ);
+    }
+    const Team* pTeam = pChr->mTeamPtr;
+    int iThere = 0;
+    for (int i = 0; i < pTeam->mMemberCount; ++i)
+    {
+        const Character* pMember = pTeam->GetMemberPtr(i);
+        if (pMember && pMember != pChr && pMember->GetAssignedCP() == pCP)
+        {
+            ++iThere;
+        }
+    }
+    return AITuning::OverhaulPostWeight(fImportance, fDistance, iThere, pTeam->mMemberCount);
 }
 
 // FUNCTION: SWBF2 0x00483070

@@ -5379,6 +5379,15 @@ void EntityFlyer::TargetReact(Controllable* pAttacker)
             return;
         }
     }
+    else if (AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2: retail truncates the frequency to an int first, so a near attacker never
+        // makes a flier jink.
+        if (!(AIDifficulty::GetFlyerEvasiveFrequency() * 100.0f > (float)iRoll))
+        {
+            return;
+        }
+    }
     else if (!((float)(int)AIDifficulty::GetFlyerEvasiveFrequency() * 100.0f > (float)iRoll))
     {
         return;

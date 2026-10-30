@@ -9,6 +9,7 @@
 #include "Controllable.h"
 #include "GameLoop.h"
 #include "GameObject.h"
+#include "Team.h"
 #include "RedEngineFL/Util/RedLog.h"
 
 namespace AIStats
@@ -35,6 +36,57 @@ Counters sCounters;
 LARGE_INTEGER sFrameStart;
 float sNextReport = 30.0f;
 bool sReported;
+
+// How a team's living bots are spread over command posts: the number of posts they are
+// assigned to and the largest share on one post.
+void PostSpread(int iTeam, int& iPosts, int& iMaxShare)
+{
+    const void* apPosts[16];
+    int aiCounts[16];
+    int iUsed = 0;
+    int iBots = 0;
+    iPosts = 0;
+    iMaxShare = 0;
+    const Team* pTeam = Team::GetPtr(iTeam);
+    if (!pTeam)
+    {
+        return;
+    }
+    for (int i = 0; i < pTeam->mMemberCount; ++i)
+    {
+        const Character* pMember = pTeam->GetMemberPtr(i);
+        if (!pMember || pMember->mPlayerId >= 0 || !pMember->mUnit || !pMember->GetAssignedCP())
+        {
+            continue;
+        }
+        ++iBots;
+        const void* pPost = pMember->GetAssignedCP();
+        int j = 0;
+        while (j < iUsed && apPosts[j] != pPost)
+        {
+            ++j;
+        }
+        if (j == iUsed)
+        {
+            if (iUsed == 16)
+            {
+                continue;
+            }
+            apPosts[iUsed] = pPost;
+            aiCounts[iUsed++] = 0;
+        }
+        ++aiCounts[j];
+    }
+    iPosts = iUsed;
+    for (int j = 0; j < iUsed; ++j)
+    {
+        const int iShare = 100 * aiCounts[j] / iBots;
+        if (iShare > iMaxShare)
+        {
+            iMaxShare = iShare;
+        }
+    }
+}
 
 double TicksToMs(LONGLONG llTicks)
 {
@@ -143,15 +195,18 @@ void Report()
     }
     const Counters& c = sCounters;
     const float fTargeted = c.fTargetHuman + c.fTargetBot;
+    int iPosts1, iShare1, iPosts2, iShare2;
+    PostSpread(1, iPosts1, iShare1);
+    PostSpread(2, iPosts2, iShare2);
     LOG(LogSim, Inform,
         "OPENSWBF2 AI STATS t=%.0f level=%d target_human=%.0f%% (%.0fs of %.0fs) contested_human=%.0f%% "
         "(%.0fs) veh_contested_human=%.0f%% (%.0fs) kills bot>bot=%d bot>human=%d human>bot=%d "
-        "ai_ms=%.3f max=%.2f",
+        "ai_ms=%.3f max=%.2f posts t1=%d/%d%% t2=%d/%d%%",
         GameLoop::GetMissionTime(), AIDifficulty::GetProfileDifficulty(),
         fTargeted > 0.0f ? 100.0f * c.fTargetHuman / fTargeted : 0.0f, c.fTargetHuman, fTargeted,
         c.fContested > 0.0f ? 100.0f * c.fContestedHuman / c.fContested : 0.0f, c.fContested,
         c.fVehContested > 0.0f ? 100.0f * c.fVehContestedHuman / c.fVehContested : 0.0f, c.fVehContested,
         c.iKills[0][0], c.iKills[0][1], c.iKills[1][0], c.iFrames ? c.dFrameMs / c.iFrames : 0.0,
-        c.dFrameMsMax);
+        c.dFrameMsMax, iPosts1, iShare1, iPosts2, iShare2);
 }
 }

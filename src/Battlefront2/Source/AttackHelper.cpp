@@ -1,7 +1,9 @@
 #include <float.h>
 
 #include "AttackHelper.h"
+#include "AIDifficulty.h"
 #include "AILowLevel.h"
+#include "AITuning.h"
 #include "AIUtil.h"
 #include "Aimer.h"
 #include "Controllable.h"
@@ -119,6 +121,15 @@ bool AttackHelper::UpdateTarget()
     const GameObject* pVisible = threats.GetVisibleObject();
     const GameObject* pOldTarget = GetTarget();
     const GameObject* pTarget = pOldTarget;
+    // OpenSWBF2 Overhaul: an enemy that ducks out of sight is kept for a few seconds, so the
+    // bot aims and fires at its last known position and the Locate pattern goes looking for it.
+    if (!pVisible && pOldTarget && AIDifficulty::IsOverhaul() &&
+        GetMe()->GetGameObject()->IsMyEnemy(pOldTarget) &&
+        GameLoop::GetMissionTime() - mLastTimeSeen < AITuning::kTargetMemorySeconds)
+    {
+        mTargetVisible = false;
+        return false;
+    }
     if (pTarget && !GetMe()->GetGameObject()->IsMyEnemy(pTarget))
     {
         SetTarget(pVisible);
