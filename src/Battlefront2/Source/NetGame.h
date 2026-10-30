@@ -538,8 +538,12 @@ struct NetPlayer
 
     unsigned char skippedSends[64];
     int updateWindowSize;
-    unsigned int sentUpdateTurn[2];
-    float sentUpdateTime[2];
+    // OpenSWBF2: up to kUpdateWindowMax updates in flight (retail 2), and a timed-out update
+    // keeps its slot until reused so a late ack still feeds the RTT estimate.
+    enum { kUpdateWindowMax = 16 };
+    unsigned int sentUpdateTurn[kUpdateWindowMax];
+    float sentUpdateTime[kUpdateWindowMax];
+    bool sentUpdateTimedOut[kUpdateWindowMax];
     float averageRtt;
     float deviationRtt;
     unsigned int key;
