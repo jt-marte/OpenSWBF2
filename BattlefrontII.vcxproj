@@ -800,6 +800,7 @@
     <ClCompile Include="src\RedEngineFL\movie\RedMovie.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerBase.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.cpp" />
+    <ClCompile Include="src\RedEngineFL\movie\pc\FFMovieDecoder.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.cpp" />
     <ClCompile Include="src\SoundFL\source\sndallocbitmap.cpp" />
     <ClCompile Include="src\SoundFL\source\sndbufferio.cpp" />
@@ -1549,6 +1550,7 @@
     <ClInclude Include="src\RedEngineFL\movie\RedMovie.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerBase.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.h" />
+    <ClInclude Include="src\RedEngineFL\movie\pc\FFMovieDecoder.h" />
     <ClInclude Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.h" />
     <ClInclude Include="src\RedEngineFL\movie\redpipe.h" />
     <ClInclude Include="src\SoundFL\source\sndallocator.h" />
