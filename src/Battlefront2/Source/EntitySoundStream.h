@@ -40,7 +40,7 @@ public:
     virtual void Play();
     virtual bool Update(float fDeltaTime);
 
-    static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+    static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     static PblHash rttiHashEntitySoundStream;

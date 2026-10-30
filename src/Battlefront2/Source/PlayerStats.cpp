@@ -1392,12 +1392,12 @@ void PlayerStats::Write(NetPktGroup& group)
 {
     const int iBaitTeam = GetBaitVal(0, 0) > GetBaitVal(0, 1) ? 0 : 1;
     Character* pBait = GetBait(0, iBaitTeam);
-    group.WriteBits((reinterpret_cast<int>(pBait) - reinterpret_cast<int>(Character::sCharacters)) / static_cast<int>(sizeof(Character)), 8);
+    group.WriteBits((int)((reinterpret_cast<intptr_t>(pBait) - reinterpret_cast<intptr_t>(Character::sCharacters)) / static_cast<intptr_t>(sizeof(Character))), 8);
     group.WriteBits(GetBaitVal(0, iBaitTeam), 8);
 
     const int iNemesisTeam = GetNemesisVal(0, 0) > GetNemesisVal(0, 1) ? 0 : 1;
     Character* pNemesis = GetNemesis(0, iNemesisTeam);
-    group.WriteBits((reinterpret_cast<int>(pNemesis) - reinterpret_cast<int>(Character::sCharacters)) / static_cast<int>(sizeof(Character)), 8);
+    group.WriteBits((int)((reinterpret_cast<intptr_t>(pNemesis) - reinterpret_cast<intptr_t>(Character::sCharacters)) / static_cast<intptr_t>(sizeof(Character))), 8);
     group.WriteBits(GetNemesisVal(0, iNemesisTeam), 8);
 
     const int iExperience = GetExperiencePoints(0, 0);

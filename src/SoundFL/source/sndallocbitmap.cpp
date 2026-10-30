@@ -146,7 +146,7 @@ unsigned int AllocBitmap::GetFreeEntries() const
 }
 
 // FUNCTION: SWBF2 0x00745520
-unsigned int MemoryBitmap::GetStartAddress() const
+uintptr_t MemoryBitmap::GetStartAddress() const
 {
     return mStartAddress;
 }
@@ -170,7 +170,7 @@ void AllocBitmap::Initialize(unsigned char* pBitmap, unsigned int uiNumEntries)
 }
 
 // FUNCTION: SWBF2 0x00745590
-void MemoryBitmap::Initialize(unsigned int uiStartAddress, unsigned int uiMemorySize,
+void MemoryBitmap::Initialize(uintptr_t uiStartAddress, unsigned int uiMemorySize,
                               unsigned int uiEntrySize, unsigned char* pBitmap)
 {
     mStartAddress = uiStartAddress;

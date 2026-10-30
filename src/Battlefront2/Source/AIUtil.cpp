@@ -1,4 +1,31 @@
 #include "AIUtil.h"
+#include "PoolBlockSizes.h"
+#include "NavigatorFollowTarget.h"
+#include "NavigatorGraphFollower.h"
+#include "NavigatorPathFollower.h"
+#include "NavigatorSlide.h"
+#include "UnitBoardAgent.h"
+#include "UnitCTFOffenseAgent.h"
+#include "UnitCaptureCPAgent.h"
+#include "UnitCombatAgent.h"
+#include "UnitDeathmatchAgent.h"
+#include "UnitDefendAgent.h"
+#include "UnitDestroyAgent.h"
+#include "UnitFlyAgent.h"
+#include "UnitFollowAgent.h"
+#include "UnitHoldAgent.h"
+#include "UnitRandomAgent.h"
+#include "UnitTrooperAgent.h"
+#include "UnitUnBoardAgent.h"
+#include "UnitWaitAgent.h"
+#include "UnitWaitSecondaryAgent.h"
+#include "CTFGoal.h"
+#include "CTFGoalD.h"
+#include "ConquestGoal.h"
+#include "DeathmatchGoal.h"
+#include "DefendGoal.h"
+#include "DestroyGoal.h"
+#include "FollowGoal.h"
 
 #include <math.h>
 
@@ -342,14 +369,14 @@ void AIUtil::Init()
     gSnipeSuitabilityDist = 70.0f;
 
     UnitController::sMemoryPool.Setup(600, sizeof(UnitController), UnitController::sMemoryPool.GetGrow());
-    UnitAgent::sMemoryPool.Setup(600, 0x358, UnitAgent::sMemoryPool.GetGrow());
-    Navigator::sMemoryPool.Setup(600, 0x1e8, Navigator::sMemoryPool.GetGrow());
+    UnitAgent::sMemoryPool.Setup(600, UNITAGENT_POOL_BLOCK, UnitAgent::sMemoryPool.GetGrow());
+    Navigator::sMemoryPool.Setup(600, NAVIGATOR_POOL_BLOCK, Navigator::sMemoryPool.GetGrow());
     PathFollower::sMemoryPool.Setup(600, PathFollower::sMemoryPool.GetSize(),
                                     PathFollower::sMemoryPool.GetGrow());
     ConnectivityGraphFollower::sMemoryPool.Setup(600, ConnectivityGraphFollower::sMemoryPool.GetSize(),
                                                  ConnectivityGraphFollower::sMemoryPool.GetGrow());
     BaseHint::sMemoryPool.Setup(350, sizeof(BaseHint), BaseHint::sMemoryPool.GetGrow());
-    AI::AIGoal::sMemoryPool.Setup(20, 0x3c, AI::AIGoal::sMemoryPool.GetGrow());
+    AI::AIGoal::sMemoryPool.Setup(20, AIGOAL_POOL_BLOCK, AI::AIGoal::sMemoryPool.GetGrow());
     VisionManager::RayRequest::sMemoryPool.Setup(201, VisionManager::RayRequest::sMemoryPool.GetSize(),
                                                  VisionManager::RayRequest::sMemoryPool.GetGrow());
 
@@ -768,7 +795,7 @@ void AIUtil::CalculateHeadingControls(const Controllable* pMe, float fScale,
     const Aimer* pAimer = pMe->GetCurAimer();
 
     const WeaponClass* pWeaponClass =
-        pAimer ? *(const WeaponClass* const*)((const char*)pAimer->GetWeapon() + 0x64) : 0;
+        pAimer ? pAimer->GetWeapon()->GetClass() : 0;
     if (pTarget)
     {
         vBubble = CalculateBubbleOffset(pMe, vAim, pTarget, pWeaponClass);
@@ -2201,3 +2228,31 @@ struct ReserveStruct;
 // GLOBAL: SWBF2 0x01eaeff8
 ListPool<ReserveStruct, int>* sList;
 }
+
+// every subclass fits its pool's blocks (PoolBlockSizes.h)
+static_assert(sizeof(NavigatorFollowTarget) <= NAVIGATOR_POOL_BLOCK, "Navigator pool block");
+static_assert(sizeof(NavigatorGraphFollower) <= NAVIGATOR_POOL_BLOCK, "Navigator pool block");
+static_assert(sizeof(NavigatorPathFollower) <= NAVIGATOR_POOL_BLOCK, "Navigator pool block");
+static_assert(sizeof(NavigatorSlide) <= NAVIGATOR_POOL_BLOCK, "Navigator pool block");
+static_assert(sizeof(UnitBoardAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitCTFOffenseAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitCaptureCPAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitCombatAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitDeathmatchAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitDefendAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitDestroyAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitFlyAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitFollowAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitHoldAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitRandomAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitTrooperAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitUnBoardAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitWaitAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(UnitWaitSecondaryAgent) <= UNITAGENT_POOL_BLOCK, "UnitAgent pool block");
+static_assert(sizeof(AI::CTFGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::CTFGoalD) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::ConquestGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::DeathmatchGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::DefendGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::DestroyGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");
+static_assert(sizeof(AI::FollowGoal) <= AIGOAL_POOL_BLOCK, "AIGoal pool block");

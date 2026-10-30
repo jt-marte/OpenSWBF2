@@ -27,6 +27,9 @@ Archive: `%USERPROFILE%\OpenSWBF2-baseline\vs2013\vs2013-release-1168dd4.zip` SH
 
 | File | SHA-256 | Produced by |
 |------|---------|-------------|
+| `corpus\floatparse\edge.txt` | B4F9849C5A291B20C55591BAF066ACB1A83D59F8F058A42A3141B635417D0AD7 | `OpenSWBF2Tests.exe --gen-corpus=corpus`, moved from `tests\corpus\` in Phase 20 |
+| `corpus\floatparse\odf.txt` | 808E140FC6DE97024AE70353DD85EA71E73F5996BA6C50D59D80B764404F2210 | `OpenSWBF2Tests.exe --gen-corpus=corpus`, copied from `tests\corpus\` in Phase 20 |
+| `corpus\mathfn\math.txt` | C6A87CFB78835F85C8C09487D557CD3C74333DB32CF5A8CA2133BDFC9848BB8B | `OpenSWBF2Tests.exe --gen-corpus=corpus`, moved from `tests\corpus\` in Phase 20 |
 | `digests.txt` | A6C3F1C777CDB1F84A3C932A6932EA5721C4B8898E72A49024C606866EC76E3D | `capture-vs2013.ps1 -Collect` |
 | `digests-debug.txt` | D285E11C8F109D5C586D948E8F2A653B2EDD89D7367838A74D6EC10BA3B1DB44 | `capture-vs2013.ps1 -DebugDigests` from `run.ps1 -Smoke Twice -SmokeConfiguration Debug` |
 | `digests-hog.txt` | A6C3F1C777CDB1F84A3C932A6932EA5721C4B8898E72A49024C606866EC76E3D | `capture-vs2013.ps1 -Collect` |
@@ -118,6 +121,12 @@ Archive: `%USERPROFILE%\OpenSWBF2-baseline\vs2013\vs2013-release-1168dd4.zip` SH
 | `layouts\WeaponRepair@WeaponRepair.txt` | 93A9CC64405C67AB033C4E3D7684AD9643CCB017D0CCEE4682A8D84C1B083CA8 | `capture-vs2013.ps1 -Layouts` |
 | `smoke-all.txt` | D3A17DD5F652140BC999F40EF43F7E3E0BFEC43CA2B6807DB270EF59E51DBC55 | `capture-vs2013.ps1 -Tables` from `run.ps1 -Smoke All` |
 | `smoke-all-digests.txt` | 5D75137AAE338D23E8E441CA0955A9073C1F969F2A00884FDEA6F65158347ACB | `capture-vs2013.ps1 -Tables` from `run.ps1 -Smoke All` |
+
+## Superseded by v143
+
+The v143 build is the reference from Phase 20 on. Its files are listed in
+[../v143/MANIFEST.md](../v143/MANIFEST.md), and every difference from this baseline is explained in
+[../v143/CAUSES.md](../v143/CAUSES.md).
 
 ## Notes
 

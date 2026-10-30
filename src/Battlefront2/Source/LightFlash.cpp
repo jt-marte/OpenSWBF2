@@ -7,7 +7,7 @@
 // `dynamic initializer for 'LightFlash::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768c40
 // `dynamic atexit destructor for 'LightFlash::sMemoryPool''
-MemoryPool LightFlash::sMemoryPool("LightFlash", 0x150);
+MemoryPool LightFlash::sMemoryPool("LightFlash", RED_POOL_SIZE(0x150, LightFlash));
 
 static inline RedColorValue ToColorValue(const RedColor& c)
 {

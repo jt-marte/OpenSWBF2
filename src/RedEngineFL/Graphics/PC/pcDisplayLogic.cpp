@@ -1441,4 +1441,146 @@ float ScaleFov(float fFov, float fTanScale)
     return (float)atan((double)fTanScale * tan((double)fFov * 0.5)) * 2.0f;
 }
 
+Renderer ChooseRenderer(unsigned int uiSetting, bool bNoRender)
+{
+    if (bNoRender)
+    {
+        return kRendererNone;
+    }
+    return uiSetting == kRendererD3D9 ? kRendererD3D9 : kRendererVulkan;
+}
+
+VulkanFail VulkanCheck(bool bDll, bool bLoaded, bool bEntry, bool bInterface, unsigned int uiAdapters,
+                       long hrDevice)
+{
+    if (!bDll)
+    {
+        return kVulkanNoDll;
+    }
+    if (!bLoaded)
+    {
+        return kVulkanLoadFailed;
+    }
+    if (!bEntry)
+    {
+        return kVulkanNoEntry;
+    }
+    if (!bInterface)
+    {
+        return kVulkanNoInterface;
+    }
+    if (uiAdapters == 0)
+    {
+        return kVulkanNoAdapter;
+    }
+    if (hrDevice < 0)
+    {
+        return kVulkanNoDevice;
+    }
+    return kVulkanOk;
+}
+
+void RendererLogText(Renderer eChosen, bool bFromCli, VulkanFail eFail, unsigned long ulCode,
+                     char* pcOut, unsigned int uiSize)
+{
+    if (pcOut == 0 || uiSize == 0)
+    {
+        return;
+    }
+    if (eChosen == kRendererNone)
+    {
+        _snprintf(pcOut, uiSize, "none (headless)");
+    }
+    else if (eChosen == kRendererD3D9)
+    {
+        _snprintf(pcOut, uiSize, "d3d9 (%s)", bFromCli ? "-d3d9" : "setting");
+    }
+    else if (eFail == kVulkanOk)
+    {
+        _snprintf(pcOut, uiSize, "vulkan (DXVK %s)", kDxvkVersion);
+    }
+    else
+    {
+        switch (eFail)
+        {
+        case kVulkanNoDll:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: no dxvk\\d3d9.dll)");
+            break;
+        case kVulkanLoadFailed:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: dxvk\\d3d9.dll did not load, error %lu)", ulCode);
+            break;
+        case kVulkanNoEntry:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: dxvk\\d3d9.dll has no Direct3DCreate9)");
+            break;
+        case kVulkanNoInterface:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: DXVK found no Vulkan driver)");
+            break;
+        case kVulkanNoAdapter:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: no adapter DXVK can use)");
+            break;
+        default:
+            _snprintf(pcOut, uiSize, "d3d9 (fallback: Vulkan device failed hr=0x%08lX)", ulCode);
+            break;
+        }
+    }
+    pcOut[uiSize - 1] = '\0';
+}
+
+bool DxvkDllPath(const char* pcExePath, char* pcOut, unsigned int uiSize)
+{
+    static const char kacTail[] = "dxvk\\d3d9.dll";
+    if (pcExePath == 0 || pcOut == 0)
+    {
+        return false;
+    }
+    const char* pcSlash = strrchr(pcExePath, '\\');
+    if (pcSlash == 0)
+    {
+        return false;
+    }
+    const unsigned int uiDir = (unsigned int)(pcSlash + 1 - pcExePath);
+    if (uiDir + sizeof(kacTail) > uiSize)
+    {
+        return false;
+    }
+    memcpy(pcOut, pcExePath, uiDir);
+    memcpy(pcOut + uiDir, kacTail, sizeof(kacTail));
+    return true;
+}
+
+bool DxvkLogDir(const char* pcGameLog, const char* pcExePath, char* pcOut, unsigned int uiSize)
+{
+    if (pcOut == 0)
+    {
+        return false;
+    }
+    if (pcGameLog != 0 && pcGameLog[0] != '\0')
+    {
+        const char* pcSlash = strrchr(pcGameLog, '\\');
+        const char* pcFwd = strrchr(pcGameLog, '/');
+        if (pcFwd != 0 && (pcSlash == 0 || pcFwd > pcSlash))
+        {
+            pcSlash = pcFwd;
+        }
+        if (pcSlash != 0 && pcSlash > pcGameLog)
+        {
+            const unsigned int uiDir = (unsigned int)(pcSlash - pcGameLog);
+            if (uiDir + 1 > uiSize)
+            {
+                return false;
+            }
+            memcpy(pcOut, pcGameLog, uiDir);
+            pcOut[uiDir] = '\0';
+            return true;
+        }
+    }
+    if (!DxvkDllPath(pcExePath, pcOut, uiSize))
+    {
+        return false;
+    }
+    // <exe dir>\dxvk, without the "\d3d9.dll"
+    *strrchr(pcOut, '\\') = '\0';
+    return true;
+}
+
 }

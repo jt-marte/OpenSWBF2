@@ -161,7 +161,7 @@ static void WriteFatalLine(EXCEPTION_POINTERS* pInfo)
     char acPath[MAX_PATH * 3];
     wchar_t awcModule[MAX_PATH];
     unsigned int uiCode = 0;
-    unsigned int uiAddr = 0;
+    UINT_PTR uiAddr = 0;
     unsigned int uiOffset = 0;
     HMODULE hModule = 0;
     lstrcpyA(acModule, "unknown");
@@ -169,10 +169,10 @@ static void WriteFatalLine(EXCEPTION_POINTERS* pInfo)
     if (pInfo != 0 && pInfo->ExceptionRecord != 0)
     {
         uiCode = (unsigned int)pInfo->ExceptionRecord->ExceptionCode;
-        uiAddr = (unsigned int)(UINT_PTR)pInfo->ExceptionRecord->ExceptionAddress;
+        uiAddr = (UINT_PTR)pInfo->ExceptionRecord->ExceptionAddress;
     }
     if (GetModuleHandleExW(GET_MODULE_HANDLE_EX_FLAG_FROM_ADDRESS | GET_MODULE_HANDLE_EX_FLAG_UNCHANGED_REFCOUNT,
-        (LPCWSTR)(UINT_PTR)uiAddr, &hModule) && hModule != 0)
+        (LPCWSTR)uiAddr, &hModule) && hModule != 0)
     {
         DWORD uiLen = GetModuleFileNameW(hModule, awcModule, MAX_PATH);
         if (uiLen > 0 && uiLen < MAX_PATH)
@@ -189,7 +189,7 @@ static void WriteFatalLine(EXCEPTION_POINTERS* pInfo)
             {
                 lstrcpyA(acModule, "unknown");
             }
-            uiOffset = uiAddr - (unsigned int)(UINT_PTR)hModule;
+            uiOffset = (unsigned int)(uiAddr - (UINT_PTR)hModule);
         }
     }
     if (gDumpPath[0] != 0)
@@ -206,8 +206,14 @@ static void WriteFatalLine(EXCEPTION_POINTERS* pInfo)
     }
     else
     {
+#ifdef _WIN64
+        // the whole 64-bit address, high half then low half (wsprintf has no 64-bit format)
+        wsprintfA(gFatalLine, "FATAL: exception 0x%08X at 0x%08X%08X (%.64s+0x%X) build %s dump %.400s\r\n", uiCode,
+            (unsigned int)(uiAddr >> 32), (unsigned int)uiAddr, acModule, uiOffset, gBuildId, acPath);
+#else
         wsprintfA(gFatalLine, "FATAL: exception 0x%08X at 0x%08X (%.64s+0x%X) build %s dump %.400s\r\n", uiCode,
             uiAddr, acModule, uiOffset, gBuildId, acPath);
+#endif
     }
     AppendLog(gFatalLine);
     WriteEnsureSummary();
@@ -515,6 +521,12 @@ void pcCrash::SetLogPath(char const* pcPath)
     gDumpDir[iLen] = 0;
 }
 
+// The -log file, "" without one.
+char const* pcCrash::GetLogPath()
+{
+    return gLogPath;
+}
+
 void __cdecl pcCrash::Exit(int iCode)
 {
     HwCursor::ReleaseClip();
@@ -584,12 +596,17 @@ void pcCrash::ReserveLowAddressSpace()
     {
         return;
     }
-    const unsigned int kLimit = 0x80000000u;
-    const unsigned int kMinRegion = 0x100000u;
+#ifdef _WIN64
+    // x64: every allocation lands above 4 GB, so a pointer squeezed through 32 bits faults
+    const uintptr_t kLimit = 0x100000000ull;
+#else
+    const uintptr_t kLimit = 0x80000000u;
+#endif
+    const uintptr_t kMinRegion = 0x100000u;
     SYSTEM_INFO si;
     GetSystemInfo(&si);
-    const unsigned int uiGran = si.dwAllocationGranularity;
-    unsigned int uiAt = (unsigned int)si.lpMinimumApplicationAddress;
+    const uintptr_t uiGran = si.dwAllocationGranularity;
+    uintptr_t uiAt = (uintptr_t)si.lpMinimumApplicationAddress;
     int iRetry = 0;
     while (uiAt < kLimit)
     {
@@ -598,15 +615,15 @@ void pcCrash::ReserveLowAddressSpace()
         {
             break;
         }
-        unsigned int uiBase = (unsigned int)mbi.BaseAddress;
-        unsigned int uiEnd = uiBase + (unsigned int)mbi.RegionSize;
+        uintptr_t uiBase = (uintptr_t)mbi.BaseAddress;
+        uintptr_t uiEnd = uiBase + mbi.RegionSize;
         if (uiEnd < uiBase || uiEnd > kLimit)
         {
             uiEnd = kLimit;
         }
         if (mbi.State == MEM_FREE)
         {
-            unsigned int uiFrom = (uiBase + uiGran - 1) & ~(uiGran - 1);
+            uintptr_t uiFrom = (uiBase + uiGran - 1) & ~(uiGran - 1);
             if (uiEnd > uiFrom && (uiEnd - uiFrom >= kMinRegion || uiEnd == kLimit))
             {
                 if (!VirtualAlloc((void*)uiFrom, uiEnd - uiFrom, MEM_RESERVE, PAGE_NOACCESS) && iRetry < 16)

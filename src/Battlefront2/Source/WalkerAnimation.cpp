@@ -12,14 +12,14 @@
 // `dynamic initializer for 'WalkerBlend::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007697a0
 // `dynamic atexit destructor for 'WalkerBlend::sMemoryPool''
-MemoryPool WalkerBlend::sMemoryPool("WalkerBlend", 76);
+MemoryPool WalkerBlend::sMemoryPool("WalkerBlend", RED_POOL_SIZE(76, WalkerBlend));
 
 // GLOBAL: SWBF2 0x01f9a740
 // SYNTHETIC: SWBF2 0x00406fc0
 // `dynamic initializer for 'WalkerBlendUnit::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007697b0
 // `dynamic atexit destructor for 'WalkerBlendUnit::sMemoryPool''
-MemoryPool WalkerBlendUnit::sMemoryPool("WalkerBlendUnit", 4924);
+MemoryPool WalkerBlendUnit::sMemoryPool("WalkerBlendUnit", RED_POOL_SIZE(4924, WalkerBlendUnit));
 
 // FUNCTION: SWBF2 0x00675990
 WalkerBlend::WalkerBlend(int iTotal, ZephyrSkeleton<64>& rSkeleton)

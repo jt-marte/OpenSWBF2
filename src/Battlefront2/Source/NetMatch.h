@@ -44,7 +44,7 @@ public:
 
     static bool GetPlayerDataByAddress();
 
-    static unsigned int HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest);
+    static uintptr_t HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest);
 
     static unsigned int __fastcall GetSessionId(NetSessionId* pId);
 

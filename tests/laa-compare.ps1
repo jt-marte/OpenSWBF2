@@ -4,18 +4,21 @@ param(
     [switch]$NoBuild,
     [string]$OutDir,
     [ValidateRange(1,64)][int]$Jobs = 8,
-    [int]$Timeout = 120
+    [int]$Timeout = 120,
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32'
 )
 $ErrorActionPreference = 'Stop'
 $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
 
+# A 64-bit image is always large address aware and its arena sits above 2 GB, so there is nothing to compare.
+if ($Platform -eq 'x64') { Write-Host '[SKIP] laa-compare - large-address-aware comparison does not apply to x64'; exit 0 }
+
 if ($Runs -lt 5) { Write-Host "INFO: -Runs raised from $Runs to 5 (minimum)"; $Runs = 5 }
 
 if (-not $NoBuild) {
-    $msbuild = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\12.0\Bin\MSBuild.exe'
-    if (-not (Test-Path $msbuild)) { Write-Host 'MSBuild 12.0 not found (install VS2013 Update 5).'; exit 2 }
+    $msbuild = Find-MSBuild
     & $msbuild (Join-Path $root 'BattlefrontII.vcxproj') "/p:Configuration=$Configuration" '/p:Platform=Win32' /m /v:minimal /nologo
     if ($LASTEXITCODE -ne 0) { Write-Host 'Build failed.'; exit 2 }
 }

@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "GameLoop.h"
+#include "PoolBlockSizes.h"
 #include "pcCrash.h"
 #include "RedEngineFL/Application/pc/pcFrameLimiter.h"
 #include "BootDisplay.h"
@@ -40,6 +41,7 @@
 #include "SoldierAnimatorLowRes.h"
 #include "VehicleSpawn.h"
 #include "ItemTimerDisplay.h"
+#include "EntityWater.h"
 #include "LoadDisplay.h"
 #include "LuaHelper.h"
 #include "MessageDisplay.h"
@@ -54,6 +56,7 @@
 #include "ReticuleDisplay.h"
 #include "ScopeDisplay.h"
 #include "ShellLoop.h"
+#include "SideNames.h"
 #include "SoldierAnimationBank.h"
 #include "SoldierAnimatorClass.h"
 #include "SoundDebugDisplay.h"
@@ -127,13 +130,6 @@ namespace Lua_Callbacks { void Cleanup(); }
 namespace RedMissionLog { bool Enabled(); }
 namespace SimDigest { unsigned int StateHash(); void TraceTurn(); void LogFactories(); void LogFactoryCounts(); void Reset(); }
 
-class EntityWater
-{
-public:
-    EntityWater();
-
-    unsigned char mOpaqueWaterState[0xa4];
-};
 
 class EntitySoldier
 {
@@ -337,8 +333,8 @@ void UpdateDedicatedNoRender()
     {
         char acTeam1[128];
         char acTeam2[128];
-        PblUnicode::ustrncnv(acTeam1, pTeam1, sizeof(acTeam1));
-        PblUnicode::ustrncnv(acTeam2, pTeam2, sizeof(acTeam2));
+        PblUnicode::ustrncnv(acTeam1, pTeam1, sizeof(acTeam1) - 1);
+        PblUnicode::ustrncnv(acTeam2, pTeam2, sizeof(acTeam2) - 1);
         _snprintf(acLine, sizeof(acLine) - 1, "Teams: %s vs %s\n", acTeam1, acTeam2);
         acLine[sizeof(acLine) - 1] = 0;
         strlcat(acText, acLine, sizeof(acText));
@@ -661,10 +657,6 @@ extern bool netFrameLock;
 extern bool netIsClient;
 extern int netMinPlayersToAutoLaunchDedicated;
 
-// GLOBAL: SWBF2 0x0079f808
-
-static const char sSideNamePrefixes[][4] = { "Neu", "All", "Imp", "Rep", "CIS", "Loc" };
-
 static const float END_DISPLAY_TIME = 5.0f;
 
 namespace GameLoop
@@ -839,6 +831,9 @@ int Init()
     Weapon::UpdateMemoryPoolSize(0x120);
     Weapon::UpdateMemoryPoolSize(0x1a0);
     Weapon::UpdateMemoryPoolSize(0x170);
+#ifdef _WIN64
+    Weapon::UpdateMemoryPoolSize(WEAPON_POOL_BLOCK); // the sizes above are Win32 ones
+#endif
 
     StickInfo::SetupMemoryPool(60, StickInfo::sMemoryPool.GetSize(), StickInfo::sMemoryPool.GetGrow());
     Ordnance::SetupMemoryPool(120, Ordnance::sMemoryPool.GetSize(), Ordnance::sMemoryPool.GetGrow());
@@ -854,6 +849,9 @@ int Init()
     Ordnance::UpdateMemoryPoolSize(360);
     Ordnance::UpdateMemoryPoolSize(304);
     Ordnance::UpdateMemoryPoolSize(320);
+#ifdef _WIN64
+    Ordnance::UpdateMemoryPoolSize(ORDNANCE_POOL_BLOCK); // the sizes above are Win32 ones
+#endif
 
     LightFlash::SetupMemoryPool(16, LightFlash::sMemoryPool.GetSize(), LightFlash::sMemoryPool.GetGrow());
     EntityLight::SetupMemoryPool(100, EntityLight::sMemoryPool.GetSize(), EntityLight::sMemoryPool.GetGrow());
@@ -1156,7 +1154,7 @@ void UpdateDedicatedMsg(float fDeltaTime)
             PblUnicode::ustrncnv(acName, "", 128);
         }
         PblUnicode::usnprintf(acCount, 128, " : %d", iCount);
-        PblUnicode::ustrlcat(acName, acCount, 128);
+        PblUnicode::ustrlcat(acName, acCount, 127);
         apText[i]->SetText(acName, true);
     }
 
@@ -1571,7 +1569,7 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
                         const bool bPlayerTeam = AIUtil::IsPlayerTeam(iTeam);
                         fprintf(pFile, "\t%c=%s\t%du@%d%c\t%3dr\t%2dp",
                                 (Team::sWinningTeams & (1 << iTeam)) ? 'W' : 'L',
-                                sSideNamePrefixes[pTeam->mSide],
+                                SideNamePrefix(pTeam->mSide),
                                 pTeam->mMemberCount,
                                 AIDifficulty::GetIntSkill((const UnitController*)bPlayerTeam, false),
                                 bPlayerTeam ? 'P' : ' ',

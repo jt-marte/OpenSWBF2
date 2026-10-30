@@ -1,4 +1,5 @@
 #include "Tracker.h"
+#include "PebbleFL/Common/PblPtrOrder.h"
 #include "GameLoop.h"
 #include "NetGame.h"
 #include "Trackable.h"
@@ -125,7 +126,7 @@ void Tracker::SetTrackable(Trackable* pTrackable, int iPlayer)
     if (rTracker.mTrackable)
     {
         Tracker* pOld = rTracker.mTrackable->mTracker;
-        if ((unsigned int)pOld != 0xDDDDDDDDu && pOld && rTracker.IsFirstPersonView())
+        if ((uintptr_t)pOld != kPblFreedPtr && pOld && rTracker.IsFirstPersonView())
         {
             rTracker.mTrackable->SetFirstPersonView(iPlayer, false);
         }

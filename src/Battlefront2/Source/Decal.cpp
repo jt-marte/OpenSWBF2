@@ -24,7 +24,7 @@ bool DecalClass::IsBumped()
 // `dynamic initializer for 'Decal::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766ec0
 // `dynamic atexit destructor for 'Decal::sMemoryPool''
-MemoryPool Decal::sMemoryPool("Decal", 0x40);
+MemoryPool Decal::sMemoryPool("Decal", RED_POOL_SIZE(0x40, Decal));
 
 // GLOBAL: SWBF2 0x01e30944
 DecalManager* DecalManager::s_pInstance;

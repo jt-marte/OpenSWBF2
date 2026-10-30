@@ -328,7 +328,7 @@ bool s_bDetailTextureTransformPrev;
 class PblMatrix;
 extern PblMatrix gMatrixIdentity;
 
-void* RedShadingState::operator new(unsigned int uiSize)
+void* RedShadingState::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }
@@ -493,7 +493,7 @@ unsigned int pcNormalShader::GetState_Prog1(const RenderItem* pItem) const
 }
 
 // FUNCTION: SWBF2 0x006ff950
-int pcNormalShader::GetDiffuseMapHash(int iItem, int)
+int pcNormalShader::GetDiffuseMapHash(intptr_t iItem, int)
 {
     const RenderItem* pItem = (const RenderItem*)iItem;
     if (!pItem)

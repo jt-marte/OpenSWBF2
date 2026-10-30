@@ -61,7 +61,7 @@ class WalkerBlendUnit
 {
 public:
 
-    static void* operator new(unsigned int uiSize) { return sMemoryPool.Allocate(uiSize); }
+    static void* operator new(size_t uiSize) { return sMemoryPool.Allocate(uiSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     WalkerBlendUnit() { mMask.SetAll(); }
@@ -110,7 +110,7 @@ public:
         }
     }
 
-    static void* operator new(unsigned int uiSize) { return sMemoryPool.Allocate(uiSize); }
+    static void* operator new(size_t uiSize) { return sMemoryPool.Allocate(uiSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     void SetJointMask(int iUnit, PblBitVector<64>& rMask) { mUnits[iUnit]->mMask = rMask; }

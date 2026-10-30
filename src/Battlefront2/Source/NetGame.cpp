@@ -1,5 +1,7 @@
 #include "GameVoiceChatNode.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 #include "PlayerController.h"
+#include "PebbleFL/Common/PblPtrOrder.h"
 #include "RedEngineFL/Util/RedSceneObject.h"
 #include <stdio.h>
 #include <new>
@@ -256,7 +258,11 @@ bool isJournalOpened;
 // `dynamic initializer for 'NetObj::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768e10
 // `dynamic atexit destructor for 'NetObj::sMemoryPool''
-MemoryPool NetObj::sMemoryPool("NetObj", 0xC);
+MemoryPool NetObj::sMemoryPool("NetObj", RED_POOL_SIZE(0xC, NetObj));
+// OpenSWBF2: retail sized the client pools with Win32 block sizes; x64 objects are larger, so x64
+// takes the host pool's block size (sized for the build's own objects)
+#define CLIENT_POOL_SIZE(uiWin32Size, hostPool) PBL_RAW_SIZE(uiWin32Size, (hostPool).GetSize())
+
 
 // GLOBAL: SWBF2 0x01ee74e0
 // SYNTHETIC: SWBF2 0x004048e0
@@ -713,7 +719,7 @@ class NetNdObjMap
 public:
     NetNdObjMap();
     void Clear();
-    bool Add(int* object, unsigned int hash);
+    bool Add(NetNdObj* object, unsigned int hash);
 
     int objMapNumEntries;
     PblHashTable<NetNdObj, 256> objMap;
@@ -1345,7 +1351,7 @@ public:
 // `dynamic initializer for 'NetObjState::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768e20
 // `dynamic atexit destructor for 'NetObjState::sMemoryPool''
-MemoryPool NetObjState::sMemoryPool("NetObjState", 0x30);
+MemoryPool NetObjState::sMemoryPool("NetObjState", RED_POOL_SIZE(0x30, NetObjState));
 
 class NetCollisionObject : public CollisionObject
 {
@@ -2324,8 +2330,8 @@ void NetGame::CreateClient()
             unsigned int uEnergyBars = hostEnergyBarPool.GetCount();
             unsigned int uTreeGrids = hostTreeGridPool.GetCount();
             unsigned int uRemoteTerminals = hostRemoteTerminalPool.GetCount();
-            clientMountedTurretPool.Setup(uTurrets, 0x2C0, 0);
-            clientAimerPool.Setup(uAimers, 0x220, 0);
+            clientMountedTurretPool.Setup(uTurrets, CLIENT_POOL_SIZE(0x2C0, hostMountedTurretPool), 0);
+            clientAimerPool.Setup(uAimers, CLIENT_POOL_SIZE(0x220, hostAimerPool), 0);
             clientWeaponPool.Setup(uWeapons, hostWeaponPool.GetSize(), 0);
             clientAmmoCounterPool.Setup(uAmmoCounters, hostAmmoCounterPool.GetSize(), 0);
             clientEnergyBarPool.Setup(uEnergyBars, hostEnergyBarPool.GetSize(), 0);
@@ -2532,24 +2538,24 @@ void NetGame::CreateLast()
 
     if (!IsOneWorld())
     {
-        clientSoldierPool.Setup(uSoldiers, 0xFD0, 0);
-        clientDroidPool.Setup(uDroids, 0x460, 0);
-        clientWalkerPool.Setup(uWalkers, 0x2100, 0);
-        clientCommandWalkerPool.Setup(uCommandWalkers, 0x2110, 0);
-        clientCommandFlyerPool.Setup(uCommandFlyers, 0x1DA0, 0);
-        clientDroidekaPool.Setup(uDroidekas, 0x1B70, 0);
-        clientFlyerPool.Setup(uFlyers, 0x1D90, 0);
-        clientCarrierPool.Setup(uCarriers, 0x1DF0, 0);
-        clientHoverPool.Setup(uHovers, 0x1D10, 0);
-        clientCommandHoverPool.Setup(uCommandHovers, 0x1D20, 0);
-        clientPowerupPool.Setup(uPowerups, 0x290, 0);
-        clientArmedDynamicPool.Setup(uArmedDynamics, 0x6B0, 0);
-        clientWalkerLegPairPool.Setup(uWalkerLegPairs, 0x130, 0);
-        clientWalkerBlendPool.Setup(uWalkerBlends, 0x4C, 0);
-        clientWalkerBlendUnitPool.Setup(uWalkerBlendUnits, 0x133C, 0);
-        clientOrdnanceTowCablePool.Setup(uOrdnanceTowCables, 0x670, 0);
-        clientAsteroidPool.Setup(uAsteroids, 0x280, 0);
-        clientFlagPool.Setup(uFlags, 0x450, 0);
+        clientSoldierPool.Setup(uSoldiers, CLIENT_POOL_SIZE(0xFD0, hostSoldierPool), 0);
+        clientDroidPool.Setup(uDroids, CLIENT_POOL_SIZE(0x460, hostDroidPool), 0);
+        clientWalkerPool.Setup(uWalkers, CLIENT_POOL_SIZE(0x2100, hostWalkerPool), 0);
+        clientCommandWalkerPool.Setup(uCommandWalkers, CLIENT_POOL_SIZE(0x2110, hostCommandWalkerPool), 0);
+        clientCommandFlyerPool.Setup(uCommandFlyers, CLIENT_POOL_SIZE(0x1DA0, hostCommandFlyerPool), 0);
+        clientDroidekaPool.Setup(uDroidekas, CLIENT_POOL_SIZE(0x1B70, hostDroidekaPool), 0);
+        clientFlyerPool.Setup(uFlyers, CLIENT_POOL_SIZE(0x1D90, hostFlyerPool), 0);
+        clientCarrierPool.Setup(uCarriers, CLIENT_POOL_SIZE(0x1DF0, hostCarrierPool), 0);
+        clientHoverPool.Setup(uHovers, CLIENT_POOL_SIZE(0x1D10, hostHoverPool), 0);
+        clientCommandHoverPool.Setup(uCommandHovers, CLIENT_POOL_SIZE(0x1D20, hostCommandHoverPool), 0);
+        clientPowerupPool.Setup(uPowerups, CLIENT_POOL_SIZE(0x290, hostPowerupPool), 0);
+        clientArmedDynamicPool.Setup(uArmedDynamics, CLIENT_POOL_SIZE(0x6B0, hostArmedDynamicPool), 0);
+        clientWalkerLegPairPool.Setup(uWalkerLegPairs, CLIENT_POOL_SIZE(0x130, hostWalkerLegPairPool), 0);
+        clientWalkerBlendPool.Setup(uWalkerBlends, CLIENT_POOL_SIZE(0x4C, hostWalkerBlendPool), 0);
+        clientWalkerBlendUnitPool.Setup(uWalkerBlendUnits, CLIENT_POOL_SIZE(0x133C, hostWalkerBlendUnitPool), 0);
+        clientOrdnanceTowCablePool.Setup(uOrdnanceTowCables, CLIENT_POOL_SIZE(0x670, hostOrdnanceTowCablePool), 0);
+        clientAsteroidPool.Setup(uAsteroids, CLIENT_POOL_SIZE(0x280, hostAsteroidPool), 0);
+        clientFlagPool.Setup(uFlags, CLIENT_POOL_SIZE(0x450, hostFlagPool), 0);
     }
 
     hostSoldierPool.Reset();
@@ -3573,7 +3579,7 @@ void HandleEvent_Message(ReliableNetEvent& event)
         {
             GameVoiceChat::PlayerChange();
         }
-        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 64);
+        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 63);
         const unsigned short* pName = playerName;
         PblUnicode::usnprintf(message, kMaxMessage - 1, pFormat, pName);
         if (pCharacter1 && event.u.message.mTeam && pCharacter1->GetTeamPtr() != event.u.message.mTeam)
@@ -3601,7 +3607,7 @@ void HandleEvent_Message(ReliableNetEvent& event)
         }
 
         const char* pszName = netPlayers[iPlayer].prevName;
-        PblUnicode::ustrncnv(playerName, pszName, 64);
+        PblUnicode::ustrncnv(playerName, pszName, 63);
         const unsigned short* pName = playerName;
         PblUnicode::usnprintf(message, kMaxMessage - 1, pFormat, pName);
         break;
@@ -4851,7 +4857,19 @@ void NetGame::SendHost()
 unsigned int GetUniqObjectId(const GameObject* pObject);
 GameObject* FindClientObject(unsigned int uId);
 // GLOBAL: SWBF2 0x01e64ef4
-unsigned int* handleToIndexMapPtr;
+struct HandleToIndex;
+
+// WriteUpdate's handle-to-index map: a count, then the table. Retail kept it as unsigned
+// int[1 + 2 * 128]; the table's slots are pointer-sized, so on x64 that array was half the size it
+// needed and the table ran over WriteUpdate's stack.
+struct HandleToIndexMap
+{
+    unsigned int count;
+    PblHashTable<HandleToIndex, 128> table;
+};
+static_assert(sizeof(void*) != 4 || sizeof(HandleToIndexMap) == 4 * (1 + 2 * 128), "retail layout");
+
+HandleToIndexMap* handleToIndexMapPtr;
 // GLOBAL: SWBF2 0x01fa2513
 bool isFullState;
 // GLOBAL: SWBF2 0x01fa88c8
@@ -4975,8 +4993,9 @@ void WriteObjectPtr(NetPktGroup& group, const GameObject* pObject)
     group.Write(bSpecial);
     if (bSpecial)
     {
-        void* pEntry = clientNdObjMap.objMap.Find(pObject->GetHandleId());
-        group.WriteBits(pEntry ? ((unsigned int*)pEntry)[3] : 0u, 8);
+        // retail read the index as word 3, which on x64 is half of NetNdObj::orig
+        const NetNdObj* pEntry = clientNdObjMap.objMap.Find(pObject->GetHandleId());
+        group.WriteBits(pEntry ? pEntry->index : 0u, 8);
     }
     else
     {
@@ -5002,6 +5021,7 @@ GameObject* ReadObjectPtr(NetPktGroup& group)
     GameObject** pPair = (GameObject**)clientNdObjMap.array[uId];
     return pPair[isFullState ? 1 : 0];
 }
+
 
 // FUNCTION: SWBF2 0x005bd440
 void MarkWriteAlign(NetPktGroup& group)
@@ -5069,13 +5089,13 @@ unsigned int GetUniqObjectId(const GameObject* pObject)
         return 63;
     }
     PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)(handleToIndexMapPtr + 1);
+        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
     unsigned int* pId = pTable->Find(pObject->GetHandleId());
     return pId ? *pId : 63;
 }
 
 // FUNCTION: SWBF2 0x005ce480
-int ComputeNetLOD(int, int iPlayer)
+int ComputeNetLOD(const void*, int iPlayer)
 {
     if (iPlayer < 0)
     {
@@ -6198,11 +6218,13 @@ bool NetGame::DetectError()
     return false;
 }
 
+#ifndef _WIN64 // unused retail helper on a 32-bit layout
 // FUNCTION: SWBF2 0x005bf360
 void __fastcall DestroyEmbeddedDamageOwner(void* pThis)
 {
     ((DamageOwner*)((char*)pThis + 0x20))->~DamageOwner();
 }
+#endif
 
 extern RecentGuestObjectRecord recentGuestObjects[64][3];
 
@@ -7686,7 +7708,7 @@ void NetGame::AddChatMessageToQue(bool local, int player, unsigned __int64 mask,
     SteamChatMsg* message = new SteamChatMsg;
     message->playerID = player;
     message->mask = mask;
-    PblUnicode::ustrncpy(message->text, text, 128);
+    PblUnicode::ustrlcpy(message->text, text, 128);
     message->text[127] = 0;
     message->flag = flag;
     message->code = code;
@@ -8781,7 +8803,6 @@ unsigned int ReadMoves(NetPktGroup& group, int player, unsigned int turn)
 
 extern unsigned int netBroadcastSendSocket;
 extern unsigned int netBroadcastRecvSocket;
-extern "C" int __stdcall closesocket(unsigned int s);
 
 // FUNCTION: SWBF2 0x005d67b0
 void EndRegisterLanGame()
@@ -9293,7 +9314,7 @@ void DisplayMessage(NG_ChatMsg& opaque)
         const unsigned short* admin = RedLocalizeDB::Find(0x10e2f4e1, true);
         if (admin)
         {
-            PblUnicode::ustrlcat(text, admin, 128);
+            PblUnicode::ustrlcat(text, admin, 127);
         }
         else
         {
@@ -9306,17 +9327,17 @@ void DisplayMessage(NG_ChatMsg& opaque)
         sender = Character::FindPlayer(message.playerID);
         if (sender)
         {
-            PblUnicode::ustrlcat(text, sender->GetName(), 128);
+            PblUnicode::ustrlcat(text, sender->GetName(), 127);
         }
     }
-    PblUnicode::ustrlcat(text, separator, 128);
+    PblUnicode::ustrlcat(text, separator, 127);
     if (message.code == TeamAssistManager::None)
     {
-        PblUnicode::ustrlcat(text, message.text, 128);
+        PblUnicode::ustrlcat(text, message.text, 127);
     }
     else
     {
-        PblUnicode::ustrlcat(text, RedLocalizeDB::Find(requestKeys[message.code], false), 128);
+        PblUnicode::ustrlcat(text, RedLocalizeDB::Find(requestKeys[message.code], false), 127);
     }
 
     const unsigned int teamOnly = 1;
@@ -11389,10 +11410,13 @@ int Min(int a, int b)
 // FUNCTION: SWBF2 0x00450380
 unsigned int __fastcall SetDamageableVanishFlags(unsigned int* pThis)
 {
-    pThis[47] = (pThis[47] & ~0x18u) | 0x10u;
-    return pThis[47];
+    // Retail cleared mIsAlive and set mVanishing in word 47, the Win32 offset of their bitfield; on
+    // x64 that word is another field. The callers ignore the result.
+    ((Damageable*)pThis)->InstantVanish();
+    return 0;
 }
 
+#ifndef _WIN64 // retail word-offset helpers; the Hole copy below no longer uses them
 // FUNCTION: SWBF2 0x00454da0
 void __fastcall SetHoleRecordRadius(int* pThis, void*, int value)
 {
@@ -11419,6 +11443,7 @@ void* __fastcall GetRangeRecordPosition(int* pThis)
 {
     return pThis[0] ? (void*)(pThis[0] + 16 * (pThis[1] + 4)) : (void*)(pThis + 2);
 }
+#endif
 
 // FUNCTION: SWBF2 0x005b7370
 bool NetGame::CanExitVehicle(unsigned int player)
@@ -11867,31 +11892,18 @@ void EnableFrameLock()
 }
 
 // FUNCTION: SWBF2 0x005b4300
-RedTerrain::Hole::Hole(RedTerrain::Hole* pSource)
+// OpenSWBF2: written with members; retail addressed the Hole as 32-bit words (60 bytes on Win32).
+RedTerrain::Hole::Hole(RedTerrain::Hole* pSource) : TreeGridObject(-1)
 {
-    int* pThis = (int*)this;
-    const int* source = (const int*)pSource;
-    new (pThis) TreeGridObject(-1);
-    pThis[11] = pThis[12] = pThis[13] = pThis[14] = 0;
-    SetHoleRecordValue(pThis, 0, 0, 0x4000);
-    ((TreeGridObject*)pThis)->SetCollisionCenter(((const TreeGridObject*)source)->GetCollisionCenter());
-    float radius = ((const TreeGridObject*)source)->GetCollisionRadius();
-    int radiusBits;
-    memcpy(&radiusBits, &radius, sizeof(radiusBits));
-    SetHoleRecordRadius(pThis, 0, radiusBits);
-    const unsigned int count = source[9];
-    pThis[9] = count;
-    struct Record
-    {
-        int words[4];
-        Record() {}
-    };
-    Record* records = new Record[count];
-    pThis[10] = (int)records;
-    for (unsigned int i = 0; i < count; ++i)
-    {
-        memcpy(&records[i], (const char*)source[10] + 16 * i, sizeof(Record));
-    }
+    memset(&node, 0, sizeof(node));
+    SetObjectData(0, 0x4000);
+    SetCollisionCenter(pSource->GetCollisionCenter());
+    const float fRadius = pSource->GetCollisionRadius();
+    SetCollisionRadius(fRadius);
+    Set2DCollisionRadius(fRadius);
+    iNumPlanes = pSource->iNumPlanes;
+    aPlanes = (PblVector4*)new char[iNumPlanes * sizeof(PblVector4)];
+    memcpy(aPlanes, pSource->aPlanes, iNumPlanes * sizeof(PblVector4));
 }
 
 static bool CheckNdRoom(unsigned int uiCount)
@@ -11901,21 +11913,20 @@ static bool CheckNdRoom(unsigned int uiCount)
 }
 
 // FUNCTION: SWBF2 0x005b45f0
-bool NetNdObjMap::Add(int* object, unsigned int hash)
+bool NetNdObjMap::Add(NetNdObj* object, unsigned int hash)
 {
     if (!CheckNdRoom(count))
     {
         return false;
     }
-    NetNdObjMap* pThis = this;
-    object[2] = hash;
-    object[3] = pThis->count;
-    if (pThis->objMap.Store(hash, (NetNdObj*)object))
+    object->uniqId = hash;
+    object->index = count;
+    if (objMap.Store(hash, object))
     {
-        ++pThis->objMapNumEntries;
+        ++objMapNumEntries;
     }
-    pThis->array[pThis->count++] = (NetNdObj*)object;
-    ((GameObject*)object[0])->SetNetUniqueId(object[3] + 0x40);
+    array[count++] = object;
+    object->obj->SetNetUniqueId(object->index + 0x40);
     return true;
 }
 
@@ -12029,8 +12040,7 @@ int NetGame::GetObjectsInRange(const PblVector3& position, float radius, GameObj
         {
             continue;
         }
-        const float* targetPosition = (const float*)GetRangeRecordPointer(GetRangeRecordPosition((int*)info + 1));
-        const PblVector3 difference = position - *(const PblVector3*)targetPosition;
+        const PblVector3 difference = position - info->GetCollisionCenter();
         if (radiusSquared > SquaredLength((const float*)&difference))
         {
             found[count++] = entry->obj;
@@ -12046,7 +12056,8 @@ int NetGame::GetObjectsInRange(const PblVector3& position, float radius, GameObj
 // FUNCTION: SWBF2 0x005c9a70
 void AddHoleToClient(const int* source)
 {
-    int* copy = (int*)::operator new(60);
+    static_assert(sizeof(void*) != 4 || sizeof(RedTerrain::Hole) == 60, "RedTerrain::Hole layout");
+    int* copy = (int*)::operator new(sizeof(RedTerrain::Hole));
     if (copy)
     {
         new (copy) RedTerrain::Hole((RedTerrain::Hole*)source);
@@ -12250,7 +12261,7 @@ void CreateClientCollision(bool bNetCollision)
                             NetNdObj* pNdObj = new NetNdObj;
                             pNdObj->obj = pObject->AddToClient();
                             pNdObj->orig = pObject;
-                            clientNdObjMap.Add((int*)pNdObj, (int)((PblHandled*)pObject)->GetHandleId());
+                            clientNdObjMap.Add(pNdObj, (int)((PblHandled*)pObject)->GetHandleId());
                         }
                     }
                     ++iCount;
@@ -12454,6 +12465,7 @@ unsigned int RedColor::GetARGB() const
            ((unsigned int)pBytes[2] << 16) | ((unsigned int)pBytes[3] << 24);
 }
 
+#ifndef _WIN64 // unused retail helper on a 32-bit handle layout
 // FUNCTION: SWBF2 0x004850c0
 bool __fastcall HandleDiffersFromObject(int* pHandle, void*, int iOther)
 {
@@ -12466,6 +12478,7 @@ bool __fastcall HandleDiffersFromObject(int* pHandle, void*, int iOther)
     }
     return iOther != iObject;
 }
+#endif
 
 // FUNCTION: SWBF2 0x005b2350
 void __fastcall SetPacketGroupHeader(void* pPacket, short iIndex, char cFlag1, char cFlag2)
@@ -12682,7 +12695,9 @@ void AloHeroData::Set()
 }
 
 // FUNCTION: SWBF2 0x0049e360
+#ifndef _WIN64 // unused retail helper on a 32-bit layout
 void* __fastcall GetMarkerTargetPointer(const int* pThis, void*) { return (void*)pThis[54]; }
+#endif
 
 // FUNCTION: SWBF2 0x005b2340
 NetPacket* __fastcall GetPacketByHeaderNumber(const short* pNumber, void*)
@@ -13330,7 +13345,7 @@ void AdjustClock()
 void GetLastObjState(GameObject* pObject, NetObjState*& pState, unsigned int& uId)
 {
     PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)(handleToIndexMapPtr + 1);
+        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
     unsigned int* pEntry = pTable->Find(pObject->GetHandleId());
     uId = *pEntry;
     if (!*((unsigned char*)pEntry + 4))
@@ -13398,22 +13413,25 @@ void WriteEvent_CreateChunkCluster(NetPktGroup& group, const void* pEvent)
         return;
     }
 
-    const unsigned int* pClass = (const unsigned int*)fields.mEntClass;
+    // Retail read the class's net index and chunk descriptors as words 7 and 26 to 35 of the
+    // class, Win32 offsets. On x64 those were other fields, so the host wrote chunks for other
+    // slots than ReadEvent_CreateChunkCluster reads and the client read past the update's end.
+    const EntityGeometryClass* pClass = fields.mEntClass;
     group.WriteBits(fields.mChunkClusterIndex, 4);
     WriteEntityClass(group, pClass);
-    if (pClass[7] >= 0xff)
+    if ((unsigned int)pClass->mNetIndex >= 0xff)
     {
         return;
     }
-    EntityClass* pEntityClass = Factory<Entity, EntityClass, EntityDesc>::FindNetIndex(pClass[7]);
+    const EntityGeometryClass* pEntityClass =
+        (const EntityGeometryClass*)Factory<Entity, EntityClass, EntityDesc>::FindNetIndex(pClass->mNetIndex);
     if (!pEntityClass)
     {
         return;
     }
-    const unsigned int* pChunkFields = (const unsigned int*)pEntityClass;
     for (int i = 0; i < 10; ++i)
     {
-        if (pChunkFields[26 + i])
+        if (pEntityClass->mChunkDescriptors[i])
         {
             const Chunk& chunk = pCluster->mChunks[i];
             WriteMatrix(group, chunk.GetMatrix());
@@ -13665,14 +13683,7 @@ PblVector3* __fastcall TransformNormalByMatrix(const PblMatrix* pMatrix, void*,
     return pOut;
 }
 
-// FUNCTION: SWBF2 0x0051ecb0
-void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex)
-{
-    const void* pSource = *(const void* const*)((const char*)pThis +
-                                            0x28 + iIndex * 4);
-    memcpy(pOut, (const char*)pSource + 16, 64);
-    return pOut;
-}
+void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex); // CameraManager.cpp
 
 // FUNCTION: SWBF2 0x005d2260
 void WriteTurnLowBits(NetPktGroup* pGroup, unsigned int uTurn)
@@ -14427,7 +14438,7 @@ void SetHostWorldIndex(int index, GameObject* pObject)
 void WriteTrackable(NetPktGroup& group, Trackable* pTrackable)
 {
     if (!pTrackable || pTrackable == (Trackable*)-1 ||
-        pTrackable->GetTracker() == (Tracker*)0xdddddddd)
+        pTrackable->GetTracker() == (Tracker*)kPblFreedPtr)
     {
         group.Write(false);
         return;
@@ -14802,6 +14813,7 @@ int debugWriteHandleId = 0x5166;
 int debugWriteInitialPlayer = 1;
 
 void WriteQuaternion(NetPktGroup& group, const PblQuaternion& value);
+
 
 // FUNCTION: SWBF2 0x005bbd50
 void WriteCreate(NetPktGroup& group, GameObject* pObject)
@@ -15264,7 +15276,7 @@ void WritePlayerMoves(NetPktGroup& group)
     PblVector3 center(0.0f, 0.0f, 0.0f);
     Trackable* pTrackable = Tracker::GetTracker(iTracker)->GetTrackable();
     if (pTrackable && pTrackable != (Trackable*)-1 &&
-        pTrackable->GetTracker() != (Tracker*)0xdddddddd)
+        pTrackable->GetTracker() != (Tracker*)kPblFreedPtr)
     {
         center = pTrackable->GetGameObject()->GetMatrix().GetTranslation();
     }
@@ -15278,7 +15290,7 @@ void WritePlayerMoves(NetPktGroup& group)
         }
         pTrackable = Tracker::GetTracker(iPlayer)->GetTrackable();
         if (!pTrackable || pTrackable == (Trackable*)-1 ||
-            pTrackable->GetTracker() == (Tracker*)0xdddddddd)
+            pTrackable->GetTracker() == (Tracker*)kPblFreedPtr)
         {
             continue;
         }
@@ -15858,10 +15870,10 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
             for (j = 0; j < 2; ++j)
             {
                 GameObject* pObject = ppScopes[j][i];
-                if (pObject && count < 64 && !added.Find((unsigned int)pObject))
+                if (pObject && count < 64 && !added.Find((unsigned int)(uintptr_t)pObject))
                 {
                     ppSends[count++] = pObject;
-                    if (added.Store((unsigned int)pObject, pObject))
+                    if (added.Store((unsigned int)(uintptr_t)pObject, pObject))
                     {
                         ++addedCount;
                     }
@@ -16045,7 +16057,7 @@ void WriteObjects(NetPktGroup& group)
         Tracker* tracker = Tracker::GetTracker(viewer);
         Trackable* trackable = tracker->GetTrackable();
         if (trackable && trackable != (Trackable*)-1 &&
-            trackable->GetTracker() != (Tracker*)0xdddddddd)
+            trackable->GetTracker() != (Tracker*)kPblFreedPtr)
         {
             trackable->SetupCameraZoomFactor(zoom);
             GameObject* pObject = trackable->GetGameObject();
@@ -16076,7 +16088,7 @@ void WriteObjects(NetPktGroup& group)
                 tracker = Tracker::GetTracker(guest);
                 trackable = tracker->GetTrackable();
                 if (trackable && trackable->GetTracker() &&
-                    trackable->GetTracker() != (Tracker*)0xdddddddd)
+                    trackable->GetTracker() != (Tracker*)kPblFreedPtr)
                 {
                     GameObject* pObject = trackable->GetGameObject();
                     const PblMatrix& matrix = pObject->GetMatrix();
@@ -16097,8 +16109,7 @@ void WriteObjects(NetPktGroup& group)
         FinishSend(sends, scopes, scopeCounts);
 
         NetObjStateMap* lastMap = netPlayers[curDst].lastObjState;
-        PblHashTable<HandleToIndex, 128>* handleMap =
-            (PblHashTable<HandleToIndex, 128>*)(handleToIndexMapPtr + 1);
+        PblHashTable<HandleToIndex, 128>* handleMap = &handleToIndexMapPtr->table;
         for (i = 0; i < 64; ++i)
         {
             NetObjState* state = lastMap->stateMap[i];
@@ -16120,7 +16131,7 @@ void WriteObjects(NetPktGroup& group)
                 {
                     if (handleMap->Store(pObject->GetHandleId(), entry))
                     {
-                        ++*handleToIndexMapPtr;
+                        ++handleToIndexMapPtr->count;
                     }
                 }
                 else
@@ -16247,7 +16258,7 @@ void WriteObjects(NetPktGroup& group)
                 entry->isNew = true;
                 if (handleMap->Store(pObject->GetHandleId(), entry))
                 {
-                    ++*handleToIndexMapPtr;
+                    ++handleToIndexMapPtr->count;
                 }
                 if (pObject->GetHandleId() == netHostTraceHandleId)
                 {
@@ -16470,11 +16481,11 @@ void WriteUpdate(NetPktGroup& group)
     }
 
     BblList<HandleToIndex, 128> handlePool;
-    unsigned int handleToIndexMap[1 + 2 * 128];
-    ((PblHashTable<HandleToIndex, 128>*)&handleToIndexMap[1])->Clear();
-    handleToIndexMap[0] = 0;
+    HandleToIndexMap handleToIndexMap;
+    handleToIndexMap.table.Clear();
+    handleToIndexMap.count = 0;
     handlePoolPtr = &handlePool;
-    handleToIndexMapPtr = handleToIndexMap;
+    handleToIndexMapPtr = &handleToIndexMap;
     if (!isFullState || curDst == -1)
     {
         WriteObjects(group);
@@ -16894,7 +16905,9 @@ void ProcessGalaxyData()
 bool netLoginPending;
 
 // FUNCTION: SWBF2 0x00438ad0
+#ifndef _WIN64 // unused retail helper on a 32-bit layout
 int __fastcall GetOpaqueObjectStatus(const void* self) { return *(const int*)((const char*)self + 0x64); }
+#endif
 
 // FUNCTION: SWBF2 0x0055e330
 int GetSpaceAssaultScoreLimit() { return Lua_Callbacks::gSpaceAssaultScoreLimit[Lua_Callbacks::gCurRules]; }

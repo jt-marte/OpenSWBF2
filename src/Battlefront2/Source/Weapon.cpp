@@ -14,6 +14,7 @@
 #include "GameLoop.h"
 #include "GameObject.h"
 #include "NetGame.h"
+#include "OdfValue.h"
 #include "Ordnance.h"
 #include "ParticleEmitterObject.h"
 #include "SoldierAnimationBank.h"
@@ -456,7 +457,9 @@ void WeaponClass::Read(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pCharge->SetProperty(uProperty, child.ReadString(acBuffer, sizeof(acBuffer)));
+            char* pcValue = child.ReadString(acBuffer, sizeof(acBuffer));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pCharge->SetProperty(uProperty, pcValue);
             if (pCharge->mNextCharge)
             {
                 pCharge = pCharge->mNextCharge;
@@ -1291,7 +1294,7 @@ GameSound WeaponClass::sWeaponChangeUnableSound;
 // `dynamic initializer for 'Weapon::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007697d0
 // `dynamic atexit destructor for 'Weapon::sMemoryPool''
-MemoryPool Weapon::sMemoryPool("Weapon", 0x110);
+MemoryPool Weapon::sMemoryPool("Weapon", RED_POOL_SIZE(0x110, Weapon));
 
 void Weapon::operator delete(void* p)
 {
@@ -2534,3 +2537,8 @@ Controllable* Weapon::GetOwner() const
 {
     return mOwner;
 }
+
+// the Weapon stand-ins in Aimer.cpp, OrdnanceBeam.cpp and ScopeDisplay.cpp pad up to these
+static_assert(offsetof(Weapon, mClass) == (sizeof(void*) == 4 ? 0x64 : 0x78), "Weapon stand-in layout");
+static_assert(offsetof(Weapon, mAimer) == (sizeof(void*) == 4 ? 0x70 : 0x90), "Weapon stand-in layout");
+static_assert(offsetof(Weapon, mTarget) == (sizeof(void*) == 4 ? 0x104 : 0x160), "Weapon stand-in layout");

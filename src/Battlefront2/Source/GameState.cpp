@@ -1,3 +1,5 @@
+#include <new>
+#include <stdexcept>
 #include <vector>
 
 #include <windows.h>
@@ -219,12 +221,6 @@
 #include "GameVoiceChatNode.h"
 #include "PebbleFL/Common/PblJournal.h"
 #include "Battlefront2/Platform/Pc/pcPadPrompts.h"
-
-namespace std
-{
-__declspec(noreturn) void __cdecl _Xbad_alloc();
-__declspec(noreturn) void __cdecl _Xlength_error(const char*);
-}
 
 namespace DownloadableContent
 {
@@ -1258,7 +1254,7 @@ void GameState::MissionState::Enter()
     GameLoop::Init();
     GameLoop::PostLoad();
 
-    unsigned int uiCount = *(unsigned int*)((char*)CameraManager::sInstance + 0x1c);
+    unsigned int uiCount = (unsigned int)CameraManager::sInstance->m_iNumCam; // retail: +0x1c
     for (unsigned int i = 0; i < uiCount; ++i)
     {
         int iIndex = FLInputManager::s_instance.GetHWPort(i);
@@ -1578,7 +1574,7 @@ StatsLeaderboardNode* AllocateStatsLeaderboardHead()
         ::operator new(sizeof(StatsLeaderboardNode));
     if (!pNode)
     {
-        std::_Xbad_alloc();
+        throw std::bad_alloc();
     }
 
     pNode->_Next = pNode;
@@ -1676,7 +1672,7 @@ void InsertStatsLeaderboardBuckets(StatsLeaderboardBucketVector* pThis, void*** 
             (unsigned int)(pThis->mLast - pThis->mFirst);
         if (0x3FFFFFFFu - uiSize < 0x10u)
         {
-            std::_Xlength_error("vector<T> too long");
+            throw std::length_error("vector<T> too long");
         }
 
         const unsigned int uiCapacity = GrowStatsBucketCapacity(pThis, uiSize + 0x10);
@@ -1686,12 +1682,12 @@ void InsertStatsLeaderboardBuckets(StatsLeaderboardBucketVector* pThis, void*** 
         {
             if (uiCapacity > 0x3FFFFFFFu)
             {
-                std::_Xbad_alloc();
+                throw std::bad_alloc();
             }
-            ppNew = (void**)::operator new(uiCapacity * 4);
+            ppNew = (void**)::operator new(uiCapacity * sizeof(void*));
             if (!ppNew)
             {
-                std::_Xbad_alloc();
+                throw std::bad_alloc();
             }
         }
 

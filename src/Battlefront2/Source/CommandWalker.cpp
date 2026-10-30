@@ -11,7 +11,7 @@
 // `dynamic initializer for 'CommandWalker::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766ea0
 // `dynamic atexit destructor for 'CommandWalker::sMemoryPool''
-MemoryPool CommandWalker::sMemoryPool("CommandWalker", 0x2110);
+MemoryPool CommandWalker::sMemoryPool("CommandWalker", RED_POOL_SIZE(0x2110, CommandWalker));
 
 // GLOBAL: SWBF2 0x01eb96f8
 // SYNTHETIC: SWBF2 0x00402720

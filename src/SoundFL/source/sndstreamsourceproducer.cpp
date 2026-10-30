@@ -14,7 +14,7 @@ StreamSourceNProducer::StreamSourceNProducer()
 // FUNCTION: SWBF2 0x0073c760
 StreamSourceProducer::StreamSourceProducer()
 {
-    mProducer[0] = 0;
+    mPackets = 0;
     mProducer[1] = 0;
     mProducer[2] = 0;
     mProducer[3] = 0;
@@ -45,13 +45,13 @@ void Snd::StreamSourceProducer::SetPackets(unsigned int uiPacketSize, StreamPack
 
     if (uiPacketSize == 0 || uiNumPackets == 0 || pPackets == 0)
     {
-        mProducer[0] = 0;
+        mPackets = 0;
         mProducer[1] = 0;
         mProducer[2] = 0;
         return;
     }
 
-    mProducer[0] = (unsigned int)pPackets;
+    mPackets = pPackets;
     mProducer[1] = uiNumPackets;
     mProducer[2] = uiPacketSize;
 
@@ -106,7 +106,7 @@ StreamPacket* StreamSourceProducer::GetPacket(unsigned int uiOutput)
 {
     (void)uiOutput;
 
-    StreamPacket* const pPackets = (StreamPacket*)mProducer[0];
+    StreamPacket* const pPackets = mPackets;
     if (pPackets == 0)
     {
         return 0;
@@ -174,7 +174,7 @@ void* __fastcall sub_73C840(void* pProducer, int, unsigned int uiFlags)
 // FUNCTION: SWBF2 0x0073c930
 unsigned int StreamSourceProducer::GetNumQueuedPackets() const
 {
-    const StreamPacket* const pPackets = (const StreamPacket*)mProducer[0];
+    const StreamPacket* const pPackets = mPackets;
     const unsigned int uiNumPackets = mProducer[1];
     unsigned int uiIndex = mProducer[3];
     unsigned int uiQueued = 0;
@@ -212,7 +212,7 @@ StreamPacket* StreamSourceNProducer::GetPacket(unsigned int uiOutput)
 StreamPacket* StreamSourceProducer::GetReadPacket()
 {
 
-    StreamPacket* const pPackets = (StreamPacket*)mProducer[0];
+    StreamPacket* const pPackets = mPackets;
     StreamPacket* const pPacket = &pPackets[mProducer[3]];
 
     if (pPacket->mBufferUsed != 0)
@@ -285,7 +285,7 @@ namespace Snd {
 StreamPacket* StreamSourceNProducer::GetWritablePacket(unsigned int uiOutput)
 {
     const StreamSourceProducer& producer = mProducers[uiOutput];
-    StreamPacket* pPacket = (StreamPacket*)producer.mProducer[0] + producer.mProducer[3];
+    StreamPacket* pPacket = producer.mPackets + producer.mProducer[3];
     return pPacket->mBufferUsed == 0 && pPacket->mRefCount == 0 ? pPacket : 0;
 }
 }

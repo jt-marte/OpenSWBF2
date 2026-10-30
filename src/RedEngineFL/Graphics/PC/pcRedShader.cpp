@@ -83,7 +83,7 @@ void pcRedShaderDef::BindOnRead(pcRedShader* pShader)
 // FUNCTION: SWBF2 0x006ac740
 void __cdecl pcRedShader::Cleanup()
 {
-    const unsigned int* const puiKeys = s_ShaderFactoryByRenderType._table;
+    const PblHashSlot* const puiKeys = s_ShaderFactoryByRenderType._table;
     const pcRedShader* const* const ppValues =
         (const pcRedShader* const*)(puiKeys + FACTORY_SLOTS);
 
@@ -140,7 +140,7 @@ unsigned short pcRedShader::GetShaderChain(pcRedShader** const ppOut,
 }
 
 // FUNCTION: SWBF2 0x006ac850
-int pcRedShader::GetDiffuseMapHash(int, int)
+int pcRedShader::GetDiffuseMapHash(intptr_t, int)
 {
     return *(const int*)m_material;
 }
@@ -158,7 +158,7 @@ void __cdecl pcRedShader::Init()
 
     pcRedShaderDef::Init();
 
-    const unsigned int* const puiKeys = s_ShaderFactoryByRenderType._table;
+    const PblHashSlot* const puiKeys = s_ShaderFactoryByRenderType._table;
     const pcRedShader* const* const ppValues =
         (const pcRedShader* const*)(puiKeys + FACTORY_SLOTS);
 

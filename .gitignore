@@ -7,3 +7,4 @@ ipch/
 *.opensdf
 *.suo
 *.user
+/third_party/

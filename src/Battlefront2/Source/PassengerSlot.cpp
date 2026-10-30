@@ -23,7 +23,7 @@ extern "C" PblMatrix* __stdcall D3DXMatrixMultiply(PblMatrix* pOut, const PblMat
 // `dynamic initializer for 'PassengerSlot::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769290
 // `dynamic atexit destructor for 'PassengerSlot::sMemoryPool''
-MemoryPool PassengerSlot::sMemoryPool("PassengerSlot", 0x1f0);
+MemoryPool PassengerSlot::sMemoryPool("PassengerSlot", RED_POOL_SIZE(0x1f0, PassengerSlot));
 
 // GLOBAL: SWBF2 0x01ef7c90
 // SYNTHETIC: SWBF2 0x00405dc0

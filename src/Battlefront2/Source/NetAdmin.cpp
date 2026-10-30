@@ -16,6 +16,7 @@
 #include "NetPacket.h"
 #include "NetSetup.h"
 #include "NetAdmin.h"
+#include "NetAdminIdText.h"
 #include "NetWire.h"
 #include "SpawnManager.h"
 #include "Team.h"
@@ -383,7 +384,7 @@ void __fastcall NetAdmin::ChatMessage(int iPlayer, const unsigned short* pusMess
     _snprintf(acBuffer, 127, "%s: ", pcName);
     acBuffer[127] = 0;
     unsigned int uLength = (unsigned int)strlen(acBuffer);
-    PblUnicode::ustrncnv(acBuffer + uLength, pusMessage, 128 - uLength);
+    PblUnicode::ustrncnv(acBuffer + uLength, pusMessage, 127 - uLength);
     acBuffer[127] = 0;
     SendAdminMessage(acBuffer);
 }
@@ -416,8 +417,8 @@ static void SendStateTransitions()
     char acTeam2[32] = "Unknown";
     if (pusTeam1 && pusTeam2)
     {
-        PblUnicode::ustrncnv(acTeam1, pusTeam1, 32);
-        PblUnicode::ustrncnv(acTeam2, pusTeam2, 32);
+        PblUnicode::ustrncnv(acTeam1, pusTeam1, 31);
+        PblUnicode::ustrncnv(acTeam2, pusTeam2, 31);
     }
     int iScore1 = Team::sTeams[1]->mCurReinforcements;
     int iScore2 = Team::sTeams[2]->mCurReinforcements;
@@ -987,7 +988,7 @@ static void PutMsg(char* pcMsg)
     }
 
     unsigned short ausMsg[128];
-    PblUnicode::ustrncnv(ausMsg, pcMsg, 128);
+    PblUnicode::ustrncnv(ausMsg, pcMsg, 127);
 
     int iDest = 64;
     unsigned __int64 uMask = ~(unsigned __int64)0;
@@ -1239,7 +1240,7 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                     int iPing = NetComm::GetPing(i);
 
                     char acKey[33] = "36b7ae01b85eef9ecea666b441d5acd3";
-                    _snprintf(adminPlayerIdText, 32, "%ull", *NetCommP::GetAddr(i));
+                    FormatAdminIdText(adminPlayerIdText, *NetCommP::GetAddr(i));
                     MD5Digest(adminPlayerIdText, strlen(adminPlayerIdText), acKey);
                     acKey[32] = 0;
 
@@ -2298,9 +2299,10 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                 }
 
                 Trackable* pTrackable = pCharacter->mUnit;
-                unsigned int* puFlags =
-                    (unsigned int*)((char*)pTrackable->GetGameObject() + 0x1fc);
-                *puFlags = (*puFlags & ~8u) | 0x10;
+                // retail: the Damageable flags word at +0x1fc, clearing bit 3 and setting bit 4
+                GameObject* pObject = pTrackable->GetGameObject();
+                pObject->mIsAlive = 0;
+                pObject->mVanishing = 1;
             }
             break;
         }
@@ -2315,7 +2317,7 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             if (iTarget >= 0 && iTarget < netCurMaxPlayers && iTarget < 64 && NetComm::IsConnected(iTarget))
             {
                 char acKey[33] = "36b7ae01b85eef9ecea666b441d5acd3";
-                _snprintf(adminBanIdText, 32, "%ull", *NetCommP::GetAddr(iTarget));
+                FormatAdminIdText(adminBanIdText, *NetCommP::GetAddr(iTarget));
                 MD5Digest(adminBanIdText, strlen(adminBanIdText), acKey);
                 acKey[32] = 0;
                 NetGame::ForceBootPlayer(iTarget);
@@ -2341,7 +2343,7 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                 }
 
                 char acKey[33] = "36b7ae01b85eef9ecea666b441d5acd3";
-                _snprintf(adminBanKeyIdText, 32, "%ull", *NetCommP::GetAddr(iPlayer));
+                FormatAdminIdText(adminBanKeyIdText, *NetCommP::GetAddr(iPlayer));
                 MD5Digest(adminBanKeyIdText, strlen(adminBanKeyIdText), acKey);
                 acKey[32] = 0;
                 if (!strcmp(acKey, acArg))
@@ -2617,7 +2619,7 @@ void FormatPlayerStatusLine(char* pcOut, int iNumber, const char* pcName, int iT
     if (pTeam && pTeam->mName)
     {
         char acTeam[128];
-        PblUnicode::ustrncnv(acTeam, pTeam->mName, 128);
+        PblUnicode::ustrncnv(acTeam, pTeam->mName, 127);
         strncpy(pcOut + 21, acTeam, 3);
         pcOut[strlen(pcOut)] = ' ';
     }
@@ -2642,7 +2644,7 @@ void __fastcall FormatRefusedAdminLine(int iPlayer, unsigned short* pusLine)
     }
     char acLine[512];
     char acMessage[512];
-    PblUnicode::ustrncnv(acLine, pusLine, 512);
+    PblUnicode::ustrncnv(acLine, pusLine, 511);
     _snprintf(acMessage, 512, "\t%s\t%s", pcPlayer, acLine);
 }
 

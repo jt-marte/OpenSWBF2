@@ -7,7 +7,7 @@
 // `dynamic initializer for 'EnergyBar::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766ef0
 // `dynamic atexit destructor for 'EnergyBar::sMemoryPool''
-MemoryPool EnergyBar::sMemoryPool("EnergyBar", 0xc);
+MemoryPool EnergyBar::sMemoryPool("EnergyBar", RED_POOL_SIZE(0xc, EnergyBar));
 
 // FUNCTION: SWBF2 0x00491470
 void EnergyBarClass::Init(float fEnergyMax, float fEnergyOverheat)

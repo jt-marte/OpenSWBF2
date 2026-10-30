@@ -36,17 +36,17 @@ namespace GameVoiceChat { char _gEncoderStorage[0x50C + 3]; }
 
 // SYNTHETIC: SWBF2 0x00403ec0
 // `dynamic initializer for 'sEncoderStorage''
-void* sEncoderStorage = (void*)(((unsigned int)GameVoiceChat::_gEncoderStorage + 3) & ~3u);
+void* sEncoderStorage = (void*)(((uintptr_t)GameVoiceChat::_gEncoderStorage + 3) & ~(uintptr_t)3);
 // GLOBAL: SWBF2 0x01ec5fbc
 
 // SYNTHETIC: SWBF2 0x00403ed0
 // `dynamic initializer for 'sDecoderStorage''
-void* sDecoderStorage = (void*)(((unsigned int)GameVoiceChat::_gDecoderStorage + 3) & ~3u);
+void* sDecoderStorage = (void*)(((uintptr_t)GameVoiceChat::_gDecoderStorage + 3) & ~(uintptr_t)3);
 // GLOBAL: SWBF2 0x01ec6018
 
 // SYNTHETIC: SWBF2 0x00403ee0
 // `dynamic initializer for 'sNodeStorage''
-void* sNodeStorage = (void*)(((unsigned int)GameVoiceChat::_gNodeStorage + 3) & ~3u);
+void* sNodeStorage = (void*)(((uintptr_t)GameVoiceChat::_gNodeStorage + 3) & ~(uintptr_t)3);
 
 // FUNCTION: SWBF2 0x0053c500
 unsigned int GameVoiceChat::GetNumNodes()

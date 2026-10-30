@@ -50,7 +50,7 @@ public:
     void SetInterpolate(bool bInterpolate);
 
     void BuildBlendLookupTable();
-    static void* operator new(unsigned int uSize);
+    static void* operator new(size_t uSize);
     static void operator delete(void* pBlock);
 
     void Update(float fDt);

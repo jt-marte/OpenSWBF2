@@ -23,9 +23,9 @@ Stream* EngineBase::smStreams;
 Voice* EngineBase::smVoices;
 bool EngineBase::smOpened;
 
-unsigned char EngineBase::smVoiceStorage[0xA800];
+__declspec(align(16)) unsigned char EngineBase::smVoiceStorage[kNumVoices * sizeof(Voice)];
 
-unsigned char EngineBase::smStreamStorage[0x1446A68];
+__declspec(align(16)) unsigned char EngineBase::smStreamStorage[kNumStreams * sizeof(Stream)];
 
 float EngineBase::smTimeElapsed;
 
@@ -98,7 +98,7 @@ void Allocator<VoiceBase>::operator delete(void* p, void* pMemory, bool bTemp)
 }
 
 template <>
-void Allocator<VoiceBase>::operator delete(void* p, unsigned int uiSize)
+void Allocator<VoiceBase>::operator delete(void* p, size_t uiSize)
 {
     (void)uiSize;
     switch (((VoiceBase*)p)->GetAllocType())
@@ -131,7 +131,7 @@ Listener* EngineBase::GetFreeListener()
 Stream* EngineBase::GetOpenStream(unsigned int uiHashID)
 {
     Stream* pResult = 0;
-    for (unsigned int uiOffset = 0; uiOffset < 0x1446A68; uiOffset += sizeof(Stream))
+    for (unsigned int uiOffset = 0; uiOffset < kNumStreams * sizeof(Stream); uiOffset += sizeof(Stream))
     {
         Stream* pStream = (Stream*)((unsigned char*)smStreams + uiOffset);
         if (pStream->mInfoList.IsEmpty())
@@ -184,7 +184,7 @@ bool EngineBase::Open()
     smOpened = true;
     smVoices = (Voice*)smVoiceStorage;
 
-    for (unsigned int uiOffset = 0; uiOffset < 0xA800; uiOffset += sizeof(Voice))
+    for (unsigned int uiOffset = 0; uiOffset < kNumVoices * sizeof(Voice); uiOffset += sizeof(Voice))
     {
 
         Voice* const pVoice =
@@ -197,7 +197,7 @@ bool EngineBase::Open()
 
     smStreams = (Stream*)smStreamStorage;
 
-    for (unsigned int uiOffset = 0; uiOffset < 0x1446A68; uiOffset += sizeof(Stream))
+    for (unsigned int uiOffset = 0; uiOffset < kNumStreams * sizeof(Stream); uiOffset += sizeof(Stream))
     {
         new ((unsigned char*)smStreams + uiOffset, false) Stream;
     }
@@ -228,12 +228,12 @@ void EngineBase::Update(float fDeltaTime, bool b)
                 }
             }
 
-            for (unsigned int uiOffset = 0; uiOffset < 0xA800; uiOffset += sizeof(Voice))
+            for (unsigned int uiOffset = 0; uiOffset < kNumVoices * sizeof(Voice); uiOffset += sizeof(Voice))
             {
                 ((Voice*)((unsigned char*)smVoices + uiOffset))->Update();
             }
 
-            for (unsigned int uiOffset = 0; uiOffset < 0x1446A68; uiOffset += sizeof(Stream))
+            for (unsigned int uiOffset = 0; uiOffset < kNumStreams * sizeof(Stream); uiOffset += sizeof(Stream))
             {
                 ((Stream*)((unsigned char*)smStreams + uiOffset))->Update(fDeltaTime);
             }
@@ -415,7 +415,7 @@ void EngineBase::DestroyAll()
     I3DL2ReverbPreset::DestroyAll();
     SampleBankBase::DestroyAllBanks();
 
-    for (unsigned int uiOffset = 0; uiOffset < 0x1446A68; uiOffset += sizeof(Stream))
+    for (unsigned int uiOffset = 0; uiOffset < kNumStreams * sizeof(Stream); uiOffset += sizeof(Stream))
     {
         ((Stream*)((unsigned char*)smStreams + uiOffset))->SourceBus::SetBus(&Bus::smRootBus);
     }
@@ -432,7 +432,7 @@ void EngineBase::Close()
     SoundStream::Init();
     Sound::Close();
 
-    for (unsigned int uiOffset = 0; uiOffset < 0xA800; uiOffset += sizeof(Voice))
+    for (unsigned int uiOffset = 0; uiOffset < kNumVoices * sizeof(Voice); uiOffset += sizeof(Voice))
     {
         Voice* const pVoice = (Voice*)((unsigned char*)smVoices + uiOffset);
         if (pVoice->mNode.mNext)
@@ -443,7 +443,7 @@ void EngineBase::Close()
     }
     smVoices = 0;
 
-    for (unsigned int uiOffset = 0; uiOffset < 0x1446A68; uiOffset += sizeof(Stream))
+    for (unsigned int uiOffset = 0; uiOffset < kNumStreams * sizeof(Stream); uiOffset += sizeof(Stream))
     {
         delete (Stream*)((unsigned char*)smStreams + uiOffset);
     }

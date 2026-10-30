@@ -372,7 +372,7 @@ char FlagItemClass::rttiNameFlagItemClass[] = "FlagItemClass";
 // `dynamic initializer for 'FlagItem::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768720
 // `dynamic atexit destructor for 'FlagItem::sMemoryPool''
-MemoryPool FlagItem::sMemoryPool("FlagItem", 0x450);
+MemoryPool FlagItem::sMemoryPool("FlagItem", RED_POOL_SIZE(0x450, FlagItem));
 
 // GLOBAL: SWBF2 0x007eb888
 PblList<FlagItem> FlagItem::sHostList;

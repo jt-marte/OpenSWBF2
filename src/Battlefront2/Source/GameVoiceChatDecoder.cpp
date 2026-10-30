@@ -214,7 +214,7 @@ bool GameVoiceChat::Decoder::Open(float fPacketMs, int iSlots)
     mProducerPackets = (Snd::StreamPacket*)p;
     p += uiSlots24;
     mDecoders = (Snd::StreamGSMDecoder*)p;
-    p = (char*)(((unsigned int)(p + uiSlots * 0x2D4u) + 3u) & 0xFFFFFFFCu);
+    p = (char*)(((uintptr_t)(p + uiSlots * 0x2D4u) + 3u) & ~(uintptr_t)3);
     mDecoderBuffer = (unsigned char*)p;
     p += uiAligned2 * uiSlots;
     mDecoderPackets = (Snd::StreamPacket*)p;
@@ -224,11 +224,11 @@ bool GameVoiceChat::Decoder::Open(float fPacketMs, int iSlots)
     mMixerPacketIO = (Snd::StreamPacketIO*)p;
     p += uiSlots * 8u;
     mMixerBufferOffsets = (unsigned int*)p;
-    p = (char*)(((unsigned int)(p + uiSlots * 4u) + 3u) & 0xFFFFFFFCu);
+    p = (char*)(((uintptr_t)(p + uiSlots * 4u) + 3u) & ~(uintptr_t)3);
     mMixerAccBuffer = (int*)p;
     p += uiSamples4;
     mMixerPackets = (Snd::StreamPacket*)p;
-    p = (char*)(((unsigned int)(p + 0x33u)) & 0xFFFFFFFCu);
+    p = (char*)(((uintptr_t)(p + 0x33u)) & ~(uintptr_t)3);
     mMixerOutBuffer = (short*)p;
 
     for (unsigned int i = 0; i < uiSlots; ++i)

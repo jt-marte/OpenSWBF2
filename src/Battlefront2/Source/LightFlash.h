@@ -14,7 +14,7 @@ class PblSphere;
 class LightFlash : public Thread, public RedOmniLight
 {
 public:
-    static void* operator new(unsigned int uiSize) { return sMemoryPool.Allocate(uiSize); }
+    static void* operator new(size_t uiSize) { return sMemoryPool.Allocate(uiSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     LightFlash(const PblSphere& sphere, const RedColor& color, float fLifeTime);

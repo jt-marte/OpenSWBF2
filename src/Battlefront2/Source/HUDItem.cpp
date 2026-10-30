@@ -711,7 +711,7 @@ unsigned int HUD::CopyName(char** ppDest, const char* const pSource, bool bUseUn
         *ppDest = bUseUnnamed ? sDefaultNames[1] : sDefaultNames[0];
     }
 
-    return (unsigned int)(*ppDest);
+    return (unsigned int)(uintptr_t)(*ppDest);
 }
 
 // FUNCTION: SWBF2 0x005648f0

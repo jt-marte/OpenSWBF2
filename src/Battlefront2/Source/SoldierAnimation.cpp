@@ -9,7 +9,7 @@
 // `dynamic initializer for 'SoldierAnimation::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007694b0
 // `dynamic atexit destructor for 'SoldierAnimation::sMemoryPool''
-MemoryPool SoldierAnimation::sMemoryPool("SoldierAnimation", 0xc);
+MemoryPool SoldierAnimation::sMemoryPool("SoldierAnimation", RED_POOL_SIZE(0xc, SoldierAnimation));
 
 // FUNCTION: SWBF2 0x0063c2d0
 unsigned short SoldierAnimation::GetAnimationNumFrames() const

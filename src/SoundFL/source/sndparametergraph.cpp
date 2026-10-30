@@ -13,14 +13,14 @@ namespace Snd
 // `dynamic initializer for 'Snd::ParameterGraph::ControlPoint::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a4d0
 // `dynamic atexit destructor for 'Snd::ParameterGraph::ControlPoint::smFreeList''
-FreeList ParameterGraph::ControlPoint::smFreeList(12, 1, 16, 1);
+FreeList ParameterGraph::ControlPoint::smFreeList(SND_FREELIST_SIZE(12, ParameterGraph::ControlPoint), 1, 16, 1);
 
 // GLOBAL: SWBF2 0x007e39d4
 // SYNTHETIC: SWBF2 0x0040c3e0
 // `dynamic initializer for 'Snd::ParameterGraph::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a4e0
 // `dynamic atexit destructor for 'Snd::ParameterGraph::smFreeList''
-FreeList ParameterGraph::smFreeList(16, 1, 8, 1);
+FreeList ParameterGraph::smFreeList(SND_FREELIST_SIZE(16, ParameterGraph), 1, 8, 1);
 
 // GLOBAL: SWBF2 0x007e39f0
 // SYNTHETIC: SWBF2 0x0040c400

@@ -314,7 +314,7 @@ char EntityCarrier::rttiNameEntityCarrier[] = "EntityCarrier";
 // `dynamic initializer for 'EntityCarrier::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f10
 // `dynamic atexit destructor for 'EntityCarrier::sMemoryPool''
-MemoryPool EntityCarrier::sMemoryPool("EntityCarrier", 0x1df0);
+MemoryPool EntityCarrier::sMemoryPool("EntityCarrier", RED_POOL_SIZE(0x1df0, EntityCarrier));
 
 // FUNCTION: SWBF2 0x00496e20
 bool EntityCarrier::IsRtti(unsigned int uRtti) const
@@ -586,7 +586,7 @@ Entity* EntityCarrierClass::Build(const EntityDesc& desc)
     return (Entity*)pCarrier;
 }
 
-void* EntityCarrier::operator new(unsigned int uSize)
+void* EntityCarrier::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

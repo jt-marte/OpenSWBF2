@@ -12,7 +12,7 @@ namespace
 
 void* Addr(unsigned int uiAddr)
 {
-    return (void*)uiAddr;
+    return (void*)(size_t)uiAddr;
 }
 
 bool ReadSource(const char* pcPath, std::string& sOut)
@@ -47,15 +47,15 @@ TEST_CASE("ptr order key is monotonic across 2GB" * doctest::test_suite("unit"))
 TEST_CASE("ordered list keeps address order across 2GB" * doctest::test_suite("unit"))
 {
     const unsigned int auiAddr[] = { 0x80000014u, 0x00010000u, 0xFFFEFFFCu, 0x7FFFFFF0u, 0x80000010u };
-    PblOrderedList<Thread, int> list;
-    PblOrderedList<Thread, int>::Node aNodes[5];
+    PblOrderedList<Thread, intptr_t> list;
+    PblOrderedList<Thread, intptr_t>::Node aNodes[5];
     for (int i = 0; i < 5; ++i)
     {
         list.Add(&aNodes[i], NULL, PblPtrOrderKey(Addr(auiAddr[i])));
     }
 
     const unsigned int auiSorted[] = { 0x00010000u, 0x7FFFFFF0u, 0x80000010u, 0x80000014u, 0xFFFEFFFCu };
-    PblOrderedList<Thread, int>::Node* pNode = list._head._pNext;
+    PblOrderedList<Thread, intptr_t>::Node* pNode = list._head._pNext;
     for (int i = 0; i < 5; ++i)
     {
         CHECK(pNode->_iOrder == PblPtrOrderKey(Addr(auiSorted[i])));

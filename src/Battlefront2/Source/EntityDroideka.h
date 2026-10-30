@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "Aimer.h"
 #include "Battlefront2Lod.h"
 #include "CollisionModel.h"
@@ -487,7 +489,7 @@ public:
     float mStompTime;
     float mFallTimer;
 
-    unsigned char mEnergyBar[12];
+    PBL_RAW_ALIGN unsigned char mEnergyBar[PBL_RAW_SIZE(12, 16)];
     PblHandle<FLEffectObject> mWakeEmitter;
     float mTurnState;
     float mBuffOffenseTimer;

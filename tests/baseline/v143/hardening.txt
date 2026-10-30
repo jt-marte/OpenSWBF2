@@ -1,0 +1,19 @@
+[PASS] hardening:dynamicbase
+[PASS] hardening:nxcompat
+[PASS] hardening:laa
+[PASS] hardening:reloc
+[PASS] hardening:safeseh
+[PASS] hardening:gs
+[PASS] hardening:sdl
+[PASS] hardening:flag-alignednew
+[PASS] hardening:flag-inline
+[PASS] hardening:flag-alignednew-tests
+[PASS] hardening:flag-banned
+[PASS] hardening:import-SetProcessDpiAwarenessContext
+[PASS] hardening:import-SetProcessDpiAwareness
+[PASS] hardening:import-SetProcessDPIAware
+[PASS] hardening:import-GetDpiForWindow
+[PASS] hardening:import-AdjustWindowRectExForDpi
+[PASS] hardening:import-shcore
+[PASS] hardening:redlog-vendor
+[PASS] hardening:aslr-base (0x00B00000)

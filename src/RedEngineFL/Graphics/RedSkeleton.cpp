@@ -25,7 +25,7 @@ static PblMatrix* _NewAlignedMatrices(unsigned int uiCount)
     {
         return 0;
     }
-    unsigned char uPad = (unsigned char)(16 - ((unsigned int)p & 15));
+    unsigned char uPad = (unsigned char)(16 - ((uintptr_t)p & 15));
     p += uPad;
     p[-1] = (char)uPad;
     return (PblMatrix*)p;

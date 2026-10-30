@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "Agent.h"
 #include "Controllable.h"
 #include "RedEngineFL/Memory/RedMemoryPool.h"
@@ -21,7 +23,7 @@ class UnitAgent : public Agent
 
 public:
 
-    static void* operator new(unsigned int uiSize) { return sMemoryPool.Allocate(uiSize); }
+    static void* operator new(size_t uiSize) { return sMemoryPool.Allocate(uiSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
     static MemoryPool sMemoryPool;
 
@@ -73,7 +75,7 @@ private:
 public:
 
     UnitController* mCtrl;
-    unsigned char mAttackHelper[52];
+    PBL_RAW_ALIGN unsigned char mAttackHelper[PBL_RAW_SIZE(52, 64)];
     float mCheckNearbyUnitsTime;
     bool mNearbyUnitsInCombat;
 };

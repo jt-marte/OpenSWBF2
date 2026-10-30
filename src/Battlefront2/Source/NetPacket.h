@@ -173,7 +173,7 @@ public:
     unsigned int pktBits;
 };
 
-static_assert(sizeof(NetPktGroup) == 28, "NetPktGroup layout");
+static_assert(sizeof(NetPktGroup) == (sizeof(void*) == 4 ? 28 : 32), "NetPktGroup layout");
 
 extern int netRejectCounts[NET_REJECT_COUNT];
 void NetRejectCount(int iReason);

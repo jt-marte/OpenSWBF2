@@ -1,0 +1,949 @@
+0	0001:00000000	??__E?s_Instance@pcDynamicSprite@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcDynamicSprite pcDynamicSprite::s_Instance''(void)	pcDynamicSprite.obj
+1	0001:000000a0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	pcGodray.obj
+2	0001:000000f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	pcSkyDome.obj
+3	0001:00000140	??__Es_SkyFogPlane@@YAXXZ	void __cdecl `dynamic initializer for 's_SkyFogPlane''(void)	pcSkyDome.obj
+4	0001:00000180	??__Es_SunSkyRenderable@@YAXXZ	void __cdecl `dynamic initializer for 's_SunSkyRenderable''(void)	pcSunFlare.obj
+5	0001:000001b0	??__EcamDir@TestSpawn@AIDebug@@YAXXZ	void __cdecl AIDebug::TestSpawn::`dynamic initializer for 'camDir''(void)	AIDebug.obj
+6	0001:000001d0	??__EmCamera@TestSpawn@AIDebug@@YAXXZ	void __cdecl AIDebug::TestSpawn::`dynamic initializer for 'mCamera''(void)	AIDebug.obj
+7	0001:000001f0	??__E?rttiHashAIGoal@AIGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::AIGoal::rttiHashAIGoal''(void)	AIGoal.obj
+8	0001:00000200	??__E?sMemoryPool@AIGoal@AI@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool AI::AIGoal::sMemoryPool''(void)	AIGoal.obj
+9	0001:00000220	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	AIUtil.obj
+10	0001:00000270	??__E?sRegions@AIVisRegionManager@@2V?$ListPool@PAVAIVisRegion@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class ListPool<class AIVisRegion *,int> AIVisRegionManager::sRegions''(void)	AIVisRegion.obj
+11	0001:000002b0	??__E?sMemoryPool@ActiveRegion@ActiveRegions@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ActiveRegions::ActiveRegion::sMemoryPool''(void)	ActiveRegion.obj
+12	0001:000002d0	??__E?rttiHashAgent@Agent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Agent::rttiHashAgent''(void)	Agent.obj
+13	0001:000002e0	??__E?sMemoryPool@Aimer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Aimer::sMemoryPool''(void)	Aimer.obj
+14	0001:00000300	??__E?sMemoryPool@AmmoCounter@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool AmmoCounter::sMemoryPool''(void)	AmmoCounter.obj
+15	0001:00000320	??__E?rttiHashAsteroid@Asteroid@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Asteroid::rttiHashAsteroid''(void)	Asteroid.obj
+16	0001:00000330	??__E?rttiHashAsteroidClass@AsteroidClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AsteroidClass::rttiHashAsteroidClass''(void)	Asteroid.obj
+17	0001:00000340	??__E?sMemoryPool@Asteroid@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Asteroid::sMemoryPool''(void)	Asteroid.obj
+18	0001:00000360	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Asteroid.obj
+19	0001:000003b0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	AttachedEffects.obj
+20	0001:00000400	??__E_FrontlineSceneManager@@YAXXZ	void __cdecl `dynamic initializer for '_FrontlineSceneManager''(void)	Battlefront2SceneManager.obj
+21	0001:00000420	??__E?sInstance@BonusManager@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class BonusManager BonusManager::sInstance''(void)	BonusManager.obj
+22	0001:000004e0	??__E?rttiHashCTFGoal@CTFGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::CTFGoal::rttiHashCTFGoal''(void)	CTFGoal.obj
+23	0001:000004f0	??__E?rttiHashCTFGoalD@CTFGoalD@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::CTFGoalD::rttiHashCTFGoalD''(void)	CTFGoalD.obj
+24	0001:00000500	??__EcameraInterpolator@@YAXXZ	void __cdecl `dynamic initializer for 'cameraInterpolator''(void)	CameraManager.obj
+25	0001:00000530	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Chunk.obj
+26	0001:00000580	??__E?rttiHashEntityCloth@EntityCloth@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityCloth::rttiHashEntityCloth''(void)	Cloth.obj
+27	0001:00000590	??__E?rttiHashEntityClothClass@EntityClothClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityClothClass::rttiHashEntityClothClass''(void)	Cloth.obj
+28	0001:000005a0	??__E?sMemoryPool@ClothData@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ClothData::sMemoryPool''(void)	Cloth.obj
+29	0001:000005c0	??__E?sMemoryPool@EntityCloth@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityCloth::sMemoryPool''(void)	Cloth.obj
+30	0001:000005e0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Cloth.obj
+31	0001:00000630	??__EclothData_@ClothBE@@YAXXZ	void __cdecl ClothBE::`dynamic initializer for 'clothData_''(void)	Cloth.obj
+32	0001:00000690	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	CollisionBody.obj
+33	0001:000006e0	??__E?sClientCollisionMask@CollisionModel@@2PAVCollisionMask@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class CollisionMask * CollisionModel::sClientCollisionMask''(void)	CollisionModel.obj
+34	0001:00000710	??__E?sHostCollisionMask@CollisionModel@@2PAVCollisionMask@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class CollisionMask * CollisionModel::sHostCollisionMask''(void)	CollisionModel.obj
+35	0001:00000740	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	CollisionModel.obj
+36	0001:00000790	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	CollisionPrimitive.obj
+37	0001:000007e0	??__EkRttiHashEntityDroideka@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityDroideka''(void)	CombatHelper.obj
+38	0001:000007f0	??__EkRttiHashEntityFlyer@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityFlyer''(void)	CombatHelper.obj
+39	0001:00000800	??__EkRttiHashEntityHover@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityHover''(void)	CombatHelper.obj
+40	0001:00000810	??__EkRttiHashEntitySoldier@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntitySoldier''(void)	CombatHelper.obj
+41	0001:00000820	??__EkRttiHashEntityWalker@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityWalker''(void)	CombatHelper.obj
+42	0001:00000830	??__EkRttiHashMountedTurret@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashMountedTurret''(void)	CombatHelper.obj
+43	0001:00000840	??__EkRttiHashWeaponMelee@?A0x994e9635@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponMelee''(void)	CombatHelper.obj
+44	0001:00000850	??__EkRttiHashCommandFlyer@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashCommandFlyer''(void)	CombatUtil.obj
+45	0001:00000860	??__EkRttiHashEntityBuilding@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityBuilding''(void)	CombatUtil.obj
+46	0001:00000870	??__EkRttiHashEntityBuildingArmed@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityBuildingArmed''(void)	CombatUtil.obj
+47	0001:00000880	??__EkRttiHashEntityDroid@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityDroid''(void)	CombatUtil.obj
+48	0001:00000890	??__EkRttiHashEntityDroideka@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityDroideka''(void)	CombatUtil.obj
+49	0001:000008a0	??__EkRttiHashEntityFlyer@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityFlyer''(void)	CombatUtil.obj
+50	0001:000008b0	??__EkRttiHashEntityFlyerClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityFlyerClass''(void)	CombatUtil.obj
+51	0001:000008c0	??__EkRttiHashEntityHover@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityHover''(void)	CombatUtil.obj
+52	0001:000008d0	??__EkRttiHashEntityRemoteTerminal@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityRemoteTerminal''(void)	CombatUtil.obj
+53	0001:000008e0	??__EkRttiHashEntitySoldier@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntitySoldier''(void)	CombatUtil.obj
+54	0001:000008f0	??__EkRttiHashEntityTrap@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityTrap''(void)	CombatUtil.obj
+55	0001:00000900	??__EkRttiHashEntityWalker@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityWalker''(void)	CombatUtil.obj
+56	0001:00000910	??__EkRttiHashMountedTurret@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashMountedTurret''(void)	CombatUtil.obj
+57	0001:00000920	??__EkRttiHashOrdnanceBeamClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceBeamClass''(void)	CombatUtil.obj
+58	0001:00000930	??__EkRttiHashOrdnanceGrenadeClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceGrenadeClass''(void)	CombatUtil.obj
+59	0001:00000940	??__EkRttiHashOrdnanceHaywireClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceHaywireClass''(void)	CombatUtil.obj
+60	0001:00000950	??__EkRttiHashOrdnanceMissileClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceMissileClass''(void)	CombatUtil.obj
+61	0001:00000960	??__EkRttiHashOrdnanceShellClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceShellClass''(void)	CombatUtil.obj
+62	0001:00000970	??__EkRttiHashOrdnanceStickyClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashOrdnanceStickyClass''(void)	CombatUtil.obj
+63	0001:00000980	??__EkRttiHashWeaponCannonClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponCannonClass''(void)	CombatUtil.obj
+64	0001:00000990	??__EkRttiHashWeaponGrenadeClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponGrenadeClass''(void)	CombatUtil.obj
+65	0001:000009a0	??__EkRttiHashWeaponMelee@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponMelee''(void)	CombatUtil.obj
+66	0001:000009b0	??__EkRttiHashWeaponMeleeClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponMeleeClass''(void)	CombatUtil.obj
+67	0001:000009c0	??__EkRttiHashWeaponMeleeThrowClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponMeleeThrowClass''(void)	CombatUtil.obj
+68	0001:000009d0	??__EkRttiHashWeaponRemoteClass@?A0x2ebc6ffc@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashWeaponRemoteClass''(void)	CombatUtil.obj
+69	0001:000009e0	??__E?sMemoryPool@Attack@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::Attack::sMemoryPool''(void)	Combo.obj
+70	0001:00000a00	??__E?sMemoryPool@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::sMemoryPool''(void)	Combo.obj
+71	0001:00000a20	??__E?sMemoryPool@Condition@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::Condition::sMemoryPool''(void)	Combo.obj
+72	0001:00000a40	??__E?sMemoryPool@DamageSample@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::DamageSample::sMemoryPool''(void)	Combo.obj
+73	0001:00000a60	??__E?sMemoryPool@Deflect@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::Deflect::sMemoryPool''(void)	Combo.obj
+74	0001:00000a80	??__E?sMemoryPool@State@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::State::sMemoryPool''(void)	Combo.obj
+75	0001:00000aa0	??__E?sMemoryPool@Transition@Combo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Combo::Transition::sMemoryPool''(void)	Combo.obj
+76	0001:00000ac0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Combo.obj
+77	0001:00000b10	??__E?rttiHashCommandBuilding@CommandBuilding@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuilding::rttiHashCommandBuilding''(void)	CommandBuilding.obj
+78	0001:00000b20	??__E?rttiHashCommandBuildingClass@CommandBuildingClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuildingClass::rttiHashCommandBuildingClass''(void)	CommandBuilding.obj
+79	0001:00000b30	??__E?rttiHashCommandBuildingAnimatedArmed@CommandBuildingAnimatedArmed@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuildingAnimatedArmed::rttiHashCommandBuildingAnimatedArmed''(void)	CommandBuildingAnimatedArmed.obj
+80	0001:00000b40	??__E?rttiHashCommandBuildingAnimatedArmedClass@CommandBuildingAnimatedArmedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuildingAnimatedArmedClass::rttiHashCommandBuildingAnimatedArmedClass''(void)	CommandBuildingAnimatedArmed.obj
+81	0001:00000b50	??__E?rttiHashCommandBuildingArmed@CommandBuildingArmed@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuildingArmed::rttiHashCommandBuildingArmed''(void)	CommandBuildingArmed.obj
+82	0001:00000b60	??__E?rttiHashCommandBuildingArmedClass@CommandBuildingArmedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandBuildingArmedClass::rttiHashCommandBuildingArmedClass''(void)	CommandBuildingArmed.obj
+83	0001:00000b70	??__E?rttiHashCommandFlyer@CommandFlyer@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandFlyer::rttiHashCommandFlyer''(void)	CommandFlyer.obj
+84	0001:00000b80	??__E?rttiHashCommandFlyerClass@CommandFlyerClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandFlyerClass::rttiHashCommandFlyerClass''(void)	CommandFlyer.obj
+85	0001:00000b90	??__E?sMemoryPool@CommandFlyer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool CommandFlyer::sMemoryPool''(void)	CommandFlyer.obj
+86	0001:00000bb0	??__E?rttiHashCommandHover@CommandHover@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandHover::rttiHashCommandHover''(void)	CommandHover.obj
+87	0001:00000bc0	??__E?rttiHashCommandHoverClass@CommandHoverClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandHoverClass::rttiHashCommandHoverClass''(void)	CommandHover.obj
+88	0001:00000bd0	??__E?sMemoryPool@CommandHover@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool CommandHover::sMemoryPool''(void)	CommandHover.obj
+89	0001:00000bf0	??__E?rttiHashCommandWalker@CommandWalker@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandWalker::rttiHashCommandWalker''(void)	CommandWalker.obj
+90	0001:00000c00	??__E?rttiHashCommandWalkerClass@CommandWalkerClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash CommandWalkerClass::rttiHashCommandWalkerClass''(void)	CommandWalker.obj
+91	0001:00000c10	??__E?sMemoryPool@CommandWalker@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool CommandWalker::sMemoryPool''(void)	CommandWalker.obj
+92	0001:00000c30	??__E?sMemoryPool@ConnectivityGraphFollower@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ConnectivityGraphFollower::sMemoryPool''(void)	ConnectivityGraphFollower.obj
+93	0001:00000c50	??__E?rttiHashConquestGoal@ConquestGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::ConquestGoal::rttiHashConquestGoal''(void)	ConquestGoal.obj
+94	0001:00000c60	??__EABDumpHardware@@YAXXZ	void __cdecl `dynamic initializer for 'ABDumpHardware''(void)	ConsoleCommands.obj
+95	0001:00000c80	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	ConsoleCommands.obj
+96	0001:00000cd0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Controllable.obj
+97	0001:00000d20	??__E?rttiHashController@Controller@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Controller::rttiHashController''(void)	Controller.obj
+98	0001:00000d30	??__E?rttiHashDeathmatchGoal@DeathmatchGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::DeathmatchGoal::rttiHashDeathmatchGoal''(void)	DeathmatchGoal.obj
+99	0001:00000d40	??__E?sMemoryPool@Decal@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Decal::sMemoryPool''(void)	Decal.obj
+100	0001:00000d60	??__E?rttiHashDefendGoal@DefendGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::DefendGoal::rttiHashDefendGoal''(void)	DefendGoal.obj
+101	0001:00000d70	??__E?rttiHashDestroyGoal@DestroyGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::DestroyGoal::rttiHashDestroyGoal''(void)	DestroyGoal.obj
+102	0001:00000d80	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	DisplayDroideka.obj
+103	0001:00000dd0	??__E?sMemoryPool@EnergyBar@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EnergyBar::sMemoryPool''(void)	EnergyBar.obj
+104	0001:00000df0	??__E?rttiHashEntity@Entity@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Entity::rttiHashEntity''(void)	Entity.obj
+105	0001:00000e00	??__E?rttiHashEntityClass@EntityClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityClass::rttiHashEntityClass''(void)	Entity.obj
+106	0001:00000e10	??__E?rttiHashEntityEx@EntityEx@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityEx::rttiHashEntityEx''(void)	Entity.obj
+107	0001:00000e20	??__E?rttiHashEntityBuilding@EntityBuilding@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuilding::rttiHashEntityBuilding''(void)	EntityBuilding.obj
+108	0001:00000e30	??__E?rttiHashEntityBuildingClass@EntityBuildingClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingClass::rttiHashEntityBuildingClass''(void)	EntityBuilding.obj
+109	0001:00000e40	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityBuilding.obj
+110	0001:00000e90	??__E?rttiHashEntityBuildingAnimated@EntityBuildingAnimated@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingAnimated::rttiHashEntityBuildingAnimated''(void)	EntityBuildingAnimated.obj
+111	0001:00000ea0	??__E?rttiHashEntityBuildingAnimatedClass@EntityBuildingAnimatedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingAnimatedClass::rttiHashEntityBuildingAnimatedClass''(void)	EntityBuildingAnimated.obj
+112	0001:00000eb0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityBuildingAnimated.obj
+113	0001:00000f00	??__E?rttiHashEntityBuildingAnimatedArmed@EntityBuildingAnimatedArmed@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingAnimatedArmed::rttiHashEntityBuildingAnimatedArmed''(void)	EntityBuildingAnimatedArmed.obj
+114	0001:00000f10	??__E?rttiHashEntityBuildingAnimatedArmedClass@EntityBuildingAnimatedArmedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingAnimatedArmedClass::rttiHashEntityBuildingAnimatedArmedClass''(void)	EntityBuildingAnimatedArmed.obj
+115	0001:00000f20	??__E?rttiHashEntityBuildingArmed@EntityBuildingArmed@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingArmed::rttiHashEntityBuildingArmed''(void)	EntityBuildingArmed.obj
+116	0001:00000f30	??__E?rttiHashEntityBuildingArmedClass@EntityBuildingArmedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingArmedClass::rttiHashEntityBuildingArmedClass''(void)	EntityBuildingArmed.obj
+117	0001:00000f40	??__E?rttiHashEntityBuildingArmedDynamic@EntityBuildingArmedDynamic@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingArmedDynamic::rttiHashEntityBuildingArmedDynamic''(void)	EntityBuildingArmedDynamic.obj
+118	0001:00000f50	??__E?rttiHashEntityBuildingArmedDynamicClass@EntityBuildingArmedDynamicClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityBuildingArmedDynamicClass::rttiHashEntityBuildingArmedDynamicClass''(void)	EntityBuildingArmedDynamic.obj
+119	0001:00000f60	??__E?sMemoryPool@EntityBuildingArmedDynamic@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityBuildingArmedDynamic::sMemoryPool''(void)	EntityBuildingArmedDynamic.obj
+120	0001:00000f80	??__E?rttiHashEntityCarrier@EntityCarrier@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityCarrier::rttiHashEntityCarrier''(void)	EntityCarrier.obj
+121	0001:00000f90	??__E?rttiHashEntityCarrierClass@EntityCarrierClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityCarrierClass::rttiHashEntityCarrierClass''(void)	EntityCarrier.obj
+122	0001:00000fa0	??__E?sMemoryPool@EntityCarrier@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityCarrier::sMemoryPool''(void)	EntityCarrier.obj
+123	0001:00000fc0	??__E?rttiHashEntityDefenseGridTurret@EntityDefenseGridTurret@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDefenseGridTurret::rttiHashEntityDefenseGridTurret''(void)	EntityDefenseGridTurret.obj
+124	0001:00000fd0	??__E?rttiHashEntityDefenseGridTurretClass@EntityDefenseGridTurretClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDefenseGridTurretClass::rttiHashEntityDefenseGridTurretClass''(void)	EntityDefenseGridTurret.obj
+125	0001:00000fe0	??__E?sMemoryPool@EntityDefenseGridTurret@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityDefenseGridTurret::sMemoryPool''(void)	EntityDefenseGridTurret.obj
+126	0001:00001000	??__E?rttiHashEntityDoor@EntityDoor@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDoor::rttiHashEntityDoor''(void)	EntityDoor.obj
+127	0001:00001010	??__E?rttiHashEntityDoorClass@EntityDoorClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDoorClass::rttiHashEntityDoorClass''(void)	EntityDoor.obj
+128	0001:00001020	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityDoor.obj
+129	0001:00001070	??__E?rttiHashEntityDroid@EntityDroid@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDroid::rttiHashEntityDroid''(void)	EntityDroid.obj
+130	0001:00001080	??__E?rttiHashEntityDroidClass@EntityDroidClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDroidClass::rttiHashEntityDroidClass''(void)	EntityDroid.obj
+131	0001:00001090	??__E?sMemoryPool@EntityDroid@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityDroid::sMemoryPool''(void)	EntityDroid.obj
+132	0001:000010b0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityDroid.obj
+133	0001:00001100	??__E?rttiHashEntityDroideka@EntityDroideka@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDroideka::rttiHashEntityDroideka''(void)	EntityDroideka.obj
+134	0001:00001110	??__E?rttiHashEntityDroidekaClass@EntityDroidekaClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityDroidekaClass::rttiHashEntityDroidekaClass''(void)	EntityDroideka.obj
+135	0001:00001120	??__E?sMemoryPool@EntityDroideka@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityDroideka::sMemoryPool''(void)	EntityDroideka.obj
+136	0001:00001140	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityDroideka.obj
+137	0001:00001190	??__E?rttiHashEntityEffectClass@EntityEffectClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityEffectClass::rttiHashEntityEffectClass''(void)	EntityEffect.obj
+138	0001:000011a0	??__E?rttiHashEntityFlyer@EntityFlyer@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityFlyer::rttiHashEntityFlyer''(void)	EntityFlyer.obj
+139	0001:000011b0	??__E?rttiHashEntityFlyerClass@EntityFlyerClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityFlyerClass::rttiHashEntityFlyerClass''(void)	EntityFlyer.obj
+140	0001:000011c0	??__E?sMemoryPool@EntityFlyer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityFlyer::sMemoryPool''(void)	EntityFlyer.obj
+141	0001:000011e0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityFlyer.obj
+142	0001:00001230	??__EcvRenderContrails@@YAXXZ	void __cdecl `dynamic initializer for 'cvRenderContrails''(void)	EntityFlyer.obj
+143	0001:00001260	??__E?rttiHashEntityGeometry@EntityGeometry@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityGeometry::rttiHashEntityGeometry''(void)	EntityGeometry.obj
+144	0001:00001270	??__E?rttiHashEntityGeometryClass@EntityGeometryClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityGeometryClass::rttiHashEntityGeometryClass''(void)	EntityGeometry.obj
+145	0001:00001280	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityGeometry.obj
+146	0001:000012d0	??__E?rttiHashEntityHologram@EntityHologram@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityHologram::rttiHashEntityHologram''(void)	EntityHologram.obj
+147	0001:000012e0	??__E?rttiHashEntityHologramClass@EntityHologramClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityHologramClass::rttiHashEntityHologramClass''(void)	EntityHologram.obj
+148	0001:000012f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityHologram.obj
+149	0001:00001340	??__E?rttiHashEntityHover@EntityHover@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityHover::rttiHashEntityHover''(void)	EntityHover.obj
+150	0001:00001350	??__E?rttiHashEntityHoverClass@EntityHoverClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityHoverClass::rttiHashEntityHoverClass''(void)	EntityHover.obj
+151	0001:00001360	??__E?sMemoryPool@EntityHover@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityHover::sMemoryPool''(void)	EntityHover.obj
+152	0001:00001380	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityHover.obj
+153	0001:000013d0	??__E?rttiHashEntityItem@EntityItem@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityItem::rttiHashEntityItem''(void)	EntityItem.obj
+154	0001:000013e0	??__E?rttiHashEntityItemClass@EntityItemClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityItemClass::rttiHashEntityItemClass''(void)	EntityItem.obj
+155	0001:000013f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityItem.obj
+156	0001:00001440	??__E?rttiHashEntityLight@EntityLight@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityLight::rttiHashEntityLight''(void)	EntityLight.obj
+157	0001:00001450	??__E?rttiHashEntityLightClass@EntityLightClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityLightClass::rttiHashEntityLightClass''(void)	EntityLight.obj
+158	0001:00001460	??__E?sMemoryPool@EntityLight@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityLight::sMemoryPool''(void)	EntityLight.obj
+159	0001:00001480	??__E?rttiHashEntityMine@EntityMine@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityMine::rttiHashEntityMine''(void)	EntityMine.obj
+160	0001:00001490	??__E?rttiHashEntityMineClass@EntityMineClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityMineClass::rttiHashEntityMineClass''(void)	EntityMine.obj
+161	0001:000014a0	??__E?sMemoryPool@EntityMine@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityMine::sMemoryPool''(void)	EntityMine.obj
+162	0001:000014c0	??__E?rttiHashEntityPortableTurret@EntityPortableTurret@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityPortableTurret::rttiHashEntityPortableTurret''(void)	EntityPortableTurret.obj
+163	0001:000014d0	??__E?rttiHashEntityPortableTurretClass@EntityPortableTurretClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityPortableTurretClass::rttiHashEntityPortableTurretClass''(void)	EntityPortableTurret.obj
+164	0001:000014e0	??__E?sMemoryPool@EntityPortableTurret@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityPortableTurret::sMemoryPool''(void)	EntityPortableTurret.obj
+165	0001:00001500	??__E?rttiHashEntityProp@EntityProp@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityProp::rttiHashEntityProp''(void)	EntityProp.obj
+166	0001:00001510	??__E?rttiHashEntityPropClass@EntityPropClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityPropClass::rttiHashEntityPropClass''(void)	EntityProp.obj
+167	0001:00001520	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityProp.obj
+168	0001:00001570	??__E?rttiHashEntityPropAnimated@EntityPropAnimated@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityPropAnimated::rttiHashEntityPropAnimated''(void)	EntityPropAnimated.obj
+169	0001:00001580	??__E?rttiHashEntityPropAnimatedClass@EntityPropAnimatedClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityPropAnimatedClass::rttiHashEntityPropAnimatedClass''(void)	EntityPropAnimated.obj
+170	0001:00001590	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityPropAnimated.obj
+171	0001:000015e0	??__E?rttiHashEntityRemoteTerminal@EntityRemoteTerminal@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityRemoteTerminal::rttiHashEntityRemoteTerminal''(void)	EntityRemoteTerminal.obj
+172	0001:000015f0	??__E?rttiHashEntityRemoteTerminalClass@EntityRemoteTerminalClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityRemoteTerminalClass::rttiHashEntityRemoteTerminalClass''(void)	EntityRemoteTerminal.obj
+173	0001:00001600	??__E?sMemoryPool@EntityRemoteTerminal@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityRemoteTerminal::sMemoryPool''(void)	EntityRemoteTerminal.obj
+174	0001:00001620	??__E?rttiHashEntitySoldier@EntitySoldier@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoldier::rttiHashEntitySoldier''(void)	EntitySoldier.obj
+175	0001:00001630	??__E?rttiHashEntitySoldierClass@EntitySoldierClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoldierClass::rttiHashEntitySoldierClass''(void)	EntitySoldier.obj
+176	0001:00001640	??__E?sMemoryPool@AcklayData@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool AcklayData::sMemoryPool''(void)	EntitySoldier.obj
+177	0001:00001660	??__E?sMemoryPool@EntitySoldier@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntitySoldier::sMemoryPool''(void)	EntitySoldier.obj
+178	0001:00001680	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntitySoldier.obj
+179	0001:000016d0	??__Eg_SoldierPolyCount@@YAXXZ	void __cdecl `dynamic initializer for 'g_SoldierPolyCount''(void)	EntitySoldier.obj
+180	0001:00001700	??__E?rttiHashEntitySound@EntitySound@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySound::rttiHashEntitySound''(void)	EntitySound.obj
+181	0001:00001710	??__E?rttiHashEntitySoundClass@EntitySoundClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoundClass::rttiHashEntitySoundClass''(void)	EntitySound.obj
+182	0001:00001720	??__E?sEntitySoundList@EntitySound@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle EntitySound::sEntitySoundList''(void)	EntitySound.obj
+183	0001:00001730	??__E?sMemoryPool@SoundSpaceRegion@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool SoundSpaceRegion::sMemoryPool''(void)	EntitySound.obj
+184	0001:00001750	??__E?rttiHashEntitySoundStatic@EntitySoundStatic@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoundStatic::rttiHashEntitySoundStatic''(void)	EntitySoundStatic.obj
+185	0001:00001760	??__E?rttiHashEntitySoundStaticClass@EntitySoundStaticClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoundStaticClass::rttiHashEntitySoundStaticClass''(void)	EntitySoundStatic.obj
+186	0001:00001770	??__E?sMemoryPool@EntitySoundStatic@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntitySoundStatic::sMemoryPool''(void)	EntitySoundStatic.obj
+187	0001:00001790	??__E?rttiHashEntitySoundStream@EntitySoundStream@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoundStream::rttiHashEntitySoundStream''(void)	EntitySoundStream.obj
+188	0001:000017a0	??__E?rttiHashEntitySoundStreamClass@EntitySoundStreamClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntitySoundStreamClass::rttiHashEntitySoundStreamClass''(void)	EntitySoundStream.obj
+189	0001:000017b0	??__E?sMemoryPool@EntitySoundStream@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntitySoundStream::sMemoryPool''(void)	EntitySoundStream.obj
+190	0001:000017d0	??__E?rttiHashEntityTrap@EntityTrap@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityTrap::rttiHashEntityTrap''(void)	EntityTrap.obj
+191	0001:000017e0	??__E?rttiHashEntityTrapClass@EntityTrapClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityTrapClass::rttiHashEntityTrapClass''(void)	EntityTrap.obj
+192	0001:000017f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityTrap.obj
+193	0001:00001840	??__E?rttiHashEntityWalker@EntityWalker@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityWalker::rttiHashEntityWalker''(void)	EntityWalker.obj
+194	0001:00001850	??__E?rttiHashEntityWalkerClass@EntityWalkerClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash EntityWalkerClass::rttiHashEntityWalkerClass''(void)	EntityWalker.obj
+195	0001:00001860	??__E?sMemoryPool@EntityWalker@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool EntityWalker::sMemoryPool''(void)	EntityWalker.obj
+196	0001:00001880	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	EntityWalker.obj
+197	0001:000018d0	??__Eg_WalkerShowDamage@@YAXXZ	void __cdecl `dynamic initializer for 'g_WalkerShowDamage''(void)	EntityWalker.obj
+198	0001:00001900	??__EmChangeClass@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mChangeClass''(void)	EventManager_Character.obj
+199	0001:00001910	??__EmDeath@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mDeath''(void)	EventManager_Character.obj
+200	0001:00001920	??__EmDeathsChange@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mDeathsChange''(void)	EventManager_Character.obj
+201	0001:00001930	??__EmDispenseControllable@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mDispenseControllable''(void)	EventManager_Character.obj
+202	0001:00001940	??__EmDispensePowerup@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mDispensePowerup''(void)	EventManager_Character.obj
+203	0001:00001950	??__EmEnterVehicle@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mEnterVehicle''(void)	EventManager_Character.obj
+204	0001:00001960	??__EmIssueAICommand@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mIssueAICommand''(void)	EventManager_Character.obj
+205	0001:00001970	??__EmKillsChange@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mKillsChange''(void)	EventManager_Character.obj
+206	0001:00001980	??__EmLandedFlyer@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mLandedFlyer''(void)	EventManager_Character.obj
+207	0001:00001990	??__EmScoreChange@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mScoreChange''(void)	EventManager_Character.obj
+208	0001:000019a0	??__EmSpawn@CharacterEvent@EventManager@@YAXXZ	void __cdecl EventManager::CharacterEvent::`dynamic initializer for 'mSpawn''(void)	EventManager_Character.obj
+209	0001:000019b0	??__EmAbortCapture@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mAbortCapture''(void)	EventManager_CommandPost.obj
+210	0001:000019c0	??__EmAbortNeutralize@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mAbortNeutralize''(void)	EventManager_CommandPost.obj
+211	0001:000019d0	??__EmBeginCapture@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mBeginCapture''(void)	EventManager_CommandPost.obj
+212	0001:000019e0	??__EmBeginNeutralize@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mBeginNeutralize''(void)	EventManager_CommandPost.obj
+213	0001:000019f0	??__EmFinishCapture@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mFinishCapture''(void)	EventManager_CommandPost.obj
+214	0001:00001a00	??__EmFinishNeutralize@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mFinishNeutralize''(void)	EventManager_CommandPost.obj
+215	0001:00001a10	??__EmKill@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mKill''(void)	EventManager_CommandPost.obj
+216	0001:00001a20	??__EmRespawn@CommandPostEvent@EventManager@@YAXXZ	void __cdecl EventManager::CommandPostEvent::`dynamic initializer for 'mRespawn''(void)	EventManager_CommandPost.obj
+217	0001:00001a30	??__EmPlayerChange@ControllableEvent@EventManager@@YAXXZ	void __cdecl EventManager::ControllableEvent::`dynamic initializer for 'mPlayerChange''(void)	EventManager_Controllable.obj
+218	0001:00001a40	??__EmTargetChange@ControllableEvent@EventManager@@YAXXZ	void __cdecl EventManager::ControllableEvent::`dynamic initializer for 'mTargetChange''(void)	EventManager_Controllable.obj
+219	0001:00001a50	??__EmTeamChange@ControllableEvent@EventManager@@YAXXZ	void __cdecl EventManager::ControllableEvent::`dynamic initializer for 'mTeamChange''(void)	EventManager_Controllable.obj
+220	0001:00001a60	??__EmWeaponChange@ControllableEvent@EventManager@@YAXXZ	void __cdecl EventManager::ControllableEvent::`dynamic initializer for 'mWeaponChange''(void)	EventManager_Controllable.obj
+221	0001:00001a70	??__EmCapture@FlagEvent@EventManager@@YAXXZ	void __cdecl EventManager::FlagEvent::`dynamic initializer for 'mCapture''(void)	EventManager_Flag.obj
+222	0001:00001a80	??__EmDrop@FlagEvent@EventManager@@YAXXZ	void __cdecl EventManager::FlagEvent::`dynamic initializer for 'mDrop''(void)	EventManager_Flag.obj
+223	0001:00001a90	??__EmPickUp@FlagEvent@EventManager@@YAXXZ	void __cdecl EventManager::FlagEvent::`dynamic initializer for 'mPickUp''(void)	EventManager_Flag.obj
+224	0001:00001aa0	??__EmReset@FlagEvent@EventManager@@YAXXZ	void __cdecl EventManager::FlagEvent::`dynamic initializer for 'mReset''(void)	EventManager_Flag.obj
+225	0001:00001ab0	??__EmReturn@FlagEvent@EventManager@@YAXXZ	void __cdecl EventManager::FlagEvent::`dynamic initializer for 'mReturn''(void)	EventManager_Flag.obj
+226	0001:00001ac0	??__EmCreate@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mCreate''(void)	EventManager_Object.obj
+227	0001:00001ad0	??__EmDamage@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mDamage''(void)	EventManager_Object.obj
+228	0001:00001ae0	??__EmDelete@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mDelete''(void)	EventManager_Object.obj
+229	0001:00001af0	??__EmHack@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mHack''(void)	EventManager_Object.obj
+230	0001:00001b00	??__EmHeadshot@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mHeadshot''(void)	EventManager_Object.obj
+231	0001:00001b10	??__EmHealthChange@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mHealthChange''(void)	EventManager_Object.obj
+232	0001:00001b20	??__EmInit@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mInit''(void)	EventManager_Object.obj
+233	0001:00001b30	??__EmKill@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mKill''(void)	EventManager_Object.obj
+234	0001:00001b40	??__EmRepair@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mRepair''(void)	EventManager_Object.obj
+235	0001:00001b50	??__EmRespawn@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mRespawn''(void)	EventManager_Object.obj
+236	0001:00001b60	??__EmShieldChange@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mShieldChange''(void)	EventManager_Object.obj
+237	0001:00001b70	??__EmTeamChange@ObjectEvent@EventManager@@YAXXZ	void __cdecl EventManager::ObjectEvent::`dynamic initializer for 'mTeamChange''(void)	EventManager_Object.obj
+238	0001:00001b80	??__EmEnterRegion@RegionEvent@EventManager@@YAXXZ	void __cdecl EventManager::RegionEvent::`dynamic initializer for 'mEnterRegion''(void)	EventManager_Region.obj
+239	0001:00001b90	??__EmLeaveRegion@RegionEvent@EventManager@@YAXXZ	void __cdecl EventManager::RegionEvent::`dynamic initializer for 'mLeaveRegion''(void)	EventManager_Region.obj
+240	0001:00001ba0	??__EmPointsChange@TeamEvent@EventManager@@YAXXZ	void __cdecl EventManager::TeamEvent::`dynamic initializer for 'mPointsChange''(void)	EventManager_Team.obj
+241	0001:00001bb0	??__EmTicketBleedChange@TeamEvent@EventManager@@YAXXZ	void __cdecl EventManager::TeamEvent::`dynamic initializer for 'mTicketBleedChange''(void)	EventManager_Team.obj
+242	0001:00001bc0	??__EmTicketCountChange@TeamEvent@EventManager@@YAXXZ	void __cdecl EventManager::TeamEvent::`dynamic initializer for 'mTicketCountChange''(void)	EventManager_Team.obj
+243	0001:00001bd0	??__EmElapsed@TimerEvent@EventManager@@YAXXZ	void __cdecl EventManager::TimerEvent::`dynamic initializer for 'mElapsed''(void)	EventManager_Timer.obj
+244	0001:00001be0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Explosion.obj
+245	0001:00001c30	??__E?_Thread@FLEffect@@2VFLEffectThread@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class FLEffect::FLEffectThread FLEffect::_Thread''(void)	FLEffect.obj
+246	0001:00001c50	??__E?s_OffsetMatrixPool@FLEffectObject@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool FLEffectObject::s_OffsetMatrixPool''(void)	FLEffect.obj
+247	0001:00001c70	??__E?sMemoryPool@Event@GuiManager@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool GuiManager::Event::sMemoryPool''(void)	FLGuiManager.obj
+248	0001:00001c90	??__EsInstances@@YAXXZ	void __cdecl `dynamic initializer for 'sInstances''(void)	FLGuiManager.obj
+249	0001:00001cc0	??__EsKeygrabber@@YAXXZ	void __cdecl `dynamic initializer for 'sKeygrabber''(void)	FLGuiManager.obj
+250	0001:00001cf0	??__E?s_instance@FLInputManager@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class FLInputManager FLInputManager::s_instance''(void)	FLInputManager.obj
+251	0001:00001e50	??__EgAlternateActionKeys@@YAXXZ	void __cdecl `dynamic initializer for 'gAlternateActionKeys''(void)	FLInputManager.obj
+252	0001:00001e90	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	FirstPerson.obj
+253	0001:00001ee0	??__E?rttiHashFlagItem@FlagItem@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FlagItem::rttiHashFlagItem''(void)	FlagItem.obj
+254	0001:00001ef0	??__E?rttiHashFlagItemClass@FlagItemClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FlagItemClass::rttiHashFlagItemClass''(void)	FlagItem.obj
+255	0001:00001f00	??__E?sMemoryPool@FlagItem@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool FlagItem::sMemoryPool''(void)	FlagItem.obj
+256	0001:00001f20	??__EsFlashyTextManagerInstance@@YAXXZ	void __cdecl `dynamic initializer for 'sFlashyTextManagerInstance''(void)	FlashyTextElement.obj
+257	0001:00001f80	??__E?sRegions@FlyRegionManager@@2V?$ListPool@PAVRedRegion@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class ListPool<class RedRegion *,int> FlyRegionManager::sRegions''(void)	FlyRegion.obj
+258	0001:00001fc0	??__E?rttiHashFoleyFX@FoleyFX@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FoleyFX::rttiHashFoleyFX''(void)	FoleyFX.obj
+259	0001:00001fd0	??__E?smList@FoleyFX@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle FoleyFX::smList''(void)	FoleyFX.obj
+260	0001:00001fe0	??__E?smList@FoleyFXGroup@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle FoleyFXGroup::smList''(void)	FoleyFXGroup.obj
+261	0001:00001ff0	??__E?rttiHashFoleyFXImpact@FoleyFXImpact@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FoleyFXImpact::rttiHashFoleyFXImpact''(void)	FoleyFXOrdnance.obj
+262	0001:00002000	??__E?smFreeList@FoleyFXImpact@@2VFreeList@Snd@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList FoleyFXImpact::smFreeList''(void)	FoleyFXOrdnance.obj
+263	0001:00002010	??__E?smList@FoleyFXRegion@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle FoleyFXRegion::smList''(void)	FoleyFXRegion.obj
+264	0001:00002020	??__E?rttiHashFoleyFXSoldier@FoleyFXSoldier@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FoleyFXSoldier::rttiHashFoleyFXSoldier''(void)	FoleyFXSoldier.obj
+265	0001:00002030	??__E?smFreeList@FoleyFXSoldier@@2VFreeList@Snd@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList FoleyFXSoldier::smFreeList''(void)	FoleyFXSoldier.obj
+266	0001:00002040	??__E?rttiHashFoleyFXWalker@FoleyFXWalker@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash FoleyFXWalker::rttiHashFoleyFXWalker''(void)	FoleyFXWalker.obj
+267	0001:00002050	??__E?smFreeList@FoleyFXWalker@@2VFreeList@Snd@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList FoleyFXWalker::smFreeList''(void)	FoleyFXWalker.obj
+268	0001:00002060	??__E?rttiHashFollowGoal@FollowGoal@AI@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash AI::FollowGoal::rttiHashFollowGoal''(void)	FollowGoal.obj
+269	0001:00002070	??__E_frameUpdateTimer@@YAXXZ	void __cdecl `dynamic initializer for '_frameUpdateTimer''(void)	FrameUpdate.obj
+270	0001:00002080	??__EgNormalizedMagentaColor@@YAXXZ	void __cdecl `dynamic initializer for 'gNormalizedMagentaColor''(void)	FrameUpdate.obj
+271	0001:00002100	??__EsAspectRatio@@YAXXZ	void __cdecl `dynamic initializer for 'sAspectRatio''(void)	GameCamera.obj
+272	0001:00002110	??__EframeTimer@@YAXXZ	void __cdecl `dynamic initializer for 'frameTimer''(void)	GameLoop.obj
+273	0001:00002120	??__EmAttractGroup@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mAttractGroup''(void)	GameLoop.obj
+274	0001:00002140	??__EmAttractInfoText@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mAttractInfoText''(void)	GameLoop.obj
+275	0001:00002160	??__EmDedicatedGroup@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mDedicatedGroup''(void)	GameLoop.obj
+276	0001:00002180	??__EmDedicatedTeam1Text@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mDedicatedTeam1Text''(void)	GameLoop.obj
+277	0001:000021a0	??__EmDedicatedTeam2Text@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mDedicatedTeam2Text''(void)	GameLoop.obj
+278	0001:000021c0	??__EmDedicatedTitleText@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mDedicatedTitleText''(void)	GameLoop.obj
+279	0001:000021e0	??__EmWaitMessageGroup@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mWaitMessageGroup''(void)	GameLoop.obj
+280	0001:00002200	??__EmWaitTextElement@GameLoop@@YAXXZ	void __cdecl GameLoop::`dynamic initializer for 'mWaitTextElement''(void)	GameLoop.obj
+281	0001:00002220	??__EnetAutoAssignTeamsOriginalSetting@@YAXXZ	void __cdecl `dynamic initializer for 'netAutoAssignTeamsOriginalSetting''(void)	GameLoop.obj
+282	0001:00002230	??__Eg_InGameMovieQueue@@YAXXZ	void __cdecl `dynamic initializer for 'g_InGameMovieQueue''(void)	GameMovie.obj
+283	0001:00002250	??__E?rttiHashGameObject@GameObject@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash GameObject::rttiHashGameObject''(void)	GameObject.obj
+284	0001:00002260	??__E?rttiHashGameObjectClass@GameObjectClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash GameObjectClass::rttiHashGameObjectClass''(void)	GameObject.obj
+285	0001:00002270	??__E?smFreeList@Layer@SoundParameterized@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundParameterized::Layer::smFreeList''(void)	GameSoundEngine.obj
+286	0001:00002280	??__EgSoundHeap@GameSoundEngine@@YAXXZ	void __cdecl GameSoundEngine::`dynamic initializer for 'gSoundHeap''(void)	GameSoundEngine.obj
+287	0001:00002290	??__EsSoundDamping@@YAXXZ	void __cdecl `dynamic initializer for 'sSoundDamping''(void)	GameSoundEngine.obj
+288	0001:000022b0	??__E?_NormalState@PlayState@MissionState@GameState@@2VNormalState@123@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class GameState::MissionState::PlayState::NormalState GameState::MissionState::PlayState::_NormalState''(void)	GameState.obj
+289	0001:000022c0	??__E?_PausedState@PlayState@MissionState@GameState@@2VPausedState@123@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class GameState::MissionState::PlayState::PausedState GameState::MissionState::PlayState::_PausedState''(void)	GameState.obj
+290	0001:000022d0	??__E?_PlayState@MissionState@GameState@@2VPlayState@12@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class GameState::MissionState::PlayState GameState::MissionState::_PlayState''(void)	GameState.obj
+291	0001:000022e0	??__E_MissionState@@YAXXZ	void __cdecl `dynamic initializer for '_MissionState''(void)	GameState.obj
+292	0001:000022f0	??__E_ShellState@@YAXXZ	void __cdecl `dynamic initializer for '_ShellState''(void)	GameState.obj
+293	0001:00002300	??__E_SystemTimeBase@GameState@@YAXXZ	void __cdecl GameState::`dynamic initializer for '_SystemTimeBase''(void)	GameState.obj
+294	0001:00002310	??__E_TimeBase@GameState@@YAXXZ	void __cdecl GameState::`dynamic initializer for '_TimeBase''(void)	GameState.obj
+295	0001:00002320	??__E_TotalTimeBase@GameState@@YAXXZ	void __cdecl GameState::`dynamic initializer for '_TotalTimeBase''(void)	GameState.obj
+296	0001:00002330	??__EsStatsLeaderboard@@YAXXZ	void __cdecl `dynamic initializer for 'sStatsLeaderboard''(void)	GameState.obj
+297	0001:000023e0	??__EsStatsScratchBytes@@YAXXZ	void __cdecl `dynamic initializer for 'sStatsScratchBytes''(void)	GameState.obj
+298	0001:000023f0	??__EgTransport@GameVoiceChat@@YAXXZ	void __cdecl GameVoiceChat::`dynamic initializer for 'gTransport''(void)	GameVoiceChat.obj
+299	0001:00002410	??__EsDecoderStorage@@YAXXZ	void __cdecl `dynamic initializer for 'sDecoderStorage''(void)	GameVoiceChat.obj
+300	0001:00002420	??__EsEncoderStorage@@YAXXZ	void __cdecl `dynamic initializer for 'sEncoderStorage''(void)	GameVoiceChat.obj
+301	0001:00002430	??__EsNodeStorage@@YAXXZ	void __cdecl `dynamic initializer for 'sNodeStorage''(void)	GameVoiceChat.obj
+302	0001:00002440	??__EgPacketQueue@GameVoiceChat@@YAXXZ	void __cdecl GameVoiceChat::`dynamic initializer for 'gPacketQueue''(void)	GameVoiceChatUtil.obj
+303	0001:00002470	??__E?sList@Element@HUD@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble HUD::Element::sList''(void)	HUDElement.obj
+304	0001:00002480	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	HUDElement.obj
+305	0001:000024d0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	HUDElementBarSegmented.obj
+306	0001:00002520	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	HUDElementGroup.obj
+307	0001:00002570	??__E?sMapList@ElementMap@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::ElementMap::sMapList''(void)	HUDElementMap.obj
+308	0001:00002580	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	HUDElementMap.obj
+309	0001:000025d0	??__E?sModelList@ElementModel3D@HUD@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble HUD::ElementModel3D::sModelList''(void)	HUDElementModel3D.obj
+310	0001:000025e0	??__E?sSeatingDisplays@ElementVehicleSeating@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::ElementVehicleSeating::sSeatingDisplays''(void)	HUDElementVehicleSeating.obj
+311	0001:000025f0	??__E?sList@EventClass@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::EventClass::sList''(void)	HUDEvent.obj
+312	0001:00002600	??__E?sEventQueue@EventQueue@HUD@@2V12@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class HUD::EventQueue HUD::EventQueue::sEventQueue''(void)	HUDEventQueue.obj
+313	0001:00002640	??__EgEventList@HUD@@YAXXZ	void __cdecl HUD::`dynamic initializer for 'gEventList''(void)	HUDEventQueue.obj
+314	0001:00002670	??__EgPlayerData@GameEvents@HUD@@YAXXZ	void __cdecl HUD::GameEvents::`dynamic initializer for 'gPlayerData''(void)	HUDGameEvents.obj
+315	0001:000026a0	??__E?sList@Factory@Item@HUD@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble HUD::Item::Factory::sList''(void)	HUDItem.obj
+316	0001:000026b0	??__E?sList@Item@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::Item::sList''(void)	HUDItem.obj
+317	0001:000026c0	??__E?sList@Sound@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::Sound::sList''(void)	HUDSound.obj
+318	0001:000026d0	??__E?sList@Transform@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::Transform::sList''(void)	HUDTransform.obj
+319	0001:000026e0	??__E?sTransformNameMeshList@TransformNameMesh@HUD@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle HUD::TransformNameMesh::sTransformNameMeshList''(void)	HUDTransformNameMesh.obj
+320	0001:000026f0	??__E?sMemoryPool@BaseHint@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool BaseHint::sMemoryPool''(void)	HintManager.obj
+321	0001:00002710	??__E?rttiHashIFaceSoldierAnimator@IFaceSoldierAnimator@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash IFaceSoldierAnimator::rttiHashIFaceSoldierAnimator''(void)	IFaceSoldierAnimator.obj
+322	0001:00002720	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	IFaceSoldierAnimator.obj
+323	0001:00002770	??__E?sMemoryPool@LightFlash@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool LightFlash::sMemoryPool''(void)	LightFlash.obj
+324	0001:00002790	??__E?sMemoryPool@LightningBoltEffectObject@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool LightningBoltEffectObject::sMemoryPool''(void)	LightningBoltEffect.obj
+325	0001:000027b0	??__E?sLVLDatabase@LoadDisplay@@2VIDDatabase@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class LoadDisplay::IDDatabase LoadDisplay::sLVLDatabase''(void)	LoadDisplay.obj
+326	0001:00002800	??__E?sTipsDatabase@LoadDisplay@@2VIDDatabase@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class LoadDisplay::IDDatabase LoadDisplay::sTipsDatabase''(void)	LoadDisplay.obj
+327	0001:00002850	??__EDEFAULT_LED_TEXTURE_HASH@@YAXXZ	void __cdecl `dynamic initializer for 'DEFAULT_LED_TEXTURE_HASH''(void)	LoadDisplay.obj
+328	0001:00002870	??__E?sTargetCommon@LockOnManager@@2PAUTarget@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct LockOnManager::Target * LockOnManager::sTargetCommon''(void)	LockOnManager.obj
+329	0001:000028a0	??__E?sTargetLockSound@LockOnManager@@2VGameSound@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class GameSound LockOnManager::sTargetLockSound''(void)	LockOnManager.obj
+330	0001:000028c0	??__EsDefaultFont@@YAXXZ	void __cdecl `dynamic initializer for 'sDefaultFont''(void)	LuaCallbacks_IFace.obj
+331	0001:000028d0	??__EsSavedPlayerOne@@YAXXZ	void __cdecl `dynamic initializer for 'sSavedPlayerOne''(void)	LuaCallbacks_LoadSave.obj
+332	0001:000028e0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	LuaCallbacks_Mission.obj
+333	0001:00002930	??__EgGlobalNumBots@@YAXXZ	void __cdecl `dynamic initializer for 'gGlobalNumBots''(void)	LuaCallbacks_Options.obj
+334	0001:00002940	??__EsAuditionEffects@@YAXXZ	void __cdecl `dynamic initializer for 'sAuditionEffects''(void)	LuaCallbacks_Sound.obj
+335	0001:00002970	??__EsDelayedSounds@Lua_Callbacks@@YAXXZ	void __cdecl Lua_Callbacks::`dynamic initializer for 'sDelayedSounds''(void)	LuaCallbacks_Sound.obj
+336	0001:000029a0	??__E?_EventInstances@LuaEventManager@@2PAVLuaEvent@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class LuaEvent * LuaEventManager::_EventInstances''(void)	LuaEvent.obj
+337	0001:000029d0	??__E?_Instance@LuaEventManager@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class LuaEventManager LuaEventManager::_Instance''(void)	LuaEvent.obj
+338	0001:00002a30	??__EsAwardHudColor@@YAXXZ	void __cdecl `dynamic initializer for 'sAwardHudColor''(void)	MedalsMgr.obj
+339	0001:00002a40	??__EsMedalHudColor@@YAXXZ	void __cdecl `dynamic initializer for 'sMedalHudColor''(void)	MedalsMgr.obj
+340	0001:00002a50	??__E?rttiHashMountedTurret@MountedTurret@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash MountedTurret::rttiHashMountedTurret''(void)	MountedTurret.obj
+341	0001:00002a60	??__E?rttiHashMountedTurretClass@MountedTurretClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash MountedTurretClass::rttiHashMountedTurretClass''(void)	MountedTurret.obj
+342	0001:00002a70	??__E?sMemoryPool@MountedTurret@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool MountedTurret::sMemoryPool''(void)	MountedTurret.obj
+343	0001:00002a90	??__E?sMemoryPool@Music@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Music::sMemoryPool''(void)	Music.obj
+344	0001:00002ab0	??__E?sMusicActive@Music@@2VPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted Music::sMusicActive''(void)	Music.obj
+345	0001:00002ac0	??__E?sMusicInactive@Music@@2VPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted Music::sMusicInactive''(void)	Music.obj
+346	0001:00002ad0	??__E?rttiHashNavigator@Navigator@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Navigator::rttiHashNavigator''(void)	Navigator.obj
+347	0001:00002ae0	??__E?sMemoryPool@Navigator@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Navigator::sMemoryPool''(void)	Navigator.obj
+348	0001:00002b00	??__E?rttiHashNavigatorFollowTarget@NavigatorFollowTarget@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash NavigatorFollowTarget::rttiHashNavigatorFollowTarget''(void)	NavigatorFollowTarget.obj
+349	0001:00002b10	??__E?rttiHashNavigatorGraphFollower@NavigatorGraphFollower@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash NavigatorGraphFollower::rttiHashNavigatorGraphFollower''(void)	NavigatorGraphFollower.obj
+350	0001:00002b20	??__E?rttiHashNavigatorPathFollower@NavigatorPathFollower@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash NavigatorPathFollower::rttiHashNavigatorPathFollower''(void)	NavigatorPathFollower.obj
+351	0001:00002b30	??__E?rttiHashNavigatorSlide@NavigatorSlide@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash NavigatorSlide::rttiHashNavigatorSlide''(void)	NavigatorSlide.obj
+352	0001:00002b40	??__EsLoginLimiter@@YAXXZ	void __cdecl `dynamic initializer for 'sLoginLimiter''(void)	NetAdmin.obj
+353	0001:00002b50	??__EinPktGroups@@YAXXZ	void __cdecl `dynamic initializer for 'inPktGroups''(void)	NetComm.obj
+354	0001:00002b70	??__EnetDests@@YAXXZ	void __cdecl `dynamic initializer for 'netDests''(void)	NetComm.obj
+355	0001:00002b90	??__EnetTimeBase@@YAXXZ	void __cdecl `dynamic initializer for 'netTimeBase''(void)	NetComm.obj
+356	0001:00002ba0	??__EnetTimeStamp@@YAXXZ	void __cdecl `dynamic initializer for 'netTimeStamp''(void)	NetComm.obj
+357	0001:00002bc0	??__EbandwidthQueue@@YAXXZ	void __cdecl `dynamic initializer for 'bandwidthQueue''(void)	NetDrag.obj
+358	0001:00002be0	??__E?sList@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2V?$PblList@V?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Entity,class EntityClass,struct EntityDesc> > Factory<class Entity,class EntityClass,struct EntityDesc>::sList''(void)	NetGame.obj
+359	0001:00002c00	??__E?sList@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2V?$PblList@V?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc> > Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc>::sList''(void)	NetGame.obj
+360	0001:00002c20	??__E?sList@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2V?$PblList@V?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc> > Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc>::sList''(void)	NetGame.obj
+361	0001:00002c40	??__E?sList@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2V?$PblList@V?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Weapon,class WeaponClass,struct WeaponDesc> > Factory<class Weapon,class WeaponClass,struct WeaponDesc>::sList''(void)	NetGame.obj
+362	0001:00002c60	??__E?sMemoryPool@NetObj@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool NetObj::sMemoryPool''(void)	NetGame.obj
+363	0001:00002c90	??__E?sMemoryPool@NetObjState@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool NetObjState::sMemoryPool''(void)	NetGame.obj
+364	0001:00002cc0	??__EaloHeroData0@@YAXXZ	void __cdecl `dynamic initializer for 'aloHeroData0''(void)	NetGame.obj
+365	0001:00002ce0	??__EaloHeroData1@@YAXXZ	void __cdecl `dynamic initializer for 'aloHeroData1''(void)	NetGame.obj
+366	0001:00002d00	??__EaloHeroData2@@YAXXZ	void __cdecl `dynamic initializer for 'aloHeroData2''(void)	NetGame.obj
+367	0001:00002d20	??__EaloMapDisplayMarkers@@YAXXZ	void __cdecl `dynamic initializer for 'aloMapDisplayMarkers''(void)	NetGame.obj
+368	0001:00002d40	??__EaloMiniStats@@YAXXZ	void __cdecl `dynamic initializer for 'aloMiniStats''(void)	NetGame.obj
+369	0001:00002d50	??__EaloMissionTimer@@YAXXZ	void __cdecl `dynamic initializer for 'aloMissionTimer''(void)	NetGame.obj
+370	0001:00002d60	??__EaloNextGameInfo@@YAXXZ	void __cdecl `dynamic initializer for 'aloNextGameInfo''(void)	NetGame.obj
+371	0001:00002d70	??__EaloReinforcements@@YAXXZ	void __cdecl `dynamic initializer for 'aloReinforcements''(void)	NetGame.obj
+372	0001:00002d80	??__EaloStats@@YAXXZ	void __cdecl `dynamic initializer for 'aloStats''(void)	NetGame.obj
+373	0001:00002d90	??__EaloTrackable@@YAXXZ	void __cdecl `dynamic initializer for 'aloTrackable''(void)	NetGame.obj
+374	0001:00002da0	??__EclientAimerPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientAimerPool''(void)	NetGame.obj
+375	0001:00002dd0	??__EclientAmmoCounterPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientAmmoCounterPool''(void)	NetGame.obj
+376	0001:00002e00	??__EclientArmedDynamicPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientArmedDynamicPool''(void)	NetGame.obj
+377	0001:00002e30	??__EclientAsteroidPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientAsteroidPool''(void)	NetGame.obj
+378	0001:00002e60	??__EclientCarrierPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientCarrierPool''(void)	NetGame.obj
+379	0001:00002e90	??__EclientCommandFlyerPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientCommandFlyerPool''(void)	NetGame.obj
+380	0001:00002ec0	??__EclientCommandHoverPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientCommandHoverPool''(void)	NetGame.obj
+381	0001:00002ef0	??__EclientCommandWalkerPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientCommandWalkerPool''(void)	NetGame.obj
+382	0001:00002f20	??__EclientDroidPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientDroidPool''(void)	NetGame.obj
+383	0001:00002f50	??__EclientDroidekaPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientDroidekaPool''(void)	NetGame.obj
+384	0001:00002f80	??__EclientEnergyBarPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientEnergyBarPool''(void)	NetGame.obj
+385	0001:00002fb0	??__EclientFlagPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientFlagPool''(void)	NetGame.obj
+386	0001:00002fe0	??__EclientFlyerPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientFlyerPool''(void)	NetGame.obj
+387	0001:00003010	??__EclientHoverPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientHoverPool''(void)	NetGame.obj
+388	0001:00003040	??__EclientMountedTurretPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientMountedTurretPool''(void)	NetGame.obj
+389	0001:00003070	??__EclientNdObjMap@@YAXXZ	void __cdecl `dynamic initializer for 'clientNdObjMap''(void)	NetGame.obj
+390	0001:00003080	??__EclientOrdnanceTowCablePool@@YAXXZ	void __cdecl `dynamic initializer for 'clientOrdnanceTowCablePool''(void)	NetGame.obj
+391	0001:000030b0	??__EclientPowerupPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientPowerupPool''(void)	NetGame.obj
+392	0001:000030e0	??__EclientRemoteTerminalPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientRemoteTerminalPool''(void)	NetGame.obj
+393	0001:00003110	??__EclientSoldierPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientSoldierPool''(void)	NetGame.obj
+394	0001:00003140	??__EclientTreeGridPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientTreeGridPool''(void)	NetGame.obj
+395	0001:00003170	??__EclientWalkerBlendPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientWalkerBlendPool''(void)	NetGame.obj
+396	0001:000031a0	??__EclientWalkerBlendUnitPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientWalkerBlendUnitPool''(void)	NetGame.obj
+397	0001:000031d0	??__EclientWalkerLegPairPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientWalkerLegPairPool''(void)	NetGame.obj
+398	0001:00003200	??__EclientWalkerPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientWalkerPool''(void)	NetGame.obj
+399	0001:00003230	??__EclientWeaponPool@@YAXXZ	void __cdecl `dynamic initializer for 'clientWeaponPool''(void)	NetGame.obj
+400	0001:00003260	??__EfarToNearCenter@@YAXXZ	void __cdecl `dynamic initializer for 'farToNearCenter''(void)	NetGame.obj
+401	0001:00003270	??__EframeLockStamp@@YAXXZ	void __cdecl `dynamic initializer for 'frameLockStamp''(void)	NetGame.obj
+402	0001:00003290	??__EframeLockTimeBase@@YAXXZ	void __cdecl `dynamic initializer for 'frameLockTimeBase''(void)	NetGame.obj
+403	0001:000032a0	??__EgCameraFrontPos@@YAXXZ	void __cdecl `dynamic initializer for 'gCameraFrontPos''(void)	NetGame.obj
+404	0001:000032d0	??__EhostAimerPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostAimerPool''(void)	NetGame.obj
+405	0001:00003300	??__EhostAmmoCounterPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostAmmoCounterPool''(void)	NetGame.obj
+406	0001:00003330	??__EhostArmedDynamicPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostArmedDynamicPool''(void)	NetGame.obj
+407	0001:00003360	??__EhostAsteroidPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostAsteroidPool''(void)	NetGame.obj
+408	0001:00003390	??__EhostCarrierPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostCarrierPool''(void)	NetGame.obj
+409	0001:000033c0	??__EhostCommandFlyerPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostCommandFlyerPool''(void)	NetGame.obj
+410	0001:000033f0	??__EhostCommandHoverPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostCommandHoverPool''(void)	NetGame.obj
+411	0001:00003420	??__EhostCommandWalkerPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostCommandWalkerPool''(void)	NetGame.obj
+412	0001:00003450	??__EhostDroidPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostDroidPool''(void)	NetGame.obj
+413	0001:00003480	??__EhostDroidekaPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostDroidekaPool''(void)	NetGame.obj
+414	0001:000034b0	??__EhostEnergyBarPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostEnergyBarPool''(void)	NetGame.obj
+415	0001:000034e0	??__EhostFlagPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostFlagPool''(void)	NetGame.obj
+416	0001:00003510	??__EhostFlyerPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostFlyerPool''(void)	NetGame.obj
+417	0001:00003540	??__EhostHoverPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostHoverPool''(void)	NetGame.obj
+418	0001:00003570	??__EhostMountedTurretPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostMountedTurretPool''(void)	NetGame.obj
+419	0001:000035a0	??__EhostOrdnanceTowCablePool@@YAXXZ	void __cdecl `dynamic initializer for 'hostOrdnanceTowCablePool''(void)	NetGame.obj
+420	0001:000035d0	??__EhostPowerupPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostPowerupPool''(void)	NetGame.obj
+421	0001:00003600	??__EhostRemoteTerminalPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostRemoteTerminalPool''(void)	NetGame.obj
+422	0001:00003630	??__EhostSoldierPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostSoldierPool''(void)	NetGame.obj
+423	0001:00003660	??__EhostTreeGridPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostTreeGridPool''(void)	NetGame.obj
+424	0001:00003690	??__EhostTurns@@YAXXZ	void __cdecl `dynamic initializer for 'hostTurns''(void)	NetGame.obj
+425	0001:000036c0	??__EhostWalkerBlendPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostWalkerBlendPool''(void)	NetGame.obj
+426	0001:000036f0	??__EhostWalkerBlendUnitPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostWalkerBlendUnitPool''(void)	NetGame.obj
+427	0001:00003720	??__EhostWalkerLegPairPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostWalkerLegPairPool''(void)	NetGame.obj
+428	0001:00003750	??__EhostWalkerPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostWalkerPool''(void)	NetGame.obj
+429	0001:00003780	??__EhostWeaponPool@@YAXXZ	void __cdecl `dynamic initializer for 'hostWeaponPool''(void)	NetGame.obj
+430	0001:000037b0	??__ElateState@@YAXXZ	void __cdecl `dynamic initializer for 'lateState''(void)	NetGame.obj
+431	0001:000037d0	??__ElocalClientTurns@@YAXXZ	void __cdecl `dynamic initializer for 'localClientTurns''(void)	NetGame.obj
+432	0001:00003800	??__EnearObjects@@YAXXZ	void __cdecl `dynamic initializer for 'nearObjects''(void)	NetGame.obj
+433	0001:00003820	??__EnetCenter@@YAXXZ	void __cdecl `dynamic initializer for 'netCenter''(void)	NetGame.obj
+434	0001:00003830	??__EnetGameChatMsgClient@@YAXXZ	void __cdecl `dynamic initializer for 'netGameChatMsgClient''(void)	NetGame.obj
+435	0001:00003850	??__EnetGameChatMsgServer@@YAXXZ	void __cdecl `dynamic initializer for 'netGameChatMsgServer''(void)	NetGame.obj
+436	0001:00003870	??__EnetLocalPos@@YAXXZ	void __cdecl `dynamic initializer for 'netLocalPos''(void)	NetGame.obj
+437	0001:00003890	??__EnetPlayers@@YAXXZ	void __cdecl `dynamic initializer for 'netPlayers''(void)	NetGame.obj
+438	0001:000038b0	??__EnoInputs@@YAXXZ	void __cdecl `dynamic initializer for 'noInputs''(void)	NetGame.obj
+439	0001:000038d0	??__ErecentGuestObjects@@YAXXZ	void __cdecl `dynamic initializer for 'recentGuestObjects''(void)	NetGame.obj
+440	0001:00003900	??__ErelChunkClusterData@@YAXXZ	void __cdecl `dynamic initializer for 'relChunkClusterData''(void)	NetGame.obj
+441	0001:00003920	??__EremoteClientTurns@@YAXXZ	void __cdecl `dynamic initializer for 'remoteClientTurns''(void)	NetGame.obj
+442	0001:00003940	??__EsendCenter@@YAXXZ	void __cdecl `dynamic initializer for 'sendCenter''(void)	NetGame.obj
+443	0001:00003950	??__EsendFront@@YAXXZ	void __cdecl `dynamic initializer for 'sendFront''(void)	NetGame.obj
+444	0001:00003960	??__EspawnInfo@@YAXXZ	void __cdecl `dynamic initializer for 'spawnInfo''(void)	NetGame.obj
+445	0001:00003990	??__EtrackDesc@@YAXXZ	void __cdecl `dynamic initializer for 'trackDesc''(void)	NetGame.obj
+446	0001:000039a0	??__EsmoothInfo@@YAXXZ	void __cdecl `dynamic initializer for 'smoothInfo''(void)	NetPredict.obj
+447	0001:000039f0	??__E?mSpecialJoinAddress@NetSetup@@2UNetSessionId@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct NetSessionId NetSetup::mSpecialJoinAddress''(void)	NetSetup.obj
+448	0001:00003a00	??__E?sList@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2V?$PblList@V?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Entity,class EntityClass,struct EntityDesc> > Factory<class Entity,class EntityClass,struct EntityDesc>::sList''(void)	NetSetup.obj
+449	0001:00003a20	??__E?sList@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2V?$PblList@V?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc> > Factory<class Ordnance,class ExplosionClass,struct OrdnanceDesc>::sList''(void)	NetSetup.obj
+450	0001:00003a40	??__E?sList@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2V?$PblList@V?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc> > Factory<class Ordnance,class OrdnanceClass,struct OrdnanceDesc>::sList''(void)	NetSetup.obj
+451	0001:00003a60	??__E?sList@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2V?$PblList@V?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblList<class Factory<class Weapon,class WeaponClass,struct WeaponDesc> > Factory<class Weapon,class WeaponClass,struct WeaponDesc>::sList''(void)	NetSetup.obj
+452	0001:00003a80	??__EautoNetTimeStamp@@YAXXZ	void __cdecl `dynamic initializer for 'autoNetTimeStamp''(void)	NetSetup.obj
+453	0001:00003aa0	??__EclientAddrs@@YAXXZ	void __cdecl `dynamic initializer for 'clientAddrs''(void)	NetSetup.obj
+454	0001:00003ac0	??__EhostAddrs@@YAXXZ	void __cdecl `dynamic initializer for 'hostAddrs''(void)	NetSetup.obj
+455	0001:00003ae0	??__EmyAddr@@YAXXZ	void __cdecl `dynamic initializer for 'myAddr''(void)	NetSetup.obj
+456	0001:00003af0	??__EnetPrevSessionId@@YAXXZ	void __cdecl `dynamic initializer for 'netPrevSessionId''(void)	NetSetup.obj
+457	0001:00003b00	??__EnetRandom@@YAXXZ	void __cdecl `dynamic initializer for 'netRandom''(void)	NetSetup.obj
+458	0001:00003b10	??__EnetSessionId@@YAXXZ	void __cdecl `dynamic initializer for 'netSessionId''(void)	NetSetup.obj
+459	0001:00003b20	??__E?rttiHashOrdnance@Ordnance@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Ordnance::rttiHashOrdnance''(void)	Ordnance.obj
+460	0001:00003b30	??__E?rttiHashOrdnanceClass@OrdnanceClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceClass::rttiHashOrdnanceClass''(void)	Ordnance.obj
+461	0001:00003b40	??__E?sMemoryPool@Ordnance@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Ordnance::sMemoryPool''(void)	Ordnance.obj
+462	0001:00003b60	??__E?rttiHashOrdnanceBeacon@OrdnanceBeacon@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBeacon::rttiHashOrdnanceBeacon''(void)	OrdnanceBeacon.obj
+463	0001:00003b70	??__E?rttiHashOrdnanceBeaconClass@OrdnanceBeaconClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBeaconClass::rttiHashOrdnanceBeaconClass''(void)	OrdnanceBeacon.obj
+464	0001:00003b80	??__E?rttiHashOrdnanceBeam@OrdnanceBeam@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBeam::rttiHashOrdnanceBeam''(void)	OrdnanceBeam.obj
+465	0001:00003b90	??__E?rttiHashOrdnanceBeamClass@OrdnanceBeamClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBeamClass::rttiHashOrdnanceBeamClass''(void)	OrdnanceBeam.obj
+466	0001:00003ba0	??__E?rttiHashOrdnanceBullet@OrdnanceBullet@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBullet::rttiHashOrdnanceBullet''(void)	OrdnanceBullet.obj
+467	0001:00003bb0	??__E?rttiHashOrdnanceBulletClass@OrdnanceBulletClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceBulletClass::rttiHashOrdnanceBulletClass''(void)	OrdnanceBullet.obj
+468	0001:00003bc0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	OrdnanceBullet.obj
+469	0001:00003c10	??__E?rttiHashOrdnanceEmitterClass@OrdnanceEmitterClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceEmitterClass::rttiHashOrdnanceEmitterClass''(void)	OrdnanceEmitter.obj
+470	0001:00003c20	??__E?rttiHashOrdnanceFatRay@OrdnanceFatRay@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceFatRay::rttiHashOrdnanceFatRay''(void)	OrdnanceFatRay.obj
+471	0001:00003c30	??__E?rttiHashOrdnanceFatRayClass@OrdnanceFatRayClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceFatRayClass::rttiHashOrdnanceFatRayClass''(void)	OrdnanceFatRay.obj
+472	0001:00003c40	??__E?rttiHashOrdnanceGrapplingHook@OrdnanceGrapplingHook@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceGrapplingHook::rttiHashOrdnanceGrapplingHook''(void)	OrdnanceGrapplingHook.obj
+473	0001:00003c50	??__E?rttiHashOrdnanceGrapplingHookClass@OrdnanceGrapplingHookClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceGrapplingHookClass::rttiHashOrdnanceGrapplingHookClass''(void)	OrdnanceGrapplingHook.obj
+474	0001:00003c60	??__E?rttiHashOrdnanceGrenade@OrdnanceGrenade@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceGrenade::rttiHashOrdnanceGrenade''(void)	OrdnanceGrenade.obj
+475	0001:00003c70	??__E?rttiHashOrdnanceGrenadeClass@OrdnanceGrenadeClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceGrenadeClass::rttiHashOrdnanceGrenadeClass''(void)	OrdnanceGrenade.obj
+476	0001:00003c80	??__E?rttiHashOrdnanceHaywire@OrdnanceHaywire@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceHaywire::rttiHashOrdnanceHaywire''(void)	OrdnanceHaywire.obj
+477	0001:00003c90	??__E?rttiHashOrdnanceHaywireClass@OrdnanceHaywireClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceHaywireClass::rttiHashOrdnanceHaywireClass''(void)	OrdnanceHaywire.obj
+478	0001:00003ca0	??__E?rttiHashOrdnanceLaser@OrdnanceLaser@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceLaser::rttiHashOrdnanceLaser''(void)	OrdnanceLaser.obj
+479	0001:00003cb0	??__E?rttiHashOrdnanceLaserClass@OrdnanceLaserClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceLaserClass::rttiHashOrdnanceLaserClass''(void)	OrdnanceLaser.obj
+480	0001:00003cc0	??__E?rttiHashOrdnanceMeleeThrow@OrdnanceMeleeThrow@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceMeleeThrow::rttiHashOrdnanceMeleeThrow''(void)	OrdnanceMeleeThrow.obj
+481	0001:00003cd0	??__E?rttiHashOrdnanceMeleeThrowClass@OrdnanceMeleeThrowClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceMeleeThrowClass::rttiHashOrdnanceMeleeThrowClass''(void)	OrdnanceMeleeThrow.obj
+482	0001:00003ce0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	OrdnanceMeleeThrow.obj
+483	0001:00003d30	??__E?rttiHashOrdnanceMissile@OrdnanceMissile@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceMissile::rttiHashOrdnanceMissile''(void)	OrdnanceMissile.obj
+484	0001:00003d40	??__E?rttiHashOrdnanceMissileClass@OrdnanceMissileClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceMissileClass::rttiHashOrdnanceMissileClass''(void)	OrdnanceMissile.obj
+485	0001:00003d50	??__E?rttiHashOrdnanceShell@OrdnanceShell@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceShell::rttiHashOrdnanceShell''(void)	OrdnanceShell.obj
+486	0001:00003d60	??__E?rttiHashOrdnanceShellClass@OrdnanceShellClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceShellClass::rttiHashOrdnanceShellClass''(void)	OrdnanceShell.obj
+487	0001:00003d70	??__E?rttiHashOrdnanceSticky@OrdnanceSticky@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceSticky::rttiHashOrdnanceSticky''(void)	OrdnanceSticky.obj
+488	0001:00003d80	??__E?rttiHashOrdnanceStickyClass@OrdnanceStickyClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceStickyClass::rttiHashOrdnanceStickyClass''(void)	OrdnanceSticky.obj
+489	0001:00003d90	??__E?rttiHashOrdnanceTowCable@OrdnanceTowCable@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceTowCable::rttiHashOrdnanceTowCable''(void)	OrdnanceTowCable.obj
+490	0001:00003da0	??__E?rttiHashOrdnanceTowCableClass@OrdnanceTowCableClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash OrdnanceTowCableClass::rttiHashOrdnanceTowCableClass''(void)	OrdnanceTowCable.obj
+491	0001:00003db0	??__E?sMemoryPool@OrdnanceTowCable@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool OrdnanceTowCable::sMemoryPool''(void)	OrdnanceTowCable.obj
+492	0001:00003dd0	??__E?sMemoryPool@ParticleEmitter@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleEmitter::sMemoryPool''(void)	ParticleEmitter.obj
+493	0001:00003df0	??__EsEmitterCache@@YAXXZ	void __cdecl `dynamic initializer for 'sEmitterCache''(void)	ParticleEmitter.obj
+494	0001:00003e10	??__EsPEO@@YAXXZ	void __cdecl `dynamic initializer for 'sPEO''(void)	ParticleEmitter.obj
+495	0001:00003f00	??__EsParticleCache@@YAXXZ	void __cdecl `dynamic initializer for 'sParticleCache''(void)	ParticleEmitter.obj
+496	0001:00003f20	??__E?sMemoryPool@ParticleEmitterInfoData@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleEmitterInfoData::sMemoryPool''(void)	ParticleEmitterInfo.obj
+497	0001:00003f40	??__E?sMemoryPool@ParticleEmitterObject@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleEmitterObject::sMemoryPool''(void)	ParticleEmitterObject.obj
+498	0001:00003f60	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	ParticleEmitterObject.obj
+499	0001:00003fb0	??__E?sMemoryPool@ColorTransformer@ParticleTransformer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleTransformer::ColorTransformer::sMemoryPool''(void)	ParticleTransformer.obj
+500	0001:00003fd0	??__E?sMemoryPool@PositionTransformer@ParticleTransformer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleTransformer::PositionTransformer::sMemoryPool''(void)	ParticleTransformer.obj
+501	0001:00003ff0	??__E?sMemoryPool@RotationTransformer@ParticleTransformer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleTransformer::RotationTransformer::sMemoryPool''(void)	ParticleTransformer.obj
+502	0001:00004010	??__E?sMemoryPool@SizeTransformer@ParticleTransformer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ParticleTransformer::SizeTransformer::sMemoryPool''(void)	ParticleTransformer.obj
+503	0001:00004030	??__E?rttiHashPassengerSlot@PassengerSlot@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PassengerSlot::rttiHashPassengerSlot''(void)	PassengerSlot.obj
+504	0001:00004040	??__E?sMemoryPool@PassengerSlot@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PassengerSlot::sMemoryPool''(void)	PassengerSlot.obj
+505	0001:00004060	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	PassengerSlot.obj
+506	0001:000040b0	??__E?sMemoryPool@Obstacle@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Obstacle::sMemoryPool''(void)	PathFinder.obj
+507	0001:000040d0	??__E?sMemoryPool@PathNode@PathFinder@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PathFinder::PathNode::sMemoryPool''(void)	PathFinder.obj
+508	0001:000040f0	??__E?sMemoryPool@PathFollower@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PathFollower::sMemoryPool''(void)	PathFollower.obj
+509	0001:00004110	??__EkRttiHashEntityDroideka@?A0x625dd2e2@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityDroideka''(void)	PathFollower.obj
+510	0001:00004120	??__EkRttiHashEntityFlyer@?A0x625dd2e2@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityFlyer''(void)	PathFollower.obj
+511	0001:00004130	??__EkRttiHashEntityHover@?A0x625dd2e2@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityHover''(void)	PathFollower.obj
+512	0001:00004140	??__EkRttiHashEntitySoldier@?A0x625dd2e2@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntitySoldier''(void)	PathFollower.obj
+513	0001:00004150	??__EkRttiHashEntityWalker@?A0x625dd2e2@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityWalker''(void)	PathFollower.obj
+514	0001:00004160	??__E?sMemoryPool@AIPath@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool AIPath::sMemoryPool''(void)	PathManager.obj
+515	0001:00004180	??__E?sMemoryPool@AIPathNode@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool AIPathNode::sMemoryPool''(void)	PathManager.obj
+516	0001:000041a0	??__E?sMemoryPool@PathRequest@PathManager@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PathManager::PathRequest::sMemoryPool''(void)	PathManager.obj
+517	0001:000041c0	??__EmTimer@PathManager@@YAXXZ	void __cdecl PathManager::`dynamic initializer for 'mTimer''(void)	PathManager.obj
+518	0001:000041d0	??__E_sPauseMenuInstance@@YAXXZ	void __cdecl `dynamic initializer for '_sPauseMenuInstance''(void)	PauseMenu.obj
+519	0001:00004200	??__EgTogglePauseReverbCommand@@YAXXZ	void __cdecl `dynamic initializer for 'gTogglePauseReverbCommand''(void)	PauseMenu.obj
+520	0001:00004230	??__E?rttiHashPlayerController@PlayerController@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PlayerController::rttiHashPlayerController''(void)	PlayerController.obj
+521	0001:00004240	??__E?sMemoryPool@PlayerController@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PlayerController::sMemoryPool''(void)	PlayerController.obj
+522	0001:00004260	??__EmAllUserPrefs@PlayerPrefs@@YAXXZ	void __cdecl PlayerPrefs::`dynamic initializer for 'mAllUserPrefs''(void)	PlayerProfile.obj
+523	0001:00004280	??__EmDefaultProfile@@YAXXZ	void __cdecl `dynamic initializer for 'mDefaultProfile''(void)	PlayerProfile.obj
+524	0001:00004290	??__EmProfiles@@YAXXZ	void __cdecl `dynamic initializer for 'mProfiles''(void)	PlayerProfile.obj
+525	0001:000042a0	??__E?rttiHashPowerupItem@PowerupItem@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PowerupItem::rttiHashPowerupItem''(void)	PowerupItem.obj
+526	0001:000042b0	??__E?rttiHashPowerupItemClass@PowerupItemClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PowerupItemClass::rttiHashPowerupItemClass''(void)	PowerupItem.obj
+527	0001:000042c0	??__E?sMemoryPool@PowerupItem@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool PowerupItem::sMemoryPool''(void)	PowerupItem.obj
+528	0001:000042e0	??__E?rttiHashPowerupStation@PowerupStation@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PowerupStation::rttiHashPowerupStation''(void)	PowerupStation.obj
+529	0001:000042f0	??__E?rttiHashPowerupStationClass@PowerupStationClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash PowerupStationClass::rttiHashPowerupStationClass''(void)	PowerupStation.obj
+530	0001:00004300	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	PowerupStation.obj
+531	0001:00004350	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	ProceduralAnimation.obj
+532	0001:000043a0	??__EpamanagerInterpolator@@YAXXZ	void __cdecl `dynamic initializer for 'pamanagerInterpolator''(void)	ProceduralAnimation.obj
+533	0001:000043c0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	PropGenerator.obj
+534	0001:00004410	??__EafScore@@YAXXZ	void __cdecl `dynamic initializer for 'afScore''(void)	PropGenerator.obj
+535	0001:00004420	??__EmPropLayers@PropGenerator@@YAXXZ	void __cdecl PropGenerator::`dynamic initializer for 'mPropLayers''(void)	PropGenerator.obj
+536	0001:00004450	??__EmThread@PropGenerator@@YAXXZ	void __cdecl PropGenerator::`dynamic initializer for 'mThread''(void)	PropGenerator.obj
+537	0001:00004470	??__EsObjectCache@@YAXXZ	void __cdecl `dynamic initializer for 'sObjectCache''(void)	PropModelMesh.obj
+538	0001:000044a0	??__EQosIcon@@YAXXZ	void __cdecl `dynamic initializer for 'QosIcon''(void)	QOSDisplay.obj
+539	0001:000044c0	??__EclientQosText1@@YAXXZ	void __cdecl `dynamic initializer for 'clientQosText1''(void)	QOSDisplay.obj
+540	0001:000044e0	??__EclientQosText2@@YAXXZ	void __cdecl `dynamic initializer for 'clientQosText2''(void)	QOSDisplay.obj
+541	0001:00004500	??__EhostQosText@@YAXXZ	void __cdecl `dynamic initializer for 'hostQosText''(void)	QOSDisplay.obj
+542	0001:00004520	??__EmsgGroup@@YAXXZ	void __cdecl `dynamic initializer for 'msgGroup''(void)	QOSDisplay.obj
+543	0001:00004540	??__EqosText@@YAXXZ	void __cdecl `dynamic initializer for 'qosText''(void)	QOSDisplay.obj
+544	0001:00004560	??__EqosTextDbg@@YAXXZ	void __cdecl `dynamic initializer for 'qosTextDbg''(void)	QOSDisplay.obj
+545	0001:00004580	??__EreticuleInterpolator@@YAXXZ	void __cdecl `dynamic initializer for 'reticuleInterpolator''(void)	ReticuleDisplay.obj
+546	0001:000045b0	??__E?rttiHashRotatingModel@RotatingModel@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash RotatingModel::rttiHashRotatingModel''(void)	RotatingModel.obj
+547	0001:000045c0	??__E?sRegions@RumbleRegionManager@@2V?$ListPool@PAVRumbleRegion@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class ListPool<class RumbleRegion *,int> RumbleRegionManager::sRegions''(void)	RumbleRegion.obj
+548	0001:00004600	??__E?s_RumbleEffectClassList@RumbleEffectClass@@2V?$ListPool@PAVRumbleEffectClass@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class ListPool<class RumbleEffectClass *,int> RumbleEffectClass::s_RumbleEffectClassList''(void)	RumbleRegion.obj
+549	0001:00004640	??__E?s_RumbleEffectList@RumbleEffectClass@@2V?$ListPool@PAVRumbleEffect@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class ListPool<class RumbleEffect *,int> RumbleEffectClass::s_RumbleEffectList''(void)	RumbleRegion.obj
+550	0001:00004680	??__ErumbleRandom@@YAXXZ	void __cdecl `dynamic initializer for 'rumbleRandom''(void)	RumbleRegion.obj
+551	0001:000046c0	??__EmSaveFsm@SaveGameManager@@YAXXZ	void __cdecl SaveGameManager::`dynamic initializer for 'mSaveFsm''(void)	SaveGameManager.obj
+552	0001:000046e0	??__E?sMemoryPool@ShieldEffect@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool ShieldEffect::sMemoryPool''(void)	ShieldEffect.obj
+553	0001:00004700	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	SkyDome.obj
+554	0001:00004750	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	SkyStars.obj
+555	0001:000047a0	??__E?sMemoryPool@SoldierAnimation@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool SoldierAnimation::sMemoryPool''(void)	SoldierAnimation.obj
+556	0001:000047c0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	SoldierAnimator.obj
+557	0001:00004810	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	SoldierAnimatorClass.obj
+558	0001:00004860	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	SoldierAnimatorLowRes.obj
+559	0001:000048b0	??__E?sMemoryPool@ViewportData@SpaceAssault@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool SpaceAssault::ViewportData::sMemoryPool''(void)	SpaceAssault.obj
+560	0001:000048d0	??__E?m_emitter@SpaceDustEffect@@2PAUDustEmitterData@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct SpaceDustEffect::DustEmitterData * SpaceDustEffect::m_emitter''(void)	SpaceDustEffect.obj
+561	0001:00004900	??__E?sData@DamageArrowGroup@@2PAUData@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct DamageArrowGroup::Data * DamageArrowGroup::sData''(void)	StatusDisplay.obj
+562	0001:00004970	??__E?sRelativeX@SquadCommandGroup@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float SquadCommandGroup::sRelativeX''(void)	StatusDisplay.obj
+563	0001:00004990	??__E?sRelativeY@SquadCommandGroup@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float SquadCommandGroup::sRelativeY''(void)	StatusDisplay.obj
+564	0001:000049b0	??__EgVoiceChatTeamColors@@YAXXZ	void __cdecl `dynamic initializer for 'gVoiceChatTeamColors''(void)	StatusDisplay.obj
+565	0001:00004a20	??__E?sMemoryPool@StickInfo@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool StickInfo::sMemoryPool''(void)	StickInfo.obj
+566	0001:00004a40	??__E_gClientMarkers@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for '_gClientMarkers''(void)	TargetManager.obj
+567	0001:00004a70	??__E_gHostMarkers@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for '_gHostMarkers''(void)	TargetManager.obj
+568	0001:00004aa0	??__E_gPost@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for '_gPost''(void)	TargetManager.obj
+569	0001:00004ad0	??__E_gTarget@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for '_gTarget''(void)	TargetManager.obj
+570	0001:00004b00	??__EgColorTable@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for 'gColorTable''(void)	TargetManager.obj
+571	0001:00004de0	??__EgMarkers@TargetManager@@YAXXZ	void __cdecl TargetManager::`dynamic initializer for 'gMarkers''(void)	TargetManager.obj
+572	0001:00004df0	??__EgEnemyColor@@YAXXZ	void __cdecl `dynamic initializer for 'gEnemyColor''(void)	Team.obj
+573	0001:00004e00	??__EgLocalColor@@YAXXZ	void __cdecl `dynamic initializer for 'gLocalColor''(void)	Team.obj
+574	0001:00004e10	??__EgNeutralColor@@YAXXZ	void __cdecl `dynamic initializer for 'gNeutralColor''(void)	Team.obj
+575	0001:00004e20	??__E?sMemoryPool@TeamAssist@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TeamAssist::sMemoryPool''(void)	TeamAssist.obj
+576	0001:00004e40	??__EsTeamList@@YAXXZ	void __cdecl `dynamic initializer for 'sTeamList''(void)	TeamManager.obj
+577	0001:00004e70	??__E?sMemoryPool@TentacleSimulator@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TentacleSimulator::sMemoryPool''(void)	TentacleSimulator.obj
+578	0001:00004e90	??__E?sExecutingThread@Thread@@2PAVNode@?$PblOrderedList@VThread@@H@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblOrderedList<class Thread,int>::Node * Thread::sExecutingThread''(void)	Thread.obj
+579	0001:00004ea0	??__EsClientFrameThreadList@@YAXXZ	void __cdecl `dynamic initializer for 'sClientFrameThreadList''(void)	Thread.obj
+580	0001:00004eb0	??__EsClientLocalTurnThreadList@@YAXXZ	void __cdecl `dynamic initializer for 'sClientLocalTurnThreadList''(void)	Thread.obj
+581	0001:00004ec0	??__EsClientTurnThreadList@@YAXXZ	void __cdecl `dynamic initializer for 'sClientTurnThreadList''(void)	Thread.obj
+582	0001:00004ed0	??__EsHostFrameThreadList@@YAXXZ	void __cdecl `dynamic initializer for 'sHostFrameThreadList''(void)	Thread.obj
+583	0001:00004ee0	??__EsHostTurnThreadList@@YAXXZ	void __cdecl `dynamic initializer for 'sHostTurnThreadList''(void)	Thread.obj
+584	0001:00004ef0	??__E?sMemoryPool@Timer@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Timer::sMemoryPool''(void)	Timer.obj
+585	0001:00004f10	??__EsClientInstances@@YAXXZ	void __cdecl `dynamic initializer for 'sClientInstances''(void)	Tracker.obj
+586	0001:00004f40	??__EsHostInstances@@YAXXZ	void __cdecl `dynamic initializer for 'sHostInstances''(void)	Tracker.obj
+587	0001:00004f70	??__E?sMemoryPool@TreeGridStack@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TreeGridStack::sMemoryPool''(void)	TreeGrid.obj
+588	0001:00004f90	??__E?sList@Group@TriggerSoundRegion@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle TriggerSoundRegion::Group::sList''(void)	TriggerSoundRegion.obj
+589	0001:00004fa0	??__E?sList@Properties@TriggerSoundRegion@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle TriggerSoundRegion::Properties::sList''(void)	TriggerSoundRegion.obj
+590	0001:00004fb0	??__E?sList@TriggerSoundRegion@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle TriggerSoundRegion::sList''(void)	TriggerSoundRegion.obj
+591	0001:00004fc0	??__E?sMemoryPool@Group@TriggerSoundRegion@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TriggerSoundRegion::Group::sMemoryPool''(void)	TriggerSoundRegion.obj
+592	0001:00004fe0	??__E?sMemoryPool@Properties@TriggerSoundRegion@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TriggerSoundRegion::Properties::sMemoryPool''(void)	TriggerSoundRegion.obj
+593	0001:00005000	??__E?sMemoryPool@TriggerSoundRegion@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool TriggerSoundRegion::sMemoryPool''(void)	TriggerSoundRegion.obj
+594	0001:00005020	??__E?rttiHashUnitAgent@UnitAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitAgent::rttiHashUnitAgent''(void)	UnitAgent.obj
+595	0001:00005030	??__E?sMemoryPool@UnitAgent@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool UnitAgent::sMemoryPool''(void)	UnitAgent.obj
+596	0001:00005050	??__EkRttiHashEntityHover@?A0x7622969b@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityHover''(void)	UnitAttackPatterns.obj
+597	0001:00005060	??__EkRttiHashEntitySoldier@?A0x7622969b@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntitySoldier''(void)	UnitAttackPatterns.obj
+598	0001:00005070	??__EkRttiHashEntityWalker@?A0x7622969b@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityWalker''(void)	UnitAttackPatterns.obj
+599	0001:00005080	??__E?rttiHashUnitBoardAgent@UnitBoardAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitBoardAgent::rttiHashUnitBoardAgent''(void)	UnitBoardAgent.obj
+600	0001:00005090	??__E?rttiHashUnitCTFOffenseAgent@UnitCTFOffenseAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitCTFOffenseAgent::rttiHashUnitCTFOffenseAgent''(void)	UnitCTFOffenseAgent.obj
+601	0001:000050a0	??__E?rttiHashUnitCaptureCPAgent@UnitCaptureCPAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitCaptureCPAgent::rttiHashUnitCaptureCPAgent''(void)	UnitCaptureCPAgent.obj
+602	0001:000050b0	??__E?rttiHashUnitCombatAgent@UnitCombatAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitCombatAgent::rttiHashUnitCombatAgent''(void)	UnitCombatAgent.obj
+603	0001:000050c0	??__E?rttiHashUnitController@UnitController@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitController::rttiHashUnitController''(void)	UnitController.obj
+604	0001:000050d0	??__E?sMemoryPool@UnitController@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool UnitController::sMemoryPool''(void)	UnitController.obj
+605	0001:000050f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	UnitController.obj
+606	0001:00005140	??__E?rttiHashUnitDeathmatchAgent@UnitDeathmatchAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitDeathmatchAgent::rttiHashUnitDeathmatchAgent''(void)	UnitDeathmatchAgent.obj
+607	0001:00005150	??__E?rttiHashUnitDefendAgent@UnitDefendAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitDefendAgent::rttiHashUnitDefendAgent''(void)	UnitDefendAgent.obj
+608	0001:00005160	??__E?rttiHashUnitDestroyAgent@UnitDestroyAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitDestroyAgent::rttiHashUnitDestroyAgent''(void)	UnitDestroyAgent.obj
+609	0001:00005170	??__E?rttiHashUnitFlyAgent@UnitFlyAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitFlyAgent::rttiHashUnitFlyAgent''(void)	UnitFlyAgent.obj
+610	0001:00005180	??__E?rttiHashUnitFlyController@UnitFlyController@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitFlyController::rttiHashUnitFlyController''(void)	UnitFlyController.obj
+611	0001:00005190	??__E?rttiHashUnitFollowAgent@UnitFollowAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitFollowAgent::rttiHashUnitFollowAgent''(void)	UnitFollowAgent.obj
+612	0001:000051a0	??__EkRttiHashEntityDroideka@?A0x8f95c8be@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityDroideka''(void)	UnitFollowAgent.obj
+613	0001:000051b0	??__EkRttiHashEntitySoldier@?A0x8f95c8be@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntitySoldier''(void)	UnitFollowAgent.obj
+614	0001:000051c0	??__E?rttiHashUnitHoldAgent@UnitHoldAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitHoldAgent::rttiHashUnitHoldAgent''(void)	UnitHoldAgent.obj
+615	0001:000051d0	??__E?rttiHashUnitMobileController@UnitMobileController@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitMobileController::rttiHashUnitMobileController''(void)	UnitMobileController.obj
+616	0001:000051e0	??__E?rttiHashUnitRandomAgent@UnitRandomAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitRandomAgent::rttiHashUnitRandomAgent''(void)	UnitRandomAgent.obj
+617	0001:000051f0	??__E?rttiHashUnitStationaryController@UnitStationaryController@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitStationaryController::rttiHashUnitStationaryController''(void)	UnitStationaryController.obj
+618	0001:00005200	??__E?rttiHashUnitTrooperAgent@UnitTrooperAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitTrooperAgent::rttiHashUnitTrooperAgent''(void)	UnitTrooperAgent.obj
+619	0001:00005210	??__E?rttiHashUnitUnBoardAgent@UnitUnBoardAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitUnBoardAgent::rttiHashUnitUnBoardAgent''(void)	UnitUnBoardAgent.obj
+620	0001:00005220	??__E?rttiHashUnitWaitAgent@UnitWaitAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitWaitAgent::rttiHashUnitWaitAgent''(void)	UnitWaitAgent.obj
+621	0001:00005230	??__E?rttiHashUnitWaitSecondaryAgent@UnitWaitSecondaryAgent@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash UnitWaitSecondaryAgent::rttiHashUnitWaitSecondaryAgent''(void)	UnitWaitSecondaryAgent.obj
+622	0001:00005240	??__EmSndQueue@VOHelper@AI@@YAXXZ	void __cdecl AI::VOHelper::`dynamic initializer for 'mSndQueue''(void)	VOHelper.obj
+623	0001:00005270	??__EkRttiHashEntityHover@?A0x1eeeccfd@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for 'kRttiHashEntityHover''(void)	VehicleCoverHelper.obj
+624	0001:00005280	??__E?sEngineList@VehicleEngine@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle VehicleEngine::sEngineList''(void)	VehicleEngine.obj
+625	0001:00005290	??__E?sGlobalList@Boost@VehicleEngineClass@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle VehicleEngineClass::Boost::sGlobalList''(void)	VehicleEngine.obj
+626	0001:000052a0	??__E?smFreeList@Boost@VehicleEngineClass@@2VFreeList@Snd@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList VehicleEngineClass::Boost::smFreeList''(void)	VehicleEngine.obj
+627	0001:000052b0	??__EsClientVehicles@@YAXXZ	void __cdecl `dynamic initializer for 'sClientVehicles''(void)	VehicleManager.obj
+628	0001:000052d0	??__EsHostVehicles@@YAXXZ	void __cdecl `dynamic initializer for 'sHostVehicles''(void)	VehicleManager.obj
+629	0001:000052f0	??__E?sMemoryPool@VehicleTracker@VehicleSpawn@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool VehicleSpawn::VehicleTracker::sMemoryPool''(void)	VehicleSpawn.obj
+630	0001:00005310	??__E?sMemoryPool@RayRequest@VisionManager@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool VisionManager::RayRequest::sMemoryPool''(void)	VisionManager.obj
+631	0001:00005330	??__E?sMemoryPool@WalkerBlend@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool WalkerBlend::sMemoryPool''(void)	WalkerAnimation.obj
+632	0001:00005350	??__E?sMemoryPool@WalkerBlendUnit@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool WalkerBlendUnit::sMemoryPool''(void)	WalkerAnimation.obj
+633	0001:00005370	??__E?sMemoryPool@WalkerLegPair@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool WalkerLegPair::sMemoryPool''(void)	WalkerLegPair.obj
+634	0001:00005390	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	WalkerLegPair.obj
+635	0001:000053e0	??__E?rttiHashWeapon@Weapon@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Weapon::rttiHashWeapon''(void)	Weapon.obj
+636	0001:000053f0	??__E?rttiHashWeaponClass@WeaponClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponClass::rttiHashWeaponClass''(void)	Weapon.obj
+637	0001:00005400	??__E?sMemoryPool@Weapon@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool Weapon::sMemoryPool''(void)	Weapon.obj
+638	0001:00005420	??__E?sWeaponChangeUnableSound@WeaponClass@@2VGameSound@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class GameSound WeaponClass::sWeaponChangeUnableSound''(void)	Weapon.obj
+639	0001:00005440	??__E?rttiHashWeaponAreaEffect@WeaponAreaEffect@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponAreaEffect::rttiHashWeaponAreaEffect''(void)	WeaponAreaEffect.obj
+640	0001:00005450	??__E?rttiHashWeaponAreaEffectClass@WeaponAreaEffectClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponAreaEffectClass::rttiHashWeaponAreaEffectClass''(void)	WeaponAreaEffect.obj
+641	0001:00005460	??__E?rttiHashWeaponBinoculars@WeaponBinoculars@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponBinoculars::rttiHashWeaponBinoculars''(void)	WeaponBinoculars.obj
+642	0001:00005470	??__E?rttiHashWeaponBinocularsClass@WeaponBinocularsClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponBinocularsClass::rttiHashWeaponBinocularsClass''(void)	WeaponBinoculars.obj
+643	0001:00005480	??__E?rttiHashWeaponCannon@WeaponCannon@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponCannon::rttiHashWeaponCannon''(void)	WeaponCannon.obj
+644	0001:00005490	??__E?rttiHashWeaponCannonClass@WeaponCannonClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponCannonClass::rttiHashWeaponCannonClass''(void)	WeaponCannon.obj
+645	0001:000054a0	??__E?rttiHashWeaponCatapult@WeaponCatapult@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponCatapult::rttiHashWeaponCatapult''(void)	WeaponCatapult.obj
+646	0001:000054b0	??__E?rttiHashWeaponCatapultClass@WeaponCatapultClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponCatapultClass::rttiHashWeaponCatapultClass''(void)	WeaponCatapult.obj
+647	0001:000054c0	??__E?rttiHashWeaponDestruct@WeaponDestruct@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDestruct::rttiHashWeaponDestruct''(void)	WeaponDestruct.obj
+648	0001:000054d0	??__E?rttiHashWeaponDestructClass@WeaponDestructClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDestructClass::rttiHashWeaponDestructClass''(void)	WeaponDestruct.obj
+649	0001:000054e0	??__E?rttiHashWeaponDetonator@WeaponDetonator@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDetonator::rttiHashWeaponDetonator''(void)	WeaponDetonator.obj
+650	0001:000054f0	??__E?rttiHashWeaponDetonatorClass@WeaponDetonatorClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDetonatorClass::rttiHashWeaponDetonatorClass''(void)	WeaponDetonator.obj
+651	0001:00005500	??__E?rttiHashWeaponDisguise@WeaponDisguise@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDisguise::rttiHashWeaponDisguise''(void)	WeaponDisguise.obj
+652	0001:00005510	??__E?rttiHashWeaponDisguiseClass@WeaponDisguiseClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDisguiseClass::rttiHashWeaponDisguiseClass''(void)	WeaponDisguise.obj
+653	0001:00005520	??__E?rttiHashWeaponDispenser@WeaponDispenser@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDispenser::rttiHashWeaponDispenser''(void)	WeaponDispenser.obj
+654	0001:00005530	??__E?rttiHashWeaponDispenserClass@WeaponDispenserClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponDispenserClass::rttiHashWeaponDispenserClass''(void)	WeaponDispenser.obj
+655	0001:00005540	??__E?rttiHashWeaponGrapplingHook@WeaponGrapplingHook@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponGrapplingHook::rttiHashWeaponGrapplingHook''(void)	WeaponGrapplingHook.obj
+656	0001:00005550	??__E?rttiHashWeaponGrapplingHookClass@WeaponGrapplingHookClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponGrapplingHookClass::rttiHashWeaponGrapplingHookClass''(void)	WeaponGrapplingHook.obj
+657	0001:00005560	??__E?rttiHashWeaponGrenade@WeaponGrenade@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponGrenade::rttiHashWeaponGrenade''(void)	WeaponGrenade.obj
+658	0001:00005570	??__E?rttiHashWeaponGrenadeClass@WeaponGrenadeClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponGrenadeClass::rttiHashWeaponGrenadeClass''(void)	WeaponGrenade.obj
+659	0001:00005580	??__E?rttiHashWeaponInvisibility@WeaponInvisibility@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponInvisibility::rttiHashWeaponInvisibility''(void)	WeaponInvisibility.obj
+660	0001:00005590	??__E?rttiHashWeaponInvisibilityClass@WeaponInvisibilityClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponInvisibilityClass::rttiHashWeaponInvisibilityClass''(void)	WeaponInvisibility.obj
+661	0001:000055a0	??__E?rttiHashWeaponLaser@WeaponLaser@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponLaser::rttiHashWeaponLaser''(void)	WeaponLaser.obj
+662	0001:000055b0	??__E?rttiHashWeaponLaserClass@WeaponLaserClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponLaserClass::rttiHashWeaponLaserClass''(void)	WeaponLaser.obj
+663	0001:000055c0	??__E?rttiHashWeaponLauncher@WeaponLauncher@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponLauncher::rttiHashWeaponLauncher''(void)	WeaponLauncher.obj
+664	0001:000055d0	??__E?rttiHashWeaponLauncherClass@WeaponLauncherClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponLauncherClass::rttiHashWeaponLauncherClass''(void)	WeaponLauncher.obj
+665	0001:000055e0	??__E?rttiHashWeaponMelee@WeaponMelee@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponMelee::rttiHashWeaponMelee''(void)	WeaponMelee.obj
+666	0001:000055f0	??__E?rttiHashWeaponMeleeClass@WeaponMeleeClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponMeleeClass::rttiHashWeaponMeleeClass''(void)	WeaponMelee.obj
+667	0001:00005600	??__E_IdentityMatrix@?A0x402ffbf3@@YAXXZ	void __cdecl `anonymous namespace'::`dynamic initializer for '_IdentityMatrix''(void)	WeaponMelee.obj
+668	0001:00005650	??__EgDefaultHash@@YAXXZ	void __cdecl `dynamic initializer for 'gDefaultHash''(void)	WeaponMelee.obj
+669	0001:00005670	??__E?rttiHashWeaponMeleeThrow@WeaponMeleeThrow@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponMeleeThrow::rttiHashWeaponMeleeThrow''(void)	WeaponMeleeThrow.obj
+670	0001:00005680	??__E?rttiHashWeaponMeleeThrowClass@WeaponMeleeThrowClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponMeleeThrowClass::rttiHashWeaponMeleeThrowClass''(void)	WeaponMeleeThrow.obj
+671	0001:00005690	??__E?rttiHashWeaponRemote@WeaponRemote@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponRemote::rttiHashWeaponRemote''(void)	WeaponRemote.obj
+672	0001:000056a0	??__E?rttiHashWeaponRemoteClass@WeaponRemoteClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponRemoteClass::rttiHashWeaponRemoteClass''(void)	WeaponRemote.obj
+673	0001:000056b0	??__E?rttiHashWeaponRepair@WeaponRepair@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponRepair::rttiHashWeaponRepair''(void)	WeaponRepair.obj
+674	0001:000056c0	??__E?rttiHashWeaponRepairClass@WeaponRepairClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponRepairClass::rttiHashWeaponRepairClass''(void)	WeaponRepair.obj
+675	0001:000056d0	??__E?rttiHashWeaponShield@WeaponShield@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponShield::rttiHashWeaponShield''(void)	WeaponShield.obj
+676	0001:000056e0	??__E?rttiHashWeaponShieldClass@WeaponShieldClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponShieldClass::rttiHashWeaponShieldClass''(void)	WeaponShield.obj
+677	0001:000056f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	WeaponShield.obj
+678	0001:00005740	??__E?rttiHashWeaponTowCable@WeaponTowCable@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponTowCable::rttiHashWeaponTowCable''(void)	WeaponTowCable.obj
+679	0001:00005750	??__E?rttiHashWeaponTowCableClass@WeaponTowCableClass@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash WeaponTowCableClass::rttiHashWeaponTowCableClass''(void)	WeaponTowCable.obj
+680	0001:00005760	??__Etest@@YAXXZ	void __cdecl `dynamic initializer for 'test''(void)	PblHeap.obj
+681	0001:000058c0	??__E_TheSinCosTable@@YAXXZ	void __cdecl `dynamic initializer for '_TheSinCosTable''(void)	PblMath.obj
+682	0001:00005930	??__EsNegativeXRotation80@@YAXXZ	void __cdecl `dynamic initializer for 'sNegativeXRotation80''(void)	PblMath.obj
+683	0001:000059b0	??__E?_Sim@PblRandom@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblRandom PblRandom::_Sim''(void)	PblRandom.obj
+684	0001:000059f0	??__E?sList@PblRegion@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle PblRegion::sList''(void)	PblRegion.obj
+685	0001:00005a00	??__EpblTime@@YAXXZ	void __cdecl `dynamic initializer for 'pblTime''(void)	PblTime.obj
+686	0001:00005a40	??__EsStartupWordCopy@@YAXXZ	void __cdecl `dynamic initializer for 'sStartupWordCopy''(void)	PblTime.obj
+687	0001:00005a50	??__E?_UnderWaterRenderable@RedWater@@2VUnderWaterRenderable@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class UnderWaterRenderable RedWater::_UnderWaterRenderable''(void)	RedWater.obj
+688	0001:00005a80	??__E?_WaterRenderable@RedWater@@2VWaterRenderable@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class WaterRenderable RedWater::_WaterRenderable''(void)	RedWater.obj
+689	0001:00005ab0	??__E_RenderableLists@FLRenderer@@YAXXZ	void __cdecl FLRenderer::`dynamic initializer for '_RenderableLists''(void)	pcFLRender.obj
+690	0001:00005af0	??__E_enableReflection@@YAXXZ	void __cdecl `dynamic initializer for '_enableReflection''(void)	pcFLRender.obj
+691	0001:00005b20	??__EcvReflectionsDraw@@YAXXZ	void __cdecl `dynamic initializer for 'cvReflectionsDraw''(void)	pcFLRender.obj
+692	0001:00005b50	??__EcvReflectionsEnable@@YAXXZ	void __cdecl `dynamic initializer for 'cvReflectionsEnable''(void)	pcFLRender.obj
+693	0001:00005b80	??__EcvarNearScenePushInf@@YAXXZ	void __cdecl `dynamic initializer for 'cvarNearScenePushInf''(void)	pcFLRender.obj
+694	0001:00005bb0	??__Eg_Enable@@YAXXZ	void __cdecl `dynamic initializer for 'g_Enable''(void)	pcFLRender.obj
+695	0001:00005be0	??__EmCursorGroup@FLRenderer@@YAXXZ	void __cdecl FLRenderer::`dynamic initializer for 'mCursorGroup''(void)	pcFLRender.obj
+696	0001:00005c00	??__EmCursorImage@FLRenderer@@YAXXZ	void __cdecl FLRenderer::`dynamic initializer for 'mCursorImage''(void)	pcFLRender.obj
+697	0001:00005c20	??__Es_cvRenderFarScene@@YAXXZ	void __cdecl `dynamic initializer for 's_cvRenderFarScene''(void)	pcFLRender.obj
+698	0001:00005c50	??__E?_PrintfColor@RedDebug@@0VRedColor@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedColor RedDebug::_PrintfColor''(void)	pcRedDebug.obj
+699	0001:00005c60	??__E?_ScreenGroup@RedDebug@@0VRedScreenGroupElement@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedScreenGroupElement RedDebug::_ScreenGroup''(void)	pcRedDebug.obj
+700	0001:00005c80	??__E?_aMarkers3D@RedDebug@@0PAVRedTetrahedronShape@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedTetrahedronShape * RedDebug::_aMarkers3D''(void)	pcRedDebug.obj
+701	0001:00005cb0	??__E?_aSpheres@RedDebug@@0PAVRedSphereShape@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedSphereShape * RedDebug::_aSpheres''(void)	pcRedDebug.obj
+702	0001:00005ce0	??__E?_aText3D@RedDebug@@0PAUText3D@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static struct RedDebug::Text3D * RedDebug::_aText3D''(void)	pcRedDebug.obj
+703	0001:00005d10	??__E?_aTextLines@RedDebug@@0PAVRedTextElement@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedTextElement * RedDebug::_aTextLines''(void)	pcRedDebug.obj
+704	0001:00005d40	??__E?_kStaticRenderable@RedDebug@@0VRedDebugRenderable@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class RedDebug::RedDebugRenderable RedDebug::_kStaticRenderable''(void)	pcRedDebug.obj
+705	0001:00005d70	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	pcRedDebug.obj
+706	0001:00005dc0	??__EkuiShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiShader''(void)	pcRedDropShadow.obj
+707	0001:00005de0	??__E?_FarInstance@RedParticleRenderer@@2VRenderable@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedParticleRenderer::Renderable RedParticleRenderer::_FarInstance''(void)	pcRedParticle.obj
+708	0001:00005e00	??__E?_Instance@RedParticleRenderer@@2VRenderable@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedParticleRenderer::Renderable RedParticleRenderer::_Instance''(void)	pcRedParticle.obj
+709	0001:00005e20	??__EkuiParticleShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiParticleShader''(void)	pcRedParticle.obj
+710	0001:00005e40	??__E_TerrainRenderable@@YAXXZ	void __cdecl `dynamic initializer for '_TerrainRenderable''(void)	pcRedTerrain.obj
+711	0001:00005f00	??__EcvForceFullDetail@@YAXXZ	void __cdecl `dynamic initializer for 'cvForceFullDetail''(void)	pcRedTerrain.obj
+712	0001:00005f30	??__EWATERSPLASH_COLOR@@YAXXZ	void __cdecl `dynamic initializer for 'WATERSPLASH_COLOR''(void)	pcRedWater.obj
+713	0001:00005f40	??__EkuiNormalMapAdderShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiNormalMapAdderShader''(void)	pcRedWater.obj
+714	0001:00005f60	??__EkuiOceanShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiOceanShader''(void)	pcRedWater.obj
+715	0001:00005f80	??__EkuiPreReflectionShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiPreReflectionShader''(void)	pcRedWater.obj
+716	0001:00005fa0	??__EkuiUnderWaterShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiUnderWaterShader''(void)	pcRedWater.obj
+717	0001:00005fc0	??__EkuiWaterDistortionRingTextureHash@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterDistortionRingTextureHash''(void)	pcRedWater.obj
+718	0001:00005fe0	??__EkuiWaterRingShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterRingShader''(void)	pcRedWater.obj
+719	0001:00006000	??__EkuiWaterRingTextureHash@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterRingTextureHash''(void)	pcRedWater.obj
+720	0001:00006020	??__EkuiWaterShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterShader''(void)	pcRedWater.obj
+721	0001:00006040	??__EkuiWaterSplashShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterSplashShader''(void)	pcRedWater.obj
+722	0001:00006060	??__EkuiWaterSplashTextureHash@@YAXXZ	void __cdecl `dynamic initializer for 'kuiWaterSplashTextureHash''(void)	pcRedWater.obj
+723	0001:00006080	??__EkuiClearShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiClearShader''(void)	pcShadowQuadRenderable.obj
+724	0001:000060a0	??__EkuiFilterShader@@YAXXZ	void __cdecl `dynamic initializer for 'kuiFilterShader''(void)	pcShadowQuadRenderable.obj
+725	0001:000060c0	??__E?s_Factory@pcClearShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcClearShader pcClearShader::s_Factory''(void)	pcClearShader.obj
+726	0001:000061d0	??__E?s_shaderDef@pcClearShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcClearShader::s_shaderDef''(void)	pcClearShader.obj
+727	0001:000061f0	??__E?s_uiRenderTypeHash@pcClearShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcClearShader::s_uiRenderTypeHash''(void)	pcClearShader.obj
+728	0001:00006210	??__E?s_Factory@pcDecalShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcDecalShader pcDecalShader::s_Factory''(void)	pcDecalShader.obj
+729	0001:00006350	??__E?s_shaderDef@pcDecalShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcDecalShader::s_shaderDef''(void)	pcDecalShader.obj
+730	0001:00006370	??__E?s_uiRenderTypeHash@pcDecalShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcDecalShader::s_uiRenderTypeHash''(void)	pcDecalShader.obj
+731	0001:00006390	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcDecalShader.obj
+732	0001:000063b0	??__E?s_Factory@pcFilterCopyShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcFilterCopyShader pcFilterCopyShader::s_Factory''(void)	pcFilterCopyShader.obj
+733	0001:000064f0	??__E?s_shaderDef@pcFilterCopyShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcFilterCopyShader::s_shaderDef''(void)	pcFilterCopyShader.obj
+734	0001:00006510	??__E?s_uiRenderTypeHash@pcFilterCopyShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcFilterCopyShader::s_uiRenderTypeHash''(void)	pcFilterCopyShader.obj
+735	0001:00006530	??__E?s_Factory@pcFlareShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcFlareShader pcFlareShader::s_Factory''(void)	pcFlareShader.obj
+736	0001:00006670	??__E?s_shaderDef@pcFlareShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcFlareShader::s_shaderDef''(void)	pcFlareShader.obj
+737	0001:00006690	??__E?s_uiRenderTypeHash@pcFlareShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcFlareShader::s_uiRenderTypeHash''(void)	pcFlareShader.obj
+738	0001:000066b0	??__E?s_Factory@pcHDRShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcHDRShader pcHDRShader::s_Factory''(void)	pcHDRShader.obj
+739	0001:000067f0	??__E?s_shaderDef@pcHDRShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcHDRShader::s_shaderDef''(void)	pcHDRShader.obj
+740	0001:00006810	??__E?s_uiRenderTypeHash@pcHDRShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcHDRShader::s_uiRenderTypeHash''(void)	pcHDRShader.obj
+741	0001:00006830	??__E?s_Factory@pcInterfaceShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcInterfaceShader pcInterfaceShader::s_Factory''(void)	pcInterfaceShader.obj
+742	0001:00006970	??__E?s_shaderDef@pcInterfaceShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcInterfaceShader::s_shaderDef''(void)	pcInterfaceShader.obj
+743	0001:00006990	??__E?s_uiRenderTypeHash@pcInterfaceShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcInterfaceShader::s_uiRenderTypeHash''(void)	pcInterfaceShader.obj
+744	0001:000069b0	??__E?s_Factory@pcLightBeamShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcLightBeamShader pcLightBeamShader::s_Factory''(void)	pcLightBeamShader.obj
+745	0001:00006af0	??__E?s_shaderDef@pcLightBeamShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcLightBeamShader::s_shaderDef''(void)	pcLightBeamShader.obj
+746	0001:00006b10	??__E?s_uiRenderTypeHash@pcLightBeamShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcLightBeamShader::s_uiRenderTypeHash''(void)	pcLightBeamShader.obj
+747	0001:00006b30	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcLightBeamShader.obj
+748	0001:00006b50	??__E?s_Factory@pcNormalMapAdderShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcNormalMapAdderShader pcNormalMapAdderShader::s_Factory''(void)	pcNormalMapAdderShader.obj
+749	0001:00006ca0	??__E?s_shaderDef@pcNormalMapAdderShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcNormalMapAdderShader::s_shaderDef''(void)	pcNormalMapAdderShader.obj
+750	0001:00006cc0	??__E?s_uiRenderTypeHash@pcNormalMapAdderShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcNormalMapAdderShader::s_uiRenderTypeHash''(void)	pcNormalMapAdderShader.obj
+751	0001:00006ce0	??__EkuiHemisphereNormalizationMap@@YAXXZ	void __cdecl `dynamic initializer for 'kuiHemisphereNormalizationMap''(void)	pcNormalMapAdderShader.obj
+752	0001:00006d00	??__E?s_Factory@pcNormalShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcNormalShader pcNormalShader::s_Factory''(void)	pcNormalShader.obj
+753	0001:00006e40	??__E?s_shaderDef@pcNormalShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcNormalShader::s_shaderDef''(void)	pcNormalShader.obj
+754	0001:00006e60	??__E?s_uiRenderTypeHash@pcNormalShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcNormalShader::s_uiRenderTypeHash''(void)	pcNormalShader.obj
+755	0001:00006e80	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcNormalShader.obj
+756	0001:00006ea0	??__E?s_Factory@pcOceanShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcOceanShader pcOceanShader::s_Factory''(void)	pcOceanShader.obj
+757	0001:00006ff0	??__E?s_shaderDef@pcOceanShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcOceanShader::s_shaderDef''(void)	pcOceanShader.obj
+758	0001:00007010	??__E?s_uiRenderTypeHash@pcOceanShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcOceanShader::s_uiRenderTypeHash''(void)	pcOceanShader.obj
+759	0001:00007030	??__EkuiCubeNormalizationMap@@YAXXZ	void __cdecl `dynamic initializer for 'kuiCubeNormalizationMap''(void)	pcOceanShader.obj
+760	0001:00007050	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcOceanShader.obj
+761	0001:00007070	??__E?s_Factory@pcParticleShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcParticleShader pcParticleShader::s_Factory''(void)	pcParticleShader.obj
+762	0001:000071b0	??__E?s_shaderDef@pcParticleShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcParticleShader::s_shaderDef''(void)	pcParticleShader.obj
+763	0001:000071d0	??__E?s_uiRenderTypeHash@pcParticleShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcParticleShader::s_uiRenderTypeHash''(void)	pcParticleShader.obj
+764	0001:000071f0	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcParticleShader.obj
+765	0001:00007210	??__E?s_Factory@pcPerPixelDiffuseLightingShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcPerPixelDiffuseLightingShader pcPerPixelDiffuseLightingShader::s_Factory''(void)	pcPerPixelDiffuseLightingShader.obj
+766	0001:00007350	??__E?s_shaderDef@pcPerPixelDiffuseLightingShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcPerPixelDiffuseLightingShader::s_shaderDef''(void)	pcPerPixelDiffuseLightingShader.obj
+767	0001:00007370	??__E?s_uiRenderTypeHash@pcPerPixelDiffuseLightingShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcPerPixelDiffuseLightingShader::s_uiRenderTypeHash''(void)	pcPerPixelDiffuseLightingShader.obj
+768	0001:00007390	??__Es_uiDefaultSpotLightMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiDefaultSpotLightMapHash''(void)	pcPerPixelDiffuseLightingShader.obj
+769	0001:000073b0	??__Es_uiLightVolumeMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiLightVolumeMapHash''(void)	pcPerPixelDiffuseLightingShader.obj
+770	0001:000073d0	??__Es_uiNormalizationCubeMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiNormalizationCubeMapHash''(void)	pcPerPixelDiffuseLightingShader.obj
+771	0001:000073f0	??__E?s_Factory@pcPerVertexDiffuseLightingShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcPerVertexDiffuseLightingShader pcPerVertexDiffuseLightingShader::s_Factory''(void)	pcPerVertexDiffuseLightingShader.obj
+772	0001:00007530	??__E?s_shaderDef@pcPerVertexDiffuseLightingShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcPerVertexDiffuseLightingShader::s_shaderDef''(void)	pcPerVertexDiffuseLightingShader.obj
+773	0001:00007550	??__E?s_uiRenderTypeHash@pcPerVertexDiffuseLightingShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcPerVertexDiffuseLightingShader::s_uiRenderTypeHash''(void)	pcPerVertexDiffuseLightingShader.obj
+774	0001:00007570	??__E?s_Factory@pcPreReflectionShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcPreReflectionShader pcPreReflectionShader::s_Factory''(void)	pcPreReflectionShader.obj
+775	0001:000076b0	??__E?s_shaderDef@pcPreReflectionShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcPreReflectionShader::s_shaderDef''(void)	pcPreReflectionShader.obj
+776	0001:000076d0	??__E?s_uiRenderTypeHash@pcPreReflectionShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcPreReflectionShader::s_uiRenderTypeHash''(void)	pcPreReflectionShader.obj
+777	0001:000076f0	??__E?s_Factory@pcRainShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRainShader pcRainShader::s_Factory''(void)	pcRainShader.obj
+778	0001:00007830	??__E?s_shaderDef@pcRainShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcRainShader::s_shaderDef''(void)	pcRainShader.obj
+779	0001:00007850	??__E?s_uiRenderTypeHash@pcRainShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcRainShader::s_uiRenderTypeHash''(void)	pcRainShader.obj
+780	0001:00007870	??__E?s_Factory@pcRefractionShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRefractionShader pcRefractionShader::s_Factory''(void)	pcRefractionShader.obj
+781	0001:000079b0	??__E?s_shaderDef@pcRefractionShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcRefractionShader::s_shaderDef''(void)	pcRefractionShader.obj
+782	0001:000079d0	??__E?s_uiRenderTypeHash@pcRefractionShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcRefractionShader::s_uiRenderTypeHash''(void)	pcRefractionShader.obj
+783	0001:000079f0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	pcRefractionShader.obj
+784	0001:00007a40	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcRefractionShader.obj
+785	0001:00007a60	??__E?s_Factory@pcSampleShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcSampleShader pcSampleShader::s_Factory''(void)	pcSampleShader.obj
+786	0001:00007ba0	??__E?s_shaderDef@pcSampleShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcSampleShader::s_shaderDef''(void)	pcSampleShader.obj
+787	0001:00007bc0	??__E?s_uiRenderTypeHash@pcSampleShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcSampleShader::s_uiRenderTypeHash''(void)	pcSampleShader.obj
+788	0001:00007be0	??__E?s_Factory@pcShadowQuadShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcShadowQuadShader pcShadowQuadShader::s_Factory''(void)	pcShadowQuadShader.obj
+789	0001:00007d20	??__E?s_shaderDef@pcShadowQuadShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcShadowQuadShader::s_shaderDef''(void)	pcShadowQuadShader.obj
+790	0001:00007d40	??__E?s_uiRenderTypeHash@pcShadowQuadShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcShadowQuadShader::s_uiRenderTypeHash''(void)	pcShadowQuadShader.obj
+791	0001:00007d60	??__E?s_Factory@pcShieldShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcShieldShader pcShieldShader::s_Factory''(void)	pcShieldShader.obj
+792	0001:00007ea0	??__E?s_shaderDef@pcShieldShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcShieldShader::s_shaderDef''(void)	pcShieldShader.obj
+793	0001:00007ec0	??__E?s_uiRenderTypeHash@pcShieldShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcShieldShader::s_uiRenderTypeHash''(void)	pcShieldShader.obj
+794	0001:00007ee0	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcShieldShader.obj
+795	0001:00007f00	??__EkuiSpecularSpotMap@@YAXXZ	void __cdecl `dynamic initializer for 'kuiSpecularSpotMap''(void)	pcShieldShader.obj
+796	0001:00007f30	??__E?s_Factory@pcSkyFogShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcSkyFogShader pcSkyFogShader::s_Factory''(void)	pcSkyFogShader.obj
+797	0001:00008070	??__E?s_shaderDef@pcSkyFogShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcSkyFogShader::s_shaderDef''(void)	pcSkyFogShader.obj
+798	0001:00008090	??__E?s_uiRenderTypeHash@pcSkyFogShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcSkyFogShader::s_uiRenderTypeHash''(void)	pcSkyFogShader.obj
+799	0001:000080b0	??__E?s_Factory@pcSpecularLightingShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcSpecularLightingShader pcSpecularLightingShader::s_Factory''(void)	pcSpecularLightingShader.obj
+800	0001:000081f0	??__E?s_shaderDef@pcSpecularLightingShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcSpecularLightingShader::s_shaderDef''(void)	pcSpecularLightingShader.obj
+801	0001:00008210	??__E?s_uiRenderTypeHash@pcSpecularLightingShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcSpecularLightingShader::s_uiRenderTypeHash''(void)	pcSpecularLightingShader.obj
+802	0001:00008230	??__EkfSpecSizeInvDefault@@YAXXZ	void __cdecl `dynamic initializer for 'kfSpecSizeInvDefault''(void)	pcSpecularLightingShader.obj
+803	0001:00008270	??__Es_uiLightVolumeMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiLightVolumeMapHash''(void)	pcSpecularLightingShader.obj
+804	0001:00008290	??__Es_uiNormalizationCubeMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiNormalizationCubeMapHash''(void)	pcSpecularLightingShader.obj
+805	0001:000082b0	??__Es_uiSpecularCubeMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiSpecularCubeMapHash''(void)	pcSpecularLightingShader.obj
+806	0001:000082d0	??__Es_uiSpecularSpotMapHash@@YAXXZ	void __cdecl `dynamic initializer for 's_uiSpecularSpotMapHash''(void)	pcSpecularLightingShader.obj
+807	0001:000082f0	??__E?s_Factory@pcStencilShadowShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcStencilShadowShader pcStencilShadowShader::s_Factory''(void)	pcStencilShadowShader.obj
+808	0001:00008430	??__E?s_shaderDef@pcStencilShadowShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcStencilShadowShader::s_shaderDef''(void)	pcStencilShadowShader.obj
+809	0001:00008450	??__E?s_uiRenderTypeHash@pcStencilShadowShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcStencilShadowShader::s_uiRenderTypeHash''(void)	pcStencilShadowShader.obj
+810	0001:00008470	??__E?s_Factory@pcTerrainShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcTerrainShader pcTerrainShader::s_Factory''(void)	pcTerrainShader.obj
+811	0001:000085b0	??__E?s_shaderDef@pcTerrainShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcTerrainShader::s_shaderDef''(void)	pcTerrainShader.obj
+812	0001:000085d0	??__E?s_uiRenderTypeHash@pcTerrainShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcTerrainShader::s_uiRenderTypeHash''(void)	pcTerrainShader.obj
+813	0001:000085f0	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcTerrainShader.obj
+814	0001:00008610	??__E?s_Factory@pcTerrainShader2@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcTerrainShader2 pcTerrainShader2::s_Factory''(void)	pcTerrainShader2.obj
+815	0001:00008750	??__E?s_shaderDef@pcTerrainShader2@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcTerrainShader2::s_shaderDef''(void)	pcTerrainShader2.obj
+816	0001:00008770	??__E?s_uiRenderTypeHash@pcTerrainShader2@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcTerrainShader2::s_uiRenderTypeHash''(void)	pcTerrainShader2.obj
+817	0001:00008790	??__E?s_Factory@pcWaterShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcWaterShader pcWaterShader::s_Factory''(void)	pcWaterShader.obj
+818	0001:00008940	??__E?s_shaderDef@pcWaterShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcWaterShader::s_shaderDef''(void)	pcWaterShader.obj
+819	0001:00008960	??__E?s_uiRenderTypeHash@pcWaterShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcWaterShader::s_uiRenderTypeHash''(void)	pcWaterShader.obj
+820	0001:00008980	??__EkuiCubeNormalizationMap@@YAXXZ	void __cdecl `dynamic initializer for 'kuiCubeNormalizationMap''(void)	pcWaterShader.obj
+821	0001:000089a0	??__EkuiLinearRamp@@YAXXZ	void __cdecl `dynamic initializer for 'kuiLinearRamp''(void)	pcWaterShader.obj
+822	0001:000089c0	??__E?s_Factory@pcZPrepassShader@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcZPrepassShader pcZPrepassShader::s_Factory''(void)	pcZPrepassShader.obj
+823	0001:00008b00	??__E?s_shaderDef@pcZPrepassShader@@2VpcRedShaderDef@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class pcRedShaderDef pcZPrepassShader::s_shaderDef''(void)	pcZPrepassShader.obj
+824	0001:00008b20	??__E?s_uiRenderTypeHash@pcZPrepassShader@@2IA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static unsigned int pcZPrepassShader::s_uiRenderTypeHash''(void)	pcZPrepassShader.obj
+825	0001:00008b40	??__EsCustomRenderPresets@RedAutoSettings@@YAXXZ	void __cdecl RedAutoSettings::`dynamic initializer for 'sCustomRenderPresets''(void)	pcRedAutoSettings.obj
+826	0001:00008bd0	??__E?m_aLightingStatePool@RedRenderer@@2PAURedLightingState@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct RedLightingState * RedRenderer::m_aLightingStatePool''(void)	pcRedRenderer.obj
+827	0001:00008c00	??__E?m_colorFog@RedRenderer@@2VRedColor@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedColor RedRenderer::m_colorFog''(void)	pcRedRenderer.obj
+828	0001:00008c10	??__E?m_opaqueQueues@RedRenderer@@2V?$Vector@VSortHeap@RedRenderer@@V?$BaseArray@VSortHeap@RedRenderer@@V?$TNewArrayAlloc@VSortHeap@RedRenderer@@@util@@@util@@@util@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class util::Vector<class RedRenderer::SortHeap,class util::BaseArray<class RedRenderer::SortHeap,class util::TNewArrayAlloc<class RedRenderer::SortHeap> > > RedRenderer::m_opaqueQueues''(void)	pcRedRenderer.obj
+829	0001:00008c20	??__E?m_posttransparentItems@RedRenderer@@2V?$TransparentHeap@PAURenderItem@@I@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class TransparentHeap<struct RenderItem *,unsigned int> RedRenderer::m_posttransparentItems''(void)	pcRedRenderer.obj
+830	0001:00008c40	??__E?m_preShadowTransparentItems@RedRenderer@@2V?$TransparentHeap@PAURenderItem@@I@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class TransparentHeap<struct RenderItem *,unsigned int> RedRenderer::m_preShadowTransparentItems''(void)	pcRedRenderer.obj
+831	0001:00008c60	??__E?m_renderItemPool@RedRenderer@@2PAURenderItem@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct RenderItem * RedRenderer::m_renderItemPool''(void)	pcRedRenderer.obj
+832	0001:00008c90	??__E?m_transparentItems@RedRenderer@@2V?$TransparentHeap@PAURenderItem@@I@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class TransparentHeap<struct RenderItem *,unsigned int> RedRenderer::m_transparentItems''(void)	pcRedRenderer.obj
+833	0001:00008cb0	??__Es_pcClearShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcClearShaderLinked''(void)	pcRedShader.obj
+834	0001:00008cd0	??__Es_pcDecalShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcDecalShaderLinked''(void)	pcRedShader.obj
+835	0001:00008cf0	??__Es_pcFilterCopyShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcFilterCopyShaderLinked''(void)	pcRedShader.obj
+836	0001:00008d10	??__Es_pcFlareShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcFlareShaderLinked''(void)	pcRedShader.obj
+837	0001:00008d30	??__Es_pcHDRShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcHDRShaderLinked''(void)	pcRedShader.obj
+838	0001:00008d50	??__Es_pcInterfaceShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcInterfaceShaderLinked''(void)	pcRedShader.obj
+839	0001:00008d70	??__Es_pcLightBeamShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcLightBeamShaderLinked''(void)	pcRedShader.obj
+840	0001:00008d90	??__Es_pcNormalMapAdderShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcNormalMapAdderShaderLinked''(void)	pcRedShader.obj
+841	0001:00008db0	??__Es_pcNormalShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcNormalShaderLinked''(void)	pcRedShader.obj
+842	0001:00008dd0	??__Es_pcOceanShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcOceanShaderLinked''(void)	pcRedShader.obj
+843	0001:00008df0	??__Es_pcParticleShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcParticleShaderLinked''(void)	pcRedShader.obj
+844	0001:00008e10	??__Es_pcPerPixelDiffuseLightingShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcPerPixelDiffuseLightingShaderLinked''(void)	pcRedShader.obj
+845	0001:00008e30	??__Es_pcPerVertexDiffuseLightingShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcPerVertexDiffuseLightingShaderLinked''(void)	pcRedShader.obj
+846	0001:00008e50	??__Es_pcPreReflectionShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcPreReflectionShaderLinked''(void)	pcRedShader.obj
+847	0001:00008e70	??__Es_pcRainShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcRainShaderLinked''(void)	pcRedShader.obj
+848	0001:00008e90	??__Es_pcRefractionShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcRefractionShaderLinked''(void)	pcRedShader.obj
+849	0001:00008eb0	??__Es_pcSampleShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcSampleShaderLinked''(void)	pcRedShader.obj
+850	0001:00008ed0	??__Es_pcShadowQuadShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcShadowQuadShaderLinked''(void)	pcRedShader.obj
+851	0001:00008ef0	??__Es_pcShieldShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcShieldShaderLinked''(void)	pcRedShader.obj
+852	0001:00008f10	??__Es_pcSkyFogShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcSkyFogShaderLinked''(void)	pcRedShader.obj
+853	0001:00008f30	??__Es_pcSpecularLightingShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcSpecularLightingShaderLinked''(void)	pcRedShader.obj
+854	0001:00008f50	??__Es_pcStencilShadowShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcStencilShadowShaderLinked''(void)	pcRedShader.obj
+855	0001:00008f70	??__Es_pcTerrainShader2Linked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcTerrainShader2Linked''(void)	pcRedShader.obj
+856	0001:00008f90	??__Es_pcTerrainShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcTerrainShaderLinked''(void)	pcRedShader.obj
+857	0001:00008fb0	??__Es_pcWaterShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcWaterShaderLinked''(void)	pcRedShader.obj
+858	0001:00008fd0	??__Es_pcZPrepassShaderLinked@@YAXXZ	void __cdecl `dynamic initializer for 's_pcZPrepassShaderLinked''(void)	pcRedShader.obj
+859	0001:00009000	??__E?BLACK@RedAmbientLight@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedAmbientLight RedAmbientLight::BLACK''(void)	RedAmbientLight.obj
+860	0001:00009040	??__E?WHITE@RedAmbientLight@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedAmbientLight RedAmbientLight::WHITE''(void)	RedAmbientLight.obj
+861	0001:00009080	??__E?BLACK@RedDirectionalLight@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedDirectionalLight RedDirectionalLight::BLACK''(void)	RedDirectionalLight.obj
+862	0001:000090c0	??__E?BLACK@RedOmniLight@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedOmniLight RedOmniLight::BLACK''(void)	RedOmniLight.obj
+863	0001:00009240	??__E?sMemoryPool@RedOmniLight@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool RedOmniLight::sMemoryPool''(void)	RedOmniLight.obj
+864	0001:00009260	??__E?sMemoryPool@Entry@RedShadingPose@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool RedShadingPose::Entry::sMemoryPool''(void)	RedShadingState.obj
+865	0001:00009280	??__E?sMemoryPool@RedShadingState@@2VMemoryPool@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class MemoryPool RedShadingState::sMemoryPool''(void)	RedShadingState.obj
+866	0001:000092a0	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	RedSkeleton.obj
+867	0001:000092f0	??__E?BLACK@RedSpotLight@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedSpotLight RedSpotLight::BLACK''(void)	RedSpotLight.obj
+868	0001:00009330	??__E?rttiHashRed3DModelAnimator@Red3DModelAnimator@@2VPblHash@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblHash Red3DModelAnimator::rttiHashRed3DModelAnimator''(void)	Red3DModelAnimator.obj
+869	0001:00009340	??__E_IdentityMatrix@@YAXXZ	void __cdecl `dynamic initializer for '_IdentityMatrix''(void)	Red3DModelAnimator.obj
+870	0001:00009390	??__E?s_fCotHalfFOVx@RedHotSpot@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float RedHotSpot::s_fCotHalfFOVx''(void)	RedHotSpot.obj
+871	0001:000093b0	??__E?s_fCotHalfFOVy@RedHotSpot@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float RedHotSpot::s_fCotHalfFOVy''(void)	RedHotSpot.obj
+872	0001:000093d0	??__ESQRT3@@YAXXZ	void __cdecl `dynamic initializer for 'SQRT3''(void)	RedHotSpot.obj
+873	0001:00009410	??__E?sSQRT3@RedInterfaceScreen@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float RedInterfaceScreen::sSQRT3''(void)	RedInterfaceScreen.obj
+874	0001:00009450	??__E?s_directionalLight@RedInterfaceScreen@@2PAVRedDirectionalLight@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedDirectionalLight * RedInterfaceScreen::s_directionalLight''(void)	RedInterfaceScreen.obj
+875	0001:00009480	??__E?s_lightingState@RedInterfaceScreen@@2URedLightingState@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct RedLightingState RedInterfaceScreen::s_lightingState''(void)	RedInterfaceScreen.obj
+876	0001:000094c0	??__E?s_screenFull@RedInterfaceScreen@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedInterfaceScreen RedInterfaceScreen::s_screenFull''(void)	RedInterfaceScreen.obj
+877	0001:00009540	??__E?sfHeight@RedInterfaceScreen@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float RedInterfaceScreen::sfHeight''(void)	RedInterfaceScreen.obj
+878	0001:00009560	??__E?sfWidth@RedInterfaceScreen@@2MA@@YAXXZ	void __cdecl `dynamic initializer for 'public: static float RedInterfaceScreen::sfWidth''(void)	RedInterfaceScreen.obj
+879	0001:00009580	??__EshadowBlobRandom@@YAXXZ	void __cdecl `dynamic initializer for 'shadowBlobRandom''(void)	RedShadowBlob.obj
+880	0001:000095c0	??__E?s_aPoints@RedVectorElement@@2PAUPoint@1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static struct RedVectorElement::Point * RedVectorElement::s_aPoints''(void)	RedVectorElement.obj
+881	0001:000095f0	??__EdisplayableSuballoc_@pvs@@YAXXZ	void __cdecl pvs::`dynamic initializer for 'displayableSuballoc_''(void)	Portal.obj
+882	0001:00009630	??__Eg_BackFaceCull@@YAXXZ	void __cdecl `dynamic initializer for 'g_BackFaceCull''(void)	Portal.obj
+883	0001:00009660	??__Eg_DebugDraw@@YAXXZ	void __cdecl `dynamic initializer for 'g_DebugDraw''(void)	Portal.obj
+884	0001:00009690	??__Eg_Enable@@YAXXZ	void __cdecl `dynamic initializer for 'g_Enable''(void)	Portal.obj
+885	0001:000096c0	??__Eg_ProximityTest@@YAXXZ	void __cdecl `dynamic initializer for 'g_ProximityTest''(void)	Portal.obj
+886	0001:000096f0	??__Eg_SaveCam@@YAXXZ	void __cdecl `dynamic initializer for 'g_SaveCam''(void)	Portal.obj
+887	0001:00009720	??__E?sList@RedRegionFactory@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle RedRegionFactory::sList''(void)	RedRegion.obj
+888	0001:00009730	??__E?sRegionFactory@RedRegionFactory@@2V1@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class RedRegionFactory RedRegionFactory::sRegionFactory''(void)	RedRegion.obj
+889	0001:00009740	??__Eglobals@util@@YAXXZ	void __cdecl util::`dynamic initializer for 'globals''(void)	Globals.obj
+890	0001:000097e0	??__Em_joysticks@RedInputManager@@YAXXZ	void __cdecl RedInputManager::`dynamic initializer for 'm_joysticks''(void)	pcRedInputManager.obj
+891	0001:00009810	??__Em_keyboards@RedInputManager@@YAXXZ	void __cdecl RedInputManager::`dynamic initializer for 'm_keyboards''(void)	pcRedInputManager.obj
+892	0001:00009840	??__Em_mouses@RedInputManager@@YAXXZ	void __cdecl RedInputManager::`dynamic initializer for 'm_mouses''(void)	pcRedInputManager.obj
+893	0001:00009870	??__E?sRandom@Properties@RedMovie@@2VPblRandom@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblRandom RedMovie::Properties::sRandom''(void)	RedMovie.obj
+894	0001:000098b0	??__E?smFreeList@Bus@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::Bus::smFreeList''(void)	sndbus.obj
+895	0001:000098c0	??__E?smRootBus@Bus@Snd@@2V12@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Bus Snd::Bus::smRootBus''(void)	sndbus.obj
+896	0001:000098d0	??__E?smListeners@EngineBase@Snd@@2PAVListener@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Listener * Snd::EngineBase::smListeners''(void)	sndenginebase.obj
+897	0001:00009900	??__E?smVoiceVirtualManager@EngineBase@Snd@@2VVoiceVirtualManager@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::VoiceVirtualManager Snd::EngineBase::smVoiceVirtualManager''(void)	sndenginebase.obj
+898	0001:00009910	??__E?smFileList@File@Snd@@2VPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted Snd::File::smFileList''(void)	sndfile.obj
+899	0001:00009920	??__E?smQueuedCommands@File@Snd@@2VSemaphore@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Semaphore Snd::File::smQueuedCommands''(void)	sndfile.obj
+900	0001:00009930	??__E?smQueuedFileOpList@File@Snd@@2VPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted Snd::File::smQueuedFileOpList''(void)	sndfile.obj
+901	0001:00009940	??__E?smQueuedFileOpListLock@File@Snd@@2VSemaphore@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Semaphore Snd::File::smQueuedFileOpListLock''(void)	sndfile.obj
+902	0001:00009950	??__EsndRandom@Snd@@YAXXZ	void __cdecl Snd::`dynamic initializer for 'sndRandom''(void)	sndglobals.obj
+903	0001:00009990	??__E?smFreeList@I3DL2ReverbPreset@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::I3DL2ReverbPreset::smFreeList''(void)	sndi3dl2reverbpreset.obj
+904	0001:000099a0	??__E?smList@I3DL2ReverbPreset@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::I3DL2ReverbPreset::smList''(void)	sndi3dl2reverbpreset.obj
+905	0001:000099b0	??__E?smFreeList@Node@ObjectList@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::ObjectList::Node::smFreeList''(void)	sndobjectlist.obj
+906	0001:000099c0	??__E?smFreeList@ObjectWeight@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::ObjectWeight::smFreeList''(void)	sndobjectweightlist.obj
+907	0001:000099d0	??__E?smFreeList@ControlPoint@ParameterGraph@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::ParameterGraph::ControlPoint::smFreeList''(void)	sndparametergraph.obj
+908	0001:000099e0	??__E?smFreeList@ParameterGraph@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::ParameterGraph::smFreeList''(void)	sndparametergraph.obj
+909	0001:000099f0	??__E?smParameterGraphs@ParameterGraph@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::ParameterGraph::smParameterGraphs''(void)	sndparametergraph.obj
+910	0001:00009a00	??__E?smSampleBankList@SampleBankBase@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::SampleBankBase::smSampleBankList''(void)	sndsamplebankbase.obj
+911	0001:00009a10	??__E?smFreeList@Properties@Sound@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::Sound::Properties::smFreeList''(void)	sndsound.obj
+912	0001:00009a20	??__E?smPropertyList@Properties@Sound@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::Sound::Properties::smPropertyList''(void)	sndsound.obj
+913	0001:00009a30	??__E?smSoundList@Sound@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::Sound::smSoundList''(void)	sndsound.obj
+914	0001:00009a40	??__E?smSource3Ds@Sound@Snd@@2PAVSource3D@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Source3D * Snd::Sound::smSource3Ds''(void)	sndsound.obj
+915	0001:00009a70	??__E?smActiveList@FireForgetLayer@SoundLayered@Snd@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble Snd::SoundLayered::FireForgetLayer::smActiveList''(void)	sndsoundlayered.obj
+916	0001:00009a80	??__E?smFreeList@Layer@Properties@SoundLayered@Snd@@2VFreeList@4@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundLayered::Properties::Layer::smFreeList''(void)	sndsoundlayered.obj
+917	0001:00009a90	??__E?smFreeList@Properties@SoundLayered@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundLayered::Properties::smFreeList''(void)	sndsoundlayered.obj
+918	0001:00009aa0	??__E?smFreeList@SoundLayer@SoundLayered@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundLayered::SoundLayer::smFreeList''(void)	sndsoundlayered.obj
+919	0001:00009ab0	??__E?smInactiveList@FireForgetLayer@SoundLayered@Snd@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble Snd::SoundLayered::FireForgetLayer::smInactiveList''(void)	sndsoundlayered.obj
+920	0001:00009ac0	??__E?smPropertyList@Properties@SoundLayered@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::SoundLayered::Properties::smPropertyList''(void)	sndsoundlayered.obj
+921	0001:00009ad0	??__E?smSoundLayeredList@SoundLayered@Snd@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble Snd::SoundLayered::smSoundLayeredList''(void)	sndsoundlayered.obj
+922	0001:00009ae0	??__E?smFreeList@Properties@Controller@SoundParameterized@Snd@@2VFreeList@4@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundParameterized::Controller::Properties::smFreeList''(void)	sndsoundparameterized.obj
+923	0001:00009af0	??__E?smFreeList@Properties@Layer@SoundParameterized@Snd@@2VFreeList@4@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundParameterized::Layer::Properties::smFreeList''(void)	sndsoundparameterized.obj
+924	0001:00009b00	??__E?smFreeList@Properties@SoundParameterized@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundParameterized::Properties::smFreeList''(void)	sndsoundparameterized.obj
+925	0001:00009b10	??__E?smPropertyList@Properties@SoundParameterized@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::SoundParameterized::Properties::smPropertyList''(void)	sndsoundparameterized.obj
+926	0001:00009b20	??__E?smSoundParameterizedList@SoundParameterized@Snd@@2VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDouble Snd::SoundParameterized::smSoundParameterizedList''(void)	sndsoundparameterized.obj
+927	0001:00009b30	??__E?smFireForget@SoundStream@Snd@@2PAVFireForget@12@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::SoundStream::FireForget * Snd::SoundStream::smFireForget''(void)	sndsoundstream.obj
+928	0001:00009b60	??__E?smFree@SoundStream@Snd@@2VPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted Snd::SoundStream::smFree''(void)	sndsoundstream.obj
+929	0001:00009b70	??__E?smFreeList@Properties@SoundStream@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundStream::Properties::smFreeList''(void)	sndsoundstream.obj
+930	0001:00009b80	??__E?smFreeList@SoundStream@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::SoundStream::smFreeList''(void)	sndsoundstream.obj
+931	0001:00009b90	??__E?smList@SoundStream@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::SoundStream::smList''(void)	sndsoundstream.obj
+932	0001:00009ba0	??__E?smPropertyList@Properties@SoundStream@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::SoundStream::Properties::smPropertyList''(void)	sndsoundstream.obj
+933	0001:00009bb0	??__E?smQueue@SoundStream@Snd@@2PAVPblListDoubleSorted@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListDoubleSorted * Snd::SoundStream::smQueue''(void)	sndsoundstream.obj
+934	0001:00009be0	??__E?smDefaultSpace@Space@Snd@@2V12@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::Space Snd::Space::smDefaultSpace''(void)	sndspace.obj
+935	0001:00009c30	??__E?smFreeList@Connected@Space@Snd@@2VFreeList@3@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::Space::Connected::smFreeList''(void)	sndspace.obj
+936	0001:00009c40	??__E?smFreeList@Space@Snd@@2VFreeList@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::FreeList Snd::Space::smFreeList''(void)	sndspace.obj
+937	0001:00009c50	??__E?smSpaceList@Space@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::Space::smSpaceList''(void)	sndspace.obj
+938	0001:00009c60	??__E?smInfoList@Info@StreamBase@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::StreamBase::Info::smInfoList''(void)	sndstreambase.obj
+939	0001:00009c70	??__E?smList@DSBuffer@Snd@@0VPblListDouble@@A@@YAXXZ	void __cdecl `dynamic initializer for 'private: static class PblListDouble Snd::DSBuffer::smList''(void)	snddsbuffer.obj
+940	0001:00009c80	??__E?smRendererList@DSBufferRenderer@Snd@@2VPblListSingle@@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class PblListSingle Snd::DSBufferRenderer::smRendererList''(void)	snddsbufferrenderer.obj
+941	0001:00009c90	??__E?smDummySecBuffer@Engine@Snd@@2VDSBuffer@2@A@@YAXXZ	void __cdecl `dynamic initializer for 'public: static class Snd::DSBuffer Snd::Engine::smDummySecBuffer''(void)	sndengine.obj
+942	0001:00009cb0	??__E_smHighLowPass@@YAXXZ	void __cdecl `dynamic initializer for '_smHighLowPass''(void)	sndengine.obj
+943	0001:00009cd0	??__EsmEngineUpdater@@YAXXZ	void __cdecl `dynamic initializer for 'smEngineUpdater''(void)	sndengine.obj
+944	0001:00009cf0	??__EsndEngineThreadUpdate@Snd@@YAXXZ	void __cdecl Snd::`dynamic initializer for 'sndEngineThreadUpdate''(void)	sndengine.obj
+945	0001:00009d10	??__EgEncryptedAppTicket@@YAXXZ	void __cdecl `dynamic initializer for 'gEncryptedAppTicket''(void)	gfSteamAuth.obj
+946	0001:00009d20	??__EgFriendConnectionStrings@@YAXXZ	void __cdecl `dynamic initializer for 'gFriendConnectionStrings''(void)	gfSteamAuth.obj
+947	0001:00009dd0	??__EkuiDummyRootHash@@YAXXZ	void __cdecl `dynamic initializer for 'kuiDummyRootHash''(void)	ZephyrSkeleton.obj
+948	0001:00009df0	??__EgLCDPanels@@YAXXZ	void __cdecl `dynamic initializer for 'gLCDPanels''(void)	lgLcd.obj

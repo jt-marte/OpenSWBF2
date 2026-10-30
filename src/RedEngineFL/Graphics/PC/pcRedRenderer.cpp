@@ -41,6 +41,7 @@
 #include "Battlefront2/Source/LoadUtil.h"
 #include "Battlefront2/Source/pcCrash.h"
 #include "RedEngineFL/Graphics/PC/pcGammaPass.h"
+#include "RedEngineFL/Graphics/PC/pcDxvk.h"
 #include "Battlefront2/Source/ColorControl.h"
 
 void PumpWaitingMessages();
@@ -3105,10 +3106,10 @@ int RedRenderer::m_uiCurMatrixPoolOffset;
 unsigned int RedRenderer::m_curRenderItemOffset;
 RedCamera* RedRenderer::m_camera;
 RedLightingState* RedRenderer::m_pLightingState;
-int RedRenderer::m_pmObjWorldPrev;
-int RedRenderer::m_pmBoneMatricesPrev;
-int RedRenderer::m_pPrimPrev;
-int RedRenderer::m_pLightingStatePrev;
+intptr_t RedRenderer::m_pmObjWorldPrev;
+intptr_t RedRenderer::m_pmBoneMatricesPrev;
+intptr_t RedRenderer::m_pPrimPrev;
+intptr_t RedRenderer::m_pLightingStatePrev;
 
 // GLOBAL: SWBF2 0x008bef50
 // SYNTHETIC: SWBF2 0x00407590
@@ -3902,14 +3903,16 @@ void RedRenderer::Init()
     RedRenderer::m_uiCurMatrixPoolOffset = 0;
     RedRenderer::m_uiCurLightingStatePoolOffset = 0;
 
-    memcpy((unsigned char*)&RedRenderer::m_aLightingStatePool[2048] + 4,
-           (const unsigned char*)&RedAmbientLight::BLACK + 4, 0x6C);
-    *(void**)((unsigned char*)&RedRenderer::m_aLightingStatePool[2048] + 0x70) =
+    // the ambient light past its vtable pointer, then pDirectionalLights (retail: +4, 0x6C, +0x70)
+    memcpy((unsigned char*)&RedRenderer::m_aLightingStatePool[2048] + sizeof(void*),
+           (const unsigned char*)&RedAmbientLight::BLACK + sizeof(void*), sizeof(RedAmbientLight) - sizeof(void*));
+    *(void**)((unsigned char*)&RedRenderer::m_aLightingStatePool[2048] + offsetof(RedLightingState, pDirectionalLights)) =
         &RedDirectionalLight::BLACK;
 
-    memcpy((unsigned char*)&RedRenderer::m_aLightingStatePool[2049] + 4,
-           (const unsigned char*)&RedAmbientLight::WHITE + 4, 0x6C);
-    *(void**)((unsigned char*)&RedRenderer::m_aLightingStatePool[2049] + 0x70) =
+    // the ambient light past its vtable pointer, then pDirectionalLights (retail: +4, 0x6C, +0x70)
+    memcpy((unsigned char*)&RedRenderer::m_aLightingStatePool[2049] + sizeof(void*),
+           (const unsigned char*)&RedAmbientLight::WHITE + sizeof(void*), sizeof(RedAmbientLight) - sizeof(void*));
+    *(void**)((unsigned char*)&RedRenderer::m_aLightingStatePool[2049] + offsetof(RedLightingState, pDirectionalLights)) =
         &RedDirectionalLight::BLACK;
 
     RedRenderer::m_pLightingState = &RedRenderer::m_aLightingStatePool[2048];
@@ -3939,29 +3942,12 @@ void RedRenderer::Init()
     RedRenderer::internalInitOcclusionQuery();
 }
 
-// FUNCTION: SWBF2 0x006b2270
-void RedRenderer::InitStatic()
+// OpenSWBF2: enumerates m_pD3D's adapters and picks the one to run on
+// (gAdapter); again when the renderer falls back from Vulkan to D3D9.
+static void EnumerateAdapters()
 {
-    sWaitForFrameQuery = !DisplayCfg::gDisplay.bNoWaitQuery;
-    sPresentIntervals = 0;
-
-    if (!g_bNoRender)
-    {
-        m_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
-    }
-    else
-    {
-        m_pD3D = new FakeD3D;
-    }
-
-    if (!m_pD3D)
-    {
-        LOG(LogRender, Fatal, "Cannot create Direct3D interface!");
-        RedWarning::DialogBoxMessage("Cannot create Direct3D interface!");
-        pcCrash::Exit(1);
-    }
-
-    pcRedDeviceEnumerator::Init(m_pD3D);
+    pcRedDeviceEnumerator::GetDeviceList().Clear();
+    pcRedDeviceEnumerator::Init(RedRenderer::m_pD3D);
     pcRedDeviceEnumerator::Enumerate(8, 8, 24, 8);
 
     if (!g_bNoRender)
@@ -3984,6 +3970,130 @@ void RedRenderer::InitStatic()
             DisplayCfg::gDisplay.uiAdapter,
             (DisplayCfg::gDisplay.uiCliMask & DisplayCfg::kAdapter) != 0,
             DisplayCfg::gDisplay.acAdapterName, akAdapters, uiAdapters, g_bNoRender);
+    }
+}
+
+static void CannotCreateD3D()
+{
+    LOG(LogRender, Fatal, "Cannot create Direct3D interface!");
+    RedWarning::DialogBoxMessage("Cannot create Direct3D interface!");
+    pcCrash::Exit(1);
+}
+
+// OpenSWBF2: "OPENSWBF2 RENDERER ..." for the renderer this run is on. A
+// fallback is logged when it happens, so its reason is there even if D3D9
+// then fails as well.
+static void LogRenderer(DisplayLogic::Renderer eChosen, DisplayLogic::VulkanFail eFail, unsigned long ulCode)
+{
+    char acRenderer[128];
+    DisplayLogic::RendererLogText(eChosen, (DisplayCfg::gDisplay.uiCliMask & DisplayCfg::kRenderer) != 0,
+                                  eFail, ulCode, acRenderer, sizeof(acRenderer));
+    if (eFail != DisplayLogic::kVulkanOk)
+    {
+        LOG(LogRender, Warning, "OPENSWBF2 RENDERER %s", acRenderer);
+    }
+    else
+    {
+        LOG(LogRender, Inform, "OPENSWBF2 RENDERER %s", acRenderer);
+    }
+}
+
+// OpenSWBF2: Vulkan got as far as DXVK's IDirect3D9 but no further: drop it
+// for the system D3D9 and pick the adapter again.
+static void FallBackToD3D9()
+{
+    RedRenderer::m_pD3D->Release();
+    RedRenderer::m_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+    if (!RedRenderer::m_pD3D)
+    {
+        CannotCreateD3D();
+    }
+    EnumerateAdapters();
+}
+
+// The device the game renders with, created windowed (Init applies the mode).
+static HRESULT CreateRenderDevice()
+{
+    D3DPRESENT_PARAMETERS& pp = RedRenderer::m_d3dpp;
+    if (RedRenderer::m_pD3D->CheckDeviceMultiSampleType(gAdapter, D3DDEVTYPE_HAL, D3DFMT_A8R8G8B8,
+                                                        TRUE, D3DMULTISAMPLE_NONE, 0)
+        != D3D_OK)
+    {
+        pp.MultiSampleType = D3DMULTISAMPLE_NONE;
+        pp.MultiSampleQuality = 0;
+    }
+
+    D3DCAPS9 caps;
+    memset(&caps, 0, sizeof(caps));
+    if (RedRenderer::m_pD3D->GetDeviceCaps(gAdapter, D3DDEVTYPE_HAL, &caps) == D3D_OK)
+    {
+        sPresentIntervals = caps.PresentationIntervals;
+    }
+    pp.PresentationInterval = ResolveInterval(false, pp.Windowed != FALSE, true);
+    DWORD dwBehaviorFlags = (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
+                                ? D3DCREATE_HARDWARE_VERTEXPROCESSING
+                                : D3DCREATE_SOFTWARE_VERTEXPROCESSING;
+
+    return RedRenderer::m_pD3D->CreateDevice(gAdapter, D3DDEVTYPE_HAL, hGlobalWnd, dwBehaviorFlags,
+                                             &pp, &RedRenderer::m_pd3dDevice);
+}
+
+// FUNCTION: SWBF2 0x006b2270
+void RedRenderer::InitStatic()
+{
+    sWaitForFrameQuery = !DisplayCfg::gDisplay.bNoWaitQuery;
+    sPresentIntervals = 0;
+
+    // OpenSWBF2: Vulkan through DXVK unless display.ini or -d3d9 asks for D3D9.
+    // Each step of starting it, up to the device, falls back to D3D9 when it
+    // fails (pcDxvk.cpp); headless runs never load DXVK.
+    const DisplayLogic::Renderer eChosen =
+        DisplayLogic::ChooseRenderer(DisplayCfg::gDisplay.uiRenderer, g_bNoRender);
+    DisplayLogic::VulkanFail eFail = DisplayLogic::kVulkanOk;
+    unsigned long ulFailCode = 0;
+    m_pD3D = 0;
+    if (eChosen == DisplayLogic::kRendererVulkan)
+    {
+        m_pD3D = Dxvk::Create(eFail, ulFailCode);
+        if (!m_pD3D)
+        {
+            LogRenderer(eChosen, eFail, ulFailCode);
+        }
+    }
+    bool bVulkan = m_pD3D != 0;
+
+    if (!g_bNoRender)
+    {
+        if (!m_pD3D)
+        {
+            m_pD3D = Direct3DCreate9(D3D_SDK_VERSION);
+        }
+    }
+    else
+    {
+        m_pD3D = new FakeD3D;
+    }
+
+    if (!m_pD3D)
+    {
+        CannotCreateD3D();
+    }
+
+    EnumerateAdapters();
+
+    // OpenSWBF2: a Vulkan device must come up before VidMode_Init tests modes
+    // with it and saves them to vidmode.ini
+    if (bVulkan)
+    {
+        const HRESULT hrProbe = Dxvk::ProbeDevice(m_pD3D, gAdapter, hGlobalWnd);
+        eFail = DisplayLogic::VulkanCheck(true, true, true, true, 1, hrProbe);
+        if (eFail != DisplayLogic::kVulkanOk)
+        {
+            ulFailCode = (unsigned long)hrProbe;
+            bVulkan = false;
+            LogRenderer(eChosen, eFail, ulFailCode);
+            FallBackToD3D9();
+        }
     }
 
     if (!g_bNoRender)
@@ -4028,28 +4138,22 @@ void RedRenderer::InitStatic()
     HRESULT hr = D3D_OK;
     if (!g_bNoRender)
     {
-
-        if (m_pD3D->CheckDeviceMultiSampleType(gAdapter, D3DDEVTYPE_HAL, D3DFMT_A8R8G8B8,
-                                               TRUE, D3DMULTISAMPLE_NONE, 0)
-            != D3D_OK)
+        const D3DPRESENT_PARAMETERS kStartPp = m_d3dpp;
+        hr = CreateRenderDevice();
+        if (FAILED(hr) && bVulkan)
         {
-            m_d3dpp.MultiSampleType = D3DMULTISAMPLE_NONE;
-            m_d3dpp.MultiSampleQuality = 0;
+            // OpenSWBF2: the probe worked but this device didn't: start over on D3D9
+            eFail = DisplayLogic::kVulkanNoDevice;
+            ulFailCode = (unsigned long)hr;
+            bVulkan = false;
+            m_pd3dDevice = 0;
+            LogRenderer(eChosen, eFail, ulFailCode);
+            FallBackToD3D9();
+            VidConfig::ClearConfigs();
+            RedVideoConfig::VidMode_Init(m_pD3D);
+            m_d3dpp = kStartPp;
+            hr = CreateRenderDevice();
         }
-
-        D3DCAPS9 caps;
-        memset(&caps, 0, sizeof(caps));
-        if (m_pD3D->GetDeviceCaps(gAdapter, D3DDEVTYPE_HAL, &caps) == D3D_OK)
-        {
-            sPresentIntervals = caps.PresentationIntervals;
-        }
-        m_d3dpp.PresentationInterval = ResolveInterval(false, m_d3dpp.Windowed != FALSE, true);
-        DWORD dwBehaviorFlags = (caps.DevCaps & D3DDEVCAPS_HWTRANSFORMANDLIGHT)
-                                    ? D3DCREATE_HARDWARE_VERTEXPROCESSING
-                                    : D3DCREATE_SOFTWARE_VERTEXPROCESSING;
-
-        hr = m_pD3D->CreateDevice(gAdapter, D3DDEVTYPE_HAL, hGlobalWnd, dwBehaviorFlags,
-                                  &m_d3dpp, &m_pd3dDevice);
 
         HRESULT hrIdentifier = m_pD3D->GetAdapterIdentifier(gAdapter, 0, &m_adaptorIdentifier);
         if (hrIdentifier != D3D_OK)
@@ -4066,6 +4170,14 @@ void RedRenderer::InitStatic()
         m_pd3dDevice = 0;
         m_pd3dDevice = new FakeD3DDevice;
         memset(&m_adaptorIdentifier, 0, sizeof(m_adaptorIdentifier));
+    }
+
+    // OpenSWBF2: which renderer this run is on (a fallback was logged above)
+    Dxvk::SetRunning(g_bNoRender ? DisplayLogic::kRendererNone
+                                 : (bVulkan ? DisplayLogic::kRendererVulkan : DisplayLogic::kRendererD3D9));
+    if (eFail == DisplayLogic::kVulkanOk)
+    {
+        LogRenderer(eChosen, eFail, 0);
     }
 
     m_d3dppLast = m_d3dpp;
@@ -6549,7 +6661,7 @@ unsigned int GetShaderID_(const pcRedShader* pShader, const RenderItem* pItem, u
     if (pShader->m_material && bSortMaterial)
     {
         return (unsigned int)const_cast<pcRedShader*>(pShader)->GetDiffuseMapHash(
-            (int)pItem, (int)uiPass);
+            (intptr_t)pItem, (int)uiPass);
     }
     return pShader->GetID(uiPass);
 }
@@ -7374,9 +7486,9 @@ void __cdecl RedRenderer::internalRenderProg1(RenderItem* pItem, unsigned int ui
     internalShaderBeginEnd(pItem, uiShaderID, uiPass);
 
     pcRedVertexShaderConstantRegister* pRegs;
-    if (pItem->pBoneMatrices && (int)pItem->pBoneMatrices != RedRenderer::m_pmBoneMatricesPrev)
+    if (pItem->pBoneMatrices && (intptr_t)pItem->pBoneMatrices != RedRenderer::m_pmBoneMatricesPrev)
     {
-        RedRenderer::m_pmBoneMatricesPrev = (int)pItem->pBoneMatrices;
+        RedRenderer::m_pmBoneMatricesPrev = (intptr_t)pItem->pBoneMatrices;
         pRegs = m_VSConstants.GetRegisterArray(51, 3 * pItem->numBoneMatrices);
         for (unsigned short i = 0; i < pItem->numBoneMatrices; ++i)
         {
@@ -7387,9 +7499,9 @@ void __cdecl RedRenderer::internalRenderProg1(RenderItem* pItem, unsigned int ui
 
     float fSpotW = 2.0f;
     float fSpotProjected = 0.0f;
-    if ((int)pItem->pPrim != RedRenderer::m_pPrimPrev)
+    if ((intptr_t)pItem->pPrim != RedRenderer::m_pPrimPrev)
     {
-        RedRenderer::m_pPrimPrev = (int)pItem->pPrim;
+        RedRenderer::m_pPrimPrev = (intptr_t)pItem->pPrim;
         pRegs = m_VSConstants.GetRegisterArray(12, 4);
         if (uiRVF & 0x4000)
         {
@@ -7443,9 +7555,9 @@ void __cdecl RedRenderer::internalRenderProg1(RenderItem* pItem, unsigned int ui
         pRegs[15].component[3] = 1.0f;
     }
 
-    if ((int)pItem->pmObjWorld != RedRenderer::m_pmObjWorldPrev)
+    if ((intptr_t)pItem->pmObjWorld != RedRenderer::m_pmObjWorldPrev)
     {
-        RedRenderer::m_pmObjWorldPrev = (int)pItem->pmObjWorld;
+        RedRenderer::m_pmObjWorldPrev = (intptr_t)pItem->pmObjWorld;
         pRegs = m_VSConstants.GetRegisterArray(16, 3);
         PblMatrix mWorld = *pItem->pmObjWorld;
         pRegs[16].SetMatrix4x3(mWorld);
@@ -7458,7 +7570,7 @@ void __cdecl RedRenderer::internalRenderProg1(RenderItem* pItem, unsigned int ui
         const RedLightingState* pLS = pItem->pLightingState;
         sAccumulatedLightingBits |= uiLights;
         pRegs = m_VSConstants.GetRegisterArray(19, 6);
-        RedRenderer::m_pLightingStatePrev = (int)pLS;
+        RedRenderer::m_pLightingStatePrev = (intptr_t)pLS;
         sCurrentFormatHasNormals = bNormals;
         float fDirProjected = 0.0f;
         float fOmniProjected = 0.0f;
@@ -7642,9 +7754,9 @@ void __cdecl RedRenderer::internalRenderProg1(RenderItem* pItem, unsigned int ui
         const RedLightingState* pDefault =
             bNormals ? &RedRenderer::m_aLightingStatePool[2048]
                      : &RedRenderer::m_aLightingStatePool[2049];
-        if ((int)pDefault != RedRenderer::m_pLightingStatePrev)
+        if ((intptr_t)pDefault != RedRenderer::m_pLightingStatePrev)
         {
-            RedRenderer::m_pLightingStatePrev = (int)pDefault;
+            RedRenderer::m_pLightingStatePrev = (intptr_t)pDefault;
             pRegs = m_VSConstants.GetRegisterArray(19, 2);
             const RedAmbientLight& rAmbient = pDefault->ambientLight;
             SetColor_(pRegs[19], rAmbient.m_topColor);
@@ -7697,9 +7809,9 @@ void RedRenderer::internalRenderZPrepassProg1(RenderItem* pItem, unsigned int ui
 
     pcRedVertexShaderConstantRegister* pRegs;
     if (pItem->pBoneMatrices &&
-        (int)pItem->pBoneMatrices != RedRenderer::m_pmBoneMatricesPrev)
+        (intptr_t)pItem->pBoneMatrices != RedRenderer::m_pmBoneMatricesPrev)
     {
-        RedRenderer::m_pmBoneMatricesPrev = (int)pItem->pBoneMatrices;
+        RedRenderer::m_pmBoneMatricesPrev = (intptr_t)pItem->pBoneMatrices;
         pRegs = m_VSConstants.GetRegisterArray(51, 3 * pItem->numBoneMatrices);
         for (unsigned short i = 0; i < pItem->numBoneMatrices; ++i)
         {
@@ -7708,9 +7820,9 @@ void RedRenderer::internalRenderZPrepassProg1(RenderItem* pItem, unsigned int ui
         m_VSConstants.Update();
     }
 
-    if ((int)pItem->pPrim != RedRenderer::m_pPrimPrev)
+    if ((intptr_t)pItem->pPrim != RedRenderer::m_pPrimPrev)
     {
-        RedRenderer::m_pPrimPrev = (int)pItem->pPrim;
+        RedRenderer::m_pPrimPrev = (intptr_t)pItem->pPrim;
         pRegs = m_VSConstants.GetRegisterArray(12, 4);
         pRegs[12].component[0] = (uiRVF & 0x4000) ? 2.0f : 1.0f;
         pRegs[12].component[1] = (uiRVF & 0x4000) ? -1.0f : 0.0f;
@@ -7747,9 +7859,9 @@ void RedRenderer::internalRenderZPrepassProg1(RenderItem* pItem, unsigned int ui
         pRegs[15].component[3] = 1.0f;
     }
 
-    if ((int)pItem->pmObjWorld != RedRenderer::m_pmObjWorldPrev)
+    if ((intptr_t)pItem->pmObjWorld != RedRenderer::m_pmObjWorldPrev)
     {
-        RedRenderer::m_pmObjWorldPrev = (int)pItem->pmObjWorld;
+        RedRenderer::m_pmObjWorldPrev = (intptr_t)pItem->pmObjWorld;
         pRegs = m_VSConstants.GetRegisterArray(16, 3);
         PblMatrix world = *pItem->pmObjWorld;
         pRegs[16].SetMatrix4x3(world);

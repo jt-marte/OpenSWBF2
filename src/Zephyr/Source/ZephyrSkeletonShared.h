@@ -36,7 +36,7 @@ public:
     static unsigned int GetRequiredMemSize(int iNumJoints, DataOffsets& kOffsets);
 
     // FUNCTION: SWBF2 0x00470930
-    int GetJointIdxByCrc(unsigned int uiCrc) const { return (int)m_kHashCRC2Joint.Find(uiCrc) - 1; }
+    int GetJointIdxByCrc(unsigned int uiCrc) const { return (int)(intptr_t)m_kHashCRC2Joint.Find(uiCrc) - 1; }
 
     // FUNCTION: SWBF2 0x0072ee20
     void SetJointTransformAnimationFlag(int iJoint, bool bFlag);
@@ -45,7 +45,7 @@ public:
 
     const ZephyrJointShared* GetJointByCrc(unsigned int uiCrc) const
     {
-        int iJoint = (int)m_kHashCRC2Joint.Find(uiCrc) - 1;
+        int iJoint = (int)(intptr_t)m_kHashCRC2Joint.Find(uiCrc) - 1;
         return iJoint < 0 ? 0 : &m_pJoints[iJoint];
     }
 

@@ -41,7 +41,7 @@ public:
     virtual void Play();
     virtual bool Update(float fDeltaTime);
 
-    static void* operator new(unsigned int uSize);
+    static void* operator new(size_t uSize);
 
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 

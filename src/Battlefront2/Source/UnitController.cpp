@@ -257,11 +257,16 @@ const UnitController* UnitControllerPtr(const Controllable* pControllable)
 UnitController::UnitController(Controllable* pOwner)
     : Controller(pOwner)
 {
+    static_assert(sizeof(PblOrderedList<UnitController, float>::Node) <= sizeof(mManagerNode), "mManagerNode storage");
     new (mManagerNode) PblOrderedList<UnitController, float>::Node();
+    static_assert(sizeof(AI::UnitThreatManager) <= sizeof(mThreatManager), "mThreatManager storage");
     new (mThreatManager) AI::UnitThreatManager();
+    static_assert(sizeof(AILowLevel) <= sizeof(mLowLevel), "mLowLevel storage");
     new (mLowLevel) AILowLevel(this);
+    static_assert(sizeof(SquadCommands::SquadCommandOrder) <= sizeof(mLastSquadCommand), "mLastSquadCommand storage");
     new (mLastSquadCommand) SquadCommands::SquadCommandOrder();
 
+    static_assert(8 * sizeof(PblHandle<const GameObject>) <= sizeof(mFriendly), "mFriendly storage");
     for (int i = 0; i < 8; i++)
     {
         new (mFriendly + i * sizeof(PblHandle<const GameObject>)) PblHandle<const GameObject>();

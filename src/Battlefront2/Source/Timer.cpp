@@ -22,7 +22,7 @@ PblHashTable<Timer, 64> Timer::sMap;
 // `dynamic initializer for 'Timer::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007695f0
 // `dynamic atexit destructor for 'Timer::sMemoryPool''
-MemoryPool Timer::sMemoryPool("Timer", 0x2c);
+MemoryPool Timer::sMemoryPool("Timer", RED_POOL_SIZE(0x2c, Timer));
 
 // GLOBAL: SWBF2 0x01e51e25
 namespace EventManager { static char noContext; }

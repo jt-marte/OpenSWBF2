@@ -8,7 +8,7 @@
 class FoleyFXSoldier : public FoleyFXImpact
 {
 public:
-    static void* operator new(unsigned int) { return smFreeList.Alloc(); }
+    static void* operator new(size_t) { return smFreeList.Alloc(); }
     static void operator delete(void* p) { smFreeList.Free(p); }
 
     FoleyFXSoldier();

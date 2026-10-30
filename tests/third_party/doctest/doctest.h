@@ -552,6 +552,7 @@ typedef basic_ostream<char, char_traits<char> > ostream;
 #include <iosfwd>
 #endif // DOCTEST_CONFIG_USE_IOSFWD
 #endif // _LIBCPP_VERSION
+#include <ostream>
 
 // static assert macro - because of the c++98 support requires that the message is an
 // identifier (no spaces and not a C string) - example without quotes: I_am_a_message

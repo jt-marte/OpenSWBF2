@@ -9,17 +9,26 @@
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{F303D4E6-ED54-5075-A41B-A8829D3D67C5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>BattlefrontII</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -28,12 +37,20 @@
     <TargetName>BattlefrontII</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);$(DXSDK_DIR)Include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86</LibraryPath>
     <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <!-- the lvl tools stay 32-bit (they write 32-bit Lua bytecode), so x64 runs the Win32 build of them -->
+    <LuaCompilerExe>bin\Win32\$(Configuration)\LuaCompiler.exe</LuaCompilerExe>
+  </PropertyGroup>
+  <!-- OpenSWBF2: the x64 build. Galaxy, steam_api and Bink only exist as 32-bit DLLs, so x64 has
+       no Galaxy (Modern multiplayer only) and plays movies with FFmpeg (third_party\ffmpeg). -->
+  <PropertyGroup Condition="'$(Platform)'=='x64'">
+    <IncludePath>$(IncludePath);$(ProjectDir)third_party\ffmpeg\include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(ProjectDir)third_party\ffmpeg\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -47,6 +64,10 @@
       <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>false</ConformanceMode>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+      <AdditionalOptions>/Zc:alignedNew- /Zc:inline- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -67,6 +88,18 @@
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
       <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;lib\binkw32.lib;lib\steam_api.lib;lib\Galaxy.lib</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>OPENSWBF2_NO_GALAXY;OPENSWBF2_FFMPEG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <!-- pointer truncation (C4311/C4312/C4302) is always a bug in the x64 build -->
+      <AdditionalOptions>/we4311 /we4312 /we4302 %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <TargetMachine>MachineX64</TargetMachine>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -115,7 +148,9 @@
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcVideoEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcWeatherEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIDebug.cpp" />
-    <ClCompile Include="src\Battlefront2\Source\AIDifficulty.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\AIDifficulty.cpp">
+      <FloatingPointModel>Strict</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\AIOverhaul.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIStats.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AITuning.cpp" />
@@ -383,6 +418,7 @@
     <ClCompile Include="src\Battlefront2\Source\NetMatch.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPacket.cpp" />
     <ClCompile Include="src\Battlefront2\Source\MemFailLog.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\OdfValue.cpp" />
     <ClCompile Include="src\Battlefront2\Source\SimDigest.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetWire.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPredict.cpp" />
@@ -538,7 +574,9 @@
     <ClCompile Include="src\Battlefront2\Source\Weapon.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponAreaEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponBinoculars.cpp" />
-    <ClCompile Include="src\Battlefront2\Source\WeaponCannon.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\WeaponCannon.cpp">
+      <FloatingPointModel>Strict</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\WeaponCatapult.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponDestruct.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponDetonator.cpp" />
@@ -707,6 +745,7 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcCrispFont.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp" />
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDxvk.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcGammaPass.cpp" />
     <ClCompile Include="src\RedEngineFL\Application\pc\pcFrameLimiter.cpp" />
     <ClCompile Include="src\RedEngineFL\Application\pc\pcWindow.cpp" />
@@ -800,6 +839,7 @@
     <ClCompile Include="src\RedEngineFL\movie\RedMovie.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerBase.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.cpp" />
+    <ClCompile Include="src\RedEngineFL\movie\pc\FFMovieDecoder.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.cpp" />
     <ClCompile Include="src\SoundFL\source\sndallocbitmap.cpp" />
     <ClCompile Include="src\SoundFL\source\sndbufferio.cpp" />
@@ -935,6 +975,7 @@
     <ClInclude Include="src\Battlefront2\Source\AIStats.h" />
     <ClInclude Include="src\Battlefront2\Source\AITuning.h" />
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h" />
+    <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />
     <ClInclude Include="src\Battlefront2\Source\AILowLevel.h" />
@@ -1179,11 +1220,13 @@
     <ClInclude Include="src\Battlefront2\Source\NavigatorPathFollower.h" />
     <ClInclude Include="src\Battlefront2\Source\NavigatorSlide.h" />
     <ClInclude Include="src\Battlefront2\Source\NetAdmin.h" />
+    <ClInclude Include="src\Battlefront2\Source\NetAdminIdText.h" />
     <ClInclude Include="src\Battlefront2\Source\NetComm.h" />
     <ClInclude Include="src\Battlefront2\Source\NetGame.h" />
     <ClInclude Include="src\Battlefront2\Source\NetMatch.h" />
     <ClInclude Include="src\Battlefront2\Source\NetPacket.h" />
     <ClInclude Include="src\Battlefront2\Source\MemFailLog.h" />
+    <ClInclude Include="src\Battlefront2\Source\OdfValue.h" />
     <ClInclude Include="src\Battlefront2\Source\SimDigest.h" />
     <ClInclude Include="src\Battlefront2\Source\SimDigestCore.h" />
     <ClInclude Include="src\Battlefront2\Source\NetWire.h" />
@@ -1191,6 +1234,7 @@
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcCrispFont.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.h" />
+    <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDxvk.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPass.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPassPS.h" />
     <None Include="src\RedEngineFL\Graphics\PC\pcGammaPass.hlsl" />
@@ -1266,6 +1310,7 @@
     <ClInclude Include="src\Battlefront2\Source\ShadowEffect.h" />
     <ClInclude Include="src\Battlefront2\Source\ShellLoop.h" />
     <ClInclude Include="src\Battlefront2\Source\ShieldEffect.h" />
+    <ClInclude Include="src\Battlefront2\Source\SideNames.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyDome.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyObject.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyStars.h" />
@@ -1549,6 +1594,7 @@
     <ClInclude Include="src\RedEngineFL\movie\RedMovie.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerBase.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.h" />
+    <ClInclude Include="src\RedEngineFL\movie\pc\FFMovieDecoder.h" />
     <ClInclude Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.h" />
     <ClInclude Include="src\RedEngineFL\movie\redpipe.h" />
     <ClInclude Include="src\SoundFL\source\sndallocator.h" />
@@ -1673,6 +1719,7 @@
     <ProjectReference Include="LuaCompiler.vcxproj">
       <Project>{8E0BC5D7-03D1-5947-AEC7-5EAA5F25A967}</Project>
       <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <Properties Condition="'$(Platform)'=='x64'">Platform=Win32</Properties>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -1681,19 +1728,37 @@
     <SWBF2_GAMEDATA Condition="'$(_SteamSWBF2)' != ''">$(_SteamSWBF2)\GameData</SWBF2_GAMEDATA>
   </PropertyGroup>
   <Target Name="BuildLuaLvls" AfterTargets="Build" DependsOnTargets="StageGameData" Condition="'$(SWBF2_GAMEDATA)' != '' and '$(SWBF2_NOSTAGE)' != 'true'">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(OutDir)LuaCompiler.exe&quot; lvl --index &quot;data\scripts\index.json&quot; --gamedata &quot;$(SWBF2_GAMEDATA)&quot; --out-dir &quot;$(OutDir)data\_lvl_pc&quot;" />
+    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(LuaCompilerExe)&quot; lvl --index &quot;data\scripts\index.json&quot; --gamedata &quot;$(SWBF2_GAMEDATA)&quot; --out-dir &quot;$(OutDir)data\_lvl_pc&quot;" />
   </Target>
   <Target Name="StageGameData" AfterTargets="Build" Condition="'$(SWBF2_GAMEDATA)' != '' and '$(SWBF2_NOSTAGE)' != 'true'">
-    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(OutDir)LuaCompiler.exe&quot; stage --retail &quot;$(SWBF2_GAMEDATA)&quot; --out &quot;$(OutDir).&quot;" />
-    <ItemGroup>
+    <Exec WorkingDirectory="$(ProjectDir)" Command="&quot;$(LuaCompilerExe)&quot; stage --retail &quot;$(SWBF2_GAMEDATA)&quot; --out &quot;$(OutDir).&quot;" />
+    <ItemGroup Condition="'$(Platform)'=='Win32'">
       <GameDataFile Include="$(SWBF2_GAMEDATA)\binkw32.dll" Condition="Exists('$(SWBF2_GAMEDATA)\binkw32.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\Galaxy.dll" Condition="Exists('$(SWBF2_GAMEDATA)\Galaxy.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\GalaxyPeer.dll" Condition="Exists('$(SWBF2_GAMEDATA)\GalaxyPeer.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\steam_api.dll" Condition="Exists('$(SWBF2_GAMEDATA)\steam_api.dll')" />
       <GameDataFile Include="$(SWBF2_GAMEDATA)\unicows.dll" Condition="Exists('$(SWBF2_GAMEDATA)\unicows.dll')" />
     </ItemGroup>
+    <ItemGroup Condition="'$(Platform)'=='x64'">
+      <GameDataFile Include="third_party\ffmpeg\bin\avcodec-*.dll;third_party\ffmpeg\bin\avformat-*.dll;third_party\ffmpeg\bin\avutil-*.dll;third_party\ffmpeg\bin\swresample-*.dll;third_party\ffmpeg\bin\swscale-*.dll" />
+    </ItemGroup>
+    <Warning Condition="'$(Platform)'=='x64' and !Exists('third_party\ffmpeg\bin')" Text="third_party\ffmpeg is missing (run tools\setup.ps1): the x64 build will not start without the FFmpeg DLLs." />
     <Copy SourceFiles="@(GameDataFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <!-- FFmpeg's LGPL licence ships beside its DLLs -->
+    <Copy Condition="'$(Platform)'=='x64' and Exists('third_party\ffmpeg\LICENSE.txt')" SourceFiles="third_party\ffmpeg\LICENSE.txt" DestinationFiles="$(OutDir)FFmpeg-LICENSE.txt" SkipUnchangedFiles="true" />
     <WriteLinesToFile File="$(OutDir)steam_appid.txt" Lines="6060" Overwrite="true" />
     <MakeDir Directories="$(OutDir)SaveGames" />
+  </Target>
+  <!-- OpenSWBF2: DXVK for the Vulkan renderer, as dxvk\d3d9.dll. Never beside the exe: there it would
+       replace the system d3d9.dll for the DirectX 9 renderer too. tools\setup.ps1 fetches it into
+       third_party\dxvk; without it the build still succeeds and the game falls back to DirectX 9. -->
+  <PropertyGroup>
+    <DxvkArch Condition="'$(Platform)' == 'Win32'">x32</DxvkArch>
+    <DxvkArch Condition="'$(Platform)' == 'x64'">x64</DxvkArch>
+    <DxvkDll>$(ProjectDir)third_party\dxvk\$(DxvkArch)\d3d9.dll</DxvkDll>
+  </PropertyGroup>
+  <Target Name="CopyDxvk" AfterTargets="Build" Condition="'$(DxvkArch)' != ''">
+    <Warning Condition="!Exists('$(DxvkDll)')" Text="DXVK not found at $(DxvkDll), run tools\setup.ps1. The game will run on DirectX 9." />
+    <Copy Condition="Exists('$(DxvkDll)')" SourceFiles="$(DxvkDll);$(ProjectDir)lib\dxvk\LICENSE.txt" DestinationFolder="$(OutDir)dxvk" SkipUnchangedFiles="true" />
   </Target>
 </Project>

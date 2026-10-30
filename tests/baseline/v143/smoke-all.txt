@@ -1,0 +1,179 @@
+[PASS] hardening:dynamicbase
+[PASS] hardening:nxcompat
+[PASS] hardening:laa
+[PASS] hardening:reloc
+[PASS] hardening:safeseh
+[PASS] hardening:gs
+[PASS] hardening:sdl
+[PASS] hardening:flag-alignednew
+[PASS] hardening:flag-inline
+[PASS] hardening:flag-alignednew-tests
+[PASS] hardening:flag-banned
+[PASS] hardening:import-SetProcessDpiAwarenessContext
+[PASS] hardening:import-SetProcessDpiAwareness
+[PASS] hardening:import-SetProcessDPIAware
+[PASS] hardening:import-GetDpiForWindow
+[PASS] hardening:import-AdjustWindowRectExForDpi
+[PASS] hardening:import-shcore
+[PASS] hardening:redlog-vendor
+[PASS] hardening:aslr-base (0x00B00000)
+[PASS] smoke:cor1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:cor1c_con class=Pass exit=0x00000000
+[PASS] smoke:cor1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:cor1g_con class=Pass exit=0x00000000
+[PASS] smoke:cor1g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:dag1c_con class=Pass exit=0x00000000
+[PASS] smoke:dag1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:dag1g_con class=Pass exit=0x00000000
+[PASS] smoke:dag1g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:dea1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:dea1c_con class=Pass exit=0x00000000
+[PASS] smoke:dea1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:dea1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:dea1g_con class=Pass exit=0x00000000
+[PASS] smoke:end1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:end1g_con class=Pass exit=0x00000000
+[PASS] smoke:end1g_hunt class=Pass exit=0x00000000
+[PASS] smoke:fel1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:fel1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:fel1c_con class=Pass exit=0x00000000
+[PASS] smoke:fel1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:fel1g_con class=Pass exit=0x00000000
+[PASS] smoke:geo1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:geo1c_con class=Pass exit=0x00000000
+[PASS] smoke:geo1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:geo1c_hunt class=Pass exit=0x00000000
+[PASS] smoke:geo1c_xl class=Pass exit=0x00000000
+[PASS] smoke:hot1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:hot1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:hot1g_con class=Pass exit=0x00000000
+[PASS] smoke:hot1g_hunt class=Pass exit=0x00000000
+[PASS] smoke:hot1g_uber class=TimeOut exit=0x00000001
+[PASS] smoke:hot1g_xl class=Pass exit=0x00000000
+[PASS] smoke:kam1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:kam1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:kam1c_con class=Pass exit=0x00000000
+[PASS] smoke:kam1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:kam1g_con class=Pass exit=0x00000000
+[PASS] smoke:kas2c_c class=TimeOut exit=0x00000001
+[PASS] smoke:kas2c_con class=Pass exit=0x00000000
+[PASS] smoke:kas2c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:kas2c_hunt class=Pass exit=0x00000000
+[PASS] smoke:kas2c_uber class=Pass exit=0x00000000
+[PASS] smoke:kas2c_xl class=Pass exit=0x00000000
+[PASS] smoke:kas2g_con class=Pass exit=0x00000000
+[PASS] smoke:kas2g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:kas2g_xl class=Pass exit=0x00000000
+[PASS] smoke:mus1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:mus1c_con class=Pass exit=0x00000000
+[PASS] smoke:mus1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:mus1g_con class=Pass exit=0x00000000
+[PASS] smoke:mus1g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:myg1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:myg1c_con class=Pass exit=0x00000000
+[PASS] smoke:myg1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:myg1g_con class=Pass exit=0x00000000
+[PASS] smoke:myg1g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:nab2c_con class=Pass exit=0x00000000
+[PASS] smoke:nab2c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:nab2c_hunt class=Pass exit=0x00000000
+[PASS] smoke:nab2g_c class=TimeOut exit=0x00000001
+[PASS] smoke:nab2g_con class=Pass exit=0x00000000
+[PASS] smoke:nab2g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:pol1c_con class=Pass exit=0x00000000
+[PASS] smoke:pol1c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:pol1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:pol1g_con class=Pass exit=0x00000000
+[PASS] smoke:pol1g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:spa1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa1g_ass class=Pass exit=0x00000000
+[PASS] smoke:spa1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:spa2c_c class=TimeOut exit=0x00000001
+[PASS] smoke:spa3c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa3c_ass class=Pass exit=0x00000000
+[PASS] smoke:spa3c_c class=TimeOut exit=0x00000001
+[PASS] smoke:spa4g_c class=TimeOut exit=0x00000001
+[PASS] smoke:spa6c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa6c_ass class=Pass exit=0x00000000
+[PASS] smoke:spa7c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa7c_ass class=Pass exit=0x00000000
+[PASS] smoke:spa8g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa8g_ass class=Pass exit=0x00000000
+[PASS] smoke:spa9g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:spa9g_ass class=Pass exit=0x00000000
+[PASS] smoke:tan1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:tan1c_con class=Pass exit=0x00000000
+[PASS] smoke:tan1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:tan1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:tan1g_con class=Pass exit=0x00000000
+[PASS] smoke:tat2c_con class=Pass exit=0x00000000
+[PASS] smoke:tat2c_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:tat2g_con class=Pass exit=0x00000000
+[PASS] smoke:tat2g_ctf class=TimeOut exit=0x00000001
+[PASS] smoke:tat2g_eli class=Pass exit=0x00000000
+[PASS] smoke:tat2g_hunt class=Pass exit=0x00000000
+[PASS] smoke:tat3c_1flag class=Fatal exit=0x00000003
+[PASS] smoke:tat3c_con class=Fatal exit=0x00000003
+[PASS] smoke:tat3g_1flag class=Fatal exit=0x00000003
+[PASS] smoke:tat3g_con class=Fatal exit=0x00000003
+[PASS] smoke:uta1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:uta1c_c class=TimeOut exit=0x00000001
+[PASS] smoke:uta1c_con class=Pass exit=0x00000000
+[PASS] smoke:uta1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:uta1g_con class=Pass exit=0x00000000
+[PASS] smoke:yav1c_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:yav1c_con class=Pass exit=0x00000000
+[PASS] smoke:yav1g_1flag class=TimeOut exit=0x00000001
+[PASS] smoke:yav1g_c class=TimeOut exit=0x00000001
+[PASS] smoke:yav1g_con class=Pass exit=0x00000000
+[PASS] smoke:dedicated class=Pass exit=0x00000000
+[PASS] smoke:crash-nullderef class=Fatal exit=0x00000003
+[PASS] smoke:crash-divzero class=Fatal exit=0x00000003
+[PASS] smoke:crash-stackoverflow class=Fatal exit=0x00000003
+[PASS] smoke:crash-debugbreak class=Fatal exit=0x00000003
+[PASS] smoke:crash-abort class=Fatal exit=0x00000003
+[PASS] smoke:crash-invalidparam class=Fatal exit=0x00000003
+[PASS] smoke:crash-fastfail class=GsFailure exit=0xC0000409
+[PASS] smoke:fatal-init class=Fatal exit=0x00000001
+[PASS] smoke:crash-arenaoom class=Fatal exit=0x00000001
+[PASS] smoke:crash-debugheapoom class=Fatal exit=0x00000001
+[PASS] smoke:crash-heapfail class=Pass exit=0x00000000
+[PASS] smoke:crash-luaoom class=Pass exit=0x00000000
+[PASS] smoke:crash-luapanic class=Fatal exit=0x00000004
+[PASS] smoke:crash-hang class=Fatal exit=0x00000005
+[PASS] smoke:crash-check class=Fatal exit=0x00000003
+[PASS] smoke:crash-resetinitlost class=Pass exit=0x00000000
+[PASS] smoke:crash-resetrecover class=Pass exit=0x00000000
+[PASS] smoke:crash-resetflap class=Pass exit=0x00000000
+[PASS] smoke:crash-resetlaterinit class=InitFailure exit=0x00000000
+[PASS] smoke:crash-resetfatal class=Fatal exit=0x00000001
+[PASS] smoke:crash-applymode class=Pass exit=0x00000000
+[PASS] smoke:crash-applymodesmall class=Pass exit=0x00000000
+[PASS] smoke:crash-applyfail class=Pass exit=0x00000000
+[PASS] smoke:crash-applypresentfail class=Pass exit=0x00000000
+[PASS] smoke:crash-applytargetfail class=Pass exit=0x00000000
+[PASS] smoke:crash-gammapass class=Pass exit=0x00000000
+[PASS] smoke:crash-gammafallback class=Pass exit=0x00000000
+[PASS] smoke:crash-gammalost class=Pass exit=0x00000000
+[PASS] smoke:crash-shellstretch class=Pass exit=0x00000000
+[PASS] smoke:crash-gammadrawfail class=Pass exit=0x00000000
+[PASS] smoke:crash-applyadapter class=Pass exit=0x00000000
+[PASS] smoke:crash-adaptercancel class=Pass exit=0x00000000
+[PASS] smoke:crash-adapteraccept class=Pass exit=0x00000000
+[PASS] smoke:crash-menuconfirm class=Pass exit=0x00000000
+[PASS] smoke:crash-menukeep class=Pass exit=0x00000000
+[PASS] smoke:crash-menusavefail class=Pass exit=0x00000000
+[PASS] smoke:crash-menuorder class=Pass exit=0x00000000
+[PASS] smoke:crash-menuorderrev class=Pass exit=0x00000000
+[PASS] smoke:crash-menurevertsave class=Pass exit=0x00000000
+[PASS] smoke:crash-menuapplyfail class=Pass exit=0x00000000
+
+Results
+  PASS     169
+  FAIL     0
+  SKIP     0
+  TIMEOUT  0
+  CRASH    0
+Known bugs
+  KNOWN    0
+  PASS     0

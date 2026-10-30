@@ -18,6 +18,7 @@ const unsigned int kPadLookSpeed = 2048; // OpenSWBF2: controller sensitivity le
 const unsigned int kHudScale = 4096; // OpenSWBF2: HUD scale, percent 50..150 (default 100)
 const unsigned int kFov = 8192; // OpenSWBF2: field of view, degrees at 16:9 55..100 (default 61)
 const unsigned int kCrispFonts = 16384; // OpenSWBF2: redraw the font atlases sharp above 1080p (default on)
+const unsigned int kRenderer = 32768; // OpenSWBF2: renderer, vulkan (default) or d3d9, read at startup
 
 const unsigned int kAdapterMax = 15;
 const unsigned int kRefreshMax = 1000;
@@ -43,6 +44,8 @@ const unsigned int kHashNoWaitQuery = 0xFF222165;
 const unsigned int kHashNoDpi = 0x5B1931B5;
 const unsigned int kHashDisplayIni = 0x8CDD8845;
 const unsigned int kHashSwCursor = 0x21567C6D;
+const unsigned int kHashVulkan = 0xFC99B1F2;
+const unsigned int kHashD3d9 = 0x3E21D70F;
 
 struct DisplaySettings
 {
@@ -60,6 +63,7 @@ struct DisplaySettings
     unsigned int uiHudScale;
     unsigned int uiFov;
     bool bCrispFonts;
+    unsigned int uiRenderer;
     char acDisplayIni[260];
     unsigned int uiSet;
     unsigned int uiCliMask;
@@ -96,6 +100,7 @@ bool SavePadLayout(unsigned int uiLayout);
 bool SavePadLookSpeed(unsigned int uiLevel);
 bool SaveHudScale(unsigned int uiPercent);
 bool SaveFov(unsigned int uiDegrees);
+bool SaveRenderer(unsigned int uiRenderer);
 void SetPendingAdapter(unsigned int uiIndex, const char* pcName);
 void ClearPendingAdapter();
 const PendingAdapter& GetPendingAdapter();

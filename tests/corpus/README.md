@@ -66,7 +66,7 @@ filled with `7FA5A5A5` beforehand so a failed conversion shows. `atof` is the do
 - `edge.txt`: hand-picked edge cases. The loose `.cfg`/`.ini` numeric paths go through the same
   `sscanf("%f")` and `atof` entry points, and `edge.txt` covers them with the long-mantissa,
   near-halfway, exponent, leading `+`/`.` and trailing-junk cases, plus `nan`, `inf`, `1.#INF`
-  and `1.#QNAN` forms recorded as VS2013 parses them.
+  and `1.#QNAN` forms recorded as the generating CRT parses them.
 
 ## mathfn
 
@@ -89,10 +89,21 @@ and `NetGame.cpp`/`NetSetup.cpp` in the game) calls the plain msvcr120 entries, 
 `atan` there follow x87 precision: the case allows only `sqrt.d` and `atan.d` lines to differ and
 prints how many did (273 in Debug, 0 in Release).
 
+## mathfn on x64
+
+The x64 build checks `mathfn\x64\math.txt` instead of `mathfn\math.txt`: the x64 libm rounds some results differently from x86 (225 of the 10636 lines differ), so each platform keeps its own file and the Win32 one is never read for x64. The format and the input grid are the same. The test exe pins the generic SSE2 path with `_set_FMA3_enable(0)` so the file does not depend on whether the CPU has FMA3. `math corpus x87 pc24` is skipped on x64. If the x64 file is missing `math corpus` prints `[SKIP]` instead of failing.
+
+Record it with `tests\run.ps1 -Platform x64 -RecordCorpus` (or `OpenSWBF2Tests.exe --gen-corpus=corpus` from `tests\`). On x64 that writes only `mathfn\x64\math.txt`, needs no GameData, and gives the same bytes from the Debug and Release builds. `floatparse` is shared by both platforms: the x64 build parses every token identically, and the `float parse corpus` cases check it.
+
 ## Provenance of floatparse and mathfn
 
-Generated once on VS2013 Update 5 (`cl` 18.00.40629, `msvcr120.dll` 12.00.40664.0) by running
+Generated on v143 (MSVC 14.44.35207, `ucrtbase.dll` 10.0.26100.9711) by running
 `..\bin\Tests\Release\OpenSWBF2Tests.exe --gen-corpus=corpus` from `tests\` with retail GameData
-present (without it the mode prints `[SKIP]` and exits 77). Do not regenerate them after the
-toolchain switch: Phase 20 compares the v143/UCRT results against these bits. The checker cases
-in the `corpus` suite read only these files and need no GameData, so they never skip.
+present (without it the mode prints `[SKIP]` and exits 77). The VS2013 Update 5 originals (`cl`
+18.00.40629, `msvcr120.dll` 12.00.40664.0) are kept unchanged under
+`tests\baseline\vs2013\corpus\`. `odf.txt` is identical on both toolchains; the `edge.txt` and
+`math.txt` deltas are explained in `tests\baseline\v143\CAUSES.md`. The files are regenerated
+only at a toolchain change, with a written cause. The checker cases in the `corpus` suite read
+only these files and need no GameData, so they never skip (on x64 `math corpus` skips until
+`mathfn\x64\math.txt` exists). `mathfn\x64\math.txt` was first generated on VS2013 Update 5 for
+x64 and regenerated the same way on v143 x64 when the x64 build moved to v143.

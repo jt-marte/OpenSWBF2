@@ -56,7 +56,7 @@ char EntityRemoteTerminal::rttiNameEntityRemoteTerminal[] = "EntityRemoteTermina
 // `dynamic initializer for 'EntityRemoteTerminal::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766fa0
 // `dynamic atexit destructor for 'EntityRemoteTerminal::sMemoryPool''
-MemoryPool EntityRemoteTerminal::sMemoryPool("EntityRemoteTerminal", 0x3f0);
+MemoryPool EntityRemoteTerminal::sMemoryPool("EntityRemoteTerminal", RED_POOL_SIZE(0x3f0, EntityRemoteTerminal));
 
 namespace
 {

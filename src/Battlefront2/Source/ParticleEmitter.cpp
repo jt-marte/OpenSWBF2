@@ -13,7 +13,7 @@ extern SmallEffectLodData smallEffectLodData;
 // `dynamic initializer for 'ParticleEmitter::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769210
 // `dynamic atexit destructor for 'ParticleEmitter::sMemoryPool''
-MemoryPool ParticleEmitter::sMemoryPool("ParticleEmitter", 0x40);
+MemoryPool ParticleEmitter::sMemoryPool("ParticleEmitter", RED_POOL_SIZE(0x40, ParticleEmitter));
 
 // FUNCTION: SWBF2 0x00609ed0
 ParticleEmitterClass::ParticleEmitterClass()

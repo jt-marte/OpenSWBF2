@@ -11,6 +11,7 @@
 #include "FLEffect.h"
 #include "GameObject.h"
 #include "NetGame.h"
+#include "OdfValue.h"
 #include "UnitController.h"
 #include "VisionManager.h"
 #include "WeaponCannonInstance.h"
@@ -62,7 +63,7 @@ char OrdnanceClass::rttiNameOrdnanceClass[] = "OrdnanceClass";
 // `dynamic initializer for 'Ordnance::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007691f0
 // `dynamic atexit destructor for 'Ordnance::sMemoryPool''
-MemoryPool Ordnance::sMemoryPool("Ordnance", 0x98);
+MemoryPool Ordnance::sMemoryPool("Ordnance", RED_POOL_SIZE(0x98, Ordnance));
 
 // FUNCTION: SWBF2 0x005f7e70
 OrdnanceClass::OrdnanceClass(unsigned int uHash)
@@ -560,7 +561,9 @@ void OrdnanceClass::Read(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pClass->SetProperty(uProperty, child.ReadString(acBuffer, sizeof(acBuffer)));
+            char* pcValue = child.ReadString(acBuffer, sizeof(acBuffer));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pClass->SetProperty(uProperty, pcValue);
             if (pClass != pClass->mNextCharge)
             {
                 pClass = pClass->mNextCharge;
@@ -731,3 +734,6 @@ template Factory<Ordnance, OrdnanceClass, OrdnanceDesc>::Factory(OrdnanceClass*,
 
 // SYNTHETIC: SWBF2 0x005fa2d0
 // OrdnanceBeamClass::~OrdnanceBeamClass
+
+// CollisionManager.cpp's Ordnance stand-in pads up to mCollisionManagerNode
+static_assert(offsetof(Ordnance, mCollisionManagerNode) == (sizeof(void*) == 4 ? 0x78 : 0xD0), "Ordnance stand-in layout");

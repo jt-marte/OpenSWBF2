@@ -1086,6 +1086,7 @@ unsigned int* __fastcall SetIteratorNodeWord(unsigned int* pThis, void*, unsigne
     return pThis;
 }
 
+#ifndef _WIN64 // unused; these walk 32-bit list nodes by raw offset
 // FUNCTION: SWBF2 0x00446d90
 unsigned int __fastcall sub_446D90(const unsigned int* pThis)
 {
@@ -1110,3 +1111,4 @@ unsigned int* __fastcall AdvanceIteratorNodeWord(unsigned int* pThis)
     *pThis = *(const unsigned int*)(*pThis + 4);
     return pThis;
 }
+#endif

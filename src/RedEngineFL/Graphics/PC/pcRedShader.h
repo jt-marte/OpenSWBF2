@@ -202,7 +202,7 @@ public:
                                           unsigned short usCount,
                                           const RenderItem*);
 
-    virtual int GetDiffuseMapHash(int, int);
+    virtual int GetDiffuseMapHash(intptr_t, int); // (const RenderItem*, pass)
 
     unsigned int GetPassCaps(unsigned int uiState, unsigned int uiPass) const;
 

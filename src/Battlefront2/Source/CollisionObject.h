@@ -2,6 +2,8 @@
 
 #include <stddef.h>
 
+#include "PebbleFL/Common/PblRawStorage.h"
+
 #include "PebbleFL/Common/PblVector.h"
 
 class CollisionModel;
@@ -78,7 +80,7 @@ class TreeGridStack
 public:
 
     TreeGridStack() : mStackSize(0), mNext(0) {}
-    static void* operator new(unsigned int uiSize);
+    static void* operator new(size_t uiSize);
     static void operator delete(void* pBlock);
     TreeGridStack* AddObject(TreeGridObject* pObj, const PblVector3& rPos, float fSize);
     TreeGridStack* RemoveObject(TreeGridObject* pObj);
@@ -237,7 +239,7 @@ public:
     // FUNCTION: SWBF2 0x0045db10
     const CollisionModel* GetCollisionModel() const { return mCollisionModel; }
 
-    char mCollisionObjectNode[16];
+    PBL_RAW_ALIGN char mCollisionObjectNode[PBL_RAW_SIZE(16, 32)]; // a PblList<CollisionObject>::Node
     CollisionModel* mCollisionModel;
     CollisionObject* mParent;
     float mMass;

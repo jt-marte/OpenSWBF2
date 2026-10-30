@@ -1234,7 +1234,7 @@ void HUD::GameEvents::UpdateWeaponEvents(const RedCamera* const pCamera, const C
             const unsigned short* pLabel = pWeaponClass->mLabel;
             if (!pLabel)
             {
-                PblUnicode::ustrncnv(acFilename, pWeaponClass->mFilename, 256);
+                PblUnicode::ustrncnv(acFilename, pWeaponClass->mFilename, 255);
                 pLabel = acFilename;
             }
             PblUnicode::ustrlcpy(acName, pLabel, 256);

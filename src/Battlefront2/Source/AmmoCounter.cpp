@@ -39,7 +39,7 @@ public:
 // `dynamic initializer for 'AmmoCounter::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766d70
 // `dynamic atexit destructor for 'AmmoCounter::sMemoryPool''
-MemoryPool AmmoCounter::sMemoryPool("AmmoCounter", 0x18);
+MemoryPool AmmoCounter::sMemoryPool("AmmoCounter", RED_POOL_SIZE(0x18, AmmoCounter));
 
 // FUNCTION: SWBF2 0x00443680
 bool AmmoCounterClass::SetProperty(unsigned int uiHash, const char* pcValue)

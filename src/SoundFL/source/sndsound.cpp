@@ -17,7 +17,7 @@ namespace Snd
 {
 
 Sound::FireForget* Sound::smVoiceVirtuals;
-unsigned char Sound::smVoiceVirtualStorage[12800];
+__declspec(align(16)) unsigned char Sound::smVoiceVirtualStorage[64 * sizeof(FireForget)];
 
 // SYNTHETIC: SWBF2 0x00739c30
 // Snd::Source3D::`default constructor closure'
@@ -48,7 +48,7 @@ void Sound::Open()
     for (unsigned int i = 0; i < 64; ++i)
     {
         new (&smVoiceVirtuals[i], false)
-            FireForget((unsigned int)(unsigned long)smVoiceVirtuals, 0, true);
+            FireForget((unsigned int)(uintptr_t)smVoiceVirtuals, 0, true);
 
         ::PblVector3* pPos = &smSource3DPositions[i];
         smSource3Ds[i].mFlags |= (unsigned char)Source3D::flags_pos3DChanged;
@@ -245,7 +245,7 @@ VoiceVirtual* __cdecl Sound::GetFreeVoice(VoiceVirtualManager* pManager)
             break;
         }
         VoiceVirtual* pVoice = (VoiceVirtual*)((char*)pNode - offsetof(VoiceVirtual, mNode));
-        if (pVoice->mCustomFlags == (unsigned int)smVoiceVirtuals)
+        if (pVoice->mCustomFlags == (unsigned int)(uintptr_t)smVoiceVirtuals)
         {
             return pVoice;
         }
@@ -270,7 +270,7 @@ VoiceVirtual* __cdecl Sound::StealVoice(VoiceVirtualManager* pManager, float fPr
             break;
         }
         VoiceVirtual* pVoice = (VoiceVirtual*)((char*)pNode - offsetof(VoiceVirtual, mNode));
-        if (pVoice->mCustomFlags != (unsigned int)smVoiceVirtuals)
+        if (pVoice->mCustomFlags != (unsigned int)(uintptr_t)smVoiceVirtuals)
         {
             continue;
         }
@@ -506,7 +506,7 @@ void __cdecl Sound::UpdateVoices(VoiceVirtualManager* pManager, float fDeltaTime
             break;
         }
         FireForget* pVoice = (FireForget*)((char*)pNode - offsetof(VoiceVirtual, mNode));
-        if (pVoice->mCustomFlags != (unsigned int)smVoiceVirtuals)
+        if (pVoice->mCustomFlags != (unsigned int)(uintptr_t)smVoiceVirtuals)
         {
             continue;
         }

@@ -167,7 +167,7 @@ char EntityMine::rttiNameEntityMine[] = "EntityMine";
 // `dynamic initializer for 'EntityMine::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f80
 // `dynamic atexit destructor for 'EntityMine::sMemoryPool''
-MemoryPool EntityMine::sMemoryPool("EntityMine", 0x2a0);
+MemoryPool EntityMine::sMemoryPool("EntityMine", RED_POOL_SIZE(0x2a0, EntityMine));
 
 // FUNCTION: SWBF2 0x004cf5e0
 EntityMine::EntityMine(EntityMineClass* pClass, const EntityDesc& desc)

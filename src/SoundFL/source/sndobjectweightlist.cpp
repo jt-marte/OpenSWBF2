@@ -67,7 +67,7 @@ bool ObjectWeightList::ReadObjectWeights(PblFileChunk& chunk, unsigned int uiObj
             fIntervalDev = pFile->ReadFloat();
         }
 
-        void const* pObject = (void const*)uiHash;
+        void const* pObject = (void const*)(uintptr_t)uiHash;
         if (pfnFind)
         {
             pObject = pfnFind(uiHash);

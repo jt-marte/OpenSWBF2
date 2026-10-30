@@ -1,4 +1,5 @@
 #include <math.h>
+#include "PebbleFL/Common/PblRawStorage.h"
 
 #include "CollisionManager.h"
 #include "CameraManager.h"
@@ -38,7 +39,7 @@ public:
     virtual void KillOrdnance();
     virtual bool CheckCollision();
 
-    char mOrdnanceFields[0x78 - 0x18];
+    char mOrdnanceFields[PBL_RAW_SIZE(0x78 - 0x18, 0xA0)];
     PblList<Ordnance>::Node mCollisionManagerNode;
 };
 

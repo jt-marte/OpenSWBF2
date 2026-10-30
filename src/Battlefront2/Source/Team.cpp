@@ -891,14 +891,14 @@ void Team::GenerateRandomName(unsigned short* const pName, int iTeam) const
                 }
             }
         }
-        PblUnicode::ustrncpy(pName, pusName, 64);
+        PblUnicode::ustrlcpy(pName, pusName, 64);
         return;
     }
 
     unsigned int uRand = mNameRand.GetInt();
     if (mFirstCount)
     {
-        PblUnicode::ustrlcat(pName, mFirstNames[uRand % mFirstCount], 64);
+        PblUnicode::ustrlcat(pName, mFirstNames[uRand % mFirstCount], 60);
     }
     else
     {
@@ -914,7 +914,7 @@ void Team::GenerateRandomName(unsigned short* const pName, int iTeam) const
     uRand = mNameRand.GetInt();
     if (mLastCount)
     {
-        PblUnicode::ustrlcat(pName, mLastNames[uRand % mLastCount], 64);
+        PblUnicode::ustrlcat(pName, mLastNames[uRand % mLastCount], 63);
     }
     else
     {

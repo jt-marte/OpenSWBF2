@@ -55,7 +55,7 @@ public:
     {
     public:
 
-        static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+        static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
         static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
         static void AddMemoryPoolCount(unsigned int uCount) { sMemoryPool.SetCount(sMemoryPool.GetCount() + uCount); }

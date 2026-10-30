@@ -231,8 +231,8 @@ bool VoiceChat::Node::Open()
     mNumDecoderInputs = 0x0C;
 
     char* pEntryBuf = pBlock + uiNodes * 0x18;
-    char* pData = (char*)((((unsigned long)(pEntryBuf) +
-                            uiPackets * uiNodes * 0x10u) + 3u) & ~3u);
+    char* pData = (char*)((((uintptr_t)(pEntryBuf) +
+                            uiPackets * uiNodes * 0x10u) + 3u) & ~(uintptr_t)3);
 
     for (unsigned int i = 0; i < uiNodes; ++i)
     {

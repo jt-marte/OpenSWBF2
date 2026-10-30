@@ -94,7 +94,7 @@ int PlayerProfile::FindByName(const unsigned short* pusName)
 // FUNCTION: SWBF2 0x0061d7a0
 void PlayerProfile::tProfile::SetTrueProfileName(const unsigned short* pusName)
 {
-    PblUnicode::ustrncpy(mName, pusName, 16);
+    PblUnicode::ustrlcpy(mName, pusName, 16);
 }
 
 // FUNCTION: SWBF2 0x0061d7c0
@@ -165,7 +165,7 @@ void PlayerPrefs::InitAll()
     PlayerPrefs::mAllUserPrefs[0].mJoystick = 0;
 
     PlayerPrefs::mAllUserPrefs[0].pProfile = PlayerProfile::GetProfile(0);
-    *(PlayerProfile::tProfile**)((char*)&mDefaultProfile + 0x10) = PlayerProfile::GetProfile(1);
+    *(unsigned int*)((char*)&mDefaultProfile + 0x10) = (unsigned int)(uintptr_t)PlayerProfile::GetProfile(1);
 }
 
 // FUNCTION: SWBF2 0x0061c4d0
@@ -275,13 +275,13 @@ void PlayerProfile::tGameOpt::ApplySettings(int iPort, int  )
         Damageable::SetTeamDamageScale(mFriendlyFire / 100.0f);
     }
 
+    // OpenSWBF2: written with members; retail wrote Win32 byte offsets from the start of the
+    // object (0x20bc, 0x000c, 0x2610, 0x2638, 0x263d, 0x2642), which move on x64.
     RawControllerInputs* pJoystick = FLInputManager::s_instance.GetPlayerJoystick(iPort);
-    unsigned char* pRaw = (unsigned char*)pJoystick;
 
     for (int iMode = 0; iMode < 5; ++iMode)
     {
-        memcpy(pRaw + 0x20bc + iMode * sizeof(mKeyboardBindings[0]), mKeyboardBindings[iMode],
-               sizeof(mKeyboardBindings[0]));
+        memcpy(pJoystick->mCurKeyboardBindings[iMode], mKeyboardBindings[iMode], sizeof(mKeyboardBindings[0]));
     }
 
     for (int iMode = 0; iMode < 5; ++iMode)
@@ -295,13 +295,13 @@ void PlayerProfile::tGameOpt::ApplySettings(int iPort, int  )
             mControllerScale[1][iMode] = 4;
         }
 
-        pRaw[0x2638 + iMode] = mControllerScale[0][iMode];
-        pRaw[0x263d + iMode] = mControllerScale[1][iMode];
-        pRaw[0x000c + iMode] = mFlip[iMode];
-        *(double*)(pRaw + 0x2610 + iMode * 8) = ConvertMouseScaleToRawScale(mMouseSensitivity[iMode] / 10.0f, iMode);
-        pRaw[0x2638 + iMode] = mJoystickSensitivityX[iMode];
-        pRaw[0x263d + iMode] = mJoystickSensitivityY[iMode];
-        pRaw[0x2642 + iMode] = mMouseAssist[iMode];
+        pJoystick->mJoystickSensitivityX[iMode] = mControllerScale[0][iMode];
+        pJoystick->mJoystickSensitivityY[iMode] = mControllerScale[1][iMode];
+        *(unsigned char*)&pJoystick->mFlip[iMode] = (unsigned char)mFlip[iMode];
+        *(double*)pJoystick->mMouseSensitivity[iMode] = ConvertMouseScaleToRawScale(mMouseSensitivity[iMode] / 10.0f, iMode);
+        pJoystick->mJoystickSensitivityX[iMode] = mJoystickSensitivityX[iMode];
+        pJoystick->mJoystickSensitivityY[iMode] = mJoystickSensitivityY[iMode];
+        *(unsigned char*)&pJoystick->mMouseAssist[iMode] = (unsigned char)mMouseAssist[iMode];
 
         pJoystick->ApplyDeadZone(mDeadZone);
     }
@@ -1475,7 +1475,7 @@ void PlayerProfile::tProfile::ResetProfile()
 void PlayerProfile::tProfile::ResetToDefault()
 {
     ResetProfile();
-    PblUnicode::ustrncpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
+    PblUnicode::ustrlcpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
     mName[15] = 0;
 }
 
@@ -1504,7 +1504,7 @@ void PlayerProfile::tProfile::SanityCheck()
 
     if (!PblUnicode::ustrlen(mName))
     {
-        PblUnicode::ustrncpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
+        PblUnicode::ustrlcpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
         mName[15] = 0;
     }
     if (!PblUnicode::ustrlen(mName))
@@ -1703,7 +1703,7 @@ void PlayerProfile::tProfile::InitProfile(unsigned short const* pusName)
     mInitialized = true;
     if (pusName)
     {
-        PblUnicode::ustrncpy(mName, pusName, 16);
+        PblUnicode::ustrlcpy(mName, pusName, 16);
         mName[15] = 0;
         mbFakeProfile = false;
     }

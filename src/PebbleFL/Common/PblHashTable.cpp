@@ -3,16 +3,16 @@
 #include <string.h>
 
 // FUNCTION: SWBF2 0x00726de0
-void __cdecl PblHashTableCode::_Clear(unsigned int* pTable, int iCount)
+void __cdecl PblHashTableCode::_Clear(PblHashSlot* pTable, int iCount)
 {
-    memset(pTable, 0, iCount * sizeof(unsigned int));
+    memset(pTable, 0, iCount * sizeof(PblHashSlot));
 }
 
 // FUNCTION: SWBF2 0x00726e00
-void* __cdecl PblHashTableCode::_Find(const unsigned int* pTable, int iCount, unsigned int uiHash)
+void* __cdecl PblHashTableCode::_Find(const PblHashSlot* pTable, int iCount, unsigned int uiHash)
 {
     const int iHalf = iCount >> 1;
-    const unsigned int* pSlot = pTable + ((iHalf - 1) & uiHash);
+    const PblHashSlot* pSlot = pTable + ((iHalf - 1) & uiHash);
 
     if (!uiHash)
     {
@@ -37,10 +37,10 @@ void* __cdecl PblHashTableCode::_Find(const unsigned int* pTable, int iCount, un
 }
 
 // FUNCTION: SWBF2 0x00726f60
-bool __cdecl PblHashTableCode::_Store(unsigned int* pTable, int iCount, unsigned int uiHash, void* pValue)
+bool __cdecl PblHashTableCode::_Store(PblHashSlot* pTable, int iCount, unsigned int uiHash, void* pValue)
 {
     const int iHalf = iCount >> 1;
-    unsigned int* pSlot = pTable + ((iHalf - 1) & uiHash);
+    PblHashSlot* pSlot = pTable + ((iHalf - 1) & uiHash);
 
     while (*pSlot)
     {
@@ -57,15 +57,15 @@ bool __cdecl PblHashTableCode::_Store(unsigned int* pTable, int iCount, unsigned
     }
 
     *pSlot = uiHash;
-    pSlot[iHalf] = (unsigned int)pValue;
+    pSlot[iHalf] = (PblHashSlot)pValue;
     return true;
 }
 
 // FUNCTION: SWBF2 0x00726ed0
-bool __cdecl PblHashTableCode::_Remove(unsigned int* pTable, int iCount, unsigned int uiHash)
+bool __cdecl PblHashTableCode::_Remove(PblHashSlot* pTable, int iCount, unsigned int uiHash)
 {
     const int iHalf = iCount >> 1;
-    unsigned int* pSlot = pTable + ((iHalf - 1) & uiHash);
+    PblHashSlot* pSlot = pTable + ((iHalf - 1) & uiHash);
 
     while (*pSlot != uiHash)
     {
@@ -96,7 +96,7 @@ bool __cdecl PblHashTableCode::_Remove(unsigned int* pTable, int iCount, unsigne
             return true;
         }
 
-        const unsigned int uiMoved = *pSlot;
+        const unsigned int uiMoved = (unsigned int)*pSlot;
         void* const pMovedValue = (void*)pSlot[iHalf];
         *pSlot = 0;
         _Store(pTable, iCount, uiMoved, pMovedValue);

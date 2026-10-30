@@ -99,9 +99,9 @@ void SetHeap(int iHeap)
 }
 
 // FUNCTION: SWBF2 0x005387a0
-void* __cdecl SndAlloc(unsigned int uiSize)
+void* __cdecl SndAlloc(size_t uiSize)
 {
-    return RedAllocFromHeap(GameSoundEngine::gSoundHeap, uiSize, 0);
+    return RedAllocFromHeap(GameSoundEngine::gSoundHeap, (unsigned int)uiSize, 0);
 }
 
 // FUNCTION: SWBF2 0x005387c0
@@ -111,9 +111,9 @@ void __cdecl SndFree(void* pBlock)
 }
 
 // FUNCTION: SWBF2 0x005387e0
-void* __cdecl SndTempAlloc(unsigned int uiSize)
+void* __cdecl SndTempAlloc(size_t uiSize)
 {
-    return RedAllocFromHeap(GameMemory::RunTimeHeap, uiSize, 0);
+    return RedAllocFromHeap(GameMemory::RunTimeHeap, (unsigned int)uiSize, 0);
 }
 
 // FUNCTION: SWBF2 0x00538800
@@ -234,7 +234,7 @@ bool Init(unsigned int uiFlags, bool bEnable)
 // `dynamic initializer for 'Snd::SoundParameterized::Layer::smFreeList''
 // SYNTHETIC: SWBF2 0x0076a250
 // `dynamic atexit destructor for 'Snd::SoundParameterized::Layer::smFreeList''
-Snd::FreeList Snd::SoundParameterized::Layer::smFreeList(0x100, 1, 0xa0, 1);
+Snd::FreeList Snd::SoundParameterized::Layer::smFreeList(SND_FREELIST_SIZE(0x100, Snd::SoundParameterized::Layer), 1, 0xa0, 1);
 
 namespace GameSoundEngine
 {
@@ -288,6 +288,13 @@ namespace GameVoiceChat {
 // FUNCTION: SWBF2 0x0053c040
 bool Open(float fSeconds, bool bSoundWorking)
 {
+#ifdef _WIN64
+    // OpenSWBF2: voice chat carves its encoder, decoders and node tables with Win32 object sizes
+    // and byte offsets, so it stays off in the x64 build until it is ported (as if it failed to open).
+    (void)fSeconds;
+    (void)bSoundWorking;
+    return false;
+#endif
 
     sVoiceChatHeap = GameMemory::ApplicationHeap;
     int iOldHeap = RedSetCurrentHeap(GameMemory::ApplicationHeap);

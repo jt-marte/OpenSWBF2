@@ -9,6 +9,7 @@ namespace pcCrash
     long Filter(struct _EXCEPTION_POINTERS* pInfo);
     void __cdecl Exit(int iCode);
     void SetLogPath(char const* pcPath);
+    char const* GetLogPath();
     void SetCrashTest(char const* pcKind);
     void RunCrashTest();
     void RunMissionCrashTest();

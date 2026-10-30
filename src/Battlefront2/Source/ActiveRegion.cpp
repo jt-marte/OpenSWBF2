@@ -199,7 +199,7 @@ PblHashTable<ActiveRegion, 64> sMap;
 // `dynamic initializer for 'ActiveRegions::ActiveRegion::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766d20
 // `dynamic atexit destructor for 'ActiveRegions::ActiveRegion::sMemoryPool''
-MemoryPool ActiveRegion::sMemoryPool("ActiveRegion", 0x68);
+MemoryPool ActiveRegion::sMemoryPool("ActiveRegion", RED_POOL_SIZE(0x68, ActiveRegion));
 
 ActiveRegion::~ActiveRegion()
 {
@@ -299,6 +299,7 @@ void* __fastcall InitRawListIterator(void** pCurrent, void*, const void* pSource
     return pCurrent;
 }
 
+#ifndef _WIN64 // unused retail helpers that walk 32-bit nodes by byte offset
 // FUNCTION: SWBF2 0x00437dd0
 void* __fastcall sub_437DD0(void** pCurrent)
 {
@@ -317,3 +318,4 @@ void* __fastcall AdvanceRawListIterator(void** pCurrent)
     *pCurrent = *(void**)((char*)*pCurrent + 4);
     return pCurrent;
 }
+#endif

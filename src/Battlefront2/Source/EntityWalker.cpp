@@ -322,7 +322,7 @@ char EntityWalker::rttiNameEntityWalker[] = "EntityWalker";
 // `dynamic initializer for 'EntityWalker::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00767010
 // `dynamic atexit destructor for 'EntityWalker::sMemoryPool''
-MemoryPool EntityWalker::sMemoryPool("EntityWalker", 0x2100);
+MemoryPool EntityWalker::sMemoryPool("EntityWalker", RED_POOL_SIZE(0x2100, EntityWalker));
 
 // FUNCTION: SWBF2 0x0047fb20
 float EntityWalker::GetMaxStrafe() const
@@ -1561,7 +1561,7 @@ static PblMatrix _IdentityMatrix(
     PblVector4{ 0.0f, 0.0f, 1.0f, 0.0f },
     PblVector4{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-void* WalkerLegPair::operator new(unsigned int uSize)
+void* WalkerLegPair::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }
@@ -1871,6 +1871,7 @@ EntityWalker::EntityWalker(EntityWalkerClass* pClass, const EntityDesc& desc)
     mPivotOffset.x = 0.0f;
     mPivotOffset.y = 0.0f;
     mPivotOffset.z = 0.0f;
+    static_assert(sizeof(EnergyBar) <= sizeof(mEnergyBar), "mEnergyBar storage");
     new (mEnergyBar) EnergyBar(&pClass->mEnergyBarClass);
     mBoost = false;
     mSpeedPrev = 0.0f;

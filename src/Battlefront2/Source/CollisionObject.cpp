@@ -50,6 +50,7 @@ CollisionObject::CollisionObject(CollisionObjectType eType, const CollisionModel
       FoleyFXCollider(pColliderClass),
       FoleyFXCollidee(pCollideeClass)
 {
+    static_assert(sizeof(PblList<CollisionObject>::Node) <= sizeof(mCollisionObjectNode), "mCollisionObjectNode storage");
     new (mCollisionObjectNode) PblList<CollisionObject>::Node;
     mProcedurallyAnimated = false;
     mCollisionModel = const_cast<CollisionModel*>(pModel);

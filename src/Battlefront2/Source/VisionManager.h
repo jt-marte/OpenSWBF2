@@ -18,7 +18,7 @@ namespace VisionManager
 
         static void operator delete(void* p) { sMemoryPool.Free(p); }
 
-        static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+        static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
 
         RayRequest(UnitController* pCtrl, GameObject* pHim, int iPriority);
 

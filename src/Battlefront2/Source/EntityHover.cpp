@@ -86,7 +86,7 @@ char EntityHover::rttiNameEntityHover[] = "EntityHover";
 // `dynamic initializer for 'EntityHover::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f60
 // `dynamic atexit destructor for 'EntityHover::sMemoryPool''
-MemoryPool EntityHover::sMemoryPool("EntityHover", 0x1d10);
+MemoryPool EntityHover::sMemoryPool("EntityHover", RED_POOL_SIZE(0x1d10, EntityHover));
 
 // GLOBAL: SWBF2 0x01ebbdd4
 // SYNTHETIC: SWBF2 0x00402bb0
@@ -510,7 +510,7 @@ static PblMatrix _IdentityMatrix(
     PblVector4{ 0.0f, 0.0f, 1.0f, 0.0f },
     PblVector4{ 0.0f, 0.0f, 0.0f, 1.0f });
 
-void* EntityHover::operator new(unsigned int uSize)
+void* EntityHover::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }
@@ -529,6 +529,7 @@ EntityHover::EntityHover(EntityHoverClass* pClass, const EntityDesc& desc)
     , mObstacle(0)
     , mPostCollision(this)
 {
+    static_assert(sizeof(EnergyBar) <= sizeof(mEnergyBar), "mEnergyBar storage");
     new (mEnergyBar) EnergyBar(&pClass->mEnergyBarClass);
     mBoost = false;
 

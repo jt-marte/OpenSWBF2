@@ -35,7 +35,7 @@ namespace ParticleSystem { bool IsLodActive(int iLod); }
 // `dynamic initializer for 'ParticleEmitterObject::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769240
 // `dynamic atexit destructor for 'ParticleEmitterObject::sMemoryPool''
-MemoryPool ParticleEmitterObject::sMemoryPool("ParticleEmitterObject", 0x110);
+MemoryPool ParticleEmitterObject::sMemoryPool("ParticleEmitterObject", RED_POOL_SIZE(0x110, ParticleEmitterObject));
 
 // FUNCTION: SWBF2 0x0060b910
 ParticleEmitterInfoData* ParticleEmitterInfoData::Create()

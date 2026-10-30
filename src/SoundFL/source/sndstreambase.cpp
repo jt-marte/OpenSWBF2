@@ -15,7 +15,7 @@ StreamBase::Info::~Info()
 }
 
 template <>
-void Allocator<StreamBase::Info>::operator delete(void* p, unsigned int uiSize)
+void Allocator<StreamBase::Info>::operator delete(void* p, size_t uiSize)
 {
     (void)uiSize;
     switch (((StreamBase::Info*)p)->GetAllocType())
@@ -223,7 +223,7 @@ bool StreamBase::LoadSegments(PblFileChunk& chunk, Segment* pSegments,
                         {
                             uiLengthSamples = pSegments[i].mLengthSamples;
                             uiLength = pSegments[i].mLength;
-                            uiAliasOffset = (unsigned int)pSegments[i].mAddress;
+                            uiAliasOffset = (unsigned int)(uintptr_t)pSegments[i].mAddress;
                             break;
                         }
                     }

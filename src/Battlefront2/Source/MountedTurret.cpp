@@ -1,4 +1,5 @@
 #include "MountedTurret.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 
 #include <float.h>
 #include <math.h>
@@ -188,7 +189,7 @@ public:
         CRASHED = 5
     };
 
-    char mFlyerBaseStorage[0x564];
+    char mFlyerBaseStorage[PBL_RAW_SIZE(0x564, 0x7EC)];
     State mState;
 
     static PblHash rttiHashEntityFlyer;
@@ -212,7 +213,7 @@ char MountedTurretClass::rttiNameMountedTurretClass[] = "MountedTurretClass";
 // `dynamic initializer for 'MountedTurret::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768d20
 // `dynamic atexit destructor for 'MountedTurret::sMemoryPool''
-MemoryPool MountedTurret::sMemoryPool("MountedTurret", 0x2c0);
+MemoryPool MountedTurret::sMemoryPool("MountedTurret", RED_POOL_SIZE(0x2c0, MountedTurret));
 
 // FUNCTION: SWBF2 0x005a5160
 bool MountedTurret::IsRtti(unsigned int uRtti) const

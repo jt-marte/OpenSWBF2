@@ -1,5 +1,11 @@
 #pragma once
 
+#include <stddef.h>
+
+// A hash table slot: a key, or a value that is usually a pointer. Pointer-sized, so unsigned
+// int on Win32.
+typedef uintptr_t PblHashSlot;
+
 class PblHash
 {
 public:
@@ -20,10 +26,10 @@ private:
 class PblHashTableCode
 {
 protected:
-    static void __cdecl _Clear(unsigned int* pTable, int iCount);
-    static void* __cdecl _Find(const unsigned int* pTable, int iCount, unsigned int uiHash);
-    static bool __cdecl _Store(unsigned int* pTable, int iCount, unsigned int uiHash, void* pValue);
-    static bool __cdecl _Remove(unsigned int* pTable, int iCount, unsigned int uiHash);
+    static void __cdecl _Clear(PblHashSlot* pTable, int iCount);
+    static void* __cdecl _Find(const PblHashSlot* pTable, int iCount, unsigned int uiHash);
+    static bool __cdecl _Store(PblHashSlot* pTable, int iCount, unsigned int uiHash, void* pValue);
+    static bool __cdecl _Remove(PblHashSlot* pTable, int iCount, unsigned int uiHash);
 };
  
 
@@ -56,7 +62,7 @@ public:
         operator TYPE*() const { return (TYPE*)_table->_table[SLOTS + _pos]; }
         TYPE& operator*() const { return *(TYPE*)_table->_table[SLOTS + _pos]; }
 
-        unsigned int GetKey() const { return _table->_table[_pos]; }
+        unsigned int GetKey() const { return (unsigned int)_table->_table[_pos]; }
 
         const Itor& operator++()
         {
@@ -80,7 +86,7 @@ public:
     Itor Begin() const { return Itor(this); }
     Itor End() const { return Itor(this, SLOTS); }
 
-    unsigned int _table[2 * SLOTS];
+    PblHashSlot _table[2 * SLOTS];
 };
 
 unsigned int __cdecl PblTEMPHash(const char* pcText);

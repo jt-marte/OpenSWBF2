@@ -97,8 +97,8 @@ void RedWarning::DialogBoxMessage(char const* pcFormat, ...)
 }
 
 // FUNCTION: SWBF2 0x006f6b80
-int __stdcall RedWarning::DlgProc(HWND__* hDlg, unsigned int uiMessage, unsigned int uiWParam,
-                                  long lParam)
+intptr_t __stdcall RedWarning::DlgProc(HWND__* hDlg, unsigned int uiMessage, uintptr_t uiWParam,
+                                       intptr_t lParam)
 {
     switch (uiMessage)
     {

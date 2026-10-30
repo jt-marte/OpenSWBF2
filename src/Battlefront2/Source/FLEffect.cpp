@@ -1,4 +1,5 @@
 #include "FLEffect.h"
+#include "PebbleFL/Common/PblRawStorage.h"
 
 #include <d3dx9math.h>
 
@@ -86,10 +87,10 @@ public:
     virtual void AddToClient(); virtual void AddSends();
     virtual const PblMatrix& GetSmoothedMatrix() const;
 
-    char mInheritedObjectStorage[0x204 - 4];
+    char mInheritedObjectStorage[PBL_RAW_SIZE(0x204 - 4, 0x2F0)];
     unsigned int mHandleId;
 
-    char mHandleAndObjectStorage[0x21c - 0x208];
+    char mHandleAndObjectStorage[PBL_RAW_SIZE(0x21c - 0x208, 0x2C)];
     int mNetUniqueId;
 };
  

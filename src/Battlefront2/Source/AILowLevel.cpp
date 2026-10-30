@@ -114,12 +114,12 @@ namespace
     }
 }
 
-void* Navigator::operator new(unsigned int uiSize)
+void* Navigator::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }
 
-void* AIPath::operator new(unsigned int uiSize)
+void* AIPath::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }

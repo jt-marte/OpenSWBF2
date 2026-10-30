@@ -72,7 +72,7 @@ protected:
 
     Segment(unsigned int uiHashID, unsigned int uiOffset, unsigned int uiLength,
             unsigned int uiLengthSamples, unsigned int uiFrequency, unsigned int uiPadding)
-        : SampleBase(uiHashID, (void*)uiOffset, uiLength, uiLengthSamples,
+        : SampleBase(uiHashID, (void*)(uintptr_t)uiOffset, uiLength, uiLengthSamples,
                      (float)uiFrequency, SampleInfo::format_Unknown, 0),
           mPadding(uiPadding)
     {

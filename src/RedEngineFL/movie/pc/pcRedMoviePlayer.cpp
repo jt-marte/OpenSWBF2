@@ -9,6 +9,12 @@
 
 void __cdecl PblTraceP(const char* Format, ...);
 
+#ifdef OPENSWBF2_FFMPEG
+
+#include <math.h>
+
+#else
+
 extern "C"
 {
 
@@ -51,6 +57,8 @@ void __stdcall local_free(void* ptr)
     RedFreeToHeap(__RedCurrHeap, ptr, 0);
 }
 
+#endif
+
 // GLOBAL: SWBF2 0x009c8420
 RedMoviePlayer* RedMoviePlayer::sMoviePlayer;
 
@@ -61,6 +69,24 @@ unsigned int RedMoviePlayer::sReadSize;
 RedMoviePlayer::RedMoviePlayer()
     : RedMoviePlayerBase(0x800)
 {
+#ifdef OPENSWBF2_FFMPEG
+    mFlags = 0;
+    mSoundBuffer = 0;
+    mSoundSize = 0;
+    mSoundBlock = 0;
+    mSoundBytesPerSec = 0;
+    mSoundPlayPos = 0;
+    mSoundPlayed = 0;
+    mSoundWritten = 0;
+    mSoundQueued = 0;
+    mSoundTime = 0;
+    mClockStart = 0;
+    mSoundVolume = 0;
+    mGain = 1.0f;
+    mClockRunning = false;
+
+    sMoviePlayer = this;
+#else
     mBink = 0;
     mFlags = 0;
 
@@ -69,11 +95,15 @@ RedMoviePlayer::RedMoviePlayer()
     BinkSetIOSize(0);
     BinkSetIO(BinkFileOpen);
     BinkSetMemory(local_alloc, local_free);
+#endif
 }
 
 // FUNCTION: SWBF2 0x006f4270
 RedMoviePlayer::~RedMoviePlayer()
 {
+#ifdef OPENSWBF2_FFMPEG
+    CloseSound();
+#endif
     sMoviePlayer = 0;
 }
 
@@ -94,6 +124,228 @@ RedTexture* RedMoviePlayer::AllocTexture(const unsigned int uiNameHash,
     RedSetCurrentHeap(iOldHeap);
     return pTexture;
 }
+
+#ifdef OPENSWBF2_FFMPEG
+
+// FFmpeg's side of BinkFileReadFrame: hands over what RedMoviePlayerBase has streamed into the
+// circular buffer, running the file reads while it is empty. The buffer only ever holds the
+// current movie and FFMovieDecoder stops at the size in its header, so running dry with the
+// base already on the next segment means this one was cut short (a new segment was queued
+// mid-movie): flag it the way Bink's reader did.
+int RedMoviePlayer::MovieRead(void* pUser, unsigned char* pDest, int iSize)
+{
+    RedMoviePlayer* pPlayer = (RedMoviePlayer*)pUser;
+    while (!pPlayer->BufferGetUsed())
+    {
+        if (pPlayer->IsDiscontinuity())
+        {
+            pPlayer->mFlags |= 4;
+        }
+        else if (pPlayer->IsEnd())
+        {
+            pPlayer->mFlags |= 2;
+        }
+        if (pPlayer->mFlags & 6)
+        {
+            return 0;
+        }
+        pPlayer->RedMoviePlayerBase::Update();
+        Sleep(0);
+    }
+    return (int)pPlayer->BufferReadData(pDest, (unsigned int)iSize, true);
+}
+
+// BinkSetVolume took the gain scaled to 32767; DirectSound takes attenuation in 1/100 dB
+static long GainToVolume(float fGain)
+{
+    if (fGain <= 0.0f)
+    {
+        return DSBVOLUME_MIN;
+    }
+    if (fGain >= 1.0f)
+    {
+        return DSBVOLUME_MAX;
+    }
+    const long lVolume = (long)(2000.0f * log10f(fGain));
+    return lVolume < DSBVOLUME_MIN ? DSBVOLUME_MIN : lVolume;
+}
+
+// Starts the movie clock as the first frame goes up, with the audio playing from the same
+// moment. What BinkOpenDirectSound did: a looping DirectSound buffer on the game's device, fed
+// from Update. Without sound the clock runs off the performance counter.
+void RedMoviePlayer::StartClock()
+{
+    LARGE_INTEGER liNow;
+    QueryPerformanceCounter(&liNow);
+    mClockStart = liNow.QuadPart;
+    mClockRunning = true;
+
+    IDirectSound8* pDirectSound = Snd::Engine::smDirectSound;
+    const unsigned int uiChannels = mDecoder.GetAudioChannels();
+    const unsigned int uiRate = mDecoder.GetAudioRate();
+    if (!pDirectSound || !mDecoder.HasAudio() || !uiChannels || !uiRate)
+    {
+        return;
+    }
+
+    WAVEFORMATEX format;
+    memset(&format, 0, sizeof(format));
+    format.wFormatTag = WAVE_FORMAT_PCM;
+    format.nChannels = (WORD)uiChannels;
+    format.nSamplesPerSec = uiRate;
+    format.wBitsPerSample = 16;
+    format.nBlockAlign = (WORD)(uiChannels * 2);
+    format.nAvgBytesPerSec = uiRate * format.nBlockAlign;
+
+    // Two seconds: the movies carry about 0.8 s of audio ahead of the picture, and the rest
+    // rides out a hitch on silence instead of wrapping round onto old audio
+    DSBUFFERDESC desc;
+    memset(&desc, 0, sizeof(desc));
+    desc.dwSize = sizeof(desc);
+    desc.dwFlags = DSBCAPS_GETCURRENTPOSITION2 | DSBCAPS_CTRLVOLUME;
+    desc.dwBufferBytes = format.nAvgBytesPerSec * 2;
+    desc.lpwfxFormat = &format;
+    IDirectSoundBuffer* pBuffer = 0;
+    const HRESULT hr = pDirectSound->CreateSoundBuffer(&desc, &pBuffer, 0);
+    if (FAILED(hr))
+    {
+        PblTraceP("Movie sound: CreateSoundBuffer failed (0x%08x)\n", (unsigned int)hr);
+        return;
+    }
+
+    mSoundBuffer = pBuffer;
+    mSoundSize = desc.dwBufferBytes;
+    mSoundBlock = format.nBlockAlign;
+    mSoundBytesPerSec = format.nAvgBytesPerSec;
+    mSoundPlayPos = 0;
+    mSoundPlayed = 0;
+    mSoundWritten = 0;
+    mSoundQueued = 0;
+    mSoundTime = liNow.QuadPart;
+    mSoundVolume = GainToVolume(mGain);
+    mSoundBuffer->SetVolume(mSoundVolume);
+    FillSound();
+    mSoundBuffer->Play(0, 0, DSBPLAY_LOOPING);
+}
+
+// Seconds since the first frame went up, by the audio when there is any, as BinkWait does
+double RedMoviePlayer::GetClock() const
+{
+    if (mSoundBuffer)
+    {
+        return (double)mSoundPlayed / (double)mSoundBytesPerSec;
+    }
+    LARGE_INTEGER liNow, liFreq;
+    QueryPerformanceCounter(&liNow);
+    QueryPerformanceFrequency(&liFreq);
+    return (double)(liNow.QuadPart - mClockStart) / (double)liFreq.QuadPart;
+}
+
+void RedMoviePlayer::UpdateSound()
+{
+    if (!mSoundBuffer)
+    {
+        // Sound is off: the decoded audio has nowhere to go
+        if (mClockRunning)
+        {
+            mDecoder.ReadAudio(0, mDecoder.GetAudioBytes());
+        }
+        return;
+    }
+
+    DWORD dwPlay, dwWrite;
+    if (FAILED(mSoundBuffer->GetCurrentPosition(&dwPlay, &dwWrite)))
+    {
+        return;
+    }
+    LARGE_INTEGER liNow, liFreq;
+    QueryPerformanceCounter(&liNow);
+    QueryPerformanceFrequency(&liFreq);
+
+    // The cursor comes round every two seconds; if the game was away for over one, count the
+    // laps it made from the wall clock
+    unsigned __int64 uiAdvance = (dwPlay + mSoundSize - mSoundPlayPos) % mSoundSize;
+    const double dElapsed = (double)(liNow.QuadPart - mSoundTime) / (double)liFreq.QuadPart *
+                            (double)mSoundBytesPerSec;
+    if (dElapsed > (double)(mSoundSize / 2))
+    {
+        const double dLaps = (dElapsed - (double)uiAdvance) / (double)mSoundSize + 0.5;
+        if (dLaps >= 1.0)
+        {
+            uiAdvance += (unsigned __int64)dLaps * mSoundSize;
+        }
+    }
+    mSoundPlayed += uiAdvance;
+    mSoundPlayPos = dwPlay;
+    mSoundTime = liNow.QuadPart;
+
+    // Ran dry: the cursor went on into the silence FillSound leaves. Keep the time it played
+    // and carry on from the write cursor; FillSound drops the audio that was skipped.
+    unsigned int uiSafe = (dwWrite + mSoundSize - dwPlay) % mSoundSize;
+    uiSafe += (mSoundBlock - uiSafe % mSoundBlock) % mSoundBlock;
+    if (mSoundWritten < mSoundPlayed + uiSafe)
+    {
+        mSoundWritten = mSoundPlayed + uiSafe;
+    }
+    FillSound();
+}
+
+// Tops the buffer up from the decoder and zeroes the rest of the free space, so a stall longer
+// than the queued audio plays silence rather than old audio
+void RedMoviePlayer::FillSound()
+{
+    // Audio for time the clock has already passed is dropped to keep sound and picture together
+    if (mSoundQueued < mSoundWritten)
+    {
+        mSoundQueued += mDecoder.ReadAudio(0, (unsigned int)(mSoundWritten - mSoundQueued));
+    }
+
+    const unsigned int uiFree = mSoundSize - (unsigned int)(mSoundWritten - mSoundPlayed);
+    unsigned int uiBytes = 0;
+    if (mSoundQueued == mSoundWritten)
+    {
+        uiBytes = mDecoder.GetAudioBytes();
+        if (uiBytes > uiFree)
+        {
+            uiBytes = uiFree;
+        }
+        uiBytes -= uiBytes % mSoundBlock;
+    }
+
+    void* pPart1;
+    void* pPart2;
+    DWORD dwPart1, dwPart2;
+    if (!uiFree || FAILED(mSoundBuffer->Lock((DWORD)(mSoundWritten % mSoundSize), uiFree,
+                                             &pPart1, &dwPart1, &pPart2, &dwPart2, 0)))
+    {
+        return;
+    }
+    const unsigned int uiPart1 = uiBytes < dwPart1 ? uiBytes : dwPart1;
+    mDecoder.ReadAudio(pPart1, uiPart1);
+    memset((unsigned char*)pPart1 + uiPart1, 0, dwPart1 - uiPart1);
+    if (pPart2)
+    {
+        const unsigned int uiPart2 = uiBytes - uiPart1;
+        mDecoder.ReadAudio(pPart2, uiPart2);
+        memset((unsigned char*)pPart2 + uiPart2, 0, dwPart2 - uiPart2);
+    }
+    mSoundBuffer->Unlock(pPart1, dwPart1, pPart2, dwPart2);
+    mSoundWritten += uiBytes;
+    mSoundQueued += uiBytes;
+}
+
+void RedMoviePlayer::CloseSound()
+{
+    if (mSoundBuffer)
+    {
+        mSoundBuffer->Stop();
+        mSoundBuffer->Release();
+        mSoundBuffer = 0;
+    }
+    mClockRunning = false;
+}
+
+#else
 
 // FUNCTION: SWBF2 0x006f43a0
 BINKFILE* RedMoviePlayer::BinkFile(BINKIO* bio)
@@ -239,6 +491,8 @@ bool RedMoviePlayer::BinkIOSuspendTry(BINKIO* bio)
     return bio->try_suspend_callback && bio->try_suspend_callback(bio) != 0;
 }
 
+#endif
+
 // FUNCTION: SWBF2 0x006f4670
 void RedMoviePlayer::Close()
 {
@@ -251,18 +505,31 @@ void RedMoviePlayer::Close()
 // FUNCTION: SWBF2 0x006f46c0
 bool RedMoviePlayer::CreateBinkDecoder()
 {
+#ifdef OPENSWBF2_FFMPEG
+    return CreateTextures(mDecoder.GetWidth(), mDecoder.GetHeight(), 0x20, 3);
+#else
     return CreateTextures(mBink->Width, mBink->Height, 0x20, 3);
+#endif
 }
 
 // FUNCTION: SWBF2 0x006f46e0
 void RedMoviePlayer::DestroyBinkDecoder(bool bForce)
 {
+#ifdef OPENSWBF2_FFMPEG
+    if (mDecoder.IsOpen())
+    {
+        CloseSound();
+        mDecoder.Close();
+        DestroyTextures(bForce, 3);
+    }
+#else
     if (mBink)
     {
         BinkClose(mBink);
         mBink = 0;
         DestroyTextures(bForce, 3);
     }
+#endif
 }
 
 void PumpWaitingMessages();
@@ -293,11 +560,20 @@ void RedMoviePlayer::FreeTexture(RedTexture* pTexture, const unsigned int uiInde
 // FUNCTION: SWBF2 0x006f47a0
 float RedMoviePlayer::GetPlaybackTime() const
 {
+#ifdef OPENSWBF2_FFMPEG
+    if (!mDecoder.IsOpen() || !mDecoder.GetFrameRate())
+    {
+        return 0.0f;
+    }
+    return (float)mDecoder.GetFrameRateDiv() * (float)mDecoder.GetFrameNum() /
+           (float)mDecoder.GetFrameRate();
+#else
     if (!mBink)
     {
         return 0.0f;
     }
     return (float)mBink->FrameRateDiv * (float)mBink->FrameNum / (float)mBink->FrameRate;
+#endif
 }
 
 // FUNCTION: SWBF2 0x006f4820
@@ -305,10 +581,15 @@ bool RedMoviePlayer::Open(const char* const pFileName, unsigned int uiNumTexture
                           int iUnused, unsigned int uiArg4, unsigned int uiBufferSize,
                           unsigned int uiReadSize, unsigned int uiNumBitmaps)
 {
-    char* pBlock = (char*)RedAllocFromHeap(iHeap, uiBufferSize + 4 * (uiNumBitmaps + 4 * uiNumTextures), 0);
+    // One block: the stream buffer, then 4 texture pointers per texture, then a bitmap pointer per
+    // bitmap. Retail sized the pointers as 4 bytes; on x64 the texture table's clear wiped the
+    // bitmap pointers after it.
+    const unsigned int uiTextureTable = 4 * uiNumTextures * (unsigned int)sizeof(RedTexture*);
+    char* pBlock = (char*)RedAllocFromHeap(
+        iHeap, uiBufferSize + uiTextureTable + uiNumBitmaps * (unsigned int)sizeof(RedBitmapElement*), 0);
     if (pBlock)
     {
-        if (OpenRenderer(iHeap, (RedBitmapElement**)(pBlock + 16 * uiNumTextures + uiBufferSize),
+        if (OpenRenderer(iHeap, (RedBitmapElement**)(pBlock + uiTextureTable + uiBufferSize),
                          uiNumBitmaps))
         {
             if (RedMoviePlayerBase::Open(pFileName, (RedTexture**)(pBlock + uiBufferSize),
@@ -316,8 +597,10 @@ bool RedMoviePlayer::Open(const char* const pFileName, unsigned int uiNumTexture
                                          uiReadSize, 0xffffffff))
             {
                 sReadSize = uiReadSize;
+#ifndef OPENSWBF2_FFMPEG
                 BinkSetSoundSystem(BinkOpenDirectSound,
                                    (unsigned long)Snd::Engine::smDirectSound);
+#endif
                 return true;
             }
             CloseRenderer(iHeap);
@@ -343,6 +626,19 @@ void RedMoviePlayer::SeekSegment(const RedMoviePlayerBase::Segment* const pSegme
 // FUNCTION: SWBF2 0x006f4900
 void RedMoviePlayer::SetGain(float fGain)
 {
+#ifdef OPENSWBF2_FFMPEG
+    // Kept for the next movie's buffer too; SetVolume only when the level actually moves
+    mGain = fGain;
+    if (mSoundBuffer)
+    {
+        const long lVolume = GainToVolume(fGain);
+        if (lVolume != mSoundVolume)
+        {
+            mSoundBuffer->SetVolume(lVolume);
+            mSoundVolume = lVolume;
+        }
+    }
+#else
     if (mBink)
     {
         for (unsigned int i = 0; i < (unsigned int)mBink->NumTracks; ++i)
@@ -350,6 +646,7 @@ void RedMoviePlayer::SetGain(float fGain)
             BinkSetVolume(mBink, i, (int)(fGain * 32767.0f));
         }
     }
+#endif
 }
 
 // GLOBAL: SWBF2 0x009c8430
@@ -386,10 +683,17 @@ void RedMoviePlayer::Update()
             return;
         }
 
+#ifdef OPENSWBF2_FFMPEG
+        if (GetNumReallocTextures() && mDecoder.IsOpen())
+        {
+            ReallocTextures(mDecoder.GetWidth(), mDecoder.GetHeight(), 0x20, 3);
+        }
+#else
         if (GetNumReallocTextures() && mBink)
         {
             ReallocTextures(mBink->Width, mBink->Height, 0x20, 3);
         }
+#endif
 
         if (mFlags & 6)
         {
@@ -407,6 +711,53 @@ void RedMoviePlayer::Update()
                 mFlags |= 1;
             }
         }
+#ifdef OPENSWBF2_FFMPEG
+        else if (mDecoder.IsOpen() && (mFlags & 1))
+        {
+            UpdateSound();
+
+            // BinkWait: frame N goes up once the clock reaches N / fps. Two frames behind (a
+            // hitch, or the game running slower than the movie), decode on to the frame that is
+            // due rather than show the late ones, as Bink skips; every frame still has to be
+            // decoded, only the copies are saved. One frame late is just update jitter.
+            RedTexture* pTexture = GetTexture();
+            if (pTexture && (!mClockRunning ||
+                             GetClock() >= mDecoder.GetFrameTime(mDecoder.GetFramesDecoded())))
+            {
+                bool bFrame = mDecoder.DecodeFrame();
+                for (int i = 0; bFrame && mClockRunning && i < 8 &&
+                                mDecoder.GetFramesDecoded() < mDecoder.GetFrames() &&
+                                GetClock() >= mDecoder.GetFrameTime(mDecoder.GetFramesDecoded() + 1);
+                     ++i)
+                {
+                    bFrame = mDecoder.DecodeFrame();
+                }
+
+                // A frame decoded as MovieRead found the movie cut short may be torn; drop it
+                if (bFrame && !(mFlags & 6))
+                {
+                    IDirect3DSurface9* pSurface;
+                    ((IDirect3DTexture9*)pTexture->m_pTexture)->GetSurfaceLevel(0, &pSurface);
+                    D3DLOCKED_RECT rect;
+                    pSurface->LockRect(&rect, 0, 0);
+                    if (mDecoder.CopyToBuffer(rect.pBits, rect.Pitch, mDecoder.GetHeight()))
+                    {
+                        TextureComplete(pTexture);
+                    }
+                    pSurface->UnlockRect();
+                    pSurface->Release();
+                    if (!mClockRunning)
+                    {
+                        StartClock();
+                    }
+                }
+                if (!bFrame || mDecoder.GetFramesDecoded() >= mDecoder.GetFrames())
+                {
+                    mFlags |= IsDiscontinuity() ? 4 : 2;
+                }
+            }
+        }
+#else
         else if (mBink && (mFlags & 1) && !BinkWait(mBink))
         {
             RedTexture* pTexture = GetTexture();
@@ -433,6 +784,7 @@ void RedMoviePlayer::Update()
                 }
             }
         }
+#endif
     }
 
     if (GetPlayState() == playState_pausing && GetReadBufferFull())
@@ -442,6 +794,30 @@ void RedMoviePlayer::Update()
 
     RedMoviePlayerBase::Update();
 
+#ifdef OPENSWBF2_FFMPEG
+    if (!mDecoder.IsOpen() && GetReadBufferFull() && !sOpeningBinkDecoder && !(mFlags & 6))
+    {
+        sOpeningBinkDecoder = true;
+        if (IsEnd() || IsDiscontinuity())
+        {
+            ResetStart();
+        }
+        // The size comes from the movie's own header: MovieRead cannot tell where it ends
+        const bool bOpen = mDecoder.Open(MovieRead, 0, this, -1);
+        if (!bOpen)
+        {
+            // Bink went on to dereference the null BINK here; end the segment instead
+            PblTraceP("FFmpeg movie error: %s\n", mDecoder.GetLastError());
+            mFlags |= 2;
+        }
+        mFlags |= 1;
+        sOpeningBinkDecoder = false;
+        if (bOpen)
+        {
+            CreateBinkDecoder();
+        }
+    }
+#else
     if (!mBink && GetReadBufferFull() && !sOpeningBinkDecoder)
     {
         sOpeningBinkDecoder = true;
@@ -459,6 +835,7 @@ void RedMoviePlayer::Update()
         sOpeningBinkDecoder = false;
         CreateBinkDecoder();
     }
+#endif
 }
 
 // SYNTHETIC: SWBF2 0x00409120

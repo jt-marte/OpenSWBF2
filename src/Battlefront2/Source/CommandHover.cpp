@@ -9,7 +9,7 @@
 // `dynamic initializer for 'CommandHover::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766e90
 // `dynamic atexit destructor for 'CommandHover::sMemoryPool''
-MemoryPool CommandHover::sMemoryPool("CommandHover", 0x1d20);
+MemoryPool CommandHover::sMemoryPool("CommandHover", RED_POOL_SIZE(0x1d20, CommandHover));
 
 // GLOBAL: SWBF2 0x01eb96a4
 // SYNTHETIC: SWBF2 0x004026e0

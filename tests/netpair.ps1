@@ -8,20 +8,32 @@ param(
     [switch]$Direct,
     [string]$ServerArgs = '',
     [string]$ClientArgs = '',
-    [string]$OutDir
+    [string]$OutDir,
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32',
+    [ValidateSet('Win32','x64')][string]$ClientPlatform
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
 # each in its own worker folder (-Direct: clients join 127.0.0.1 by address instead of LAN
-# discovery). Reads the OPENSWBF2 NET markers and -netstats lines from every
+# discovery, and every socket listens on loopback only, so Windows Firewall never prompts).
+# -ClientPlatform runs the clients on the other build (mixed Win32/x64 games).
+# Reads the OPENSWBF2 NET markers and -netstats lines from every
 # run.log and prints one [PASS]/[FAIL] line per profile. See tests\README.md, "Network pair runs".
 $ErrorActionPreference = 'Stop'
 $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
+Set-SmokePlatform $Platform
+$Platform = $script:SmokePlatform
 
-$exeDir = Join-Path $root "bin\Win32\$Configuration"
+$exeDir = Get-GameExeDir $root $Configuration
 $gameData = Find-GameDataRoot
 $skip = Get-SmokePrecheck $gameData $exeDir
+if (-not $ClientPlatform) { $ClientPlatform = $Platform }
+Set-SmokePlatform $ClientPlatform
+$ClientPlatform = $script:SmokePlatform
+$clientExeDir = Get-GameExeDir $root $Configuration
+if (-not $skip) { $skip = Get-SmokePrecheck $gameData $clientExeDir }
+Set-SmokePlatform $Platform
 if (-not $skip) {
     $private = @([Net.Dns]::GetHostAddresses([Net.Dns]::GetHostName()) | Where-Object {
             $b = $_.GetAddressBytes()
@@ -62,13 +74,19 @@ function Invoke-NetPair($name, $drag) {
     New-Item -ItemType Directory -Force -Path $caseDir | Out-Null
     $gameName = "NETPAIR$PID$name"
     $common = '-norender -nosound -nowait -nofocuspause -netstats -logcmds "all Warning, LogNet Inform"'
+    if ($Direct) { $common += ' -netloopback' }
     $procs = @()
     $dirs = @()
     try {
         $names = @('server') + @(1..$Clients | ForEach-Object { "client$_" })
         foreach ($n in $names) {
             $d = Join-Path $caseDir "w-$n"
-            New-SmokeWorkerDir $exeDir $d
+            if ($n -eq 'server') { New-SmokeWorkerDir $exeDir $d }
+            else {
+                Set-SmokePlatform $ClientPlatform
+                New-SmokeWorkerDir $clientExeDir $d
+                Set-SmokePlatform $Platform
+            }
             Set-Content -Path (Join-Path $d 'steam_appid.txt') -Value '6060' -Encoding ASCII
             $dirs += $d
         }
@@ -103,7 +121,9 @@ function Invoke-NetPair($name, $drag) {
         $exited = @($procs | Where-Object { $_.HasExited } | ForEach-Object { '0x{0:X8}' -f $_.ExitCode })
     }
     finally {
-        foreach ($p in $procs) { if (-not $p.HasExited) { & taskkill /PID $p.Id /T /F 2>&1 | Out-Null } }
+        # taskkill's stderr (a child it could not end, such as a crashed peer's WerFault) must not
+        # stop the script under ErrorActionPreference Stop
+        foreach ($p in $procs) { if (-not $p.HasExited) { try { & taskkill /PID $p.Id /T /F 2>&1 | Out-Null } catch {} } }
         foreach ($p in $procs) { $p.WaitForExit(10000) | Out-Null }
         foreach ($d in $dirs) {
             Get-ChildItem -LiteralPath $d -Filter '*.dmp' -ErrorAction SilentlyContinue | Copy-Item -Destination $caseDir

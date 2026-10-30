@@ -1,0 +1,150 @@
+cor1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=3371444071/807737688 snd=49.923 state=0x68A5BD9A	none
+cor1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3396559593/614129682 snd=49.923 state=0xBFCB8B8F	cor1c_con	 309s	L=CIS	32u@12P	 46r	 0p	W=Rep	32u@13 	 77r	 0p
+cor1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1369838541/2554109452 snd=49.923 state=0xCDB5128C	none
+cor1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=4114301271/1773905006 snd=49.923 state=0xD5BF2725	cor1g_con	 309s	W=All	32u@9P	 78r	 0p	L=Imp	32u@16 	 43r	 0p
+cor1g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=559242847/3867354966 snd=49.923 state=0x916FBE95	none
+crash-abort	none	none
+crash-adapteraccept	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-adaptercancel	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-applyadapter	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-applyfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-applymode	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3807126373/1199464874 snd=49.923 state=0x3E65347D	geo1c_con	 309s	L=Rep	28u@15P	 36r	 0p	W=CIS	28u@10 	103r	 0p
+crash-applymodesmall	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-applypresentfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-applytargetfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-arenaoom	none	none
+crash-check	none	none
+crash-debugbreak	none	none
+crash-debugheapoom	none	none
+crash-divzero	none	none
+crash-fastfail	none	none
+crash-gammadrawfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-gammafallback	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-gammalost	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-gammapass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3807126373/1199464874 snd=49.923 state=0x3E65347D	geo1c_con	 309s	L=Rep	28u@15P	 36r	 0p	W=CIS	28u@10 	103r	 0p
+crash-hang	none	none
+crash-heapfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-invalidparam	none	none
+crash-luaoom	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-luapanic	none	none
+crash-menuapplyfail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-menuconfirm	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-menukeep	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3807126373/1199464874 snd=49.923 state=0x3E65347D	geo1c_con	 309s	L=Rep	28u@15P	 36r	 0p	W=CIS	28u@10 	103r	 0p
+crash-menuorder	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-menuorderrev	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-menurevertsave	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 35r	 0p	W=CIS	28u@10 	101r	 0p
+crash-menusavefail	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3807126373/1199464874 snd=49.923 state=0x3E65347D	geo1c_con	 309s	L=Rep	28u@15P	 36r	 0p	W=CIS	28u@10 	103r	 0p
+crash-nullderef	none	none
+crash-resetfatal	none	none
+crash-resetflap	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-resetinitlost	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-resetlaterinit	none	none
+crash-resetrecover	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-shellstretch	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+crash-stackoverflow	none	none
+dag1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2145954495/1833057946 snd=49.923 state=0x0A18D720	dag1c_con	 309s	L=Rep	32u@11P	 68r	 0p	W=CIS	32u@14 	 85r	 0p
+dag1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2837596015/2599533116 snd=49.923 state=0xD9F4B470	none
+dag1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1093189107/3089909774 snd=49.923 state=0xE2C85DEF	dag1g_con	 309s	L=All	32u@14P	 40r	 0p	W=Imp	32u@11 	 89r	 0p
+dag1g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=287929541/217359172 snd=49.923 state=0xAA95B0F6	none
+dea1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3231767785/2315329528 snd=49.923 state=0x6FE2CE04	none
+dea1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=110653881/2448629734 snd=49.923 state=0xB25A136D	dea1c_con	 283s	L=Rep	32u@15P	  0r	 0p	W=CIS	32u@10 	 90r	 0p
+dea1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=314871421/1414430014 snd=49.923 state=0x65A0EB0D	none
+dea1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=410514461/2022563378 snd=49.923 state=0x528DDEB9	none
+dea1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=858587277/1796592278 snd=49.923 state=0xDE4A7351	dea1g_con	 309s	L=All	32u@15P	 20r	 0p	W=Imp	32u@10 	 85r	 0p
+dedicated	OPENSWBF2 SIM DIGEST turns=1500 time=86.333 rand=684493899/2594231088 snd=19.337 state=0x256999AB	geo1c_con	 398s	L=Rep	36u@14 	  0r	 0p	W=CIS	28u@14 	 24r	 0p
+end1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1722895817/2845060812 snd=49.923 state=0xD76A62CF	none
+end1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2745347379/4043690554 snd=49.923 state=0x0E2BABB5	end1g_con	 309s	W=All	29u@8P	104r	 0p	L=Imp	29u@17 	 64r	 0p
+end1g_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2604642391/297759266 snd=49.923 state=0x2E18147F	end1g_hunt	 309s	W=Imp	32u@11P	 -1r	 6p	L=Loc	32u@14 	 -1r	 0p
+fatal-init	none	none
+fel1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=992464741/2800049134 snd=49.923 state=0xBA9F9D56	none
+fel1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=3393119485/3550970814 snd=49.923 state=0x8F3676A4	none
+fel1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=565484365/1486945648 snd=49.923 state=0x844BCFE8	fel1c_con	 309s	W=Rep	32u@11P	 91r	 0p	L=CIS	32u@14 	 76r	 0p
+fel1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1336325691/58928424 snd=49.923 state=0xA494B556	none
+fel1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2194363943/3113453898 snd=49.923 state=0xC8DB20C3	fel1g_con	 309s	L=Imp	32u@11P	 80r	 0p	W=All	32u@14 	 88r	 0p
+geo1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=3759370961/2628130228 snd=49.923 state=0xE76D2FC8	none
+geo1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1354762085/2950811992 snd=49.923 state=0x16D65714	geo1c_con	 309s	L=Rep	28u@15P	 15r	 0p	W=CIS	28u@10 	 95r	 0p
+geo1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2190787593/1976950498 snd=49.923 state=0x842525E6	none
+geo1c_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3019166437/8095858 snd=49.923 state=0xAAB8EA81	geo1c_hunt	 149s	L=Rep	32u@11P	 -1r	28p	W=Loc	32u@14 	 -1r	50p
+geo1c_xl	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=719999057/1050719560 snd=49.923 state=0x7F3BD2F2	geo1c_xl	 682s	L=Rep	80u@11P	 -1r	320p	W=CIS	80u@14 	 -1r	350p
+hot1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2784749923/3660803544 snd=49.923 state=0x071B7839	none
+hot1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=4056923933/1873017836 snd=49.923 state=0x74545248	none
+hot1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2763759203/2960762048 snd=49.923 state=0x1FE5B21F	hot1g_con	 309s	L=Imp	32u@11P	107r	 0p	W=All	32u@14 	120r	 0p
+hot1g_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1245956321/865431992 snd=49.923 state=0xD771CAD0	hot1g_hunt	 231s	L=Loc	32u@11P	 -1r	28p	W=All	32u@14 	 -1r	54p
+hot1g_uber	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=4056923933/3889336540 snd=49.923 state=0x0F55D362	none
+hot1g_xl	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=850884411/3697219798 snd=49.923 state=0x49AF0DC2	hot1g_xl	 498s	L=Imp	120u@11P	 -1r	220p	W=All	120u@14 	 -1r	350p
+kam1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=372964917/387915908 snd=49.923 state=0xA6D67EF3	none
+kam1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=3536392183/3270104826 snd=49.923 state=0xFCFBE2E9	none
+kam1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=864876891/3418059286 snd=49.923 state=0x8F5DB4DF	kam1c_con	 309s	W=CIS	32u@11P	112r	 0p	L=Rep	32u@14 	 88r	 0p
+kam1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=521462387/256983920 snd=49.923 state=0x5E2B8F2E	none
+kam1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=4094473505/732460004 snd=49.923 state=0x786B5E83	kam1g_con	 309s	W=All	32u@10P	113r	 0p	L=Imp	32u@15 	 85r	 0p
+kas2c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=34745729/2837468330 snd=49.923 state=0xA01DF142	none
+kas2c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3376580087/363241374 snd=49.923 state=0x00A6488B	kas2c_con	 309s	W=Rep	29u@11P	102r	 0p	W=CIS	29u@14 	102r	 0p
+kas2c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=460992501/884933090 snd=49.923 state=0xC386F7EC	none
+kas2c_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2271418381/1697445880 snd=49.923 state=0x7D1E7BED	kas2c_hunt	 188s	W=CIS	32u@11P	 -1r	50p	L=Loc	32u@14 	 -1r	35p
+kas2c_uber	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=612937807/386973628 snd=49.923 state=0x765A955F	kas2c_uber	 309s	W=Rep	50u@11P	  7r	 0p	L=CIS	250u@14 	  3r	 0p
+kas2c_xl	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1290474279/2568986540 snd=49.923 state=0x81B3F6FA	kas2c_xl	 419s	L=Rep	160u@11P	 -1r	327p	W=CIS	160u@14 	 -1r	354p
+kas2g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3924751549/3926269342 snd=49.923 state=0x163E286F	kas2g_con	 309s	W=All	29u@11P	122r	 0p	L=Imp	29u@14 	112r	 0p
+kas2g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2364375881/630719640 snd=49.923 state=0x201C4C39	none
+kas2g_xl	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3135067137/1681245632 snd=49.923 state=0x4B6383E4	kas2g_xl	 377s	W=All	160u@11P	 -1r	351p	L=Imp	160u@14 	 -1r	332p
+mus1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=1795188965/2794129880 snd=49.923 state=0x0F1EE769	none
+mus1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=857776751/2129381876 snd=49.923 state=0x04DF75F5	mus1c_con	 309s	L=Rep	32u@15P	 22r	 0p	W=CIS	32u@10 	 78r	 0p
+mus1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=983493233/1383025088 snd=49.923 state=0xB2E48A0D	none
+mus1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=260395595/4081994968 snd=49.923 state=0x540CD9B3	mus1g_con	 309s	W=All	32u@11P	 57r	 0p	L=Imp	32u@14 	 47r	 0p
+mus1g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1798542789/808312420 snd=49.923 state=0xA5894A2B	none
+myg1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=371889137/2703536228 snd=49.923 state=0x8DB589C7	none
+myg1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2416780355/657160784 snd=49.923 state=0x28510A4B	myg1c_con	 309s	L=Rep	32u@12P	 52r	 0p	W=CIS	32u@13 	 79r	 0p
+myg1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3910858699/2471745994 snd=49.923 state=0xD6CAFCB6	none
+myg1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=4190660409/3107270410 snd=49.923 state=0x4239F2A5	myg1g_con	 309s	L=All	32u@15P	 28r	 0p	W=Imp	32u@10 	104r	 0p
+myg1g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2449852731/1303598562 snd=49.923 state=0x2D950869	none
+nab2c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1243913777/1199078612 snd=49.923 state=0x3F6E95ED	nab2c_con	 309s	W=CIS	32u@7P	 85r	 0p	L=Rep	32u@18 	 38r	 0p
+nab2c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2317587115/3580390024 snd=49.923 state=0xB71C9091	none
+nab2c_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=121557701/1848209826 snd=49.923 state=0x8FF8B99B	nab2c_hunt	 189s	W=CIS	32u@11P	 -1r	50p	L=Loc	32u@14 	 -1r	30p
+nab2g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=2206058303/116923646 snd=49.923 state=0xA880CE00	none
+nab2g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1276288497/1676050924 snd=49.923 state=0xB324AA5A	nab2g_con	 309s	L=Imp	32u@12P	 53r	 0p	W=All	32u@13 	 81r	 0p
+nab2g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2663291519/2653862100 snd=49.923 state=0xBEDE9EAF	none
+pol1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2602934543/3397681022 snd=49.923 state=0xA0340B7B	pol1c_con	 309s	W=CIS	32u@8P	 95r	 0p	L=Rep	32u@17 	 55r	 0p
+pol1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3367479135/1060351324 snd=49.923 state=0x2EB64A32	none
+pol1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=363827327/4119786446 snd=49.923 state=0x43B09F55	none
+pol1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=4045517971/827842236 snd=49.923 state=0x70086E55	pol1g_con	 309s	W=All	32u@7P	 99r	 0p	L=Imp	32u@18 	 37r	 0p
+pol1g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3778182863/3130638540 snd=49.923 state=0x2FEFD556	none
+spa1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2602370443/1868772266 snd=49.923 state=0x719E08C8	none
+spa1g_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2261304169/3400872082 snd=49.923 state=0x2BB3F8B3	spa1g_ass	1379s	L=Imp	32u@15P	 -1r	99p	W=All	32u@10 	 -1r	181p
+spa1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=2012620601/2777493072 snd=49.923 state=0x5BF2198F	none
+spa2c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=1819824289/2606240272 snd=49.923 state=0x616F24C0	none
+spa3c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1000502971/2178369354 snd=49.923 state=0x1DD8FB57	none
+spa3c_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=529082281/2897934758 snd=49.923 state=0x7385D175	spa3c_ass	1317s	L=Rep	32u@11P	 -1r	171p	W=CIS	32u@14 	 -1r	196p
+spa3c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=1706537127/2433285240 snd=49.923 state=0x29198C00	none
+spa4g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=2416677937/1224024840 snd=49.923 state=0x96326100	none
+spa6c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1731048627/2658923086 snd=49.923 state=0x82E0B7A3	none
+spa6c_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=228546245/591594910 snd=49.923 state=0x789431B9	spa6c_ass	1638s	L=Rep	32u@15P	 -1r	86p	W=CIS	32u@10 	 -1r	180p
+spa7c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1385608125/2376484782 snd=49.923 state=0xBA20524B	none
+spa7c_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1101285551/3640432126 snd=49.923 state=0xE96AAC03	spa7c_ass	1024s	L=Rep	32u@15P	 -1r	65p	W=CIS	32u@10 	 -1r	180p
+spa8g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3328490427/3960366964 snd=49.923 state=0x21595298	none
+spa8g_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1457564853/3087027682 snd=49.923 state=0xF626CF5E	spa8g_ass	1736s	L=Imp	32u@11P	 -1r	165p	W=All	32u@14 	 -1r	180p
+spa9g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=4054736855/3504519598 snd=49.923 state=0x974EC38A	none
+spa9g_ass	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=30384061/1421508958 snd=49.923 state=0x0ABD9FE1	spa9g_ass	1134s	W=Imp	32u@11P	 -1r	181p	L=All	32u@14 	 -1r	173p
+tan1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3262166141/3235391518 snd=49.923 state=0x6B080B10	none
+tan1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=716971739/1173591634 snd=49.923 state=0xA3EFD205	tan1c_con	 309s	L=Rep	32u@13P	 12r	 0p	W=CIS	32u@12 	 62r	 0p
+tan1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1480836765/3911488004 snd=49.923 state=0x8AC1FCCD	none
+tan1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=2721417103/2012108176 snd=49.923 state=0xD5277D33	none
+tan1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2661664637/3871999926 snd=49.923 state=0xABC64241	tan1g_con	 309s	W=All	32u@11P	 65r	 0p	L=Imp	32u@14 	 55r	 0p
+tat2c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1201815305/463658830 snd=49.923 state=0x5405DB90	tat2c_con	 309s	L=Rep	28u@14P	 52r	 0p	W=CIS	28u@11 	104r	 0p
+tat2c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3728040979/32360174 snd=49.923 state=0x99E36E5B	none
+tat2g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1042071475/1738346968 snd=49.923 state=0x0EAD5D51	tat2g_con	 309s	L=Imp	28u@11P	 92r	 0p	W=All	28u@14 	111r	 0p
+tat2g_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3764079757/3543420796 snd=49.923 state=0x20661296	none
+tat2g_eli	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1347454411/4019701600 snd=49.923 state=0xFC206791	tat2g_eli	1371s	L=	32u@11P	 -1r	178p	W=	32u@14 	 -1r	180p
+tat2g_hunt	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3871647921/3017683566 snd=49.923 state=0x29B45761	tat2g_hunt	 309s	L=Loc	32u@11P	 -1r	11p	W=Loc	32u@14 	 -1r	41p
+tat3c_1flag	none	none
+tat3c_con	none	none
+tat3g_1flag	none	none
+tat3g_con	none	none
+uta1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=2061251111/242332004 snd=49.923 state=0x259F9F5F	none
+uta1c_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=1900350723/2191206088 snd=49.923 state=0x7721FC21	none
+uta1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3189718229/2961618810 snd=49.923 state=0xF2282B85	uta1c_con	 309s	W=CIS	32u@10P	 71r	 0p	L=Rep	32u@15 	 55r	 0p
+uta1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3361192599/1103902518 snd=49.923 state=0xA19A7DDD	none
+uta1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3127181469/101181718 snd=49.923 state=0x64BCAB8E	uta1g_con	 309s	W=All	32u@11P	 71r	 0p	L=Imp	32u@14 	 68r	 0p
+yav1c_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=434363845/826127304 snd=49.923 state=0xF957A443	none
+yav1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1846406019/1365527824 snd=49.923 state=0xDA6163D5	yav1c_con	 309s	W=CIS	32u@7P	106r	 0p	L=Rep	32u@18 	 33r	 0p
+yav1g_1flag	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1937164685/2747196318 snd=49.923 state=0x6265386E	none
+yav1g_c	OPENSWBF2 SIM DIGEST turns=1500 time=52.033 rand=1102113561/4242607540 snd=49.923 state=0x15AA44F0	none
+yav1g_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1097844741/400395940 snd=49.923 state=0x89A03A43	yav1g_con	 309s	L=Imp	32u@14P	 54r	 0p	W=All	32u@11 	105r	 0p

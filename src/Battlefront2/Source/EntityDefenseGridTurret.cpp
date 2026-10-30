@@ -22,9 +22,9 @@ char EntityDefenseGridTurret::rttiNameEntityDefenseGridTurret[] = "EntityDefense
 // `dynamic initializer for 'EntityDefenseGridTurret::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f20
 // `dynamic atexit destructor for 'EntityDefenseGridTurret::sMemoryPool''
-MemoryPool EntityDefenseGridTurret::sMemoryPool("EntityDefenseGridTurret", 0x6c0);
+MemoryPool EntityDefenseGridTurret::sMemoryPool("EntityDefenseGridTurret", RED_POOL_SIZE(0x6c0, EntityDefenseGridTurret));
 
-void* EntityDefenseGridTurret::operator new(unsigned int uSize)
+void* EntityDefenseGridTurret::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

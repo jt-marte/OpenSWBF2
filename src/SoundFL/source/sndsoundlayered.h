@@ -108,7 +108,7 @@ public:
 
     static FireForgetLayer* smFireForgetLayers;
     static bool smIsOpen;
-    static unsigned char smFireForgetLayerStorage[5888];
+    static unsigned char smFireForgetLayerStorage[64 * sizeof(FireForgetLayer)];
 
     static PblListDouble smSoundLayeredList;
 
@@ -187,7 +187,7 @@ public:
             }
         }
 
-        static void* operator new(unsigned int) { return smFreeList.Alloc(); }
+        static void* operator new(size_t) { return smFreeList.Alloc(); }
         static void operator delete(void* p) { smFreeList.Free(p); }
 
         Sound::Properties* mSoundProps;
@@ -232,7 +232,7 @@ public:
     {
         smPropertyList.AddLast(&mNode);
     }
-    static void* operator new(unsigned int) { return smFreeList.Alloc(); }
+    static void* operator new(size_t) { return smFreeList.Alloc(); }
     static void operator delete(void* p) { smFreeList.Free(p); }
 
     ~Properties();

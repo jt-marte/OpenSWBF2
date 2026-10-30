@@ -1,6 +1,8 @@
 #pragma once
 
 #include <stddef.h>
+
+#include "PebbleFL/Common/PblRawStorage.h"
 #include "WalkerAnimation.h"
 
 #include "Aimer.h"
@@ -113,7 +115,7 @@ public:
     EntityWalker(EntityWalkerClass* pClass, const EntityDesc& desc);
     virtual ~EntityWalker();
 
-    static void* operator new(unsigned int uSize) { return sMemoryPool.Allocate(uSize); }
+    static void* operator new(size_t uSize) { return sMemoryPool.Allocate(uSize); }
     static void operator delete(void* pBlock) { sMemoryPool.Free(pBlock); }
 
     virtual bool IsRtti(unsigned int uRtti) const;
@@ -295,7 +297,7 @@ public:
     int mState;
     PblVector3 mPrevAimerPos;
     eDirection mDirection;
-    char mEnergyBar[12];
+    PBL_RAW_ALIGN char mEnergyBar[PBL_RAW_SIZE(12, 16)];
     PblAngle mTurnOffset;
     PblAngle mPitchOffset;
     PblAngle mRollOffset;

@@ -785,6 +785,7 @@ CollisionMeshCache* CollisionMesh::_GetTriHits(const PblVector3& vPos, float fRa
     {
         PblVector3* pVerts = (PblVector3*)stack.Alloc(100 * sizeof(PblVector3));
 
+        static_assert(sizeof(CollisionMeshCache) == sizeof(pSoldier->mCollisionMeshCache[0]), "mCollisionMeshCache storage");
         CollisionMeshCache* pCaches = (CollisionMeshCache*)pSoldier->mCollisionMeshCache;
         for (int i = 0; i < 3; ++i)
         {

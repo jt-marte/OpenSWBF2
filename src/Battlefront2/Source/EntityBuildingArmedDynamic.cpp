@@ -81,7 +81,7 @@ char EntityBuildingArmedDynamic::rttiNameEntityBuildingArmedDynamic[] = "EntityB
 // `dynamic initializer for 'EntityBuildingArmedDynamic::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00766f00
 // `dynamic atexit destructor for 'EntityBuildingArmedDynamic::sMemoryPool''
-MemoryPool EntityBuildingArmedDynamic::sMemoryPool("EntityBuildingArmedDynamic", 0x6b0);
+MemoryPool EntityBuildingArmedDynamic::sMemoryPool("EntityBuildingArmedDynamic", RED_POOL_SIZE(0x6b0, EntityBuildingArmedDynamic));
 
 // FUNCTION: SWBF2 0x00496b10
 unsigned int EntityBuildingArmedDynamic::GetDerivedRtti() const
@@ -127,7 +127,7 @@ EntityBuildingArmedDynamic::EntityBuildingArmedDynamic(EntityBuildingArmedDynami
 // SYNTHETIC: SWBF2 0x00496e03
 // [thunk]:EntityBuildingArmedDynamic::`scalar deleting destructor' adjustor{608}
 
-void* EntityBuildingArmedDynamic::operator new(unsigned int uSize)
+void* EntityBuildingArmedDynamic::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

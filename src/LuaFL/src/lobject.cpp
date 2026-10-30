@@ -156,21 +156,21 @@ void luaO_chunkid (char *out, const char *source, int bufflen) {
   }
   else {
     if (*source == '@') {
-      int l;
+      size_t l;
       source++;
       bufflen -= sizeof(" `...' ");
       l = strlen(source);
       strcpy(out, "");
-      if (l>bufflen) {
+      if (l>cast(size_t, bufflen)) {
         source += (l-bufflen);
         strcat(out, "...");
       }
       strcat(out, source);
     }
     else {
-      int len = strcspn(source, "\n");
+      size_t len = strcspn(source, "\n");
       bufflen -= sizeof(" [string \"...\"] ");
-      if (len > bufflen) len = bufflen;
+      if (len > cast(size_t, bufflen)) len = cast(size_t, bufflen);
       strcpy(out, "[string \"");
       if (source[len] != '\0') {
         strncat(out, source, len);

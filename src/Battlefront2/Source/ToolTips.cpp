@@ -169,8 +169,7 @@ void ToolTipsDisplay::Init()
     mAlwaysOff = false;
 
     int iSlot = PlayerPrefs::FindByViewport(mCameraIndex);
-    PlayerProfile::tProfile* pProfile =
-        *(PlayerProfile::tProfile**)((char*)&PlayerPrefs::mAllUserPrefs + 0x14 + iSlot * 0x2c);
+    PlayerProfile::tProfile* pProfile = (&PlayerPrefs::mAllUserPrefs[0] + iSlot)->pProfile;
     if (pProfile)
     {
         if (pProfile->mToolTipOptions.mOn)

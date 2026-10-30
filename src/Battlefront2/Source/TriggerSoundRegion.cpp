@@ -52,21 +52,21 @@ const TriggerSoundRegion::Properties* TriggerSoundRegion::Properties::FindByID(u
 // `dynamic initializer for 'TriggerSoundRegion::Group::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769650
 // `dynamic atexit destructor for 'TriggerSoundRegion::Group::sMemoryPool''
-MemoryPool TriggerSoundRegion::Group::sMemoryPool("TriggerSoundRegion::Group", 0x50);
+MemoryPool TriggerSoundRegion::Group::sMemoryPool("TriggerSoundRegion::Group", RED_POOL_SIZE(0x50, TriggerSoundRegion::Group));
 
 // GLOBAL: SWBF2 0x01f9a0b8
 // SYNTHETIC: SWBF2 0x00406b90
 // `dynamic initializer for 'TriggerSoundRegion::Properties::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769670
 // `dynamic atexit destructor for 'TriggerSoundRegion::Properties::sMemoryPool''
-MemoryPool TriggerSoundRegion::Properties::sMemoryPool("TriggerSoundRegion::Properties", 0xc);
+MemoryPool TriggerSoundRegion::Properties::sMemoryPool("TriggerSoundRegion::Properties", RED_POOL_SIZE(0xc, TriggerSoundRegion::Properties));
 
 // GLOBAL: SWBF2 0x01f9a158
 // SYNTHETIC: SWBF2 0x00406bc0
 // `dynamic initializer for 'TriggerSoundRegion::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769690
 // `dynamic atexit destructor for 'TriggerSoundRegion::sMemoryPool''
-MemoryPool TriggerSoundRegion::sMemoryPool("TriggerSoundRegion", 0x70);
+MemoryPool TriggerSoundRegion::sMemoryPool("TriggerSoundRegion", RED_POOL_SIZE(0x70, TriggerSoundRegion));
 
 // FUNCTION: SWBF2 0x0065d400
 TriggerSoundRegion::Group::Group()

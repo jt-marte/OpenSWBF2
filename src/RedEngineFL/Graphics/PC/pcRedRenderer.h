@@ -1550,10 +1550,10 @@ public:
     static int m_PrevSortID;
     static pcRedShader* m_pPrevShader;
     static int m_uiPrevShaderState;
-    static int m_pmObjWorldPrev;
-    static int m_pmBoneMatricesPrev;
-    static int m_pPrimPrev;
-    static int m_pLightingStatePrev;
+    static intptr_t m_pmObjWorldPrev;
+    static intptr_t m_pmBoneMatricesPrev;
+    static intptr_t m_pPrimPrev;
+    static intptr_t m_pLightingStatePrev;
     static RedColor m_colorFog;
     static PblMatrix m_mViewUndo;
     static PblMatrix m_mProjectionUndo;

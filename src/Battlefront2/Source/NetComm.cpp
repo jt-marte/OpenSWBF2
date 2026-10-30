@@ -410,7 +410,7 @@ unsigned __int64* __fastcall NetCommP::GetAddr(int iDest)
 {
     if ((unsigned int)iDest < MAX_DESTS)
     {
-        return (unsigned __int64*)((char*)&netDests[iDest] + 0x20);
+        return (unsigned __int64*)netDests[iDest].mAddressStorage; // retail: +0x20
     }
     if (iDest == MAX_DESTS)
     {
@@ -1016,7 +1016,7 @@ int __fastcall FindSource(const void* pSource, unsigned int uType)
 
     for (; iDest < MAX_DESTS; ++iDest)
     {
-        const unsigned char* pAddress = (const unsigned char*)&netDests[iDest] + 0x20;
+        const unsigned char* pAddress = (const unsigned char*)netDests[iDest].mAddressStorage;
         if (NetComm::IsLAN())
         {
             int sourceIP, sourcePort, destIP, destPort;

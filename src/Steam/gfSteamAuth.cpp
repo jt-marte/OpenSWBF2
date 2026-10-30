@@ -133,6 +133,7 @@ inline bool SteamUser_BLoggedOn()
     return pUser->BLoggedOn();
 }
 
+#ifndef OPENSWBF2_NO_GALAXY
 class EncryptedAppTicketDownloader
 {
 public:
@@ -190,6 +191,7 @@ void EncryptedAppTicketDownloader::OnEncryptedAppTicketResponse(EncryptedAppTick
         *m_peResult = pResponse->m_eResult;
     }
 }
+#endif
 
 // TEMPLATE: SWBF2 0x0052ff30
 // `anonymous namespace'::CCallResult<`anonymous namespace'::EncryptedAppTicketDownloader,`anonymous namespace'::EncryptedAppTicketResponse_t>::Run
@@ -268,6 +270,7 @@ gf::SteamAuthProvider* gf::_sap()
 // FUNCTION: SWBF2 0x0052eae0
 void __cdecl OnSteamWarning(int, const char*) {}
 
+#ifndef OPENSWBF2_NO_GALAXY
 // FUNCTION: SWBF2 0x0052eaf0
 bool gf::SteamAuthProvider::Init(unsigned int uiAppId, bool& bRestarting)
 {
@@ -335,6 +338,46 @@ const char* gf::SteamAuthProvider::GetPersonaName()
     ISteamFriends* pFriends = SteamFriends();
     return pFriends->GetPersonaName();
 }
+#else
+// OpenSWBF2: the x64 build has no steam_api or Galaxy, whose DLLs are 32-bit only. Steam never
+// starts, so gf::initialize never creates Galaxy, and with no factory instance every caller
+// takes its "Galaxy unavailable" path, as when Steam is not running.
+bool gf::SteamAuthProvider::Init(unsigned int, bool& bRestarting)
+{
+    m_bInitialized = false;
+    bRestarting = false;
+    return false;
+}
+
+void gf::SteamAuthProvider::Shutdown() {}
+
+int gf::SteamAuthProvider::GetEncryptedAppTicket(char*, int)
+{
+    return 0;
+}
+
+const char* gf::SteamAuthProvider::GetPersonaName()
+{
+    return 0;
+}
+
+galaxy::api::IGalaxy* galaxy::api::GalaxyFactory::GetInstance()
+{
+    return 0;
+}
+
+galaxy::api::IErrorManager* galaxy::api::GalaxyFactory::GetErrorManager()
+{
+    return 0;
+}
+
+void galaxy::api::GalaxyFactory::ResetInstance() {}
+
+galaxy::api::IGalaxy* galaxy::api::GalaxyFactory::CreateInstance()
+{
+    return 0;
+}
+#endif
 
 // FUNCTION: SWBF2 0x0052e9e0
 void __fastcall FreeGalaxyGlueObject(void* pBlock)

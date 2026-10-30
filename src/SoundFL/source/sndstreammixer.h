@@ -75,6 +75,8 @@ public:
     unsigned char mOutputChannels;
     unsigned char mInterpolationRate;
 };
+// the raw offsets retail used (mFlags at 0x89) hold on Win32
+static_assert(sizeof(void*) != 4 || offsetof(StreamMixer, mFlags) == 0x89, "StreamMixer layout");
 
  
  

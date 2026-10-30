@@ -237,7 +237,7 @@ struct NetAddr
 
     NetAddr* CopyFieldsFrom(const NetAddr* other);
 
-    char GetAddr(void* pOut, int pKey) const;
+    char GetAddr(void* pOut, const void* pKey) const;
 };
  
  

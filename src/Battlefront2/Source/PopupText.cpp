@@ -121,7 +121,7 @@ void __fastcall PopupText::ShowPopup(int iType, unsigned int uTextId)
     {
         HUD::Event(HUD::GameEvents::gObjectiveEvents.hintPopup, (int)gHints[gCurHint]).Send();
         unsigned short page[16];
-        PblUnicode::usnprintf(page, 16, "%d/%d", gCurHint + 1, gNumHints);
+        PblUnicode::usnprintf(page, 14, "%d/%d", gCurHint + 1, gNumHints);
         HUD::Event(HUD::GameEvents::gObjectiveEvents.hintPopupPageNumber,
                    (const wchar_t*)page).Send();
     }

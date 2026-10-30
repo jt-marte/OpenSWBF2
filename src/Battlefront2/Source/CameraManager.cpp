@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "CameraManager.h"
+#include "PebbleFL/Common/PblPtrOrder.h"
 #include "ChaseCamera.h"
 #include "DeathCamera.h"
 #include "FreeCamera.h"
@@ -193,7 +194,7 @@ bool Tracker::IsFirstPersonView()
 {
     Trackable* pTrackable = mTrackable;
     if (pTrackable && pTrackable != (Trackable*)-1 &&
-        (unsigned int)pTrackable->mTracker != 0xDDDDDDDDu &&
+        (uintptr_t)pTrackable->mTracker != kPblFreedPtr &&
         pTrackable->GetControllable())
     {
         Controllable* pCtrl = pTrackable->GetControllable();
@@ -643,4 +644,14 @@ float GetWidescreenFOVAdjustment(float fFOV)
         ((float)FLRenderer::GetViewWidth(0) * (float)uScreenHeight);
     const float fScale = 0.75f / fAspect;
     return (float)atan((double)(fScale * (float)tan((double)(fFOV * 0.5f)))) * 2.0f;
+}
+
+// FUNCTION: SWBF2 0x0051ecb0
+// The chase camera's matrix. Retail read the ChaseCamera pointer at +0x28 and its matrix at +16,
+// Win32 offsets; it lives here, beside the classes, because NetGame.cpp only sees a stand-in.
+void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex)
+{
+    const ChaseCamera* pChase = ((const CameraManager*)pThis)->mChaseCamera[iIndex];
+    memcpy(pOut, &pChase->mMatrix, sizeof(PblMatrix));
+    return pOut;
 }

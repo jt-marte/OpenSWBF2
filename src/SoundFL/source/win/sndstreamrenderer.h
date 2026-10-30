@@ -40,7 +40,7 @@ public:
     SampleInfo::Format mFormat;
     unsigned long mChannelMask;
     DSBufferRenderer* mHardwareRenderer;
-    unsigned char mHardwareRendererStorage[416];
+    unsigned char mHardwareRendererStorage[sizeof(DSBufferRenderer)];
     unsigned int mOutConnIdx;
     StreamResampler mResampler;
     void* mResamplerBuffer;

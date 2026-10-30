@@ -15,16 +15,16 @@ public:
 // `dynamic initializer for 'RedShadingPose::Entry::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769ae0
 // `dynamic atexit destructor for 'RedShadingPose::Entry::sMemoryPool''
-MemoryPool RedShadingPose::Entry::sMemoryPool("RedShadingPose::Entry", 0xc);
+MemoryPool RedShadingPose::Entry::sMemoryPool("RedShadingPose::Entry", RED_POOL_SIZE(0xc, RedShadingPose::Entry));
 
 // GLOBAL: SWBF2 0x009acb30
 // SYNTHETIC: SWBF2 0x00408c40
 // `dynamic initializer for 'RedShadingState::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00769af0
 // `dynamic atexit destructor for 'RedShadingState::sMemoryPool''
-MemoryPool RedShadingState::sMemoryPool("RedShadingState", 0x20c);
+MemoryPool RedShadingState::sMemoryPool("RedShadingState", RED_POOL_SIZE(0x20c, RedShadingState));
 
-void* RedShadingPose::Entry::operator new(unsigned int uiSize)
+void* RedShadingPose::Entry::operator new(size_t uiSize)
 {
     return sMemoryPool.Allocate(uiSize);
 }

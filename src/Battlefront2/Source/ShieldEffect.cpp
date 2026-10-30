@@ -8,7 +8,7 @@
 // `dynamic initializer for 'ShieldEffect::sMemoryPool''
 // SYNTHETIC: SWBF2 0x007694a0
 // `dynamic atexit destructor for 'ShieldEffect::sMemoryPool''
-MemoryPool ShieldEffect::sMemoryPool("ShieldEffect", 0xF0);
+MemoryPool ShieldEffect::sMemoryPool("ShieldEffect", RED_POOL_SIZE(0xF0, ShieldEffect));
 
 // GLOBAL: SWBF2 0x01eaf060
 ShieldEffectManager* ShieldEffectManager::s_pInstance;

@@ -92,7 +92,7 @@ UnitCombatInfo::UnitCombatInfo(State eState, const PblVector3& targetPos, bool b
 {
     SetState(eState);
     mPos = targetPos;
-    mChr = (Character*)(unsigned int)bAllowRoll;
+    mChr = (Character*)(uintptr_t)bAllowRoll;
 }
 
 // FUNCTION: SWBF2 0x00662850

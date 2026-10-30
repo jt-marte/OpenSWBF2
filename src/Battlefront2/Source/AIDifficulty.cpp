@@ -1,5 +1,6 @@
 #include "AIDifficulty.h"
 
+#include "AIDifficultyLevel.h"
 #include "AITuning.h"
 #include "AIUtil.h"
 #include "Controllable.h"
@@ -80,14 +81,14 @@ void AIDifficulty::Init()
 }
 
 // FUNCTION: SWBF2 0x00438c70
-int AIDifficulty::GetProfileDifficulty()
+__declspec(noinline) int AIDifficulty::GetProfileDifficulty()
 {
-    return mProfileDifficulty;
+    return ClampDifficultyLevel(mProfileDifficulty);
 }
 
 bool AIDifficulty::IsOverhaul()
 {
-    return mProfileDifficulty == AITuning::kLevelOverhaul;
+    return GetProfileDifficulty() == AITuning::kLevelOverhaul;
 }
 
 // FUNCTION: SWBF2 0x00438c80

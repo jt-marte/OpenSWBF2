@@ -15,7 +15,7 @@
 // `dynamic initializer for 'Music::sMemoryPool''
 // SYNTHETIC: SWBF2 0x00768d30
 // `dynamic atexit destructor for 'Music::sMemoryPool''
-MemoryPool Music::sMemoryPool("Music", 0x48);
+MemoryPool Music::sMemoryPool("Music", RED_POOL_SIZE(0x48, Music));
 
 // GLOBAL: SWBF2 0x007ec23c
 // SYNTHETIC: SWBF2 0x00404370
@@ -502,7 +502,7 @@ void Music::Load(PblFileChunk& chunk)
     Music::sMusicInactive.Sort();
 }
 
-void* Music::operator new(unsigned int uSize)
+void* Music::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }

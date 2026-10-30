@@ -15,6 +15,7 @@
 #include "HintManager.h"
 #include "LoadDisplay.h"
 #include "LuaScript.h"
+#include "OdfValue.h"
 #include "PathFinder.h"
 #include "ProceduralAnimation.h"
 #include "StringDB.h"
@@ -648,7 +649,9 @@ void LoadUtil::ProcessEntity(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pEntity->SetProperty(uProperty, child.ReadString(acValue, sizeof(acValue)));
+            char* pcValue = child.ReadString(acValue, sizeof(acValue));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pEntity->SetProperty(uProperty, pcValue);
             break;
         }
         }
@@ -714,10 +717,12 @@ void LoadUtil::ProcessRegion(PblFileChunk& chunk)
             pRegion = ProcessRegionInfo(child);
             break;
         case 0x504F5250:
-            if ((unsigned int)pRegion > 1)
+            if ((uintptr_t)pRegion > 1)
             {
                 const unsigned int uProperty = child._pFile->Read32();
-                pRegion->SetProperty(uProperty, child.ReadString(acValue, sizeof(acValue)));
+                char* pcValue = child.ReadString(acValue, sizeof(acValue));
+                OdfValue::Sanitize(uProperty, pcValue);
+                pRegion->SetProperty(uProperty, pcValue);
             }
             break;
         }
@@ -726,7 +731,7 @@ void LoadUtil::ProcessRegion(PblFileChunk& chunk)
 
 bool __cdecl IsCoverHintFilteringEnabled();
 
-void* BaseHint::operator new(unsigned int uSize)
+void* BaseHint::operator new(size_t uSize)
 {
     return sMemoryPool.Allocate(uSize);
 }
@@ -801,7 +806,9 @@ void LoadUtil::ProcessHint(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pHint->SetProperty(uProperty, child.ReadString(acValue, sizeof(acValue)));
+            char* pcValue = child.ReadString(acValue, sizeof(acValue));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pHint->SetProperty(uProperty, pcValue);
             break;
         }
         }

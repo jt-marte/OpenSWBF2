@@ -28,6 +28,7 @@ extern bool gFactoryLog;
 extern bool gNoFocusPause;
 extern bool gAllowUploads;
 extern bool gNetStatsLog;
+extern bool gNetLoopback;
 extern bool gAIStatsLog;
 extern bool gAITestHuman;
 // -nettestplayer: a client spawns by itself and plays a fixed pattern of moves (NetGame.cpp)

@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <float.h>
 #include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,9 +12,19 @@
 #include <string>
 #include <vector>
 
+static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
+
 #include "testutil.h"
 
 typedef unsigned __int64 u64;
+
+// x64 libm rounds some sin/cos/exp/pow results differently from the x86 build, so the x64 build checks its
+// own math baseline. Win32 keeps reading corpus\mathfn\math.txt.
+#ifdef _WIN64
+#define MATH_CORPUS_PATH "corpus\\mathfn\\x64\\math.txt"
+#else
+#define MATH_CORPUS_PATH "corpus\\mathfn\\math.txt"
+#endif
 
 enum MathKind
 {
@@ -786,6 +797,23 @@ static bool BuildOdfLines(const char* pcRoot, std::vector<std::string>& lines)
 
 int FloatCorpusGenerate(const char* pcOutDir)
 {
+#ifdef _WIN64
+    // The float parse corpora are the same on x64 (they are checked against the Win32 files), and the math
+    // corpus needs no GameData: write only corpus\mathfn\x64\math.txt.
+    std::string sOutX64 = pcOutDir;
+    CreateDirectoryA(sOutX64.c_str(), 0);
+    CreateDirectoryA((sOutX64 + "\\mathfn").c_str(), 0);
+    CreateDirectoryA((sOutX64 + "\\mathfn\\x64").c_str(), 0);
+    std::vector<std::string> mathLinesX64 = BuildMathLines();
+    if (!WriteLines(sOutX64 + "\\mathfn\\x64\\math.txt", mathLinesX64))
+    {
+        return 1;
+    }
+    printf("gen-corpus: x64 math lines=%u -> %s\\mathfn\\x64\\math.txt\n", (unsigned int)mathLinesX64.size(),
+           pcOutDir);
+    fflush(stdout);
+    return 0;
+#endif
     const char* pcRoot = FindGameDataRoot();
     if (!pcRoot)
     {
@@ -901,8 +929,14 @@ static bool IsX87PrecisionForm(const std::string& sLine)
 
 static unsigned int CheckMathCorpus(bool bAllowX87PrecisionForms)
 {
-    const char* pcPath = "corpus\\mathfn\\math.txt";
+    const char* pcPath = MATH_CORPUS_PATH;
     WatchdogArm(pcPath);
+#ifdef _WIN64
+    if (GetFileAttributesA(pcPath) == INVALID_FILE_ATTRIBUTES)
+    {
+        SkipCase("no x64 baseline yet: corpus\\mathfn\\x64\\math.txt (record it with tests\\run.ps1 -Platform x64 -RecordCorpus)");
+    }
+#endif
     unsigned int uBad = 0;
     unsigned int uX87 = 0;
     std::vector<std::string> lines = ReadCorpusLines(pcPath, uBad);
@@ -956,6 +990,9 @@ struct PrecisionGuard
 
 TEST_CASE("math corpus x87 pc24" * doctest::test_suite("corpus"))
 {
+#ifdef _WIN64
+    SkipCase("x87 precision control does not exist on x64");
+#endif
     unsigned int uOld = 0;
     unsigned int uTmp = 0;
     REQUIRE(_controlfp_s(&uOld, 0, 0) == 0);

@@ -2384,7 +2384,7 @@ bool CNetFindGame::GetRules(FindGameRules& rules)
 char* CNetFindGame::GetDescriptorExtension()
 {
     NetGameDesc* game = curGame._pNode->_pObject;
-    return game ? (char*)game + 0xf1 : 0;
+    return game ? game->mFindData.mGalaxyLobbyPasswordData : 0; // retail: +0xf1
 }
 
 // FUNCTION: SWBF2 0x005df340
@@ -3863,7 +3863,7 @@ void CNetFindGame::UpdateGame(const NetAddr* address, const void* session, const
         {
             find->curGame._pNode = node;
             unsigned char endpoint[24] = {};
-            game->mAddr.GetAddr(endpoint, (int)&game->mKey);
+            game->mAddr.GetAddr(endpoint, &game->mKey);
             int ip = 0, port = 0;
             NetSocket::GetAddr(endpoint, ip, port);
         }
@@ -5697,7 +5697,7 @@ bool CNetFindGame::Update()
                 {
                     unsigned int address[6];
                     ClearGalaxyIdWords(address);
-                    game->mAddr.GetAddr(address, (int)&game->mKey);
+                    game->mAddr.GetAddr(address, &game->mKey);
                     int dest = NetCommP::FindJoinSource((const int*)address);
                     if (dest >= 0)
                     {
@@ -5883,7 +5883,7 @@ bool CNetFindGame::Update()
                         unsigned int endpoint[6];
                         ClearGalaxyIdWords(endpoint);
                         NetGameDesc* selected = curGame;
-                        selected->mAddr.GetAddr(endpoint, (int)&selected->mKey);
+                        selected->mAddr.GetAddr(endpoint, &selected->mKey);
                         int ip, port;
                         NetSocket::GetAddr(endpoint, ip, port);
                     }

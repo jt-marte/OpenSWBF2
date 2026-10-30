@@ -834,7 +834,7 @@ void WriteSpawnDisplay(NetPktGroup& group);
 void WritePlayerMoves(NetPktGroup& group);
 void WriteSpawnCamera(NetPktGroup& group);
 void AddSendLate();
-int ComputeNetLOD(int iUnused, int iPlayer);
+int ComputeNetLOD(const void* pUnused, int iPlayer);
 unsigned int __fastcall sub_5D3720(const void* pThis);
 
 class AloBootVote

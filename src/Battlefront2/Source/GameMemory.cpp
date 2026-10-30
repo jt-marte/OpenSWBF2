@@ -43,12 +43,12 @@ void GameMemory::InitApplicationMemory(char* pStart, char* pEnd)
         ApplicationHeap = 0;
     }
 
-    char* pAppEnd = gArenaStart + 0xF40000;
+    char* pAppEnd = gArenaStart + 0xF40000 * kHeapScale;
     ApplicationHeap = RedCreateHeap(gArenaStart, pAppEnd, 0x10, "Application");
 
     GamespyHeapstart = pAppEnd;
-    GamespyHeapend = pAppEnd + 0x200000;
-    GamespyHeap = RedCreateHeap(pAppEnd, pAppEnd + 0x200000, 0x10, "Gamespy");
+    GamespyHeapend = pAppEnd + 0x200000 * kHeapScale;
+    GamespyHeap = RedCreateHeap(pAppEnd, GamespyHeapend, 0x10, "Gamespy");
 
     g_Heap3Start = GamespyHeapend;
     RedSetCurrentHeap(ApplicationHeap);
@@ -92,16 +92,16 @@ void GameMemory::BuildHeaps(bool bMission)
         ArtistHeap = 0;
     }
 
-    char* pLuaStart = (char*)(((unsigned int)g_Heap3Start + 0x3F) & 0xFFFFFFC0);
-    char* pLuaEnd = pLuaStart + 0x1000000;
+    char* pLuaStart = (char*)(((uintptr_t)g_Heap3Start + 0x3F) & ~(uintptr_t)0x3F);
+    char* pLuaEnd = pLuaStart + 0x1000000 * kHeapScale;
     LuaHeap = RedCreateHeap(pLuaStart, pLuaEnd, 4, "Lua");
 
-    char* pArtistStart = (char*)(((unsigned int)pLuaEnd + 0x3F) & 0xFFFFFFC0);
+    char* pArtistStart = (char*)(((uintptr_t)pLuaEnd + 0x3F) & ~(uintptr_t)0x3F);
     gArtistHeapStart = pArtistStart;
     char* pArtistEnd = pArtistStart + 0x2000;
     ArtistHeap = RedCreateHeap(pArtistStart, pArtistEnd, 0x10, "Artist");
 
-    char* pRunTimeStart = (char*)(((unsigned int)pArtistEnd + 0x3F) & 0xFFFFFFC0);
+    char* pRunTimeStart = (char*)(((uintptr_t)pArtistEnd + 0x3F) & ~(uintptr_t)0x3F);
     RunTimeHeap = RedCreateHeap(pRunTimeStart, gArenaEnd, 0x10, "Runtime");
     RedSetCurrentHeap(RunTimeHeap);
 

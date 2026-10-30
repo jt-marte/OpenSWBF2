@@ -61,7 +61,7 @@ public:
 
     unsigned int GetId() const { return _iId; }
     const char* GetData() const { return _pData; }
-    bool IsDone() const { return _pNext + ((-(int)_pNext) & 3) >= _pEnd; }
+    bool IsDone() const { return _pNext + ((-(intptr_t)_pNext) & 3) >= _pEnd; }
 
     unsigned int _iId;
     int _iSize;

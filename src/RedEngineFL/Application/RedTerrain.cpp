@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <string.h>
+#include <xmmintrin.h>
 
 #include "PebbleFL/Common/PblChunk.h"
 #include "PebbleFL/Common/PblFile.h"
@@ -238,7 +239,8 @@ float RedTerrain::GetInterpolatedHeight(float fX, float fZ)
         return fH + (GetHeight(iX, iZ) - fH0) * (1.0f - fFracZ);
     }
     const float fH0 = GetHeight(iX + 1, iZ);
-    const float fH = (GetHeight(iX + 1, iZ + 1) - fH0) * fFracZ;
+    const float fH = _mm_cvtss_f32(
+        _mm_mul_ss(_mm_sub_ss(_mm_set_ss(GetHeight(iX + 1, iZ + 1)), _mm_set_ss(fH0)), _mm_set_ss(fFracZ)));
     return fH + ((GetHeight(iX, iZ) - fH0) * (1.0f - fFracX) + fH0);
 }
 

@@ -70,6 +70,7 @@ bool gFactoryLog;
 bool gNoFocusPause;
 bool gAllowUploads = LocalLimits::kUploadsDefault;
 bool gNetStatsLog;
+bool gNetLoopback;
 bool gAIStatsLog;
 bool gAITestHuman;
 bool gNetTestPlayer;
@@ -386,6 +387,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
             continue;
         }
 
+        if (_stricmp(pcArg + 1, "netloopback") == 0)
+        {
+            gNetLoopback = true;
+            continue;
+        }
+
         if (_stricmp(pcArg + 1, "aistats") == 0)
         {
             gAIStatsLog = true;
@@ -523,6 +530,12 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
             break;
         case DisplayCfg::kHashSwCursor:
             DisplayCfg::SetFlag(DisplayCfg::gCliDisplay, DisplayCfg::kSoftwareCursor);
+            break;
+        case DisplayCfg::kHashVulkan: // OpenSWBF2: renderer for this run only, over display.ini
+            DisplayCfg::SetFromText(DisplayCfg::gCliDisplay, DisplayCfg::kRenderer, "vulkan", "command line");
+            break;
+        case DisplayCfg::kHashD3d9:
+            DisplayCfg::SetFromText(DisplayCfg::gCliDisplay, DisplayCfg::kRenderer, "d3d9", "command line");
             break;
         case XInputPad::kHashNoXInput:
             XInputPad::gDisabled = true;

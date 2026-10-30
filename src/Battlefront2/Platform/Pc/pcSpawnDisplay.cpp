@@ -370,7 +370,7 @@ void SpawnDisplay::UpdateUnitCountText()
         switch (eReason)
         {
         case PlayerStats::TOO_MANY_UNITS:
-            PblUnicode::ustrlcat(text, RedLocalizeDB::Find(0xD3CD201E, false), 256);
+            PblUnicode::ustrlcat(text, RedLocalizeDB::Find(0xD3CD201E, false), 255);
             break;
         case PlayerStats::NOT_ENOUGH_POINTS:
             PblUnicode::usnprintf(text, 255, RedLocalizeDB::Find(0x155AB074, false),
@@ -391,7 +391,7 @@ void SpawnDisplay::UpdateUnitCountText()
         PblUnicode::usnprintf(countText, 127, RedLocalizeDB::Find(0xCB22A09F, false), iCurUnits,
                               iMaxUnits);
     }
-    PblUnicode::ustrlcat(text, countText, 256);
+    PblUnicode::ustrlcat(text, countText, 255);
     m_pUnitCountText->SetText(text, true);
 }
 
@@ -444,17 +444,17 @@ void SpawnDisplay::UpdateObjectText(GameObjectClass* pClass, int iSlot)
 
             if (pWeapon->mLabel)
             {
-                PblUnicode::ustrlcat(text, pWeapon->mLabel, 256);
+                PblUnicode::ustrlcat(text, pWeapon->mLabel, 255);
             }
             else
             {
                 unsigned short name[128];
                 memset(name, 0, sizeof(name));
-                PblUnicode::ustrncnv(name, pWeapon->mFilename, 128);
-                PblUnicode::ustrlcat(text, name, 256);
+                PblUnicode::ustrncnv(name, pWeapon->mFilename, 127);
+                PblUnicode::ustrlcat(text, name, 255);
             }
         }
-        PblUnicode::ustrlcat(text, sNewlineStr16, 256);
+        PblUnicode::ustrlcat(text, sNewlineStr16, 255);
     }
     m_pInfoBoxText[iSlot]->SetText(text, true);
 }

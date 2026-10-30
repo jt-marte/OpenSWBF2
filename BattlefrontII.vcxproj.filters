@@ -1020,6 +1020,9 @@
     <ClCompile Include="src\Battlefront2\Source\MemFailLog.cpp">
       <Filter>src\Battlefront2\Source</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battlefront2\Source\OdfValue.cpp">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\SimDigest.cpp">
       <Filter>src\Battlefront2\Source</Filter>
     </ClCompile>
@@ -1824,6 +1827,9 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDxvk.cpp">
+      <Filter>src\RedEngineFL\Graphics\PC</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcGammaPass.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>
@@ -2066,6 +2072,9 @@
     </ClCompile>
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.cpp">
       <Filter>src\RedEngineFL\movie</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RedEngineFL\movie\pc\FFMovieDecoder.cpp">
+      <Filter>src\RedEngineFL\movie\pc</Filter>
     </ClCompile>
     <ClCompile Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.cpp">
       <Filter>src\RedEngineFL\movie\pc</Filter>
@@ -2436,6 +2445,9 @@
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h">
@@ -3170,6 +3182,9 @@
     <ClInclude Include="src\Battlefront2\Source\NetAdmin.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\NetAdminIdText.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\NetComm.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
@@ -3183,6 +3198,9 @@
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\MemFailLog.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\OdfValue.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\SimDigest.h">
@@ -3201,6 +3219,9 @@
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.h">
+      <Filter>src\RedEngineFL\Graphics\PC</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDxvk.h">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPass.h">
@@ -3426,6 +3447,9 @@
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\ShieldEffect.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\SideNames.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\SkyDome.h">
@@ -4276,6 +4300,9 @@
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.h">
       <Filter>src\RedEngineFL\movie</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\movie\pc\FFMovieDecoder.h">
+      <Filter>src\RedEngineFL\movie\pc</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.h">
       <Filter>src\RedEngineFL\movie\pc</Filter>
