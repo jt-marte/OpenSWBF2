@@ -109,6 +109,7 @@
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcShieldEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSkyDome.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSkyStars.cpp" />
+    <ClCompile Include="src\Battlefront2\Platform\Pc\pcPadPrompts.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSpawnDisplay.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSunFlare.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcVideoEffect.cpp" />
@@ -920,6 +921,7 @@
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcLightBeam.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcSaveDevice.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcSaveFile.h" />
+    <ClInclude Include="src\Battlefront2\Platform\Pc\pcPadPrompts.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcSpawnDisplay.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcSunFlare.h" />
     <ClInclude Include="src\Battlefront2\Platform\Pc\pcVideoEffect.h" />

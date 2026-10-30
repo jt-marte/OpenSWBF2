@@ -743,3 +743,71 @@ TEST_CASE("xinput controller page names each layout's actions" * doctest::test_s
     CHECK(!ActionLabel(kLayoutModern, 0, 28)); // map
     CHECK(!ActionLabel(kLayoutModern, 3, kActZoom)); // jedi
 }
+
+TEST_CASE("xinput prompts show each layout's button for a console token" * doctest::test_suite("unit"))
+{
+    // the console's buttons are the actions they stood for
+    CHECK(TokenGlyph("btnr1", kLayoutModern, 0) == kGlyphRT);
+    CHECK(TokenGlyph("btnl1", kLayoutModern, 0) == kGlyphRB);
+    CHECK(TokenGlyph("btnl1", kLayoutLegacy, 0) == kGlyphLT);
+    CHECK(TokenGlyph("btnr2", kLayoutModern, 0) == kGlyphY);
+    CHECK(TokenGlyph("btnr2", kLayoutLegacy, 0) == kGlyphRB);
+    CHECK(TokenGlyph("btna", kLayoutModern, 2) == kGlyphA);
+    CHECK(TokenGlyph("btnb", kLayoutModern, 1) == kGlyphX);  // hold X to get in or out
+    CHECK(TokenGlyph("btnb", kLayoutLegacy, 1) == kGlyphY);
+    CHECK(TokenGlyph("btn_analog_l_down", kLayoutModern, 0) == kGlyphLS);
+    CHECK(TokenGlyph("btn_analog_r_down", kLayoutModern, 0) == kGlyphLT); // aim
+    CHECK(TokenGlyph("btn_analog_r_down", kLayoutLegacy, 0) == kGlyphRS);
+    CHECK(TokenGlyph("btn_analog_l", kLayoutModern, 0) == kGlyphLeftStick);
+    CHECK(TokenGlyph("BTN_ANALOG_R", kLayoutModern, 0) == kGlyphRightStick); // case-insensitive
+    // the game's own tokens
+    CHECK(TokenGlyph("GuiAccept", kLayoutModern, 0) == kGlyphA);
+    CHECK(TokenGlyph("GuiCancel", kLayoutLegacy, 0) == kGlyphB);
+    CHECK(TokenGlyph("crouchButton", kLayoutModern, 0) == kGlyphB);
+    CHECK(TokenGlyph("useButton", kLayoutLegacy, 0) == kGlyphY);
+    CHECK(TokenGlyph("OptionL", kLayoutModern, 0) == kTokenRetail);
+    // unbound on the pad, or unknown
+    CHECK(TokenGlyph("btnmisc", kLayoutModern, 0) == -1); // lock-on
+    CHECK(TokenGlyph("Map", kLayoutModern, 0) == -1);
+    CHECK(TokenGlyph("nosuchtoken", kLayoutModern, 0) == -1);
+    CHECK(TokenGlyph(0, kLayoutModern, 0) == -1);
+    // every token has a name, and every glyph a label (the D-pad is drawn)
+    for (int i = 0; i < TokenCount(); ++i)
+    {
+        CHECK(TokenName(i) != (const char*)0);
+    }
+    CHECK(strcmp(GlyphText(kGlyphA), "A") == 0);
+    CHECK(strcmp(GlyphText(kGlyphStart), "START") == 0);
+    CHECK(strcmp(GlyphText(kGlyphCount), "") == 0);
+    CHECK(GlyphForSlot(kSlotRightTrigger) == kGlyphRT);
+    CHECK(GlyphForSlot(kBitDPadLeft) == kGlyphDPadLeft);
+    CHECK(GlyphForSlot(-1) == -1);
+}
+
+TEST_CASE("xinput prompts only replace text whose tokens all resolve" * doctest::test_suite("unit"))
+{
+    const unsigned short usFire[] = { '{', 'b', 't', 'n', 'r', '1', '}', ' ', 't', 'o', ' ', 'f', 'i', 'r', 'e', 0 };
+    const unsigned short usLock[] = { '{', 'b', 't', 'n', 'm', 'i', 's', 'c', '}', 0 };
+    const unsigned short usPlain[] = { 'h', 'i', 0 };
+    const unsigned short usOpen[] = { '{', 'b', 't', 'n', 'a', 0 };
+    const unsigned short usOption[] = { '{', 'O', 'p', 't', 'i', 'o', 'n', 'L', '}', '{', 'b', 't', 'n', 'a', '}', 0 };
+    CHECK(PromptTextResolves(usFire, kLayoutModern, 0));
+    CHECK_FALSE(PromptTextResolves(usLock, kLayoutModern, 0));
+    CHECK(PromptTextResolves(usPlain, kLayoutModern, 0));
+    CHECK_FALSE(PromptTextResolves(usOpen, kLayoutModern, 0));
+    CHECK(PromptTextResolves(usOption, kLayoutLegacy, 0));
+    CHECK_FALSE(PromptTextResolves(0, kLayoutModern, 0));
+}
+
+TEST_CASE("xinput prompts follow the pad in game or in the menus" * doctest::test_suite("unit"))
+{
+    gPadPromptsGame = false;
+    gPadOwnsCursor = false;
+    CHECK_FALSE(PadPromptsActive());
+    gPadPromptsGame = true;
+    CHECK(PadPromptsActive());
+    gPadPromptsGame = false;
+    gPadOwnsCursor = true;
+    CHECK(PadPromptsActive());
+    gPadOwnsCursor = false;
+}

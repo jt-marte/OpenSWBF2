@@ -5,6 +5,7 @@
 #include "HUDEvent.h"
 #include "HUDGameEvents.h"
 #include "Battlefront2/Platform/Pc/pcSpawnDisplay.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 
 // FUNCTION: SWBF2 0x00658560
 void ToolTipsDisplay::SetAlwaysOff()
@@ -334,7 +335,8 @@ void ToolTipsDisplay::ShowTip(ToolTipType eType, int iParam)
     {
         return;
     }
-    if (mIsControllerDefault)
+    // OpenSWBF2: tips also show on a pad, whose layouts are always the defaults
+    if (mIsControllerDefault || XInputPad::PadPromptsActive())
     {
         mTips[eType].mInput.SetTrue();
     }

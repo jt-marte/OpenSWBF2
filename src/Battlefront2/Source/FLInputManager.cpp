@@ -5,6 +5,8 @@
 
 #include "RedEngineFL/Interface/RedTextElement.h"
 #include "RedEngineFL/input/pc/pcRedInputManager.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
+#include "Battlefront2/Platform/Pc/pcPadPrompts.h"
 #include "lglcd/lgLcd.h"
 #include "PauseMenu.h"
 #include "PlayerProfile.h"
@@ -105,8 +107,12 @@ void FLInputManager::InitCustomFontData()
     CustomFontData& d = RedFont::GetMagicCharFontData();
 
     d.nameHash_ = PblHash("SpecialFont");
-    d.numGlyphs_ = 7;
-    d.numTextures_ = 7;
+    // OpenSWBF2: the pad button icons (XInputPad::PadGlyph, drawn by PadPrompts)
+    // follow the five retail glyphs. The retail table's two empty entries are
+    // left out: a value 0 after the others ended the last glyph range at 0
+    // (CreateCustom), so nothing past it could be found.
+    d.numGlyphs_ = 5 + XInputPad::kGlyphCount;
+    d.numTextures_ = 5 + XInputPad::kGlyphCount;
     d.glyphHeight_ = 0x20;
 
     d.glyphs_ = new RedFont::Glyph[d.numGlyphs_ + 64];
@@ -116,8 +122,16 @@ void FLInputManager::InitCustomFontData()
 
     for (unsigned int i = 0; i < d.numGlyphs_; i++)
     {
-        d.glyphs_[i].value = gCustomGlyphData[i].unicodeValue;
-        d.textureHashes_[i] = gCustomGlyphData[i].textureHash;
+        if (i >= 5)
+        {
+            d.glyphs_[i].value = (unsigned short)(XInputPad::kGlyphBase + (i - 5));
+            d.textureHashes_[i] = PadPrompts::IconHash((int)(i - 5));
+        }
+        else
+        {
+            d.glyphs_[i].value = gCustomGlyphData[i].unicodeValue;
+            d.textureHashes_[i] = gCustomGlyphData[i].textureHash;
+        }
         d.defaultMap_[d.textureHashes_[i]] = d.glyphs_[i].value;
     }
 
@@ -216,6 +230,21 @@ void InitMagicCharMap(void)
     for (int i = 0; i < 0x22; i++)
     {
         rMap[gProcessedInputMap[i].hashID] = GetRawFromProcessed_(gProcessedInputMap[i].input);
+    }
+
+    // OpenSWBF2: on a pad, the hint tokens show the buttons of its layout
+    if (XInputPad::PadPromptsActive())
+    {
+        for (int i = 0; i < XInputPad::TokenCount(); i++)
+        {
+            const int iGlyph = XInputPad::TokenGlyph(XInputPad::TokenName(i), XInputPad::gPadLayout,
+                                                     XInputPad::gPadPromptMode);
+            if (iGlyph >= 0)
+            {
+                uiKey = PblHash(XInputPad::TokenName(i));
+                rMap[uiKey] = (unsigned short)(XInputPad::kGlyphBase + iGlyph);
+            }
+        }
     }
 }
 
