@@ -492,6 +492,11 @@ void PlayerController::Update(float dt)
     bool bZoom = mJoystick->IsZoomButtonDown();
     // OpenSWBF2: the Modern pad layout aims while LT is held (the soldier's
     // zoom is a toggle), RS steps two-level scopes. See XInputPad::AimZoomPress.
+    // While such a scope is up RS is the next zoom, otherwise lock-on
+    // (XInputPad::RsLockTarget), which the input layer reads from this player.
+    const bool bLocalPlayer = NetGame::IsEnabled() ? NetGame::GetJoystickIndex(mOwner->mPlayerId) >= 0
+                                                   : mOwner->mPlayerId >= 0;
+    bool bScopeStepsZoom = false;
     if (XInputPad::gPadAimActive && !bMouseMode && bIsSoldier)
     {
         EntitySoldier* pSoldier = static_cast<EntitySoldier*>(mOwner->GetEntity());
@@ -502,6 +507,11 @@ void PlayerController::Update(float dt)
         static XInputPad::AimZoom sAimZoom;
         bZoom = XInputPad::AimZoomPress(sAimZoom, XInputPad::gPadAimHeld, XInputPad::gPadSecondZoom,
                                         mOwner->mTargetInfo.mIsAiming, bTwoLevel);
+        bScopeStepsZoom = bTwoLevel && mOwner->mTargetInfo.mIsAiming;
+    }
+    if (bLocalPlayer)
+    {
+        XInputPad::gPadScopeStepsZoom = bScopeStepsZoom;
     }
     mOwner->mControlZoom.Update(dt, bZoom);
     mOwner->mControlView.Update(dt, mJoystick->IsViewButtonDown());

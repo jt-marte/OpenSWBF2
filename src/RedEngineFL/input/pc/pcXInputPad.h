@@ -269,11 +269,24 @@ struct AimZoom
 };
 bool AimZoomPress(AimZoom& rState, bool bAimHeld, bool bSecondPressed, bool bAiming, bool bTwoLevel);
 
+// Modern: RS is lock-on (vehicles, droidekas, homing launchers), except that a press made
+// while a two-level scope is up (gPadScopeStepsZoom) steps the zoom instead. The choice is
+// made when RS goes down and kept while it is held. True while lock-on should read held.
+struct RsLock
+{
+    bool bDown;
+    bool bForZoom;
+};
+bool RsLockTarget(RsLock& rState, bool bRSDown, bool bScopeStepsZoom);
+
 // Published by the input layer each frame for PlayerController: Modern is in
 // effect on a connected XInput pad, LT is held, RS was pressed this frame.
 extern bool gPadAimActive;
 extern bool gPadAimHeld;
 extern bool gPadSecondZoom;
+// Published by PlayerController for the local player: aiming a weapon with a two-level scope,
+// so RS steps the zoom rather than locking on.
+extern bool gPadScopeStepsZoom;
 
 // Menu (eGUIINPUT value) for a raw pad slot, or -1.
 int GuiForSlot(int iSlot);

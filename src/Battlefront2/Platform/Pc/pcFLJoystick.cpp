@@ -1189,6 +1189,14 @@ void RawControllerInputs::PadDefaultsProcess()
             XInputPad::gPadSecondZoom = XInputPad::gPadSecondZoom ||
                                         (mRawInputFloat[iPort][XInputPad::kBitRS] >= 0.5f &&
                                          mLastRawInputFloat[iPort][XInputPad::kBitRS] < 0.5f);
+
+            // RS: lock on, unless pressed with a two-level scope up (then the next zoom, above)
+            static XInputPad::RsLock sRsLock[10];
+            if (XInputPad::RsLockTarget(sRsLock[iPort], mRawInputFloat[iPort][XInputPad::kBitRS] >= 0.5f,
+                                        XInputPad::gPadScopeStepsZoom))
+            {
+                mProcessDestination->Set(ePROCESSEDINPUT_lockTargetButtonPressed, bLocked, 1.0f, 0.0f);
+            }
         }
 
         // On foot, double-tapping B (crouch) while moving rolls: the PC Roll
