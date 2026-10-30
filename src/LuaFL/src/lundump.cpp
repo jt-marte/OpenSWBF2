@@ -17,6 +17,7 @@ typedef struct {
  ZIO* Z;
  Mbuffer* b;
  int swap;
+ int iSizeT;		// width of size_t in the chunk, not the host: 4 or 8
  const char* name;
 } LoadState;
 
@@ -38,9 +39,9 @@ static int ezgetc (LoadState* S)
 
 // LIBRARY: SWBF2 0x006ab270
 // ezread
-static void ezread (LoadState* S, void* b, int n)
+static void ezread (LoadState* S, void* b, size_t n)
 {
- int r=luaZ_read(S->Z,b,n);
+ size_t r=luaZ_read(S->Z,b,n);
  if (r!=0) unexpectedEOZ(S);
 }
 
@@ -51,7 +52,7 @@ static void LoadBlock (LoadState* S, void* b, size_t size)
  if (S->swap)
  {
   char* p=(char*) b+size-1;
-  int n=size;
+  size_t n=size;
   while (n--) *p--=(char)ezgetc(S);
  }
  else
@@ -68,7 +69,7 @@ static void LoadVector (LoadState* S, void* b, int m, size_t size)
   while (m--)
   {
    char* p=q+size-1;
-   int n=size;
+   size_t n=size;
    while (n--) *p--=(char)ezgetc(S);
    q+=size;
   }
@@ -89,11 +90,24 @@ static int LoadInt (LoadState* S)
 
 // LIBRARY: SWBF2 0x006ab060
 // LoadSize
+// Retail, mod and our own luac chunks come from 32-bit tools with a 4-byte
+// size_t; a 64-bit lua_dump writes 8. Read the chunk's width, not the host's.
 static size_t LoadSize (LoadState* S)
 {
- size_t x;
- LoadBlock(S,&x,sizeof(x));
- return x;
+ if (S->iSizeT==4)
+ {
+  unsigned int x;
+  LoadBlock(S,&x,sizeof(x));
+  return x;
+ }
+ else
+ {
+  unsigned long long x;
+  LoadBlock(S,&x,sizeof(x));
+  if (x!=(size_t)x)
+   luaG_runerror(S->L,"size too large in %s",S->name);
+  return (size_t)x;
+ }
 }
 
 // LIBRARY: SWBF2 0x006aaff0
@@ -269,7 +283,10 @@ static void LoadHeader (LoadState* S)
 	S->name,V(version),V(VERSION0));
  S->swap=(luaU_endianness()!=LoadByte(S));
  TESTSIZE(sizeof(int),"int");
- TESTSIZE(sizeof(size_t), "size_t");
+ S->iSizeT=LoadByte(S);
+ if (S->iSizeT!=4 && S->iSizeT!=8)
+  luaG_runerror(S->L,"virtual machine mismatch in %s: "
+	"size of size_t is 4 or 8 but read %d",S->name,S->iSizeT);
  TESTSIZE(sizeof(Instruction), "Instruction");
  TESTSIZE(SIZE_OP, "OP");
  TESTSIZE(SIZE_A, "A");
