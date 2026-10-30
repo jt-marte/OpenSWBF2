@@ -12,7 +12,7 @@ namespace
 
 void* Addr(unsigned int uiAddr)
 {
-    return (void*)uiAddr;
+    return (void*)(size_t)uiAddr;
 }
 
 bool ReadSource(const char* pcPath, std::string& sOut)
