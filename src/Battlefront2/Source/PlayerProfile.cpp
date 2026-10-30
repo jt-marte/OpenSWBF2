@@ -409,7 +409,10 @@ void PlayerProfile::tPCOpt::ResetToDefault()
     mJoyEnabled = true;
     mWindowed = false;
     mVSync = false;
-    mMultiSample = D3DMULTISAMPLE_NONE;
+    // OpenSWBF2: 4x antialiasing by default (off where the device can't do it,
+    // see ComputeTargetMode). 8x stays a choice: at 4K it costs ~0.5 GB in a
+    // 32-bit game.
+    mMultiSample = D3DMULTISAMPLE_4_SAMPLES;
     mMultiSampleQuality = 0;
 
     renderOptions = RedAutoSettings::GetRenderOptions();

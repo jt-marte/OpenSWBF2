@@ -509,6 +509,14 @@ void DoAutoDetection()
     }
 
     _LoadVendorDeviceOverrides();
+
+    // OpenSWBF2: default to everything at its highest (the High preset): any PC
+    // today runs this renderer maxed, where the retail detection above still
+    // judged by shader model and CPU clock. Bump mapping still needs the
+    // hardware for it.
+    SetMasterQuality(&_RenderSettings, 2);
+    _RenderSettings.bumpMapping =
+        (caps.TextureOpCaps & D3DTEXOPCAPS_BUMPENVMAP) != 0 && sHardwareGeneration > 1;
 }
 
 }
@@ -1962,8 +1970,9 @@ void SetMasterQuality(RenderOptionsT* pOptions, int iLevel)
             pOptions->shadowQuality = QUALITY2_HIGH;
             pOptions->bumpMapping = true;
             pOptions->mEnableHDR = true;
-            pOptions->mNearSceneFadeFactor = 0.7f;
-            pOptions->mFarSceneRangeFactor = 0.7f;
+            // OpenSWBF2: full view and detail distances (retail High: 0.7)
+            pOptions->mNearSceneFadeFactor = 1.0f;
+            pOptions->mFarSceneRangeFactor = 1.0f;
 
             if (pOptions == &_RenderSettings)
             {
