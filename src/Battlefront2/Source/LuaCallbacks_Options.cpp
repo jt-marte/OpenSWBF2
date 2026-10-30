@@ -887,9 +887,10 @@ int ScriptCB_GetOnlineOpts(lua_State* L)
         iOnlineIcon = rOnline.mOnlineIcon;
         bAllRegions = rOnline.mShowAllRegions != 0;
     }
-    if (iTurnsPerSecond == 0)
+    // The menu offers 30/60/120; show a profile's retail 15/20 (or unset) as the default it hosts at.
+    if (iTurnsPerSecond < 30)
     {
-        iTurnsPerSecond = 20;
+        iTurnsPerSecond = NetWire::kDefaultTurnRate;
     }
 
     lua_newtable(LuaHelper::mState);

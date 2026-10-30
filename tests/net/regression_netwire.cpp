@@ -520,6 +520,18 @@ TEST_CASE("host bandwidth option goes past 6M" * doctest::test_suite("regression
     CHECK(NetWire::kHostBandwidthDefault == 9);
 }
 
+TEST_CASE("hosting turn rate defaults to 60 and keeps 30 to 255" * doctest::test_suite("regression"))
+{
+    CHECK(NetWire::kDefaultTurnRate == 60);
+    CHECK(NetWire::HostTurnRate(0) == 60);
+    CHECK(NetWire::HostTurnRate(15) == 60); // retail profile values
+    CHECK(NetWire::HostTurnRate(20) == 60);
+    CHECK(NetWire::HostTurnRate(30) == 30);
+    CHECK(NetWire::HostTurnRate(60) == 60);
+    CHECK(NetWire::HostTurnRate(120) == 120);
+    CHECK(NetWire::HostTurnRate(300) == 255);
+}
+
 TEST_CASE("turn rate outside the retail range is rejected" * doctest::test_suite("regression"))
 {
     NetTestReset();

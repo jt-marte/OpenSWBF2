@@ -6,6 +6,8 @@ param(
     [ValidateSet('clean', 'lag100', 'lag200', 'all')][string]$Profile = 'clean',
     [ValidateRange(30, 600)][int]$JoinTimeout = 120,
     [switch]$Direct,
+    [string]$ServerArgs = '',
+    [string]$ClientArgs = '',
     [string]$OutDir
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
@@ -70,8 +72,8 @@ function Invoke-NetPair($name, $drag) {
         }
         $srvLog = Join-Path $caseDir 'server.log'
         # -Direct also covers the -dedicated shorthand (headless Direct server, no legal screens).
-        $srvArgs = if ($Direct) { "-dedicated $Map 100 100 /gamename $gameName $common $drag -log `"$srvLog`"" }
-                   else { "/autonet dedicated -lan -nopregame -playercount 0 /gamename $gameName $Map 100 100 $common $drag -log `"$srvLog`"" }
+        $srvArgs = if ($Direct) { "-dedicated $Map 100 100 /gamename $gameName $common $drag $ServerArgs -log `"$srvLog`"" }
+                   else { "/autonet dedicated -lan -nopregame -playercount 0 /gamename $gameName $Map 100 100 $common $drag $ServerArgs -log `"$srvLog`"" }
         $procs += Start-Process -FilePath (Join-Path $dirs[0] 'BattlefrontII.exe') -ArgumentList $srvArgs -WorkingDirectory $dirs[0] -PassThru
         $deadline = (Get-Date).AddSeconds($JoinTimeout)
         while ((Get-Date) -lt $deadline -and -not ((Test-Path $srvLog) -and (Select-String -Path $srvLog -Pattern 'OPENSWBF2 NET mission start' -Quiet))) {
@@ -83,7 +85,7 @@ function Invoke-NetPair($name, $drag) {
             $cliLog = Join-Path $caseDir "client$i.log"
             $cliLogs += $cliLog
             $join = if ($Direct) { '/connect 127.0.0.1' } else { '' }
-            $cliArgs = "/autonet client -lan /gamename $gameName $join $common -log `"$cliLog`""
+            $cliArgs = "/autonet client -lan /gamename $gameName $join $common $ClientArgs -log `"$cliLog`""
             $procs += Start-Process -FilePath (Join-Path $dirs[$i] 'BattlefrontII.exe') -ArgumentList $cliArgs -WorkingDirectory $dirs[$i] -PassThru
         }
         $joined = $false

@@ -200,6 +200,7 @@ extern char autoNetSession[64];
 extern int hostshort;
 namespace GameLoop { extern bool sQuitRequested; }
 extern int gAutoNetPlayers;
+extern int netFPS;
 
 // True when pcLine holds pcWord as its own -word or /word token.
 static bool HasSwitchWord(const char* pcLine, const char* pcWord)
@@ -499,6 +500,21 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         LOG(LogCore, Inform, "OPENSWBF2 SERVER dedicated name=\"%s\" port=%d", autoNetSession, hostshort);
     }
     DisplayCfg::Init();
+    if (g_bNoRender && g_fFixedRate <= 0.0f)
+    {
+        // A headless frame sleeps 1 ms (GameState::UpdateTime), which at Windows' default 15.6 ms
+        // timer resolution held headless runs to 64 frames, and so 64 updates, a second.
+        timeBeginPeriod(1);
+    }
+    if (gDedicatedShorthand)
+    {
+        // Frame cap of twice the turn rate, so updates follow 60 and 120+ turns.
+        const unsigned int uiWantFps = netFPS * 2 > 80 ? (unsigned int)netFPS * 2 : 80u;
+        if (DisplayCfg::gDisplay.uiFps != 0 && DisplayCfg::gDisplay.uiFps < uiWantFps)
+        {
+            DisplayCfg::gDisplay.uiFps = uiWantFps;
+        }
+    }
     XInputPad::gPadLayout =
         DisplayCfg::gDisplay.uiPadLayout ? XInputPad::kLayoutLegacy : XInputPad::kLayoutModern;
     XInputPad::gPadLookLevel = (int)DisplayCfg::gDisplay.uiPadLookSpeed;

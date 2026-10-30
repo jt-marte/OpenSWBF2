@@ -44,6 +44,10 @@ bool IsUsableIPv4(unsigned long ulNetOrder);
 const unsigned int kHostBandwidthOptions = 14;
 const unsigned int kHostBandwidthDefault = 9; // 10M
 int HostBandwidthSlots(unsigned int uOption);
+// Hosting turn rate: the menu offers 30, 60 and 120; a profile still holding retail's 15 or 20
+// (or nothing) hosts at the default.
+const int kDefaultTurnRate = 60;
+int HostTurnRate(int iProfileTurns);
 bool ParseHostPort(const char* pcText, char* pcHost, unsigned int uHostCap, int& iPort, int iDefaultPort);
 bool IsValidTurnRate(int iDuration, int iTurns);
 
