@@ -10,6 +10,8 @@ local opt_tab_width = 158.5
 gPCMultiPlayerTabsLayout = {
 	{ tag = "_tab_join",		string = "ifs.mp.tabs.join",		screen = "ifs_mp_sessionlist",		  xPos = 87, width = opt_tab_width, yPos = mp_tab_ypos, },
 	{ tag = "_tab_create",		string = "ifs.mp.tabs.create",		screen = "ifs_missionselect_pcMulti", width = opt_tab_width, yPos = mp_tab_ypos, },
+	-- OpenSWBF2: join a server by address, or one joined before (ifs_mp_direct, end of this file)
+	{ tag = "_tab_direct",		string = "ifs.mp.tabs.direct",		screen = "ifs_mp_direct",			  width = opt_tab_width, yPos = mp_tab_ypos, },
 	--{ tag = "_tab_mp_opt",		string = "ifs.mp.tabs.options",		screen = "ifs_opt_mp",				  xPos = 320,width = 133, yPos = mp_tab_ypos, },
 	-- OpenSWBF2: no Galaxy account, friends list or leaderboard tabs. The screens stay
 	-- loadable for mods; tab calls that name these tags find nothing and do nothing.
@@ -17,6 +19,14 @@ gPCMultiPlayerTabsLayout = {
 	--{ tag = "_tab_friends",		string = "ifs.mp.tabs.friends",		screen = "ifs_mpgs_friends",		  width = opt_tab_width, yPos = mp_tab_ypos, },
 	--{ tag = "_tab_leaderboard", string = "ifs.mp.tabs.leaderboard",	screen = "ifs_mp_leaderboard",		  width = opt_tab_width, yPos = mp_tab_ypos, },
 }
+
+-- OpenSWBF2: the Join and Create source picker. Modern is OpenSWBF2's own path (LAN
+-- discovery and direct joins, connect type "lan"); Legacy is the Galaxy list shared with the
+-- stock game (connect type "wan"). Both screens start on Modern and share one choice, kept
+-- until the game exits. The values are the picker's rows, see sourcelist_content.
+MP_SOURCE_MODERN = 1
+MP_SOURCE_LEGACY = 2
+gMPSourceValue = MP_SOURCE_MODERN
 
 gMPSessionList_Listbox_ColumnInfo = {
 	{ width = 40, tag = "favorite", string = "ifs.mp.sessionlist.favorite", maxchars = -1, }, -- Server name -- 0.28*layout.width-5
@@ -972,24 +982,6 @@ function ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr)
 	Popup_Busy:fnActivate(1)
 end
 
--- OpenSWBF2: the password box doubles as the Join IP address box (plain text, last address)
-function ifs_mp_sessionlist_fnShowJoinIPBox(this, bShow)
-	this.bJoinIPMode = bShow
-	this.bPasswordMode = bShow -- routes Enter and Back to the box
-	this.PassBox.passedit.bPasswordMode = not bShow
-	ifs_mp_sessionlist_fnShowHideInterface(this, bShow)
-	IFObj_fnSetVis(this.PassBox, bShow)
-	this.PassBox.passedit.bKeepsFocus = bShow
-	if(bShow) then
-		IFText_fnSetString(this.PassBox.title, "common.mp.joinip_prompt")
-		IFEditbox_fnSetString(this.PassBox.passedit, ScriptCB_GetProfileJoinIP() or "")
-		gCurEditbox = this.PassBox.passedit
-	else
-		IFText_fnSetString(this.PassBox.title, "ifs.vkeyboard.title_password")
-		IFEditbox_fnSetString(this.PassBox.passedit, "")
-		gCurEditbox = nil
-	end
-end
 
 function ifs_mp_sessionlist_buddymatch_fnCheckDone()
 --	local this = ifs_mp_sessionlist_buddymatch
@@ -1339,10 +1331,6 @@ function ifs_mp_sessionlist_fnShowHideInterface(this, bHideInterface)
 --	IFObj_fnSetVis(this.filtertitle, not bHideInterface)
 	IFObj_fnSetVis(this.refreshbutton, not bHideInterface)
 	IFObj_fnSetVis(this.donebutton, not bHideInterface)
-	if(this.joinipbutton) then
-		IFObj_fnSetVis(this.joinipbutton, (not bHideInterface) and (gOnlineServiceStr == "LAN"))
-	end
-	
 	--IFObj_fnSetVis(this.ProfileNameText, not bHideInterface)
 	IFObj_fnSetVis(this.ProfileNameText, nil)
 
@@ -1354,7 +1342,7 @@ function ifs_mp_sessionlist_fnShowHideInterface(this, bHideInterface)
 	IFObj_fnSetVis(this.LoginAsText2, (not bHideInterface) and show_login_name )
 
 	if(not ScriptCB_IsLoggedIn()) then
-		this.source_value = 2
+		this.source_value = MP_SOURCE_MODERN
 	end
 	IFObj_fnSetVis(this.source_button, (not bHideInterface) and ScriptCB_IsLoggedIn())
 	
@@ -1571,18 +1559,18 @@ end
 
 
 function ifs_mp_sessionlist_fnConnectTypeUpdate( this )
-	if((not ScriptCB_IsLoggedIn()) and (this.source_value == 1)) then
-		this.source_value = 2
+	if((not ScriptCB_IsLoggedIn()) and (this.source_value == MP_SOURCE_LEGACY)) then
+		this.source_value = MP_SOURCE_MODERN
 	end
-	if( this.source_value == 1 ) then
+	if( this.source_value == MP_SOURCE_LEGACY ) then
 		ScriptCB_SetConnectType("wan")
 		gOnlineServiceStr = ScriptCB_GetOnlineService()
-		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.internet" )
-	elseif( this.source_value == 2 ) then
+		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.legacy" )
+	elseif( this.source_value == MP_SOURCE_MODERN ) then
 		ScriptCB_SetConnectType( "lan" )
 		gOnlineServiceStr = "LAN"
 		ScriptCB_SetNoticeNoCable(1)
-		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.lan" )
+		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.modern" )
 	else
 		RoundIFButtonLabel_fnSetString( this.source_button, "common.none" )
 	end
@@ -1887,6 +1875,7 @@ ifs_mp_sessionlist = NewIFShellScreen {
 			this.bInOptiSearch = nil
 
 			--reset the connect type
+			this.source_value = gMPSourceValue -- OpenSWBF2: the choice Create may have changed
 			ifs_mp_sessionlist_fnConnectTypeUpdate( this )
 			
 			ScriptCB_SetInNetGame(nil)
@@ -2084,19 +2073,6 @@ ifs_mp_sessionlist = NewIFShellScreen {
 			end
 		end
 
-		if(this.CurButton == "_joinip") then
-			ifs_mp_sessionlist_fnShowJoinIPBox(this, 1)
-			return
-		end
-		if(this.bJoinIPMode and ((this.CurButton == "_passback") or (this.CurButton == "_passok"))) then
-			local AddrStr = IFEditbox_fnGetString(this.PassBox.passedit)
-			ifs_mp_sessionlist_fnShowJoinIPBox(this, nil)
-			if(this.CurButton == "_passok") then
-				ScriptCB_SetProfileJoinIP(AddrStr)
-				ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr)
-			end
-			return
-		end
 		if((this.CurButton == "_passback") or (this.CurButton == "_passok")) then
 			this.bPasswordMode = nil
 			ifs_mp_sessionlist_fnShowHideInterface(this, nil)
@@ -2231,9 +2207,7 @@ ifs_mp_sessionlist = NewIFShellScreen {
 
 
 	Input_Back = function(this)
-		if(this.bJoinIPMode) then
-			ifs_mp_sessionlist_fnShowJoinIPBox(this, nil)
-		elseif(this.bPasswordMode) then
+		if(this.bPasswordMode) then
 			ifs_mp_sessionlist_fnShowHideInterface(this,nil)
 			IFObj_fnSetVis(this.PassBox, nil)
 			this.PassBox.passedit.bKeepsFocus = nil
@@ -2261,7 +2235,7 @@ ifs_mp_sessionlist = NewIFShellScreen {
 		if(gCurEditbox) then
 			this.bKeyPressed = 1
 			if((iKey == 10) or (iKey == 13)) then -- handle Enter different
-				if(this.bJoinIPMode or this.bSpecialJoinPass) then
+				if(this.bSpecialJoinPass) then
 					-- Input_Accept does the whole join; the list join below would start a second one
 					this.CurButton = "_passok"
 					this:Input_Accept(1)
@@ -2478,8 +2452,8 @@ ifs_mp_sessionlist = NewIFShellScreen {
 ------------------------------------------------------------------------------------
 ------------------------------------------------------------------------------------
 sourcelist_content = {
-	{ string = "ifs.mp.join.internet" },
-	{ string = "ifs.mp.join.lan" },
+	{ string = "ifs.mp.join.modern" }, -- MP_SOURCE_MODERN
+	{ string = "ifs.mp.join.legacy" }, -- MP_SOURCE_LEGACY
 }
 
 function Sourcelist_CreateItem(layout)
@@ -2526,9 +2500,9 @@ function ifs_mp_sessionlist_fnAddSourceList( this )
 	local source_x = 80
 	local source_y = 40
 	local source_btn_width = 190
-	
-	this.source_value = 1
-	this.source_value_max = 2	
+
+	this.source_value = gMPSourceValue
+	this.source_value_max = 2
 --	this.source_button =	NewIFContainer
 --	{
 --		ScreenRelativeX = 0,
@@ -2569,7 +2543,7 @@ function ifs_mp_sessionlist_fnAddSourceList( this )
 		btnh = 20,
 		font = "gamefont_small",
 		tag = "_source",
-		string = "ifs.mp.join.internet",
+		string = "ifs.mp.join.modern",
 	}
 	
 	-- source listbox
@@ -2670,9 +2644,10 @@ function ifs_mp_sessionlist_fnClickSourceButtons( this )
 		if( gMouseListBox == this.source_listbox ) then
 			if( sourcelist_layout.CursorIdx ) then
 				this.source_value = sourcelist_layout.CursorIdx
+				gMPSourceValue = this.source_value
 			end
 			print( "this.source_value = ", this.source_value )
-			ifs_mp_sessionlist_fnShowSourceDropbox( this, nil )		
+			ifs_mp_sessionlist_fnShowSourceDropbox( this, nil )
 			ifs_mp_sessionlist_fnDoRefresh( this )
 		else
 			ifs_mp_sessionlist_fnShowSourceDropbox( this, nil )
@@ -2844,7 +2819,7 @@ function ifs_mp_sessionlist_fnBuildScreen(this)
 	
 	-- game mode filter image
 
-	this.source_value = 1
+	this.source_value = gMPSourceValue
 --	-- source button
 --	this.source_value = 1
 --	this.source_value_max = 3
@@ -3388,20 +3363,6 @@ function ifs_mp_sessionlist_fnBuildScreen(this)
 		string = "ifs.mp.sessionlist.refresh",
 	}
 
-	-- OpenSWBF2: join a server by address, from the LAN list (any IP, VPN or internet)
-	this.joinipbutton =	NewPCIFButton
-	{
-		ScreenRelativeX = 0.65, -- left
-		ScreenRelativeY = 1.0, -- bottom
-		y = launch_button_y, -- just above bottom
-		x = -10 - BackButtonW - 20,
-		btnw = BackButtonW,
-		btnh = BackButtonH,
-		font = "gamefont_medium",
-		tag = "_joinip",
-		string = "common.mp.joinip",
-	}
-
 	mpsessionlist_serverinfo_layout.FirstShownIdx = 1
 	mpsessionlist_serverinfo_layout.SelectedIdx = 1
 	mpsessionlist_serverinfo_layout.CursorIdx = 1
@@ -3441,3 +3402,357 @@ ifs_mp_sessionlist_fnBuildScreen = nil
 -- OpenSWBF2: mouse-only PC page, so a pad uses snap navigation (ifelem_tabmanager.lua)
 ifs_mp_sessionlist.bPadSnap = 1
 AddIFScreen(ifs_mp_sessionlist,"ifs_mp_sessionlist")
+
+
+------------------------------------------------------------------------------------
+-- OpenSWBF2: the Direct Connect tab. Joins a server by address (IP, IP:port or host
+-- name; the port defaults to 3658) over the Modern path, and lists the last servers
+-- joined this way (recentservers.txt next to the exe) so one click rejoins them. It
+-- lives in this file because a new shell script would need the canonical script index.
+------------------------------------------------------------------------------------
+
+local direct_width = 500
+
+ifs_mp_direct_layout = {
+	showcount = 8,
+	yHeight = 19,
+	ySpacing = 1,
+	width = direct_width,
+	x = 0,
+	slider = nil, -- never more than eight
+	CreateFn = function(layout)
+		local Temp = NewIFContainer {
+			x = layout.x - 0.5 * layout.width, y = layout.y,
+		}
+		local YPos = layout.height * -0.5 + 3
+		Temp.name = NewIFText {
+			x = 10, y = YPos,
+			textw = layout.width * 0.58, texth = layout.height,
+			halign = "left", font = "gamefont_tiny", nocreatebackground = 1,
+		}
+		Temp.addr = NewIFText {
+			x = layout.width * 0.62, y = YPos,
+			textw = layout.width * 0.36, texth = layout.height,
+			halign = "left", font = "gamefont_tiny", nocreatebackground = 1,
+		}
+		return Temp
+	end,
+	PopulateFn = function(Dest, Data)
+		if(Data) then
+			local NameStr = Data.name
+			if((not NameStr) or (NameStr == "")) then
+				NameStr = Data.addr
+			end
+			IFText_fnSetUString(Dest.name, ScriptCB_tounicode(NameStr))
+			IFText_fnSetUString(Dest.addr, ScriptCB_tounicode(Data.addr))
+		end
+		IFObj_fnSetVis(Dest, Data)
+	end,
+}
+
+-- Puts the focus (and the typing cursor) in one of the two boxes.
+function ifs_mp_direct_fnFocus(this, Editbox)
+	if(gCurEditbox) then
+		IFEditbox_fnHilight(gCurEditbox, nil)
+	end
+	gCurEditbox = Editbox
+	if(gCurEditbox) then
+		IFEditbox_fnHilight(gCurEditbox, 1)
+	end
+end
+
+-- The whole page, hidden while a join is busy (the popup sits over it).
+function ifs_mp_direct_fnShowInterface(this, bShow)
+	IFObj_fnSetVis(this.form, bShow)
+	IFObj_fnSetVis(this.addredit, bShow)
+	IFObj_fnSetVis(this.passedit, bShow)
+	IFObj_fnSetVis(this.recentlist, bShow)
+end
+
+-- A line under the Join button ("needs a password"), or nothing.
+function ifs_mp_direct_fnShowNote(this, NoteStr)
+	if(NoteStr) then
+		IFText_fnSetString(this.form.note, NoteStr)
+	end
+	IFObj_fnSetVis(this.form.note, NoteStr)
+end
+
+function ifs_mp_direct_fnFillRecent(this)
+	this.RecentContents = ScriptCB_GetRecentServers() or {}
+	ifs_mp_direct_layout.FirstShownIdx = 1
+	ifs_mp_direct_layout.SelectedIdx = nil
+	ifs_mp_direct_layout.CursorIdx = nil
+	ListManager_fnFillContents(this.recentlist, this.RecentContents, ifs_mp_direct_layout)
+	IFObj_fnSetVis(this.form.none, table.getn(this.RecentContents) == 0)
+end
+
+-- Starts a join to AddrStr, or to what's in the address box. The busy popup polls the
+-- find; the server's answer then launches the join (ifs_mp_direct_fnOnSuccess).
+function ifs_mp_direct_fnJoin(this, AddrStr)
+	local _, _, TrimStr = string.find(AddrStr or IFEditbox_fnGetString(this.addredit) or "", "^%s*(.-)%s*$")
+	AddrStr = TrimStr or ""
+	if(AddrStr == "") then
+		ifs_mp_direct_fnFocus(this, this.addredit)
+		return
+	end
+	IFEditbox_fnSetString(this.addredit, AddrStr)
+	ScriptCB_SetProfileJoinIP(AddrStr)
+	this.JoinAddr = AddrStr
+	this.JoinPass = IFEditbox_fnGetString(this.passedit) or ""
+	ifs_mp_direct_fnShowNote(this, nil)
+	ifs_mp_direct_fnFocus(this, nil)
+	ifs_mp_direct_fnShowInterface(this, nil)
+
+	ScriptCB_SetConnectType("lan")
+	gOnlineServiceStr = "LAN"
+	ScriptCB_SetAmHost(nil)
+	ScriptCB_SetDedicated(nil)
+	ScriptCB_BeginJoinIP(AddrStr, this.JoinPass)
+
+	Popup_Busy.fnCheckDone = ifs_mp_sessionlist_buddymatch_fnCheckDone
+	Popup_Busy.fnOnSuccess = ifs_mp_direct_fnOnSuccess
+	Popup_Busy.fnOnFail = ifs_mp_direct_fnOnFail
+	Popup_Busy.fnOnCancel = ifs_mp_direct_fnOnCancel
+	Popup_Busy.bNoCancel = nil
+	Popup_Busy.fTimeout = 15 -- seconds
+	Popup_Busy.bCallerSetsString = nil
+	IFText_fnSetString(Popup_Busy.title, "common.mp.joining")
+	Popup_Busy:fnActivate(1)
+end
+
+function ifs_mp_direct_fnOnSuccess()
+	local this = ifs_mp_direct
+	Popup_Busy:fnActivate(nil)
+	ScriptCB_AddRecentServer(this.JoinAddr, ScriptCB_GetQuickmatchName())
+	ifs_mp_direct_fnFillRecent(this)
+
+	if(ScriptCB_IsQuickmatchPassworded()) then
+		if(this.JoinPass == "") then
+			ScriptCB_CancelQuickmatch()
+			ifs_mp_direct_fnShowInterface(this, 1)
+			ifs_mp_direct_fnShowNote(this, "ifs.mp.direct.needpass")
+			ifs_mp_direct_fnFocus(this, this.passedit)
+			return
+		end
+		ScriptCB_LaunchQuickmatch(this.JoinPass)
+	else
+		ScriptCB_LaunchQuickmatch()
+	end
+	ifs_missionselect.bForMP = 1
+	ifs_movietrans_PushScreen(ifs_mp_lobby_quick)
+end
+
+function ifs_mp_direct_fnOnFail()
+	Popup_Busy:fnActivate(nil)
+	Popup_Ok_Large.fnDone = ifs_mp_direct_fnShowForm
+	Popup_Ok_Large:fnActivate(1)
+	gPopup_fnSetTitleStr(Popup_Ok_Large, "ifs.mp.joinerrors.noconnect")
+end
+
+function ifs_mp_direct_fnOnCancel()
+	ScriptCB_CancelQuickmatch()
+	Popup_Busy:fnActivate(nil)
+	ifs_mp_direct_fnShowForm()
+end
+
+function ifs_mp_direct_fnShowForm()
+	local this = ifs_mp_direct
+	ifs_mp_direct_fnShowInterface(this, 1)
+	ifs_mp_direct_fnFocus(this, this.addredit)
+end
+
+-- Back saved the profile (the last address): leave once ifs_saveop has popped back here,
+-- as only one pop happens per callback.
+function ifs_mp_direct_fnSaveDone()
+	ifs_mp_direct.bPopOnEnter = 1
+	ScriptCB_PopScreen() -- ifs_saveop
+end
+
+ifs_mp_direct = NewIFShellScreen {
+	nologo = 1,
+	bg_texture = "iface_bg_1",
+	movieIntro      = nil,
+	movieBackground = nil,
+	bNohelptext_backPC = 1, -- like Join and Create: the tabs at the top lead out
+
+	Enter = function(this, bFwd)
+		UpdatePCTitleText(this)
+		ifelem_tabmanager_SetSelected(this, gPCMainTabsLayout, "_tab_multi")
+		ifelem_tabmanager_SetSelected(this, gPCMultiPlayerTabsLayout, "_tab_direct", 1)
+		gIFShellScreenTemplate_fnEnter(this, bFwd)
+		if(this.bPopOnEnter) then
+			this.bPopOnEnter = nil
+			ScriptCB_PopScreen("ifs_main")
+			return
+		end
+
+		ScriptCB_SetAmHost(nil)
+		if(bFwd) then
+			IFEditbox_fnSetString(this.addredit, ScriptCB_GetProfileJoinIP() or "")
+			IFEditbox_fnSetString(this.passedit, "")
+			ifs_mp_direct_fnShowNote(this, nil)
+		end
+		ifs_mp_direct_fnShowInterface(this, 1)
+		ifs_mp_direct_fnFillRecent(this)
+		ifs_mp_direct_fnFocus(this, this.addredit)
+	end,
+
+	Exit = function(this, bFwd)
+		ifs_mp_direct_fnFocus(this, nil)
+	end,
+
+	Input_Accept = function(this)
+		if((gPlatformStr == "PC") and
+		   ( ifelem_tabmanager_HandleInputAccept(this, gPCMainTabsLayout) or
+		     ifelem_tabmanager_HandleInputAccept(this, gPCMultiPlayerTabsLayout, 1) ) ) then
+			return
+		end
+
+		-- a recent server: join it
+		if(gMouseListBox == this.recentlist) then
+			local Entry = this.RecentContents[ifs_mp_direct_layout.CursorIdx or 0]
+			if(Entry) then
+				ifelm_shellscreen_fnPlaySound(this.acceptSound)
+				ifs_mp_direct_fnJoin(this, Entry.addr)
+			end
+			return
+		end
+
+		if(gShellScreen_fnDefaultInputAccept(this, 1)) then
+			return
+		end
+
+		if(this.CurButton == "_directjoin") then
+			ifelm_shellscreen_fnPlaySound(this.acceptSound)
+			ifs_mp_direct_fnJoin(this)
+		end
+	end,
+
+	Input_Back = function(this)
+		if(ScriptCB_IsCurProfileDirty()) then
+			ifs_saveop.doOp = "SaveProfile"
+			ifs_saveop.OnSuccess = ifs_mp_direct_fnSaveDone
+			ifs_saveop.OnCancel = ifs_mp_direct_fnSaveDone
+			ifs_saveop.saveName = ScriptCB_GetProfileName(1)
+			ifs_saveop.saveProfileNum = 1
+			ifs_movietrans_PushScreen(ifs_saveop)
+		else
+			ScriptCB_PopScreen("ifs_main")
+		end
+	end,
+
+	Input_KeyDown = function(this, iKey)
+		if(not gCurEditbox) then
+			return
+		end
+		if((iKey == 10) or (iKey == 13)) then -- Enter joins
+			ifs_mp_direct_fnJoin(this)
+		elseif(iKey == 9) then -- Tab swaps boxes
+			if(gCurEditbox == this.addredit) then
+				ifs_mp_direct_fnFocus(this, this.passedit)
+			else
+				ifs_mp_direct_fnFocus(this, this.addredit)
+			end
+		else
+			IFEditbox_fnAddChar(gCurEditbox, iKey)
+		end
+	end,
+}
+
+function ifs_mp_direct_fnBuildScreen(this)
+	local half = direct_width * 0.5
+	local ButtonW = 180
+	local ButtonH = ScriptCB_GetFontHeight("gamefont_medium")
+	local RowH = ScriptCB_GetFontHeight("gamefont_small") + 12
+	local top = 100
+
+	AddPCTitleText( this )
+
+	this.form = NewIFContainer {
+		ScreenRelativeX = 0.5, -- center
+		ScreenRelativeY = 0, -- top
+		y = top,
+
+		addrtitle = NewIFText {
+			string = "ifs.mp.direct.address",
+			font = "gamefont_small",
+			x = -half, y = 0,
+			textw = direct_width, halign = "left", nocreatebackground = 1,
+		},
+		passtitle = NewIFText {
+			string = "ifs.mp.direct.password",
+			font = "gamefont_small",
+			x = -half, y = 65,
+			textw = direct_width, halign = "left", nocreatebackground = 1,
+		},
+		joinbutton = NewPCIFButton {
+			x = half - ButtonW * 0.5 + 10, y = 132,
+			btnw = ButtonW, btnh = ButtonH,
+			font = "gamefont_medium",
+			tag = "_directjoin",
+			string = "ifs.mp.direct.join",
+		},
+		note = NewIFText {
+			font = "gamefont_tiny",
+			x = -half, y = 124,
+			textw = direct_width - ButtonW - 20, halign = "left", nocreatebackground = 1,
+			ColorR = 255, ColorG = 200, ColorB = 80,
+		},
+		recenttitle = NewIFText {
+			string = "ifs.mp.direct.recent",
+			font = "gamefont_small",
+			x = -half, y = 168,
+			textw = direct_width, halign = "left", nocreatebackground = 1,
+		},
+		none = NewIFText {
+			string = "ifs.mp.direct.none",
+			font = "gamefont_tiny",
+			x = -half + 10, y = 203,
+			textw = direct_width - 20, halign = "left", nocreatebackground = 1,
+		},
+	}
+
+	this.addredit = NewEditbox {
+		bKeepsFocus = 1,
+		bStickyFocus = 1,
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0,
+		y = top + 30 + RowH * 0.5,
+		width = direct_width,
+		height = RowH,
+		font = "gamefont_small",
+		MaxChars = 63, -- ScriptCB_BeginJoinIP reads 63
+	}
+	this.passedit = NewEditbox {
+		bKeepsFocus = 1,
+		bStickyFocus = 1,
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0,
+		y = top + 95 + RowH * 0.5,
+		width = direct_width,
+		height = RowH,
+		font = "gamefont_small",
+		MaxChars = 31,
+		bPasswordMode = 1,
+	}
+
+	local ListH = ifs_mp_direct_layout.showcount * (ifs_mp_direct_layout.yHeight + ifs_mp_direct_layout.ySpacing) + 30
+	this.recentlist = NewButtonWindow {
+		ZPos = 200,
+		ScreenRelativeX = 0.5,
+		ScreenRelativeY = 0,
+		x = 0,
+		y = top + 193 + ListH * 0.5,
+		width = direct_width + 20,
+		height = ListH,
+	}
+	ListManager_fnInitList(this.recentlist, ifs_mp_direct_layout)
+
+	ifelem_tabmanager_Create(this, gPCMainTabsLayout, gPCMultiPlayerTabsLayout)
+end
+
+ifs_mp_direct_fnBuildScreen(ifs_mp_direct)
+ifs_mp_direct_fnBuildScreen = nil
+
+ifs_mp_direct.bPadSnap = 1
+AddIFScreen(ifs_mp_direct, "ifs_mp_direct")

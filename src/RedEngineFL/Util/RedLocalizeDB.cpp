@@ -106,6 +106,27 @@ void PickLanguage()
     gbDeterminedLang = true;
 }
 
+// OpenSWBF2: menu text the retail localize files don't have, by PblHash of the key
+// (pinned in tests/unit). Answered ahead of the loaded files, in every language.
+struct OpenText
+{
+    unsigned int uiHash;
+    const wchar_t* pwcText;
+};
+
+static const OpenText sOpenText[] = {
+    { 0xea8e8a80, L"Overhaul" },                       // ifs.difficulty.overhaul
+    { 0x834ac275, L"Modern" },                         // ifs.mp.join.modern
+    { 0x7f0595e1, L"Legacy" },                         // ifs.mp.join.legacy
+    { 0x3ab6dbf7, L"DIRECT CONNECT" },                 // ifs.mp.tabs.direct, capitals like the other tabs
+    { 0x2ee8282b, L"Server address" },                 // ifs.mp.direct.address
+    { 0x6fbb2c30, L"Password (if any)" },              // ifs.mp.direct.password
+    { 0x1cf8e6c1, L"Join" },                           // ifs.mp.direct.join
+    { 0xbc7dd8b6, L"Recent servers" },                 // ifs.mp.direct.recent
+    { 0x6a6bc3b3, L"Servers you join show up here." }, // ifs.mp.direct.none
+    { 0x7e6a8238, L"This server needs a password." },  // ifs.mp.direct.needpass
+};
+
 // FUNCTION: SWBF2 0x006c5b30
 const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing)
 {
@@ -117,9 +138,12 @@ const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing)
     {
         return (const unsigned short*)L"Cannot join: unable to connect";
     }
-    if (uiHash == 0xea8e8a80) // ifs.difficulty.overhaul, OpenSWBF2's AI difficulty
+    for (unsigned int i = 0; i < sizeof(sOpenText) / sizeof(sOpenText[0]); ++i)
     {
-        return (const unsigned short*)L"Overhaul";
+        if (sOpenText[i].uiHash == uiHash)
+        {
+            return (const unsigned short*)sOpenText[i].pwcText;
+        }
     }
 
     FLLocalizeEntry* pEntry = sMasterLocalizeHash.Find(uiHash);

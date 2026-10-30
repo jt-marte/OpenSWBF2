@@ -87,6 +87,7 @@ int ScriptCB_LaunchQuickmatch(lua_State* L);
 int ScriptCB_CancelQuickmatch(lua_State* L);
 int ScriptCB_IsQuickmatchDone(lua_State* L);
 int ScriptCB_IsQuickmatchPassworded(lua_State* L);
+int ScriptCB_GetQuickmatchName(lua_State* L);
 int ScriptCB_CanSupportMaxPlayers(lua_State* L);
 int ScriptCB_IsBadNetworkConnection(lua_State* L);
 int ScriptCB_BeginJoin(lua_State* L);

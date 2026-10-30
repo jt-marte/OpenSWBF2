@@ -22,6 +22,8 @@ int ScriptCB_SetPCBrightnessContrast(lua_State* L);
 int ScriptCB_IsPCVideoFixedFunction(lua_State* L);
 int ScriptCB_GetProfileJoinIP(lua_State* L);
 int ScriptCB_SetProfileJoinIP(lua_State* L);
+int ScriptCB_GetRecentServers(lua_State* L);
+int ScriptCB_AddRecentServer(lua_State* L);
 int ScriptCB_SetMouseMark(lua_State* L);
 int ScriptCB_ResetMouseMark(lua_State* L);
 int ScriptCB_CheckMouseMark(lua_State* L);

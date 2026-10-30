@@ -1026,16 +1026,16 @@ function ifs_missionselect_pcMulti_ChangeMovieFile(movieFile)
 end
 
 function ifs_missionselect_pcMulti_fnSourceButtonUpdate( this )
-	if( this.source_value == 1 ) then	
+	if( this.source_value == MP_SOURCE_LEGACY ) then
 		ScriptCB_SetConnectType("wan")
 		gOnlineServiceStr = ScriptCB_GetOnlineService()
-		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.internet" )
-	elseif( this.source_value == 2 ) then
+		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.legacy" )
+	elseif( this.source_value == MP_SOURCE_MODERN ) then
 		ScriptCB_SetConnectType( "lan" )
 		gOnlineServiceStr = "LAN"
 		-- Whine like crazy
 		ScriptCB_SetNoticeNoCable(1)
-		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.lan" )
+		RoundIFButtonLabel_fnSetString( this.source_button, "ifs.mp.join.modern" )
 
 
 
@@ -1892,10 +1892,11 @@ ifs_missionselect_pcMulti = NewIFShellScreen {
 --		gIFShellScreenTemplate_fnMoveClickableButton(this.LaunchButton,this.LaunchButton.label,0)
 
 		-- set game source mode
+		-- OpenSWBF2: Modern unless Legacy was picked here or on Join (Legacy needs Galaxy)
 		if( ScriptCB_IsLoggedIn() ) then
-			this.source_value = 1
+			this.source_value = gMPSourceValue
 		else
-			this.source_value = 2
+			this.source_value = MP_SOURCE_MODERN
 		end
 
 
@@ -2145,7 +2146,7 @@ ifs_missionselect_pcMulti = NewIFShellScreen {
 
 		-- input accept for source buttons
 		if( not ScriptCB_IsLoggedIn() ) then
-			this.source_value = 2
+			this.source_value = MP_SOURCE_MODERN
 		end
 
 
@@ -3038,9 +3039,10 @@ function ifs_missionselect_pcMulti_fnClickSourceButtons( this )
 		if( gMouseListBox == this.source_listbox ) then
 			if( sourcelist_layout.CursorIdx ) then
 				this.source_value = sourcelist_layout.CursorIdx
+				gMPSourceValue = this.source_value
 			end
 			print( "this.source_value = ", this.source_value )
-			ifs_missionselect_pcMulti_fnSourceButtonUpdate( this )		
+			ifs_missionselect_pcMulti_fnSourceButtonUpdate( this )
 		end
 		ifs_mp_sessionlist_fnShowSourceDropbox( this, nil )		
 	else
