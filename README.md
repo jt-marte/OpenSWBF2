@@ -41,9 +41,21 @@ The build automatically finds the Steam install's GameData through Steam's regis
 | `/password text` | join password |
 | `/bots N` | AI units per team |
 | `/tps N` | simulation turns per second: 30, 60 (default) or 120; clients get as many updates a second as the turn rate, so 120 suits LAN and high-upload servers |
+| `/difficulty N` | AI difficulty: 2 Normal, 3 Elite, 4 Overhaul |
 | `/configdir dir` | folder holding `ServerSettings.cfg` and `ServerRotation.cfg` (default `settings`); each line is an admin command such as `/gamename My Server` or `/addmap geo1c_con` |
 | `-console` | open a console window for the log when there is no stdout |
 | `-netstats` | log ping, updates per second and bandwidth once a second |
 | `-log file` | also write the log to a file |
 
 Ctrl+C, Ctrl+Break or closing the console stops the server cleanly. The command line overrides the config files.
+
+## AI
+
+Options > General > Difficulty, the profile screen and the host options offer **Overhaul** after Normal and Elite. It changes how the bots think:
+
+- Both teams play at one skill, one step above Elite's enemies, so your AI allies are as good as the enemy (no mission or autobalance handicaps).
+- Bots pick targets by the same rules whether the enemy is a human or a bot, in soldiers, vehicles and turrets alike. Retail bots ranked any human facing them above every bot enemy, stopped looking for bots while aiming at a human, saw humans from twice as far and turned only on human attackers.
+- Bots aim by one model against every target. Retail bots shot each other with a third of the miss they used against humans.
+- Fights between bots far from any player are thought through as often as those near one.
+
+Overhaul is host-side: a server running it needs nothing new on the clients, and stock clients see it listed as Elite. `/skill N` sets the difficulty new profiles start with (4 for Overhaul).

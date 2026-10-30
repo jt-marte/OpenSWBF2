@@ -11,7 +11,7 @@ class GameObject;
 class PblHash;
 class UnitController;
 class UnitCmdInfo;
-namespace AI { class EventInfo; }
+namespace AI { class EventInfo; class EventInfo_Damaged; }
 
 // VTABLE: SWBF2 0x007af6a4
 class UnitAgent : public Agent
@@ -60,6 +60,7 @@ protected:
     bool AreNearbyUnitsInCombat();
     void PlayDamageEventVO(AI::EventInfo* pInfo);
     int DamagedEventPlayerCentricness(AI::EventInfo* pInfo);
+    int DamagedEventOverhaul(AI::EventInfo_Damaged* pInfo);
 
     int HandleDamagedEvent(AI::EventInfo* pInfo);
 

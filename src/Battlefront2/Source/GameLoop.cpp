@@ -87,6 +87,7 @@
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 #include "RedEngineFL/Graphics/RedCamera.h"
 #include "AIDifficulty.h"
+#include "AIStats.h"
 #include "AIUtil.h"
 #include "Character.h"
 #include "CommandFlyer.h"
@@ -1587,6 +1588,7 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
             if (gExitOnGameOver && !sbExitPosted)
             {
                 sbExitPosted = true;
+                AIStats::Report();
                 LOG(LogSim, Inform, "OPENSWBF2 RUN COMPLETE %s", mMissionScript);
                 if (hGlobalWnd)
                 {

@@ -2,7 +2,9 @@
 
 #include <new>
 
+#include "AIDifficulty.h"
 #include "AILowLevel.h"
+#include "AIOverhaul.h"
 #include "AIUtil.h"
 #include "AttackHelper.h"
 #include "Character.h"
@@ -521,6 +523,10 @@ int UnitAgent::DamagedEventPlayerCentricness(AI::EventInfo* pEvent)
     {
         return 0;
     }
+    if (AIDifficulty::IsOverhaul())
+    {
+        return DamagedEventOverhaul(pInfo);
+    }
     if (pInfo->mDamageOwner->mPlayerId < 0)
     {
         return 0;
@@ -535,6 +541,34 @@ int UnitAgent::DamagedEventPlayerCentricness(AI::EventInfo* pEvent)
     GameObject* pAttacker = pInfo->mDamageOwner->GetControllable()->GetGameObject();
     reinterpret_cast<AI::UnitThreatManager*>(mCtrl->mThreatManager)->AddThreat(pAttacker);
     mCtrl->ForceSetAttackHelperTarget(pAttacker);
+    return 1;
+}
+
+// OpenSWBF2 Overhaul: retail only turns on human attackers. Here any enemy that hurts the bot
+// becomes a seen threat and is remembered for the threat score; a shot that only flew at the bot
+// (CombatUtil::SendDamageEvent, zero damage) makes it suspicious, as hearing would.
+int UnitAgent::DamagedEventOverhaul(AI::EventInfo_Damaged* pInfo)
+{
+    GameObject* pMe = GetMe()->GetGameObject();
+    if (Team::sTeams[GetTeam(pMe)]->GetAffiliation(pInfo->mDamageOwner->mTeamNumber) >= 0)
+    {
+        return 0;
+    }
+
+    GameObject* pAttacker = pInfo->mDamageOwner->GetControllable()->GetGameObject();
+    AI::UnitThreatManager* pThreats = reinterpret_cast<AI::UnitThreatManager*>(mCtrl->mThreatManager);
+    if (pInfo->mAmountLost <= 0.0f)
+    {
+        pThreats->AudibleResult(pAttacker);
+        return 0;
+    }
+
+    AIOverhaul::NoteAttacker(GetMe(), pInfo->mDamageOwner);
+    pThreats->AddThreat(pAttacker);
+    if (!pThreats->GetVisibleObject())
+    {
+        mCtrl->ForceSetAttackHelperTarget(pAttacker);
+    }
     return 1;
 }
 

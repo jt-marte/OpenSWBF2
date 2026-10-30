@@ -4,6 +4,7 @@
 
 #include "Character.h"
 #include "AIGoalManager.h"
+#include "AIStats.h"
 #include "AIUtil.h"
 #include "BonusManager.h"
 #include "BoundaryManager.h"
@@ -247,6 +248,7 @@ extern bool netHeroesEnabled;
 extern int netHeroLastPlayerID[3];
 extern bool gDoTakeoverSpawns;
 extern bool gNoAIRespawn;
+extern bool gAITestHuman;
 namespace GameLoop { extern bool mbHistoricalRules; }
 extern int netNumBots;
 
@@ -561,6 +563,15 @@ bool Character::Update(float fDeltaTime)
             mCPHold = 0;
             mCPHoldTimestamp = 0.0f;
         }
+    }
+
+    // OpenSWBF2 -aitesthuman: the single-player human respawns by itself (a random class at the
+    // spawn point the AI would get) and then stands still, a stand-in human for headless AI runs.
+    if (gAITestHuman && mPlayerId >= 0 && !NetGame::IsEnabled() && !mSpawnReady)
+    {
+        const int iClassIndex = mTeamPtr->PickRandomClassIndex(this);
+        SelectClass(iClassIndex);
+        SetSpawnReady(iClassIndex >= 0);
     }
 
     if (gNoAIRespawn && mPlayerId < 0)
@@ -1350,6 +1361,7 @@ void Character::Died()
         int iAffiliation = pKiller->mTeamPtr->GetAffiliation(mTeamNumber);
         if (iAffiliation < 0)
         {
+            AIStats::OnKill(pKiller, this);
             GetPlayerStats(pKiller).AddKill(this, pDeadObject);
         }
         else if (iAffiliation > 0)

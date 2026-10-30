@@ -368,6 +368,8 @@ function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $fals
         $cases += New-Object PSObject -Property @{ Name = 'display-badini'; Args = "$standard $htail -adapter abc -refresh 99999 -displayini `"$badIni`""; Expect = $pass; Twice = 0; Timeout = 0 }
         $waitIni = Join-Path $PSScriptRoot 'smoke\display-waitquery.ini'
         $cases += New-Object PSObject -Property @{ Name = 'pacing-waitquery-ini'; Args = "$standard $htail -displayini `"$waitIni`""; Expect = @{ Class = 'Pass'; LogRx = (@('OPENSWBF2 PACING fps=80 vsync=off interval=0x80000000 waitquery=1 timer=none') + $hrx) }; Twice = 0; Timeout = 0 }
+        # Overhaul AI (difficulty 4) with the stand-in human; both teams must fight at skill 18.
+        $cases += New-Object PSObject -Property @{ Name = 'ai-overhaul'; Args = "$standard $htail /skill 4 -aistats -aitesthuman"; Expect = @{ Class = 'Pass'; LogRx = (@('OPENSWBF2 AI STATS t=\d+ level=4 target_human=\d+% .* kills bot>bot=[1-9]') + $hrx) }; Twice = 0; Timeout = 0 }
     }
     if ($which -eq 'All') {
         foreach ($line in $missions) {

@@ -15,6 +15,8 @@
 #include "PebbleFL/Common/PblMatrix.h"
 #include "PebbleFL/Common/PblRandom.h"
 #include "PebbleFL/Common/PblVector.h"
+#include "AIDifficulty.h"
+#include "AITuning.h"
 #include "AIGoal.h"
 #include "AIGoalManager.h"
 #include "AIVisRegion.h"
@@ -686,6 +688,12 @@ PblVector3 AIUtil::CalculateBubbleOffset(const Controllable* pControllable, cons
     if (pMyObj && GetControllable(pMyObj) && CountHumansInVehicle(GetControllable(pMyObj)) >= 1)
     {
         vOffset = PblVector3(0.0f, 0.0f, 0.0f);
+    }
+    else if (AIDifficulty::IsOverhaul())
+    {
+        vOffset.x *= AITuning::kOverhaulBubbleScale;
+        vOffset.y *= AITuning::kOverhaulBubbleScale;
+        vOffset.z *= AITuning::kOverhaulBubbleScale;
     }
     else if (pTargetCtrl && CountHumansInVehicle(pTargetCtrl) == 0)
     {
@@ -1759,7 +1767,9 @@ PblVector3 AIUtil::DumbDown(const GameObject* pObject, float fDeltaTime, Aimer* 
                             const PblVector3& vDir)
 {
     const UnitController* pUnit = UnitControllerPtr(pObject->GetControllable());
-    if (pUnit && pUnit->mLodState < 3)
+    // Retail aims perfectly at bots unless a human is near; OpenSWBF2 Overhaul aims the same way
+    // at every target.
+    if (pUnit && pUnit->mLodState < 3 && !AIDifficulty::IsOverhaul())
     {
         const GameObject* pTarget = pUnit->GetAttackHelperTarget();
         if (!pTarget || !pTarget->GetControllable() || pTarget->GetControllable()->mPlayerId < 0)

@@ -28,6 +28,8 @@ extern bool gFactoryLog;
 extern bool gNoFocusPause;
 extern bool gAllowUploads;
 extern bool gNetStatsLog;
+extern bool gAIStatsLog;
+extern bool gAITestHuman;
 extern bool gLogStdout;
 extern bool gLogConsole;
 extern bool gDedicatedShorthand;
