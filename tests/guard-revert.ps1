@@ -4,7 +4,8 @@ param(
     [string]$OutDir,
     [string]$Scratch,
     [string]$RowsFile,
-    [int]$CaseTimeout = 30
+    [int]$CaseTimeout = 30,
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32'
 )
 $ErrorActionPreference = 'Stop'
 if ($Row) { $Row = @($Row | ForEach-Object { $_ -split ',' }) }
@@ -15,6 +16,8 @@ if (-not $Scratch) { $Scratch = Join-Path $root 'artifacts\guard-revert\wt' }
 $Scratch = [IO.Path]::GetFullPath($Scratch)
 if ($env:TEMP -and $Scratch.StartsWith([IO.Path]::GetFullPath($env:TEMP), [StringComparison]::OrdinalIgnoreCase)) { Write-Host 'Scratch must not be under TEMP: MSBuild incremental builds miss header changes there.'; exit 2 }
 . (Join-Path $testsDir 'smoke.ps1')
+Set-SmokePlatform $Platform
+$Platform = $script:SmokePlatform
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 if (-not $OutDir) { $OutDir = Join-Path $root "artifacts\guard-revert\$stamp" }
 
@@ -37,7 +40,7 @@ function Invoke-Git([string]$dir, [string[]]$gitArgs) {
 
 function Build-Tests([string]$wt, [string]$logPath) {
     $ErrorActionPreference = 'Continue'
-    $out = & $script:msbuild (Join-Path $wt 'tests\OpenSWBF2Tests.vcxproj') '/p:Configuration=Debug' '/p:Platform=Win32' /m /v:minimal /nologo 2>&1
+    $out = & $script:msbuild (Join-Path $wt 'tests\OpenSWBF2Tests.vcxproj') '/p:Configuration=Debug' "/p:Platform=$Platform" /m /v:minimal /nologo 2>&1
     $code = $LASTEXITCODE
     $out | Set-Content -Path $logPath -Encoding ASCII
     return ($code -eq 0)
@@ -46,7 +49,7 @@ function Build-Tests([string]$wt, [string]$logPath) {
 function Build-Game([string]$wt, [string]$logPath) {
     $ErrorActionPreference = 'Continue'
     $env:SWBF2_NOSTAGE = 'true'
-    $out = & $script:msbuild (Join-Path $wt 'BattlefrontII.vcxproj') '/p:Configuration=Release' '/p:Platform=Win32' '/p:SWBF2_NOSTAGE=true' /m /v:minimal /nologo 2>&1
+    $out = & $script:msbuild (Join-Path $wt 'BattlefrontII.vcxproj') '/p:Configuration=Release' "/p:Platform=$Platform" '/p:SWBF2_NOSTAGE=true' /m /v:minimal /nologo 2>&1
     $code = $LASTEXITCODE
     $out | Set-Content -Path $logPath -Encoding ASCII
     return ($code -eq 0)
@@ -56,11 +59,13 @@ function Run-Smoke([string]$wt, [string]$tag, $case) {
     $runDir = Join-Path $OutDir "run-$tag"
     $caseDir = Join-Path $runDir 'case'
     New-Item -ItemType Directory -Force -Path $caseDir | Out-Null
-    $srcBin = Join-Path $root 'bin\Win32\Release'
-    foreach ($f in 'binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll', 'unicows.dll') {
+    $srcBin = Get-GameExeDir $root 'Release'
+    $dllNames = @('binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll', 'unicows.dll')
+    if ($Platform -eq 'x64') { $dllNames = @(Get-ChildItem -LiteralPath $srcBin -Filter '*.dll' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name }) }
+    foreach ($f in $dllNames) {
         if (Test-Path (Join-Path $srcBin $f)) { Copy-Item (Join-Path $srcBin $f) $runDir -Force }
     }
-    Copy-Item (Join-Path $wt 'bin\Win32\Release\BattlefrontII.exe') $runDir -Force
+    Copy-Item (Join-Path (Get-GameExeDir $wt 'Release') 'BattlefrontII.exe') $runDir -Force
     $dataLink = Join-Path $runDir 'data'
     & cmd /c mklink /J "$dataLink" "$(Join-Path $srcBin 'data')" | Out-Null
     try {
@@ -132,6 +137,13 @@ function Set-Anchor([string]$path, [string]$anchor, [string]$replacement) {
 . $RowsFile
 $rows = @($GuardRevertRows)
 if ($Row) { $rows = @($rows | Where-Object { $Row -contains $_.Id }) }
+if ($Platform -eq 'x64') {
+    # LAA-* rows guard the 32-bit large-address-aware work (unsigned pointer order, the LAA link flag); they mean nothing on x64.
+    $laaRows = @($rows | Where-Object { $_.Id -like 'LAA-*' })
+    foreach ($r in $laaRows) { Write-Host "[SKIP] $($r.Id) - large-address-aware row, not meaningful on x64" }
+    $rows = @($rows | Where-Object { $_.Id -notlike 'LAA-*' })
+    if ($rows.Count -eq 0 -and $laaRows.Count -gt 0) { exit 0 }
+}
 if ($rows.Count -eq 0) { Write-Host 'No rows selected.'; exit 2 }
 $smokeRows = @($rows | Where-Object { $_.Kind -eq 'Smoke' })
 $hardRows = @($rows | Where-Object { $_.Kind -eq 'Hardening' })
@@ -146,8 +158,8 @@ foreach ($w in 'Crash', 'Standard') {
 }
 
 foreach ($dll in 'd3dx9_43.dll', 'msvcr120.dll') {
-    if (-not (Test-Path (Join-Path $env:windir "SysWOW64\$dll"))) {
-        Write-Host "Preflight failed: $dll missing from SysWOW64."
+    if (-not (Test-Path (Join-Path (Get-RuntimeDllDir) $dll))) {
+        Write-Host "Preflight failed: $dll missing from $(if ($Platform -eq 'x64') { 'System32' } else { 'SysWOW64' })."
         exit 2
     }
 }
@@ -178,7 +190,7 @@ try {
     }
 
     if ($rows.Count -gt 0) {
-        $exe = Join-Path $wt 'bin\Tests\Debug\OpenSWBF2Tests.exe'
+        $exe = Get-TestExePath $wt 'Debug'
         $controlOk = Build-Tests $wt (Join-Path $OutDir 'build-control.log')
         if (-not $controlOk) { throw "control build failed, see $(Join-Path $OutDir 'build-control.log')" }
 
@@ -232,7 +244,7 @@ try {
     }
 
     if ($hardRows.Count -gt 0) {
-        $wtExe = Join-Path $wt 'bin\Win32\Release\BattlefrontII.exe'
+        $wtExe = Join-Path (Get-GameExeDir $wt 'Release') 'BattlefrontII.exe'
         $getCheck = {
             param($name)
             $db = Find-Dumpbin
@@ -274,7 +286,7 @@ try {
     }
 
     if ($smokeRows.Count -gt 0) {
-        $pre = Get-SmokePrecheck $gameData (Join-Path $root 'bin\Win32\Release')
+        $pre = Get-SmokePrecheck $gameData (Get-GameExeDir $root 'Release')
         if ($pre) { throw "smoke rows need a prior game build and data: $pre" }
         if (-not (Build-Game $wt (Join-Path $OutDir 'build-smoke-control.log'))) { throw "smoke control build failed, see $(Join-Path $OutDir 'build-smoke-control.log')" }
         $smokeControl = @{}

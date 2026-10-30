@@ -13,7 +13,10 @@ param(
     [switch]$Movies,
     [switch]$Hardening,
     [switch]$HogAddrSpace,
-    [ValidateRange(0,64)][int]$Jobs = 0
+    [ValidateRange(0,64)][int]$Jobs = 0,
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32',
+    [switch]$RecordDigests,
+    [switch]$RecordCorpus
 )
 $ErrorActionPreference = 'Stop'
 if ($Jobs -eq 0) { $Jobs = [Math]::Max(1, [Math]::Min(8, [int][Math]::Floor([Environment]::ProcessorCount / 2))) }
@@ -21,11 +24,33 @@ $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
 $script:SmokeDigestConfiguration = $SmokeConfiguration
+Set-SmokePlatform $Platform
+$Platform = $script:SmokePlatform
+$script:SmokeRecordDigests = $RecordDigests.IsPresent
+if ($Platform -ne 'Win32') { Write-Host "INFO: platform=$Platform" }
 
 $hardenOnly = $Hardening -and -not $PSBoundParameters.ContainsKey('Smoke') -and -not ($Suite -or $Filter -or $Fuzz)
 $smokeActive = ($Smoke -ne 'None') -and -not ($Suite -or $Filter -or $Fuzz) -and -not $hardenOnly
-$runUnit = ($Suite -or $Filter -or $Fuzz -or -not $PSBoundParameters.ContainsKey('Smoke') -or $Smoke -eq 'None') -and -not $hardenOnly
+$runUnit = (($Suite -or $Filter -or $Fuzz -or -not $PSBoundParameters.ContainsKey('Smoke') -or $Smoke -eq 'None') -and -not $hardenOnly) -or $RecordCorpus
 $hardenActive = $Hardening -or $smokeActive
+
+if ($RecordDigests -and $Platform -ne 'x64') {
+    Write-Host '-RecordDigests is only for -Platform x64: the Win32 digests in tests\smoke\digest-expected.txt are pinned and change only by hand, with a written cause.'
+    exit 2
+}
+if ($RecordCorpus -and $Platform -ne 'x64') {
+    Write-Host '-RecordCorpus is only for -Platform x64: the Win32 corpora are pinned (see tests\corpus\README.md, "Provenance").'
+    exit 2
+}
+if ($RecordCorpus) { $smokeActive = $false; $hardenActive = $false }
+if ($RecordDigests -and -not $smokeActive) {
+    Write-Host '-RecordDigests needs a smoke run (-Smoke Standard, Twice or All).'
+    exit 2
+}
+if ($RecordDigests -and $SmokeConfiguration -ne 'Release') {
+    Write-Host '-RecordDigests records from the Release build only (-SmokeConfiguration Release).'
+    exit 2
+}
 
 function Find-MSBuild {
     $msbuild = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\12.0\Bin\MSBuild.exe'
@@ -43,21 +68,22 @@ $results = @()
 $bad = 0
 
 if ($runUnit) {
+    $dllDir = Get-RuntimeDllDir
     foreach ($dll in 'd3dx9_43.dll', 'msvcr120.dll') {
-        if (-not (Test-Path (Join-Path $env:windir "SysWOW64\$dll"))) {
-            Write-Host "Preflight failed: $dll missing from SysWOW64. Install the DirectX June 2010 redist and the VS2013 (vcredist 2013 x86) runtime."
+        if (-not (Test-Path (Join-Path $dllDir $dll))) {
+            Write-Host "Preflight failed: $dll missing from $(if ($Platform -eq 'x64') { 'System32' } else { 'SysWOW64' }). $(Get-RuntimeDllHint)"
             exit 2
         }
     }
 
     if (-not $NoBuild) {
         $msbuild = Find-MSBuild
-        & $msbuild (Join-Path $testsDir 'OpenSWBF2Tests.vcxproj') "/p:Configuration=$Configuration" '/p:Platform=Win32' /m /v:minimal /nologo
-        if ($LASTEXITCODE -ne 0) { Write-Host 'Build failed.'; exit 2 }
+        & $msbuild (Join-Path $testsDir 'OpenSWBF2Tests.vcxproj') "/p:Configuration=$Configuration" "/p:Platform=$Platform" /m /v:minimal /nologo
+        if ($LASTEXITCODE -ne 0) { Write-Host $(if ($Platform -eq 'Win32') { 'Build failed.' } else { "Build failed (OpenSWBF2Tests, Platform=$Platform)." }); exit 2 }
     }
 
     $exe = $env:OPENSWBF2_TEST_EXE
-    if (-not $exe) { $exe = Join-Path $root "bin\Tests\$Configuration\OpenSWBF2Tests.exe" }
+    if (-not $exe) { $exe = Get-TestExePath $root $Configuration }
     if (-not (Test-Path $exe)) { Write-Host "Test exe not found: $exe"; exit 2 }
 }
 
@@ -77,6 +103,24 @@ function Start-Exe([string]$argLine) {
     $o = $p.StandardOutput.ReadToEndAsync()
     $e = $p.StandardError.ReadToEndAsync()
     return @{ Proc = $p; Out = $o; Err = $e }
+}
+
+if ($RecordCorpus) {
+    # x64 only: write the x64 math baseline (tests\corpus\mathfn\x64\math.txt) from this build's libm.
+    $h = Start-Exe '--gen-corpus=corpus'
+    if (-not $h.Proc.WaitForExit(120000)) {
+        try { $h.Proc.Kill() } catch {}
+        Write-Host '[FAIL] record-corpus - timed out'
+        exit 1
+    }
+    $outText = ($h.Out.Result + $h.Err.Result).TrimEnd()
+    if ($outText) { Write-Host $outText }
+    if ($h.Proc.ExitCode -ne 0) {
+        Write-Host "[FAIL] record-corpus - exit $($h.Proc.ExitCode)"
+        exit 1
+    }
+    Write-Host '[PASS] record-corpus tests\corpus\mathfn\x64\math.txt'
+    exit 0
 }
 
 if ($runUnit) {
@@ -160,6 +204,10 @@ if ($runUnit) {
         Write-Host $line
         $results += New-Object PSObject -Property @{ Line = $line; Final = $final; Known = $known }
         if ($final -in 'FAIL', 'TIMEOUT', 'CRASH', 'KNOWN') { Write-Host "    details: $(Join-Path $outDir $file)" }
+        if ($Platform -ne 'Win32' -and $final -eq 'SKIP') {
+            $sk = [regex]::Match($text, '(?m)^\[SKIP\] ([^\r\n]*)')
+            if ($sk.Success) { Write-Host "    $($sk.Groups[1].Value)" }
+        }
         if ($known -and $st -eq 'PASS') {
             $w = "WARNING: known_bug case passed, bug may be fixed: $($c.Name)"
             Write-Host $w
@@ -169,15 +217,21 @@ if ($runUnit) {
 }
 
 if ($hardenActive) {
-    $exeDir = Join-Path $root "bin\Win32\$SmokeConfiguration"
+    $exeDir = Get-GameExeDir $root $SmokeConfiguration
     $gameExe = Join-Path $exeDir 'BattlefrontII.exe'
     $gameDataRoot = Find-GameDataRoot
-    if (-not $NoBuild) {
+    # x64 skips cleanly while BattlefrontII.vcxproj has no x64 configuration to build.
+    $platformSkip = $null
+    if ($Platform -ne 'Win32' -and -not (Test-ProjectConfig (Join-Path $root 'BattlefrontII.vcxproj') $SmokeConfiguration)) {
+        $platformSkip = "BattlefrontII.vcxproj has no $SmokeConfiguration|$Platform configuration yet"
+    }
+    if (-not $NoBuild -and -not $platformSkip) {
         $msbuild = Find-MSBuild
-        & $msbuild (Join-Path $root 'BattlefrontII.vcxproj') "/p:Configuration=$SmokeConfiguration" '/p:Platform=Win32' /m /v:minimal /nologo
+        & $msbuild (Join-Path $root 'BattlefrontII.vcxproj') "/p:Configuration=$SmokeConfiguration" "/p:Platform=$Platform" /m /v:minimal /nologo
         if ($LASTEXITCODE -ne 0) { Write-Host 'Build failed.'; exit 2 }
     }
     $reason = Get-SmokePrecheck $gameDataRoot $exeDir
+    if ($platformSkip -and $reason -and -not (Test-Path -LiteralPath $gameExe)) { $reason = $platformSkip }
 
     function Add-SmokeResult($line, $final) {
         Write-Host $line
@@ -186,7 +240,8 @@ if ($hardenActive) {
 
     $dbCode = 0
     if (-not (Test-Path -LiteralPath $gameExe)) {
-        if ($NoBuild -and -not $Hardening) { Add-SmokeResult '[SKIP] hardening:exe - not built (-NoBuild)' 'SKIP' }
+        if ($platformSkip) { Add-SmokeResult "[SKIP] hardening:exe - $platformSkip" 'SKIP' }
+        elseif ($NoBuild -and -not $Hardening) { Add-SmokeResult '[SKIP] hardening:exe - not built (-NoBuild)' 'SKIP' }
         else {
             Add-SmokeResult "[FAIL] hardening:exe - not found: $gameExe" 'FAIL'
             $bad++
@@ -206,9 +261,11 @@ if ($hardenActive) {
         $bad++
     }
     elseif (Test-Path -LiteralPath $gameExe) {
-        $tl = Get-ClTlogCounts (Join-Path $root "obj\Win32\$SmokeConfiguration\BattlefrontII.tlog")
+        $tl = Get-ClTlogCounts (Join-Path (Get-GameObjDir $root $SmokeConfiguration) 'BattlefrontII.tlog')
+        $hardSkips = Get-HardeningSkips
         foreach ($c in (Get-HardeningChecks $hdr $cfg $tl.Total $tl.GsMinus $tl.Sdl)) {
-            if ($c.Ok) { Add-SmokeResult "[PASS] hardening:$($c.Name)" 'PASS' }
+            if ($hardSkips.ContainsKey($c.Name)) { Add-SmokeResult "[SKIP] hardening:$($c.Name) - $($hardSkips[$c.Name])" 'SKIP' }
+            elseif ($c.Ok) { Add-SmokeResult "[PASS] hardening:$($c.Name)" 'PASS' }
             else {
                 Add-SmokeResult "[FAIL] hardening:$($c.Name) - $($c.Detail)" 'FAIL'
                 $bad++
@@ -230,7 +287,7 @@ if ($hardenActive) {
         }
         if ($reason) {
             $tag = 'SKIP'
-            if ($gameDataRoot -and -not $NoBuild) {
+            if ($gameDataRoot -and -not $NoBuild -and -not $platformSkip) {
                 $tag = 'FAIL'
                 $bad++
             }
@@ -241,7 +298,7 @@ if ($hardenActive) {
             New-Item -ItemType Directory -Force -Path $aslrDir | Out-Null
             $aslrArgs = (Get-SmokeCases 'Standard' @() $false $null)[0].Args.Replace('{CASEDIR}', $aslrDir)
             $base = Get-ImageBase $gameExe $exeDir $aslrArgs
-            if ($base -and $base -ne 0x400000) { Add-SmokeResult ('[PASS] hardening:aslr-base (0x{0:X8})' -f $base) 'PASS' }
+            if ($base -and $base -ne (Get-PreferredImageBase)) { Add-SmokeResult ('[PASS] hardening:aslr-base (0x{0:X8})' -f $base) 'PASS' }
             else {
                 Add-SmokeResult ('[FAIL] hardening:aslr-base - base {0}' -f $(if ($base) { '0x{0:X8}' -f $base } else { 'unreadable' })) 'FAIL'
                 $bad++
@@ -255,11 +312,16 @@ if ($smokeActive) {
     if ($Smoke -eq 'All') { $missionFile = Join-Path $testsDir 'smoke\missions-all.txt' }
     $missions = @()
     if (Test-Path $missionFile) { $missions = @(Get-Content $missionFile | Where-Object { $_.Trim() }) }
-    $smokeCases = @(Get-SmokeCases $Smoke $missions $Movies.IsPresent $null $HogAddrSpace.IsPresent)
+    $hog = $HogAddrSpace.IsPresent
+    if ($hog -and $Platform -eq 'x64') {
+        Add-SmokeResult '[SKIP] smoke:hogaddrspace - large-address-aware checks do not apply to x64 (the 64-bit address space is always above 2 GB); running without -hogaddrspace' 'SKIP'
+        $hog = $false
+    }
+    $smokeCases = @(Get-SmokeCases $Smoke $missions $Movies.IsPresent $null $hog)
     if ($reason) {
         $final = 'SKIP'
         $tag = 'SKIP'
-        if ($gameDataRoot -and -not $NoBuild) {
+        if ($gameDataRoot -and -not $NoBuild -and -not $platformSkip) {
             $final = 'FAIL'
             $tag = 'FAIL'
         }
@@ -301,6 +363,7 @@ if ($smokeActive) {
                 if ($useParallel) { $res = Receive-SmokeCase $batch $caseIndex }
                 else { $res = Invoke-SmokeCase $sc.Name $gameExe $exeDir $argLine $caseTimeout $caseDir }
                 $ok = Test-SmokeExpect $sc $res
+                if ($ok -and $RecordDigests) { Add-RecordedDigest $sc.Name $caseDir }
                 $tok = Get-SmokeToken $res.Class
                 if ($ok) { $tok = 'PASS' }
                 elseif ($tok -eq 'PASS') { $tok = 'FAIL' }
@@ -354,6 +417,26 @@ if ($smokeActive) {
             else {
                 Add-SmokeResult "[FAIL] smoke:digest-trace mismatch at turn $dt" 'FAIL'
                 $bad++
+            }
+        }
+        if ($Platform -eq 'x64') {
+            $digestFile = Get-DigestExpectedFile
+            if ($RecordDigests) {
+                if ($script:SmokeRecorded.Count -gt 0) {
+                    Save-DigestBaseline $digestFile $script:SmokeRecorded
+                    Add-SmokeResult "[PASS] smoke:record-digests wrote $($script:SmokeRecorded.Count) row(s) to $digestFile" 'PASS'
+                }
+                else {
+                    Add-SmokeResult '[FAIL] smoke:record-digests recorded no rows (no passing digest case in this run)' 'FAIL'
+                    $bad++
+                }
+            }
+            else {
+                $ranNames = @($smokeCases | ForEach-Object { $_.Name })
+                $noRow = @(Get-DigestRowNames | Where-Object { ($ranNames -ccontains $_) -and -not (Get-DigestExpected $_) })
+                if ($noRow.Count -gt 0) {
+                    Add-SmokeResult "[SKIP] smoke:digest - no x64 baseline yet in $digestFile for: $($noRow -join ', '). Record one with: tests\run.ps1 -Platform x64 -Smoke $Smoke -RecordDigests" 'SKIP'
+                }
             }
         }
     }
