@@ -239,11 +239,11 @@ namespace
 // OpenSWBF2: the HUD's root screen groups, drawn at the HUD scale option
 // (Options -> Video, display.ini HudScale). Each top-level HUD element is
 // scaled about the screen edge, corner or centre line it sits nearest
-// (DisplayLogic::HudAnchor), so the HUD keeps to its corners; elements in the
-// middle of the screen (the reticle) and world markers are left alone. Only
-// the drawing changes: the matrices are restored afterwards, so HUD logic and
-// events never see it. No data members, as gScreenGroup is indexed as
-// RedScreenGroupElement.
+// (DisplayLogic::HudAnchor), so the HUD keeps to its corners; mid-screen
+// popups scale about the centre, while the reticle (moved by events) and
+// world markers are left alone. Only the drawing changes: the matrices are
+// restored afterwards, so HUD logic and events never see it. No data members,
+// as gScreenGroup is indexed as RedScreenGroupElement.
 class HudScreenGroup : public RedScreenGroupElement
 {
 protected:
@@ -258,6 +258,8 @@ struct HudScaled
 
 const int kMaxHudScaled = 256;
 HudScaled sHudScaled[kMaxHudScaled];
+const int kMaxHudPinned = 64;
+RedInterfaceElement* sHudPinned[kMaxHudPinned];
 
 void HudScreenGroup::RenderUsingContext(const PblMatrix& mContext, const RedColor& color)
 {
@@ -273,6 +275,26 @@ void HudScreenGroup::RenderUsingContext(const PblMatrix& mContext, const RedColo
     const float fScale = (float)uiPercent / 100.0f;
     const float fW = HUD::Element::GetViewportWidth();
     const float fH = HUD::Element::GetViewportHeight();
+
+    // top-level elements holding something moved by events (the reticle, fed
+    // its aim position) keep their place in the middle of the screen
+    int iPinned = 0;
+    for (HUD::Element* pElement = HUD::Element::GetFirst(); pElement && iPinned < kMaxHudPinned;
+         pElement = HUD::Element::GetNext(pElement))
+    {
+        HUD::ElementGroupBase* pGroup = dynamic_cast<HUD::ElementGroupBase*>(pElement);
+        if (!pGroup || !pGroup->mEventPosition.GetRegisteredClass())
+        {
+            continue;
+        }
+        HUD::Element* pTop = pElement;
+        while (pTop->mGroup)
+        {
+            pTop = pTop->mGroup;
+        }
+        sHudPinned[iPinned++] = &pTop->GetRedInterfaceElement();
+    }
+
     int iCount = 0;
     for (HUD::Element* pElement = HUD::Element::GetFirst(); pElement && iCount < kMaxHudScaled;
          pElement = HUD::Element::GetNext(pElement))
@@ -288,7 +310,15 @@ void HudScreenGroup::RenderUsingContext(const PblMatrix& mContext, const RedColo
         const float fScreenY = mLocal.m[3][1] * mRoot.m[1][1] + mRoot.m[3][1];
         if (DisplayLogic::HudIsCentral(fScreenX, fScreenY, fW, fH))
         {
-            continue;
+            bool bPinned = false;
+            for (int i = 0; i < iPinned && !bPinned; ++i)
+            {
+                bPinned = sHudPinned[i] == pRed;
+            }
+            if (bPinned)
+            {
+                continue;
+            }
         }
         const float fAnchorX = (DisplayLogic::HudAnchor(fScreenX, fW) - mRoot.m[3][0]) / mRoot.m[0][0];
         const float fAnchorY = (DisplayLogic::HudAnchor(fScreenY, fH) - mRoot.m[3][1]) / mRoot.m[1][1];

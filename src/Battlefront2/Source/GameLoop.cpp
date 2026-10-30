@@ -1102,6 +1102,7 @@ int PostLoad()
     mWaitMessageGroup.AddElement(&mWaitTextElement);
     mWaitTimer = 0.0f;
     FLRenderer::AddInterfaceElement(&mWaitMessageGroup, RedInterfaceScreen::CENTER, RedInterfaceScreen::CENTER, true);
+    mWaitMessageGroup.SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
 
     sMissionActive = true;
     LuaHelper::CallGlobalProc("ScriptPostLoad");

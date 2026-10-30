@@ -120,6 +120,7 @@ void CaptureDisplay::Bind(unsigned int uiViewport)
     mJoystickIndex = uiViewport;
     FLRenderer::AddInterfaceElement(CameraManager::sInstance->m_hView[uiViewport], &mFlagGroup, 1.0f, 0.5f,
                                     true);
+    mFlagGroup.SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
     ActivateThread(-1, PER_LOCAL_TURN);
 }
 

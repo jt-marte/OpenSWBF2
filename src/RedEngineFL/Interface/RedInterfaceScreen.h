@@ -41,6 +41,10 @@ public:
     // virtual UI size and scaled by RedInterfaceScreen::GetUiScale().
     void SetScaleUi(bool bScale) { m_bScaleUi = bScale; }
 
+    // OpenSWBF2: in-game displays drawn at the HUD's size: grown with the screen
+    // like .hud text and by the HUD scale option (DisplayLogic::HudGroupScale).
+    void SetHudScale(bool bScale) { m_bHudScale = bScale; }
+
     void SetScreenRelativePos(float fX, float fY)
     {
         m_fScreenRelativeX = fX;
@@ -52,6 +56,7 @@ public:
     bool m_bUseSafeZone : 1;
     bool m_bUsePerspectiveHack : 1;
     bool m_bScaleUi : 1;
+    bool m_bHudScale : 1;
 };
 
  

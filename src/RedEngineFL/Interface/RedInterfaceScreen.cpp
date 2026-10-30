@@ -11,6 +11,7 @@
 #include "RedEngineFL/Graphics/RedLight.h"
 #include "RedEngineFL/Graphics/RedDirectionalLight.h"
 #include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 
 class PblMatrix;
@@ -199,6 +200,7 @@ RedScreenGroupElement::RedScreenGroupElement(const char* pcName)
     m_bUseSafeZone = false;
     m_bUsePerspectiveHack = false;
     m_bScaleUi = false;
+    m_bHudScale = false;
 
     m_fScreenRelativeY = 0.0f;
     m_fScreenRelativeX = 0.0f;
@@ -210,6 +212,7 @@ RedScreenGroupElement::RedScreenGroupElement()
     m_bUseSafeZone = false;
     m_bUsePerspectiveHack = false;
     m_bScaleUi = false;
+    m_bHudScale = false;
 
     m_fScreenRelativeY = 0.0f;
     m_fScreenRelativeX = 0.0f;
@@ -340,6 +343,8 @@ void RedInterfaceScreen::Render() const
     // are scaled up. Axes and depth scale alike: the group is the 1080p layout
     // magnified about the camera, so 3D models keep their perspective.
     const float fUiScale = GetUiScale();
+    const float fHudScale =
+        DisplayLogic::HudGroupScale(GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale);
 
     for (PblList<RedScreenGroupElement>::Itor it = m_children.Begin(); it != m_children.End(); ++it)
     {
@@ -367,7 +372,8 @@ void RedInterfaceScreen::Render() const
         }
         else
         {
-            const float fGroupScale = pGroup->m_bScaleUi ? fUiScale : 1.0f;
+            const float fGroupScale =
+                pGroup->m_bScaleUi ? fUiScale : (pGroup->m_bHudScale ? fHudScale : 1.0f);
             mScreen.m[0][0] = fUnitX * fGroupScale;
             mScreen.m[1][1] = fUnitY * fGroupScale;
             mScreen.m[2][2] = fGroupScale;

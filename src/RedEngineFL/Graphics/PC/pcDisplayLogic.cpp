@@ -1323,6 +1323,23 @@ bool HudIsCentral(float fX, float fY, float fW, float fH)
     return HudAnchor(fX, fW) == fW * 0.5f && HudAnchor(fY, fH) == fH * 0.5f;
 }
 
+float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent)
+{
+    if (uiPercent == 0)
+    {
+        uiPercent = kHudScaleDefault;
+    }
+    else if (uiPercent < kHudScaleMin)
+    {
+        uiPercent = kHudScaleMin;
+    }
+    else if (uiPercent > kHudScaleMax)
+    {
+        uiPercent = kHudScaleMax;
+    }
+    return UiScale(uiScreenH) * (float)uiPercent / 100.0f;
+}
+
 float FovTanScale(unsigned int uiDegrees)
 {
     if (uiDegrees == kFovDefault)

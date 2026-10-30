@@ -106,6 +106,7 @@ void DamageArrowGroup::Bind(unsigned int hView)
     {
         FLRenderer::AddInterfaceElement(hView, &mArrows[i].mGroup, sData[i].mRelativeX,
                                         sData[i].mRelativeY, true);
+        mArrows[i].mGroup.SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
     }
 }
 
@@ -260,6 +261,7 @@ void SquadCommandGroup::Init()
 void SquadCommandGroup::Bind(unsigned int hView)
 {
     FLRenderer::AddInterfaceElement(hView, this, sRelativeX, sRelativeY, true);
+    SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
 }
 
 // FUNCTION: SWBF2 0x00650f60
@@ -323,6 +325,7 @@ void OutOfBoundsGroup::Bind(unsigned int hView)
 {
     FLRenderer::AddInterfaceElement(hView, this, RedInterfaceScreen::CENTER,
                                     RedInterfaceScreen::CENTER, true);
+    SetHudScale(true); // OpenSWBF2: drawn at the HUD's size
 }
 
 // FUNCTION: SWBF2 0x006511f0

@@ -1850,3 +1850,18 @@ TEST_CASE("display logic shell ui scale" * doctest::test_suite("unit"))
     CHECK(ShellUiScale(0) == 1.0f);
     CHECK(ShellUiScale(100000) == 1.0f);
 }
+
+TEST_CASE("display logic hud group scale" * doctest::test_suite("unit"))
+{
+    // grows with the screen like .hud text, then by the HUD scale percent
+    CHECK(HudGroupScale(1080, 100) == 1.0f);
+    CHECK(HudGroupScale(2160, 100) == doctest::Approx(2.0f));
+    CHECK(HudGroupScale(1440, 100) == doctest::Approx(1440.0f / 1080.0f));
+    CHECK(HudGroupScale(2160, 50) == doctest::Approx(1.0f));
+    CHECK(HudGroupScale(1080, 150) == doctest::Approx(1.5f));
+    // unset is the default, and the percent is clamped to its range
+    CHECK(HudGroupScale(1080, 0) == 1.0f);
+    CHECK(HudGroupScale(1080, 10) == doctest::Approx(0.5f));
+    CHECK(HudGroupScale(1080, 400) == doctest::Approx(1.5f));
+    CHECK(HudGroupScale(720, 100) == 1.0f);
+}

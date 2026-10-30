@@ -439,6 +439,11 @@ float HudAnchor(float fPos, float fExtent);
 float HudScalePos(float fPos, float fAnchor, float fScale);
 bool HudIsCentral(float fX, float fY, float fW, float fH);
 
+// The scale for in-game C++ displays (chat input, capture bar, squad menu,
+// names, timers, end screen): grown with the screen like .hud text (UiScale)
+// and by the HUD scale percent (100 when unset, clamped to its range).
+float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent);
+
 // OpenSWBF2: the field of view option, in degrees across a 16:9 screen for the
 // default camera (the stock 48 degrees at 4:3 widened for 16:9 is ~61). The
 // cameras' tan(FOV / 2) is scaled by FovTanScale, exactly 1 at the default,
