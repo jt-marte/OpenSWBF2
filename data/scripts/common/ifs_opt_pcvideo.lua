@@ -683,7 +683,14 @@ ifs_opt_pcvideo = NewIFShellScreen {
 					end
 				end
 				
+				-- OpenSWBF2: 4x antialiasing by default when the list has it
 				local multisampleIndex = 1
+				for idx, msItem in customForm.elements["multisample"].values do
+					if ( msItem.data.multisampleType == 4 and msItem.data.multisampleQuality == 0 and not msItem.bUnselectable ) then
+						multisampleIndex = idx
+						break
+					end
+				end
 				customForm.elements["multisample"].selValue = multisampleIndex
 				this.iMultiSample = customForm.elements["multisample"].values[multisampleIndex].data.multisampleType
 				this.iMultiSampleQuality = customForm.elements["multisample"].values[multisampleIndex].data.multisampleQuality
