@@ -101,6 +101,32 @@ char const* TrimPath(char const* pcPath)
     return pcResult;
 }
 
+static HANDLE sStdout;
+
+void SetStdout(StdoutMode eMode)
+{
+    sStdout = 0;
+    if (eMode == StdoutOff)
+    {
+        return;
+    }
+    HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+    if ((!hOut || hOut == INVALID_HANDLE_VALUE) && eMode >= StdoutAttach)
+    {
+        // AttachConsole is XP+, so look it up rather than raise the headers' target version.
+        typedef BOOL(WINAPI * AttachConsoleFn)(DWORD);
+        AttachConsoleFn pfnAttach = (AttachConsoleFn)GetProcAddress(GetModuleHandleA("kernel32.dll"), "AttachConsole");
+        if ((pfnAttach && pfnAttach((DWORD)-1)) || (eMode == StdoutConsole && AllocConsole()))
+        {
+            hOut = CreateFileA("CONOUT$", GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, 0, 0);
+        }
+    }
+    if (hOut && hOut != INVALID_HANDLE_VALUE)
+    {
+        sStdout = hOut;
+    }
+}
+
 void __cdecl Write(Category eCategory, Severity eSeverity, char const* pcFile, int iLine,
                    char const* pcFormat, ...)
 {
@@ -160,6 +186,12 @@ void __cdecl Write(Category eCategory, Severity eSeverity, char const* pcFile, i
 
     RedWarning::SetLogData((RedWarning::RED_ERROR_SEVERITY)eSeverity);
     RedWarning::LogMessage("%s", acLine);
+
+    if (sStdout)
+    {
+        DWORD dwWritten = 0;
+        WriteFile(sStdout, acLine, (DWORD)(iPrefix + iBody + 1), &dwWritten, 0);
+    }
 
     Unlock();
 }

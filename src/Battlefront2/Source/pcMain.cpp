@@ -26,6 +26,7 @@
 #include "SoundFL/source/sndsource3d.h"
 #include "Steam/gfSteamAuth.h"
 #include "Steam/galaxy_api.h"
+#include "PebbleFL/Common/PblUnicode.h"
 #include "CommandLine.h"
 #include "pcCrash.h"
 #include "GameLoop.h"
@@ -194,6 +195,45 @@ static void SoundEnable(bool bEnable)
 }
 
 static bool sCloseDeferred;
+extern char autoNetSession[64];
+extern int hostshort;
+namespace GameLoop { extern bool sQuitRequested; }
+
+// True when pcLine holds pcWord as its own -word or /word token.
+static bool HasSwitchWord(const char* pcLine, const char* pcWord)
+{
+    const size_t uLen = strlen(pcWord);
+    for (const char* pc = pcLine; (pc = strpbrk(pc, "-/")) != 0; ++pc)
+    {
+        const bool bStart = pc == pcLine || pc[-1] == ' ' || pc[-1] == '\t';
+        if (bStart && !_strnicmp(pc + 1, pcWord, uLen) && (pc[1 + uLen] == 0 || pc[1 + uLen] == ' ' || pc[1 + uLen] == '\t'))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Dedicated servers: Ctrl+C, Ctrl+Break and closing the console shut down the way the
+// window's close button does.
+static BOOL WINAPI DedicatedConsoleHandler(DWORD dwType)
+{
+    if (dwType != CTRL_C_EVENT && dwType != CTRL_BREAK_EVENT && dwType != CTRL_CLOSE_EVENT &&
+        dwType != CTRL_SHUTDOWN_EVENT)
+    {
+        return FALSE;
+    }
+    LOG(LogCore, Inform, "OPENSWBF2 SERVER stop requested (console event %u)", (unsigned int)dwType);
+    if (hGlobalWnd)
+    {
+        PostMessageA(hGlobalWnd, WM_CLOSE, 0, 0);
+    }
+    else
+    {
+        GameLoop::sQuitRequested = true;
+    }
+    return TRUE;
+}
 
 // FUNCTION: SWBF2 0x006172a0
 long __stdcall WindowProc(HWND__* hWnd, unsigned int Msg, unsigned int wParam, long lParam)
@@ -407,6 +447,20 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
 
     atexit(ReleaseMutex);
 
+    // OpenSWBF2: "-dedicated" is a headless Direct server (LAN transport, any address), short
+    // for the autonet switches below; maps and other switches follow as usual. Unlike plain
+    // /autonet it loads settings\ServerSettings.cfg and ServerRotation.cfg even with a game
+    // name given, skips the 20 s startup wait and logs to stdout.
+    static char sacExpandedCmdLine[4096];
+    if (HasSwitchWord(lpCmdLine, "dedicated") && !strstr(lpCmdLine, "/autonet"))
+    {
+        _snprintf(sacExpandedCmdLine, sizeof(sacExpandedCmdLine) - 1,
+                  "/autonet dedicated -lan -nopregame -playercount 0 -norender -nosound -nowait -nofocuspause -nolegal %s",
+                  lpCmdLine);
+        lpCmdLine = sacExpandedCmdLine;
+        gDedicatedShorthand = true;
+    }
+
     bool bDedicated = strstr(lpCmdLine, "/autonet") != 0 &&
                       strstr(lpCmdLine, "dedicated") != 0;
     RedWarning::Init();
@@ -419,6 +473,25 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
     ParseAutoNetCommandLine(lpCmdLine);
 
     ParseCommandLine(0, lpCmdLine);
+    if (gDedicatedShorthand)
+    {
+        if (!strcmp(autoNetSession, "LY")) // retail's default name
+        {
+            strlcpy(autoNetSession, "OpenSWBF2 Server", sizeof(autoNetSession));
+        }
+        if (!gLogStdout)
+        {
+            gLogStdout = true;
+        }
+    }
+    RedLog::SetStdout(gLogConsole ? RedLog::StdoutConsole
+                                  : (gLogStdout ? (gDedicatedShorthand ? RedLog::StdoutAttach : RedLog::StdoutRedirectOnly)
+                                                : RedLog::StdoutOff));
+    if (bDedicated)
+    {
+        SetConsoleCtrlHandler(DedicatedConsoleHandler, TRUE);
+        LOG(LogCore, Inform, "OPENSWBF2 SERVER dedicated name=\"%s\" port=%d", autoNetSession, hostshort);
+    }
     DisplayCfg::Init();
     XInputPad::gPadLayout =
         DisplayCfg::gDisplay.uiPadLayout ? XInputPad::kLayoutLegacy : XInputPad::kLayoutModern;

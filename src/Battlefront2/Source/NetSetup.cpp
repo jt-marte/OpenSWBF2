@@ -5709,6 +5709,8 @@ bool CNetFindGame::Update()
                         group.WriteBits(data.mQueryId, 32);
                         group.WriteBits(data.mQuerySeqNo, 4);
                         group.EndWrite();
+                        LOG(LogNet, Verbose, "OPENSWBF2 NET query sent to=%s seq=%u", NetCommP::DescribeAddr(dest),
+                            data.mQuerySeqNo);
                         NetComm::Send(dest, PKT_QUERY, group.pktPtr);
                         ++netFindQueryCount;
                         ++data.mQuerySeqNo;
@@ -6512,6 +6514,7 @@ void PublishNextMissionToLobby()
             }
 
             int iSrc = (unsigned char)pPkt->mData[3];
+            LOG(LogNet, Verbose, "OPENSWBF2 NET query answered to=%s", NetCommP::DescribeAddr(iSrc));
             NetPktGroup group;
             group.Set(pPkt);
             group.BeginRead();

@@ -69,7 +69,9 @@ function Invoke-NetPair($name, $drag) {
             $dirs += $d
         }
         $srvLog = Join-Path $caseDir 'server.log'
-        $srvArgs = "/autonet dedicated -lan -nopregame -playercount 0 /gamename $gameName $Map 100 100 $common $drag -log `"$srvLog`""
+        # -Direct also covers the -dedicated shorthand (headless Direct server, no legal screens).
+        $srvArgs = if ($Direct) { "-dedicated $Map 100 100 /gamename $gameName $common $drag -log `"$srvLog`"" }
+                   else { "/autonet dedicated -lan -nopregame -playercount 0 /gamename $gameName $Map 100 100 $common $drag -log `"$srvLog`"" }
         $procs += Start-Process -FilePath (Join-Path $dirs[0] 'BattlefrontII.exe') -ArgumentList $srvArgs -WorkingDirectory $dirs[0] -PassThru
         $deadline = (Get-Date).AddSeconds($JoinTimeout)
         while ((Get-Date) -lt $deadline -and -not ((Test-Path $srvLog) -and (Select-String -Path $srvLog -Pattern 'OPENSWBF2 NET mission start' -Quiet))) {
