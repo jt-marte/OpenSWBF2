@@ -344,14 +344,15 @@ end
 -- Selects the next usable tab in iDir (wrapping) exactly as a click would:
 -- the screen's Input_Accept runs ifelem_tabmanager_HandleInputAccept, so
 -- callbacks and save-before-switch behave the same. Only while a pad drives
--- the menus, and for LB/RB only with no editbox focused, since keyboard 3/4
--- send the same events (nothing on the keyboard sends LT/RT). Returns nil
--- when nothing was switched.
+-- the menus. Keyboard 3/4 send the same events as LB/RB, so with an editbox
+-- focused (Direct Connect's address) only the pad's own bumpers switch the
+-- top row (nothing on the keyboard sends LT/RT). Returns nil when nothing was
+-- switched.
 function ifelem_tabmanager_PadCycle(this, iDir, Which)
 	if( (not ScriptCB_IsPadNavigating) or (not ScriptCB_IsPadNavigating()) ) then
 		return nil
 	end
-	if( gCurEditbox and (Which == "top") ) then
+	if( gCurEditbox and (Which == "top") and not (ScriptCB_IsPadBumperDown and ScriptCB_IsPadBumperDown()) ) then
 		return nil
 	end
 

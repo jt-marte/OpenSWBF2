@@ -828,6 +828,30 @@ TEST_CASE("multiplayer opens on Direct Connect with no sign-in screen" * doctest
     CHECK(Has(LineWith(sList, "tag = \"_tab_direct\""), "xPos = 87"));
 }
 
+TEST_CASE("pad bumpers switch tabs while a text box has focus" * doctest::test_suite("regression"))
+{
+    // Direct Connect keeps its address box focused, and LB/RB stayed dead there: keyboard 3/4
+    // send the same menu events, so the tab bar ignored both whenever a box had focus. The pad
+    // now reports its own bumpers, and only keyboard 3/4 are ignored while typing.
+    std::string sTabRaw;
+    std::string sJoyRaw;
+    std::string sCbRaw;
+    REQUIRE(ReadSource("../data/scripts/common/ifelem_tabmanager.lua", sTabRaw));
+    REQUIRE(ReadSource("../src/Battlefront2/Platform/Pc/pcFLJoystick.cpp", sJoyRaw));
+    REQUIRE(ReadSource("../src/Battlefront2/Source/LuaCallbacks_PC.cpp", sCbRaw));
+    const std::string sTab = StripCr(sTabRaw);
+    const std::string sJoy = StripCr(sJoyRaw);
+    const std::string sCb = StripCr(sCbRaw);
+
+    const std::string sCycle = LuaFunctionBody(sTab, "function ifelem_tabmanager_PadCycle(this, iDir, Which)");
+    REQUIRE(!sCycle.empty());
+    CHECK(Has(LineWith(sCycle, "if( gCurEditbox and (Which == \"top\")"), "ScriptCB_IsPadBumperDown()"));
+
+    CHECK(Has(sJoy, "(i == XInputPad::kBitLB || i == XInputPad::kBitRB) && fValue > 0.0f"));
+    CHECK(Has(sJoy, "XInputPad::gBumperDown = bBumperDown;"));
+    CHECK(Has(sCb, "{ \"ScriptCB_IsPadBumperDown\", ScriptCB_IsPadBumperDown },"));
+}
+
 TEST_CASE("pad snap lands on a dropdown box like a slider bar" * doctest::test_suite("regression"))
 {
     // Instant Action's AI difficulty: the box's hotspot starts at its left end, so its centre

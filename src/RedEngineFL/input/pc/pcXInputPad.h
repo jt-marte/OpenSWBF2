@@ -330,6 +330,9 @@ extern bool gPadOwnsCursor;
 extern bool gMouseResync;
 // A pad stick (not the mouse) is moving the visible cursor.
 extern bool gStickCursor;
+// The pad's LB or RB is down. Keyboard 3/4 send the same menu events, so the
+// PC tab bar asks this before switching tabs while a text box has focus.
+extern bool gBumperDown;
 void PadTookMenus();
 void MouseTookMenus();
 

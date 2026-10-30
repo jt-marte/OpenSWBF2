@@ -907,6 +907,7 @@ void RawControllerInputs::ReadLatest(float fDeltaTime)
         m_pGuiInputs->Set(s_defUIBindings[i].mKeyB, mRawInputFloat[0][i]);
     }
 
+    bool bBumperDown = false;
     for (int iPort = 0; iPort < 10; iPort++)
     {
         if (_redJoystick[iPort])
@@ -937,6 +938,10 @@ void RawControllerInputs::ReadLatest(float fDeltaTime)
                     if (iGui >= 0)
                     {
                         float fValue = mRawInputFloat[iPort][i];
+                        if ((i == XInputPad::kBitLB || i == XInputPad::kBitRB) && fValue > 0.0f)
+                        {
+                            bBumperDown = true;
+                        }
                         if (i == XInputPad::kSlotLeftTrigger || i == XInputPad::kSlotRightTrigger)
                         {
                             // Analog triggers go to the menus as a steady on/off.
@@ -954,6 +959,7 @@ void RawControllerInputs::ReadLatest(float fDeltaTime)
             }
         }
     }
+    XInputPad::gBumperDown = bBumperDown;
 
     m_pGuiInputs->Process();
 

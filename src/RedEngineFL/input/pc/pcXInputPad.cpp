@@ -12,6 +12,7 @@ bool gNoRumble;
 bool gPadOwnsCursor;
 bool gMouseResync;
 bool gStickCursor;
+bool gBumperDown;
 int gPadLayout = kLayoutModern;
 bool gPadAimActive;
 bool gPadAimHeld;

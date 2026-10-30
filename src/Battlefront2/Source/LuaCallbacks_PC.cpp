@@ -529,6 +529,14 @@ static int ScriptCB_IsStickCursor(lua_State*)
     return 1;
 }
 
+// True while the pad's LB or RB is down, so the tab bar can tell them from
+// keyboard 3/4 (the same menu events) while a text box has focus.
+static int ScriptCB_IsPadBumperDown(lua_State*)
+{
+    lua_pushboolean(LuaHelper::mState, XInputPad::gBumperDown);
+    return 1;
+}
+
 // Screen position of an element's hotspot centre (nothing if it has none), so
 // a pad can hop between the mouse-only PC widgets.
 static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
@@ -721,6 +729,7 @@ static const CallbackEntryT sPCCallbacks[] =
     { "ScriptCB_SaveDisplayOptions", ScriptCB_SaveDisplayOptions },
     { "ScriptCB_IsPadNavigating", ScriptCB_IsPadNavigating },
     { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
+    { "ScriptCB_IsPadBumperDown", ScriptCB_IsPadBumperDown },
     { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
     { "ScriptCB_GetPadLayout", ScriptCB_GetPadLayout },
     { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },
