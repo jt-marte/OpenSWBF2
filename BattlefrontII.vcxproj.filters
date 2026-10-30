@@ -216,6 +216,9 @@
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSkyStars.cpp">
       <Filter>src\Battlefront2\Platform\Pc</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battlefront2\Platform\Pc\pcPadPrompts.cpp">
+      <Filter>src\Battlefront2\Platform\Pc</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcSpawnDisplay.cpp">
       <Filter>src\Battlefront2\Platform\Pc</Filter>
     </ClCompile>

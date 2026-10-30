@@ -332,6 +332,198 @@ const char* ActionLabel(int iLayout, int iMode, int iAction)
     return SlotLabel(DefaultSlot(iLayout, iMode, iAction));
 }
 
+int GlyphForSlot(int iSlot)
+{
+    switch (iSlot)
+    {
+    case kBitA:             return kGlyphA;
+    case kBitB:             return kGlyphB;
+    case kBitX:             return kGlyphX;
+    case kBitY:             return kGlyphY;
+    case kBitLB:            return kGlyphLB;
+    case kBitRB:            return kGlyphRB;
+    case kBitBack:          return kGlyphBack;
+    case kBitStart:         return kGlyphStart;
+    case kBitLS:            return kGlyphLS;
+    case kBitRS:            return kGlyphRS;
+    case kBitDPadUp:        return kGlyphDPadUp;
+    case kBitDPadRight:     return kGlyphDPadRight;
+    case kBitDPadDown:      return kGlyphDPadDown;
+    case kBitDPadLeft:      return kGlyphDPadLeft;
+    case kSlotLeftRight:
+    case kSlotLeftLeft:
+    case kSlotLeftDown:
+    case kSlotLeftUp:       return kGlyphLeftStick;
+    case kSlotRightRight:
+    case kSlotRightLeft:
+    case kSlotRightDown:
+    case kSlotRightUp:      return kGlyphRightStick;
+    case kSlotLeftTrigger:  return kGlyphLT;
+    case kSlotRightTrigger: return kGlyphRT;
+    default:                return -1;
+    }
+}
+
+const char* GlyphText(int iGlyph)
+{
+    static const char* const kText[kGlyphCount] = {
+        "A", "B", "X", "Y", "LB", "RB", "LT", "RT", "LS", "RS",
+        "BACK", "START", "", "", "", "", "L", "R",
+    };
+    return iGlyph >= 0 && iGlyph < kGlyphCount ? kText[iGlyph] : "";
+}
+
+int ActionGlyph(int iLayout, int iMode, int iAction)
+{
+    const bool bModern = iLayout == kLayoutModern;
+    if (bModern && (iAction == kActReload || iAction == kActUse))
+    {
+        return kGlyphX;
+    }
+    if (bModern && iAction == kActZoom && iMode == 0)
+    {
+        return kGlyphLT;
+    }
+    if (iAction == kActRoll)
+    {
+        return (iMode == 0 || iMode == 3) ? kGlyphB : -1;
+    }
+    return GlyphForSlot(DefaultSlot(iLayout, iMode, iAction));
+}
+
+namespace
+{
+
+const int kTokLeftStick = -10;
+const int kTokRightStick = -11;
+const int kTokAccept = -12;
+const int kTokCancel = -13;
+const int kTokRetailGlyph = -14;
+
+struct Token
+{
+    const char* pcName;
+    int iAction;
+};
+
+const Token kTokens[] = {
+    // the console's buttons, as the actions they stood for in its hints
+    { "btnr1", kActPrimaryFire },
+    { "btnl1", kActSecondaryFire },
+    { "btnr2", kActPrimaryNext },
+    { "btnl2", kActSecondaryNext },
+    { "btna", kActJump },
+    { "btnb", kActUse },
+    { "btn2", kActUse },
+    { "btnmisc", kActLockTarget },
+    { "btnmisc2", kActCrouch },
+    { "btn_analog_l_down", kActSprint },
+    { "btn_analog_r_down", kActZoom },
+    { "btn_select", kActPlayerList },
+    { "btn_analog_l", kTokLeftStick },
+    { "btn_analog_r", kTokRightStick },
+    // the game's own action and menu tokens
+    { "primaryFireButton", kActPrimaryFire },
+    { "secondaryFireButton", kActSecondaryFire },
+    { "sprintButton", kActSprint },
+    { "jumpButton", kActJump },
+    { "crouchButton", kActCrouch },
+    { "zoomButton", kActZoom },
+    { "viewButton", kActView },
+    { "reloadButton", kActReload },
+    { "useButton", kActUse },
+    { "squadCommandButton", kActSquadCommand },
+    { "acceptHero", kActAcceptHero },
+    { "declineHero", kActDeclineHero },
+    { "lockTargetButton", kActLockTarget },
+    { "primaryNextButton", kActPrimaryNext },
+    { "primaryPrevButton", kActPrimaryPrev },
+    { "secondaryNextButton", kActSecondaryNext },
+    { "secondaryPrevButton", kActSecondaryPrev },
+    { "playerList", kActPlayerList },
+    { "chat", kActChat },
+    { "friendChat", kActFriendChat },
+    { "Map", kActMap },
+    { "GuiAccept", kTokAccept },
+    { "GuiCancel", kTokCancel },
+    { "OptionL", kTokRetailGlyph },
+    { "OptionR", kTokRetailGlyph },
+};
+
+}
+
+int TokenCount()
+{
+    return (int)(sizeof(kTokens) / sizeof(kTokens[0]));
+}
+
+const char* TokenName(int iIndex)
+{
+    return iIndex >= 0 && iIndex < TokenCount() ? kTokens[iIndex].pcName : 0;
+}
+
+int TokenGlyph(const char* pcToken, int iLayout, int iMode)
+{
+    if (!pcToken)
+    {
+        return -1;
+    }
+    for (int i = 0; i < TokenCount(); ++i)
+    {
+        if (_stricmp(pcToken, kTokens[i].pcName) != 0)
+        {
+            continue;
+        }
+        switch (kTokens[i].iAction)
+        {
+        case kTokLeftStick:   return kGlyphLeftStick;
+        case kTokRightStick:  return kGlyphRightStick;
+        case kTokAccept:      return kGlyphA;
+        case kTokCancel:      return kGlyphB;
+        case kTokRetailGlyph: return kTokenRetail;
+        default:              return ActionGlyph(iLayout, iMode, kTokens[i].iAction);
+        }
+    }
+    return -1;
+}
+
+bool PromptTextResolves(const unsigned short* pusText, int iLayout, int iMode)
+{
+    if (!pusText)
+    {
+        return false;
+    }
+    for (const unsigned short* p = pusText; *p; ++p)
+    {
+        if (*p != '{')
+        {
+            continue;
+        }
+        char acToken[64];
+        int iLen = 0;
+        ++p;
+        while (*p && *p != '}' && iLen < (int)sizeof(acToken) - 1)
+        {
+            acToken[iLen++] = (char)(*p < 0x80 ? *p : '?');
+            ++p;
+        }
+        acToken[iLen] = '\0';
+        if (*p != '}' || TokenGlyph(acToken, iLayout, iMode) == -1)
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+bool gPadPromptsGame;
+int gPadPromptMode;
+
+bool PadPromptsActive()
+{
+    return gPadPromptsGame || gPadOwnsCursor;
+}
+
 int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs)
 {
     if (bDown)

@@ -9,6 +9,7 @@
 #include "PebbleFL/Common/PblHashTable.h"
 #include "PebbleFL/Common/PblUnicode.h"
 #include "RedEngineFL/Memory/RedMemory.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 
 // GLOBAL: SWBF2 0x00940bf0
 FLLocalizeEntry* mPatchLocalizeFile;
@@ -27,6 +28,11 @@ int sMasterLocalizeHashNumEntries;
 // `dynamic initializer for 'sMasterLocalizeHash''
 
 PblHashTable<FLLocalizeEntry, 16384> sMasterLocalizeHash;
+
+// OpenSWBF2: the console text of the hint strings (the second entry under the
+// same hash, written with {button} tokens), shown instead of the PC text
+// ("[MOUSE BUTTON 1]") while a pad is the device in use.
+PblHashTable<FLLocalizeEntry, 1024> sPadLocalizeHash;
 
 char const* gLanguageStr;
 
@@ -115,6 +121,15 @@ const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing)
     FLLocalizeEntry* pEntry = sMasterLocalizeHash.Find(uiHash);
     if (pEntry)
     {
+        if (XInputPad::PadPromptsActive())
+        {
+            FLLocalizeEntry* pPad = sPadLocalizeHash.Find(uiHash);
+            if (pPad && XInputPad::PromptTextResolves(pPad->mData, XInputPad::gPadLayout,
+                                                       XInputPad::gPadPromptMode))
+            {
+                return pPad->mData;
+            }
+        }
         return pEntry->mData;
     }
     return bNullIfMissing ? 0 : (const unsigned short*)L"[NULL]";
@@ -194,6 +209,23 @@ bool Read(PblFileChunk& chunk)
     return bLanguage;
 }
 
+// OpenSWBF2: a later entry under a hash is the console text when the PC text
+// names keys ("[E]") and it uses {button} tokens instead.
+static bool IsPadPromptVariant(const unsigned short* pusPc, const unsigned short* pusConsole)
+{
+    bool bKeys = false;
+    for (const unsigned short* p = pusPc; *p && !bKeys; ++p)
+    {
+        bKeys = *p == '[';
+    }
+    bool bTokens = false;
+    for (const unsigned short* p = pusConsole; *p && !bTokens; ++p)
+    {
+        bTokens = *p == '{';
+    }
+    return bKeys && bTokens;
+}
+
 // FUNCTION: SWBF2 0x006c5f40
 void ReadMasterLocalizeFile(PblFileChunk& chunk)
 {
@@ -204,10 +236,17 @@ void ReadMasterLocalizeFile(PblFileChunk& chunk)
     for (FLLocalizeEntry* pEntry = mMasterLocalizeFile; pEntry->mEntryLen;
          pEntry = (FLLocalizeEntry*)((char*)pEntry + pEntry->mEntryLen))
     {
-        if (!sMasterLocalizeHash.Find(pEntry->mEntryHash)
-            && sMasterLocalizeHash.Store(pEntry->mEntryHash, pEntry))
+        FLLocalizeEntry* pFirst = sMasterLocalizeHash.Find(pEntry->mEntryHash);
+        if (!pFirst)
         {
-            ++sMasterLocalizeHashNumEntries;
+            if (sMasterLocalizeHash.Store(pEntry->mEntryHash, pEntry))
+            {
+                ++sMasterLocalizeHashNumEntries;
+            }
+        }
+        else if (IsPadPromptVariant(pFirst->mData, pEntry->mData))
+        {
+            sPadLocalizeHash.Store(pEntry->mEntryHash, pEntry);
         }
     }
 }
@@ -218,6 +257,7 @@ void ReadMasterLocalizeFile(PblFileChunk& chunk)
 void RedLocalizeDB::Reset()
 {
     sMasterLocalizeHash.Clear();
+    sPadLocalizeHash.Clear();
     sMasterLocalizeHashNumEntries = 0;
     mMasterLocalizeFile = 0;
     mPatchLocalizeFile = 0;

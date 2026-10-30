@@ -190,6 +190,56 @@ int DefaultSlot(int iLayout, int iMode, int iAction);
 const char* SlotLabel(int iSlot);
 const char* ActionLabel(int iLayout, int iMode, int iAction);
 
+// Button prompts. The console versions of the hint strings ("{btnr1} to fire",
+// "Press {GuiAccept} to continue") are still in the localization data, written
+// with {tokens} that RedTextElement swaps for one glyph each; on a pad they
+// replace the PC text ("[MOUSE BUTTON 1] to fire"). Each token is the action
+// it stood for on the console, shown as the button our layout puts it on, as
+// an Xbox-style icon glyph (kGlyphBase + PadGlyph) drawn at startup.
+enum PadGlyph
+{
+    kGlyphA = 0,
+    kGlyphB,
+    kGlyphX,
+    kGlyphY,
+    kGlyphLB,
+    kGlyphRB,
+    kGlyphLT,
+    kGlyphRT,
+    kGlyphLS,
+    kGlyphRS,
+    kGlyphBack,
+    kGlyphStart,
+    kGlyphDPadUp,
+    kGlyphDPadRight,
+    kGlyphDPadDown,
+    kGlyphDPadLeft,
+    kGlyphLeftStick,
+    kGlyphRightStick,
+    kGlyphCount
+};
+const unsigned short kGlyphBase = 0xE000;
+const int kTokenRetail = -2; // a token the game draws itself ({OptionL}, {OptionR})
+
+// Glyph for a raw pad slot, or -1. The icon's label ("A", "LB", "BACK").
+int GlyphForSlot(int iSlot);
+const char* GlyphText(int iGlyph);
+// Glyph for what a layout puts on an action in an input mode, or -1 if unbound.
+int ActionGlyph(int iLayout, int iMode, int iAction);
+// Glyph for a {token} (case-insensitive name, no braces), -1 if this layout
+// leaves it unbound or the token is unknown, kTokenRetail for the game's own.
+int TokenGlyph(const char* pcToken, int iLayout, int iMode);
+int TokenCount();
+const char* TokenName(int iIndex);
+// Every {token} in a (UTF-16) string resolves, so the console text can be shown.
+bool PromptTextResolves(const unsigned short* pusText, int iLayout, int iMode);
+
+// The pad is the device in use: in game the last input was the pad's (set by
+// the input layer each frame with the input mode), or the pad drives the menus.
+extern bool gPadPromptsGame;
+extern int gPadPromptMode;
+bool PadPromptsActive();
+
 // Modern X: a tap (released within kUseHoldMs) reloads, a hold uses (get in
 // or out of a vehicle). Each press gives one result.
 const unsigned int kUseHoldMs = 500;
@@ -285,9 +335,15 @@ enum Action
     kActSquadCommand = 9,
     kActAcceptHero = 10,
     kActDeclineHero = 11,
+    kActLockTarget = 12,
     kActPrimaryNext = 13,
+    kActPrimaryPrev = 14,
     kActSecondaryNext = 15,
+    kActSecondaryPrev = 16,
     kActPlayerList = 17,
+    kActChat = 18,
+    kActFriendChat = 19,
+    kActMap = 28,
     kActRoll = 29, // ePROCESSEDINPUT_TakeScreenshot: the PC "Roll" key (special move)
     kActStrafeAxis = 30,
     kActMoveAxis = 31,

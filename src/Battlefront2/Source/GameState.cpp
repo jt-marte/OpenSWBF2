@@ -218,6 +218,7 @@
 #include "SoundDebugDisplay.h"
 #include "GameVoiceChatNode.h"
 #include "PebbleFL/Common/PblJournal.h"
+#include "Battlefront2/Platform/Pc/pcPadPrompts.h"
 
 namespace std
 {
@@ -1018,6 +1019,7 @@ void GameState::PreStateInit(bool bMission)
     }
 
     LoadUtil::ReadDataFile("common.lvl", 0, 0, 0, 0);
+    PadPrompts::CreateIcons(); // OpenSWBF2: pad button icons for the SpecialFont
     RedFont::PostCommonInit();
     GameSoundEngine::InitializeBusGains();
     gSoundEnabled = true;

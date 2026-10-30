@@ -2609,6 +2609,12 @@ void RedVariableWidthFont::LoadCustomTextures(const CustomFontData& cfd)
             {
                 glyph.width = (unsigned char)pTexture->m_uiWidth;
             }
+            // OpenSWBF2: the 64x64 option arrows ({OptionL}, {OptionR}) and pad
+            // button icons (0xE000 up) sit inline at the font's glyph height
+            if (glyph.value >= 0x8200 && glyph.width > (unsigned char)cfd.glyphHeight_)
+            {
+                glyph.width = (unsigned char)cfd.glyphHeight_;
+            }
             glyph.bottom = glyph.width;
             glyph.right = glyph.width;
         }

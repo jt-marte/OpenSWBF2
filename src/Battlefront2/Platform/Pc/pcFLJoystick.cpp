@@ -1133,6 +1133,8 @@ void RawControllerInputs::PadDefaultsProcess()
     XInputPad::gPadSecondZoom = false;
     XInputPad::gPadLookActive = false;
     XInputPad::gPadLookMag = 0.0f;
+    XInputPad::gPadPromptsGame = false;
+    XInputPad::gPadPromptMode = mMode;
     bool bLocked = false;
 
     for (int iPort = 0; iPort < 10; iPort++)
@@ -1148,6 +1150,9 @@ void RawControllerInputs::PadDefaultsProcess()
         const float fLookY = mRawInputFloat[iPort][XInputPad::kSlotRightDown];
         const float fLookMag = sqrtf(fLookX * fLookX + fLookY * fLookY);
         XInputPad::gPadLookActive = true;
+        // button prompts follow the last device used (the retail mouse-mode flag:
+        // 0 once a pad input changes, 2 once the mouse moves)
+        XInputPad::gPadPromptsGame = mProcessDestination && mProcessDestination->bits.mMouseMode == 0;
         if (fLookMag > XInputPad::gPadLookMag)
         {
             XInputPad::gPadLookMag = fLookMag;
