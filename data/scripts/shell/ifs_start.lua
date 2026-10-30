@@ -282,7 +282,8 @@ function ifs_start_OnLoginDone( )
 				ifs_main.option_mp = 1		-- set to multiplayer 
 			end
 			ScriptCB_SetGameRules("mp")
-			ifs_movietrans_PushScreen(ifs_mpgs_login)
+			-- OpenSWBF2: the session list runs the pending join itself (no sign-in screen first)
+			ifs_movietrans_PushScreen(ifs_mp_sessionlist)
 		elseif (ScriptCB_InMultiplayer()) then
 			if( ifs_main ) then
 				ifs_main.option_mp = 1		-- set to multiplayer 
@@ -305,16 +306,12 @@ function ifs_start_OnLoginDone( )
 				ifs_main.option_mp = 1		-- set to multiplayer 
 			end
 			ScriptCB_SetGameRules("mp")
-			if( ScriptCB_IsLoggedIn() ) then
-				if(ScriptCB_GetWasHost()) then
-					ifs_movietrans_PushScreen(ifs_missionselect_pcMulti)
-				else
-					ifs_movietrans_PushScreen(ifs_mp_sessionlist)
-				end
-			else
-				ifs_mpgs_login.enable_autologin = 1
-				ifs_movietrans_PushScreen(ifs_mpgs_login)
+			-- OpenSWBF2: open on Direct Connect, as the Multiplayer tab does, with the Galaxy
+			-- sign-in started quietly in the background
+			if( not ScriptCB_IsLoggedIn() and ScriptCB_IsLoginDone() ~= 0 ) then
+				ScriptCB_StartLogin()
 			end
+			ifs_movietrans_PushScreen(ifs_mp_direct)
 		end
 	else
 		ifs_movietrans_PushScreen(ifs_main)

@@ -35,16 +35,13 @@ function fnPCMainTabs_Multi( this )
 		ifs_main.option_mp = 1		-- set to multiplayer 
 	end
 	ScriptCB_SetGameRules("mp")
-	if( ScriptCB_IsLoggedIn() ) then
-		if(ScriptCB_GetAmHost()) then
-			ScriptCB_SetIFScreen("ifs_missionselect_pcMulti")
-		else
-			ScriptCB_SetIFScreen("ifs_mp_sessionlist")
-		end
-	else
-		ifs_mpgs_login.enable_autologin = 1
-		ScriptCB_SetIFScreen("ifs_mpgs_login")
+	-- OpenSWBF2: Multiplayer opens on Direct Connect, which needs no sign-in. The Galaxy sign-in
+	-- (for the Legacy server list) starts quietly in the background instead of in front of the
+	-- player; on x64 there is no Galaxy and it does nothing.
+	if( not ScriptCB_IsLoggedIn() and ScriptCB_IsLoginDone() ~= 0 ) then
+		ScriptCB_StartLogin()
 	end
+	ScriptCB_SetIFScreen("ifs_mp_direct")
 end
 
 function fnPCMainTabs_Profile( this)
@@ -139,7 +136,7 @@ gPCMainTabsLayout = {
 	  width = main_tab_width,	yPos = main_tab_ypos, callback = fnPCMainTabs_Single,
 	--hotspot_x = 62, hotspot_width = main_tab_width - 22,
 	},
-	{ tag = "_tab_multi",	string = "ifs.main.mp",			screen = "ifs_mpgs_login",		
+	{ tag = "_tab_multi",	string = "ifs.main.mp",			screen = "ifs_mp_direct",		
 	--xPos = 313,		
 	  width = main_tab_width,	yPos = main_tab_ypos, callback = fnPCMainTabs_Multi, 
 	--hotspot_x = 51, hotspot_width = main_tab_width - 16,

@@ -792,6 +792,42 @@ TEST_CASE("multiplayer: Modern first and by default with a Direct Connect tab an
     CHECK(Has(sList, "ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString)"));
 }
 
+TEST_CASE("multiplayer opens on Direct Connect with no sign-in screen" * doctest::test_suite("regression"))
+{
+    // The Galaxy sign-in screen (ifs_mpgs_login) used to stand in front of Multiplayer and showed
+    // an error whenever Galaxy was not there (always on x64). Now the Multiplayer tab and the
+    // start-up route open Direct Connect and start the sign-in quietly in the background.
+    std::string sTabsRaw;
+    std::string sStartRaw;
+    std::string sListRaw;
+    REQUIRE(ReadSource("../data/scripts/common/pctabs_options.lua", sTabsRaw));
+    REQUIRE(ReadSource("../data/scripts/shell/ifs_start.lua", sStartRaw));
+    REQUIRE(ReadSource("../data/scripts/shell/ifs_mp_sessionlist.lua", sListRaw));
+    const std::string sTabs = StripCr(sTabsRaw);
+    const std::string sStart = StripCr(sStartRaw);
+    const std::string sList = StripCr(sListRaw);
+
+    const std::string sMulti = LuaFunctionBody(sTabs, "function fnPCMainTabs_Multi( this )");
+    REQUIRE(!sMulti.empty());
+    CHECK(Has(sMulti, "ScriptCB_SetIFScreen(\"ifs_mp_direct\")"));
+    CHECK(Has(sMulti, "ScriptCB_StartLogin()"));
+    CHECK(!Has(sMulti, "ifs_mpgs_login"));
+    CHECK(Has(LineWith(sTabs, "tag = \"_tab_multi\""), "screen = \"ifs_mp_direct\""));
+
+    const std::string sDone = LuaFunctionBody(sStart, "function ifs_start_OnLoginDone( )");
+    REQUIRE(!sDone.empty());
+    CHECK(Has(sDone, "ifs_movietrans_PushScreen(ifs_mp_direct)"));
+    CHECK(!Has(sDone, "ifs_mpgs_login"));
+
+    // Direct Connect is the first Multiplayer tab, and the row's start position moved with it
+    const size_t uDirect = sList.find("tag = \"_tab_direct\"");
+    const size_t uJoin = sList.find("tag = \"_tab_join\"");
+    REQUIRE(uDirect != std::string::npos);
+    REQUIRE(uJoin != std::string::npos);
+    CHECK(uDirect < uJoin);
+    CHECK(Has(LineWith(sList, "tag = \"_tab_direct\""), "xPos = 87"));
+}
+
 TEST_CASE("pad snap lands on a dropdown box like a slider bar" * doctest::test_suite("regression"))
 {
     // Instant Action's AI difficulty: the box's hotspot starts at its left end, so its centre

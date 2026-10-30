@@ -8,10 +8,11 @@ local mp_tab_ypos = 45
 local opt_tab_width = 158.5
 
 gPCMultiPlayerTabsLayout = {
-	{ tag = "_tab_join",		string = "ifs.mp.tabs.join",		screen = "ifs_mp_sessionlist",		  xPos = 87, width = opt_tab_width, yPos = mp_tab_ypos, },
+	-- OpenSWBF2: join a server by address, or one joined before (ifs_mp_direct, end of this file).
+	-- It comes first: Multiplayer opens on it.
+	{ tag = "_tab_direct",		string = "ifs.mp.tabs.direct",		screen = "ifs_mp_direct",			  xPos = 87, width = opt_tab_width, yPos = mp_tab_ypos, },
+	{ tag = "_tab_join",		string = "ifs.mp.tabs.join",		screen = "ifs_mp_sessionlist",		  width = opt_tab_width, yPos = mp_tab_ypos, },
 	{ tag = "_tab_create",		string = "ifs.mp.tabs.create",		screen = "ifs_missionselect_pcMulti", width = opt_tab_width, yPos = mp_tab_ypos, },
-	-- OpenSWBF2: join a server by address, or one joined before (ifs_mp_direct, end of this file)
-	{ tag = "_tab_direct",		string = "ifs.mp.tabs.direct",		screen = "ifs_mp_direct",			  width = opt_tab_width, yPos = mp_tab_ypos, },
 	--{ tag = "_tab_mp_opt",		string = "ifs.mp.tabs.options",		screen = "ifs_opt_mp",				  xPos = 320,width = 133, yPos = mp_tab_ypos, },
 	-- OpenSWBF2: no Galaxy account, friends list or leaderboard tabs. The screens stay
 	-- loadable for mods; tab calls that name these tags find nothing and do nothing.
