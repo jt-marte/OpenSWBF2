@@ -44,10 +44,15 @@
   - updates kept to one packet.
 - The Galaxy account, Friends and Leaderboard tabs are gone.
 
+### 64-bit build
+- A **64-bit `BattlefrontII.exe`** beside the 32-bit one, for the same game data. It joins and hosts the same games as the 32-bit build, in either direction.
+- **Modern multiplayer only** for now: Galaxy and Steam ship only 32-bit DLLs, so the Legacy server list is not there. Voice chat is off in the 64-bit build until its codec is ported.
+- **Movies play through FFmpeg**, since Bink has no 64-bit DLL (see Third-party code).
+
 ### Tooling
 - `tools\setup.ps1` installs the 2013-era toolchain on a current PC.
-- `tests\run.ps1` runs the unit, regression and smoke tests.
-- `tests\netpair.ps1` plays a server and clients against each other with simulated lag, jitter and loss.
+- `tests\run.ps1` runs the unit, regression and smoke tests; `-Platform x64` runs them against the 64-bit build.
+- `tests\netpair.ps1` plays a server and clients against each other with simulated lag, jitter and loss; `-ClientPlatform` mixes 32-bit and 64-bit peers.
 
 ## Setup
 
@@ -57,7 +62,7 @@ You need Visual Studio 2013 (Update 5) with the v120_xp toolset and the DirectX 
 powershell -ExecutionPolicy Bypass -File tools\setup.ps1
 ```
 
-It installs VS2013 from the offline ISO, extracts the SDK headers and libs, and fetches DXVK into `third_party\dxvk`. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
+It installs VS2013 from the offline ISO, extracts the SDK headers and libs, and fetches DXVK into `third_party\dxvk` and FFmpeg (for the 64-bit build) into `third_party\ffmpeg`. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
 
 ## Build and run
 
@@ -66,6 +71,8 @@ It installs VS2013 from the offline ISO, extracts the SDK headers and libs, and 
 ```
 
 The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the Steam install's GameData through the registry; set `SWBF2_GAMEDATA` to use another copy.
+
+For the 64-bit build use `/p:Platform=x64`; it goes to `bin\x64\Release\BattlefrontII.exe`. Each build keeps its own settings and `SaveGames` folder next to its exe.
 
 ## Hosting
 
