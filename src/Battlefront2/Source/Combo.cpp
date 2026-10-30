@@ -516,11 +516,10 @@ Combo* Combo::CopyConstructor(const Combo& other)
     for (unsigned int i = 0; i < other.m_uiNumStates; ++i)
     {
         const State& state = other.m_aState[i];
-        const unsigned int* pWords = reinterpret_cast<const unsigned int*>(&state);
-        const unsigned int flags = pWords[10];
+        // retail tested bits 19, 22 and 23 of word 10, the Win32 offset of these bitfields
         if (state.m_uiDuration == 1023 ||
-            ((flags & 0x00400000u) && (flags & 0x00080000u)) ||
-            ((flags & 0x00800000u) && (flags & 0x00080000u)) ||
+            (state.m_bVelocityZFromAnim && state.m_bAnimatedMove) ||
+            (state.m_bVelocityXFromAnim && state.m_bAnimatedMove) ||
             state.m_uiNumAttacks)
         {
             bDeepCopy = true;

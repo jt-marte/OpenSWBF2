@@ -121,7 +121,9 @@ function Invoke-NetPair($name, $drag) {
         $exited = @($procs | Where-Object { $_.HasExited } | ForEach-Object { '0x{0:X8}' -f $_.ExitCode })
     }
     finally {
-        foreach ($p in $procs) { if (-not $p.HasExited) { & taskkill /PID $p.Id /T /F 2>&1 | Out-Null } }
+        # taskkill's stderr (a child it could not end, such as a crashed peer's WerFault) must not
+        # stop the script under ErrorActionPreference Stop
+        foreach ($p in $procs) { if (-not $p.HasExited) { try { & taskkill /PID $p.Id /T /F 2>&1 | Out-Null } catch {} } }
         foreach ($p in $procs) { $p.WaitForExit(10000) | Out-Null }
         foreach ($d in $dirs) {
             Get-ChildItem -LiteralPath $d -Filter '*.dmp' -ErrorAction SilentlyContinue | Copy-Item -Destination $caseDir

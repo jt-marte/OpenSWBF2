@@ -60,6 +60,14 @@ void NetSocket::OpenBroadcastSockets()
     netBroadcastSendSocket = (unsigned int)socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     setsockopt((SOCKET)netBroadcastSendSocket, SOL_SOCKET, SO_BROADCAST, (const char*)&bBroadcast,
                sizeof(bBroadcast));
+    if (gNetLoopback)
+    {
+        // connect would bind it to any address, so bind it to loopback first
+        addr.sin_family = AF_INET;
+        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+        addr.sin_port = 0;
+        bind((SOCKET)netBroadcastSendSocket, (const sockaddr*)&addr, sizeof(addr));
+    }
     addr.sin_family = AF_INET;
     addr.sin_addr.s_addr = INADDR_BROADCAST;
     addr.sin_port = htons(3656);

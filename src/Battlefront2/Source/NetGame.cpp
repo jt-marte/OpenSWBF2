@@ -4857,7 +4857,19 @@ void NetGame::SendHost()
 unsigned int GetUniqObjectId(const GameObject* pObject);
 GameObject* FindClientObject(unsigned int uId);
 // GLOBAL: SWBF2 0x01e64ef4
-unsigned int* handleToIndexMapPtr;
+struct HandleToIndex;
+
+// WriteUpdate's handle-to-index map: a count, then the table. Retail kept it as unsigned
+// int[1 + 2 * 128]; the table's slots are pointer-sized, so on x64 that array was half the size it
+// needed and the table ran over WriteUpdate's stack.
+struct HandleToIndexMap
+{
+    unsigned int count;
+    PblHashTable<HandleToIndex, 128> table;
+};
+static_assert(sizeof(void*) != 4 || sizeof(HandleToIndexMap) == 4 * (1 + 2 * 128), "retail layout");
+
+HandleToIndexMap* handleToIndexMapPtr;
 // GLOBAL: SWBF2 0x01fa2513
 bool isFullState;
 // GLOBAL: SWBF2 0x01fa88c8
@@ -4981,8 +4993,9 @@ void WriteObjectPtr(NetPktGroup& group, const GameObject* pObject)
     group.Write(bSpecial);
     if (bSpecial)
     {
-        void* pEntry = clientNdObjMap.objMap.Find(pObject->GetHandleId());
-        group.WriteBits(pEntry ? ((unsigned int*)pEntry)[3] : 0u, 8);
+        // retail read the index as word 3, which on x64 is half of NetNdObj::orig
+        const NetNdObj* pEntry = clientNdObjMap.objMap.Find(pObject->GetHandleId());
+        group.WriteBits(pEntry ? pEntry->index : 0u, 8);
     }
     else
     {
@@ -5008,6 +5021,7 @@ GameObject* ReadObjectPtr(NetPktGroup& group)
     GameObject** pPair = (GameObject**)clientNdObjMap.array[uId];
     return pPair[isFullState ? 1 : 0];
 }
+
 
 // FUNCTION: SWBF2 0x005bd440
 void MarkWriteAlign(NetPktGroup& group)
@@ -5075,7 +5089,7 @@ unsigned int GetUniqObjectId(const GameObject* pObject)
         return 63;
     }
     PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)(handleToIndexMapPtr + 1);
+        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
     unsigned int* pId = pTable->Find(pObject->GetHandleId());
     return pId ? *pId : 63;
 }
@@ -11396,8 +11410,10 @@ int Min(int a, int b)
 // FUNCTION: SWBF2 0x00450380
 unsigned int __fastcall SetDamageableVanishFlags(unsigned int* pThis)
 {
-    pThis[47] = (pThis[47] & ~0x18u) | 0x10u;
-    return pThis[47];
+    // Retail cleared mIsAlive and set mVanishing in word 47, the Win32 offset of their bitfield; on
+    // x64 that word is another field. The callers ignore the result.
+    ((Damageable*)pThis)->InstantVanish();
+    return 0;
 }
 
 #ifndef _WIN64 // retail word-offset helpers; the Hole copy below no longer uses them
@@ -13329,7 +13345,7 @@ void AdjustClock()
 void GetLastObjState(GameObject* pObject, NetObjState*& pState, unsigned int& uId)
 {
     PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)(handleToIndexMapPtr + 1);
+        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
     unsigned int* pEntry = pTable->Find(pObject->GetHandleId());
     uId = *pEntry;
     if (!*((unsigned char*)pEntry + 4))
@@ -13397,22 +13413,25 @@ void WriteEvent_CreateChunkCluster(NetPktGroup& group, const void* pEvent)
         return;
     }
 
-    const unsigned int* pClass = (const unsigned int*)fields.mEntClass;
+    // Retail read the class's net index and chunk descriptors as words 7 and 26 to 35 of the
+    // class, Win32 offsets. On x64 those were other fields, so the host wrote chunks for other
+    // slots than ReadEvent_CreateChunkCluster reads and the client read past the update's end.
+    const EntityGeometryClass* pClass = fields.mEntClass;
     group.WriteBits(fields.mChunkClusterIndex, 4);
     WriteEntityClass(group, pClass);
-    if (pClass[7] >= 0xff)
+    if ((unsigned int)pClass->mNetIndex >= 0xff)
     {
         return;
     }
-    EntityClass* pEntityClass = Factory<Entity, EntityClass, EntityDesc>::FindNetIndex(pClass[7]);
+    const EntityGeometryClass* pEntityClass =
+        (const EntityGeometryClass*)Factory<Entity, EntityClass, EntityDesc>::FindNetIndex(pClass->mNetIndex);
     if (!pEntityClass)
     {
         return;
     }
-    const unsigned int* pChunkFields = (const unsigned int*)pEntityClass;
     for (int i = 0; i < 10; ++i)
     {
-        if (pChunkFields[26 + i])
+        if (pEntityClass->mChunkDescriptors[i])
         {
             const Chunk& chunk = pCluster->mChunks[i];
             WriteMatrix(group, chunk.GetMatrix());
@@ -13664,14 +13683,7 @@ PblVector3* __fastcall TransformNormalByMatrix(const PblMatrix* pMatrix, void*,
     return pOut;
 }
 
-// FUNCTION: SWBF2 0x0051ecb0
-void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex)
-{
-    const void* pSource = *(const void* const*)((const char*)pThis +
-                                            0x28 + iIndex * 4);
-    memcpy(pOut, (const char*)pSource + 16, 64);
-    return pOut;
-}
+void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex); // CameraManager.cpp
 
 // FUNCTION: SWBF2 0x005d2260
 void WriteTurnLowBits(NetPktGroup* pGroup, unsigned int uTurn)
@@ -14801,6 +14813,7 @@ int debugWriteHandleId = 0x5166;
 int debugWriteInitialPlayer = 1;
 
 void WriteQuaternion(NetPktGroup& group, const PblQuaternion& value);
+
 
 // FUNCTION: SWBF2 0x005bbd50
 void WriteCreate(NetPktGroup& group, GameObject* pObject)
@@ -16096,8 +16109,7 @@ void WriteObjects(NetPktGroup& group)
         FinishSend(sends, scopes, scopeCounts);
 
         NetObjStateMap* lastMap = netPlayers[curDst].lastObjState;
-        PblHashTable<HandleToIndex, 128>* handleMap =
-            (PblHashTable<HandleToIndex, 128>*)(handleToIndexMapPtr + 1);
+        PblHashTable<HandleToIndex, 128>* handleMap = &handleToIndexMapPtr->table;
         for (i = 0; i < 64; ++i)
         {
             NetObjState* state = lastMap->stateMap[i];
@@ -16119,7 +16131,7 @@ void WriteObjects(NetPktGroup& group)
                 {
                     if (handleMap->Store(pObject->GetHandleId(), entry))
                     {
-                        ++*handleToIndexMapPtr;
+                        ++handleToIndexMapPtr->count;
                     }
                 }
                 else
@@ -16246,7 +16258,7 @@ void WriteObjects(NetPktGroup& group)
                 entry->isNew = true;
                 if (handleMap->Store(pObject->GetHandleId(), entry))
                 {
-                    ++*handleToIndexMapPtr;
+                    ++handleToIndexMapPtr->count;
                 }
                 if (pObject->GetHandleId() == netHostTraceHandleId)
                 {
@@ -16469,11 +16481,11 @@ void WriteUpdate(NetPktGroup& group)
     }
 
     BblList<HandleToIndex, 128> handlePool;
-    unsigned int handleToIndexMap[1 + 2 * 128];
-    ((PblHashTable<HandleToIndex, 128>*)&handleToIndexMap[1])->Clear();
-    handleToIndexMap[0] = 0;
+    HandleToIndexMap handleToIndexMap;
+    handleToIndexMap.table.Clear();
+    handleToIndexMap.count = 0;
     handlePoolPtr = &handlePool;
-    handleToIndexMapPtr = handleToIndexMap;
+    handleToIndexMapPtr = &handleToIndexMap;
     if (!isFullState || curDst == -1)
     {
         WriteObjects(group);

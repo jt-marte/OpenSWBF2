@@ -645,3 +645,13 @@ float GetWidescreenFOVAdjustment(float fFOV)
     const float fScale = 0.75f / fAspect;
     return (float)atan((double)(fScale * (float)tan((double)(fFOV * 0.5f)))) * 2.0f;
 }
+
+// FUNCTION: SWBF2 0x0051ecb0
+// The chase camera's matrix. Retail read the ChaseCamera pointer at +0x28 and its matrix at +16,
+// Win32 offsets; it lives here, beside the classes, because NetGame.cpp only sees a stand-in.
+void* __fastcall CopyCameraRecord(const void* pThis, void*, void* pOut, int iIndex)
+{
+    const ChaseCamera* pChase = ((const CameraManager*)pThis)->mChaseCamera[iIndex];
+    memcpy(pOut, &pChase->mMatrix, sizeof(PblMatrix));
+    return pOut;
+}
