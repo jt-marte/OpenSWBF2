@@ -1,62 +1,89 @@
-# Star Wars: Battlefront II (2005) Decompiled
+# OpenSWBF2
 
-## Prerequisites
+**Star Wars: Battlefront II (2005), decompiled and modernized.** This fork of [OpenSWBF2/OpenSWBF2](https://github.com/OpenSWBF2/OpenSWBF2) builds a new `BattlefrontII.exe` for the stock game data, with sharper graphics, native controller support, smarter AI and reworked online play.
 
-- Visual Studio 2013 (Update 5) with the v120_xp platform toolset
-  https://visualstudio.microsoft.com/vs/older-downloads/
-- DirectX SDK (June 2010), which sets DXSDK_DIR
-  https://www.microsoft.com/en-us/download/details.aspx?id=6812
+## What's new in this fork
 
-Or let `tools\setup.ps1` check and install them. The VS2013 web installer and the DirectX SDK installer no longer work on current systems, so the script installs VS2013 from the offline ISO and extracts the SDK headers and libs directly. It also checks that your GameData is unmodded (the 1.3 patch and Remaster replace lvls the build needs) and explains how to get a stock copy if not.
+### Graphics
+- **Sharp at 1440p and 4K**: crisp text, sharp front-end menus, in-game menus that scale with the screen, and a correct reticle, HUD icons and scope lens at high resolutions.
+- **HUD scale** (50–150%) and **field of view** (55–100°) in Options → Video.
+- New profiles start on the **highest video settings**.
+
+### Controller
+- **Native Xbox (XInput) controllers**, no binding needed. Choose the **Modern** or **Legacy** layout in Options → Game; the Controller page lists every button.
+- **Modern** layout:
+  - aim on LT, throw on RB, swap weapons on Y;
+  - tap X to reload, hold X to use;
+  - double-tap B to roll;
+  - click RS to lock on, or step the zoom while scoped.
+- Xbox button prompts in hints, a sensitivity slider, and pad navigation in the menus.
+
+### AI: the Overhaul difficulty
+- A third choice after Normal and Elite. Both teams play one step above Elite with no handicaps, so your AI allies match the enemy.
+- Bots pick targets and aim the same way at humans and bots, on foot, in vehicles and on turrets, instead of ganging up on the player.
+- Smarter tactics:
+  - turning on whoever shoots them;
+  - chasing enemies who duck out of sight;
+  - varying their attack style;
+  - falling back when badly hurt;
+  - grenading enemies in cover;
+  - spreading over command posts;
+  - jinking in starfighters.
+- Host-side: stock players need nothing and see the server listed as Elite.
+
+### Multiplayer
+- **Modern and Legacy** server sources on Join and Create. Modern is OpenSWBF2's own path (LAN and direct joins); Legacy is the Galaxy list shared with the stock game.
+- **Direct Connect** tab: join any IP or host name, with a password box and your last eight servers one click away.
+- **Dedicated server**: `-dedicated` runs headless, with no window, sound or Steam sign-in.
+- **60 ticks a second by default** (30, 60 or 120; the stock game ran 20), with host bandwidth options past 6 Mbit.
+- **Netcode retuned for those tick rates**:
+  - a 150 ms window for late inputs;
+  - an input margin that adapts to jitter;
+  - shots no longer dropped from full updates;
+  - updates kept to one packet.
+- The Galaxy account, Friends and Leaderboard tabs are gone.
+
+### Tooling
+- `tools\setup.ps1` installs the 2013-era toolchain on a current PC.
+- `tests\run.ps1` runs the unit, regression and smoke tests.
+- `tests\netpair.ps1` plays a server and clients against each other with simulated lag, jitter and loss.
+
+## Setup
+
+You need Visual Studio 2013 (Update 5) with the v120_xp toolset and the DirectX SDK (June 2010). Their old installers no longer run on current systems, so let the script handle it:
 
 ```
 powershell -ExecutionPolicy Bypass -File tools\setup.ps1
 ```
 
-Add `-CheckOnly` to only report what is missing.
+It installs VS2013 from the offline ISO and extracts the SDK headers and libs. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
 
-## Build
+## Build and run
 
 ```
-"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" BattlefrontII.sln /p:Configuration={Config} /p:Platform={Platform}
+"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" BattlefrontII.sln /p:Configuration=Release /p:Platform=Win32
 ```
 
-The exe is written to `bin\{Platform}\{Config}\BattlefrontII.exe`.
+The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the Steam install's GameData through the registry; set `SWBF2_GAMEDATA` to use another copy.
 
-## Run
+## Hosting
 
-The build automatically finds the Steam install's GameData through Steam's registry entry, or set `SWBF2_GAMEDATA` to the desired GameData directory to use another copy.
+**In game:** Multiplayer → Create with the Modern source. Others join from the Direct Connect tab with your address (port 3658). Players outside your network need UDP 3658 forwarded to you, or a VPN such as Tailscale.
 
-## Multiplayer
-
-**Direct connect.** Multiplayer's Join and Create screens pick a source: **Modern** (the default) is OpenSWBF2's own path, and **Legacy** is the Galaxy list shared with the stock Steam game (shown only when signed in to Galaxy). On Modern, Join lists servers found on the local network, and Create hosts a server others can join directly. The **Direct Connect** tab joins any address (`1.2.3.4`, `1.2.3.4:3700` or a host name; the port defaults to 3658), with a password box for locked servers, and keeps the last eight servers joined there in `recentservers.txt` next to the exe, so one click rejoins them. Private, VPN (Tailscale, Hamachi), public and loopback addresses all work; players outside your network need UDP 3658 forwarded to the host. `BattlefrontII.exe /autonet client -lan /connect <address>` joins headlessly. Hosts pick 30, 60 (default) or 120 turns per second in Options > Online; the stock game ran 20, and how it copes with a faster host is untested.
-
-**Dedicated server.** `BattlefrontII.exe -dedicated <map> [<map> ...]` starts a headless Direct server: no window, renderer or sound, no Steam sign-in needed, logs to stdout (and to the parent console when started from one). Maps use mission names such as `geo1c_con`, optionally followed by both teams' reinforcements (`geo1c_con 150 150`).
+**Dedicated server:** `BattlefrontII.exe -dedicated <map> [<map> ...]`, with mission names such as `geo1c_con`, optionally followed by both teams' reinforcements (`geo1c_con 150 150`). It logs to the console; Ctrl+C stops it cleanly.
 
 | Switch | Meaning |
 |--------|---------|
-| `-port N` | game port, UDP (default 3658; LAN discovery stays on 3656) |
-| `/gamename "Name"` | server name (default `OpenSWBF2 Server`) |
+| `-port N` | game port, UDP (default 3658) |
+| `/gamename "Name"` | server name |
 | `/playerlimit N` | player limit, 1 to 64 |
 | `/password text` | join password |
 | `/bots N` | AI units per team |
-| `/tps N` | simulation turns per second: 30, 60 (default) or 120; clients get as many updates a second as the turn rate, so 120 suits LAN and high-upload servers |
+| `/tps N` | ticks a second: 30, 60 (default) or 120 |
 | `/difficulty N` | AI difficulty: 2 Normal, 3 Elite, 4 Overhaul |
-| `/configdir dir` | folder holding `ServerSettings.cfg` and `ServerRotation.cfg` (default `settings`); each line is an admin command such as `/gamename My Server` or `/addmap geo1c_con` |
-| `-console` | open a console window for the log when there is no stdout |
-| `-netstats` | log ping, updates per second and bandwidth once a second |
+| `/configdir dir` | folder with `ServerSettings.cfg` and `ServerRotation.cfg`: one admin command per line, such as `/addmap geo1c_con` |
+| `-console` | open a console window for the log |
+| `-netstats` | log ping, updates and bandwidth once a second |
 | `-log file` | also write the log to a file |
 
-Ctrl+C, Ctrl+Break or closing the console stops the server cleanly. The command line overrides the config files.
-
-## AI
-
-Options > General > Difficulty, the profile screen and the host options offer **Overhaul** after Normal and Elite. It changes how the bots think:
-
-- Both teams play at one skill, one step above Elite's enemies, so your AI allies are as good as the enemy (no mission or autobalance handicaps).
-- Bots pick targets by the same rules whether the enemy is a human or a bot, in soldiers, vehicles and turrets alike. Retail bots ranked any human facing them above every bot enemy, stopped looking for bots while aiming at a human, saw humans from twice as far and turned only on human attackers.
-- Bots aim by one model against every target. Retail bots shot each other with a third of the miss they used against humans.
-- Fights between bots far from any player are thought through as often as those near one.
-- Tactics: a bot hit from far away turns on the shooter (retail ran in a random direction), keeps after an enemy that ducks out of sight for a few seconds (firing at and searching its last position), varies its attack style between fights instead of using one for life, backs off toward cover while firing when badly hurt, throws grenades at enemies that have stopped in cover, and spreads over command posts by distance and how many teammates are already headed there, leaving two guards on a taken post. Defenders turn on shooters and run from grenades, rebels no longer stop to shoot corpses, and pilots turn on far attackers or jink when shot at.
-
-Overhaul is host-side: a server running it needs nothing new on the clients, and stock clients see it listed as Elite. `/skill N` sets the difficulty new profiles start with (4 for Overhaul).
+The command line overrides the config files.
