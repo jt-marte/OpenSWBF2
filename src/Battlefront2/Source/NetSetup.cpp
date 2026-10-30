@@ -5857,10 +5857,10 @@ bool CNetFindGame::Update()
                         data.mPingTime = ping;
                     }
                     game->mStamp = NetComm::GetTime();
-                    PlayerProfile::tProfile* profile = PlayerProfile::GetCurProfile();
-                    int myTps = profile ? profile->mOnlineOptions.mu8TurnsPerSecond : 30;
-                    unsigned char tpsLimit = (unsigned char)myTps;
-                    bool tpsOk = tps <= tpsLimit;
+                    // Retail refused a server running more turns per second than this PC's own
+                    // setting, which PC hides at 20, so a 30-turn server could not be joined. Any
+                    // rate the wire allows is fine now.
+                    bool tpsOk = tps >= 1 && tps <= 255;
                     bool versionOk = true;
                     game->mHasSessionData = tpsOk && versionOk;
                     game->mRulesAreValid = true;
