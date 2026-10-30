@@ -2067,6 +2067,9 @@
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.cpp">
       <Filter>src\RedEngineFL\movie</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\movie\pc\FFMovieDecoder.cpp">
+      <Filter>src\RedEngineFL\movie\pc</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.cpp">
       <Filter>src\RedEngineFL\movie\pc</Filter>
     </ClCompile>
@@ -4276,6 +4279,9 @@
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.h">
       <Filter>src\RedEngineFL\movie</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\movie\pc\FFMovieDecoder.h">
+      <Filter>src\RedEngineFL\movie\pc</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.h">
       <Filter>src\RedEngineFL\movie\pc</Filter>

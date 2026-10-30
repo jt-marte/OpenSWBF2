@@ -828,6 +828,7 @@
     <ClCompile Include="src\RedEngineFL\movie\RedMovie.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerBase.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.cpp" />
+    <ClCompile Include="src\RedEngineFL\movie\pc\FFMovieDecoder.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.cpp" />
     <ClCompile Include="src\SoundFL\source\sndallocbitmap.cpp" />
     <ClCompile Include="src\SoundFL\source\sndbufferio.cpp" />
@@ -1577,6 +1578,7 @@
     <ClInclude Include="src\RedEngineFL\movie\RedMovie.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerBase.h" />
     <ClInclude Include="src\RedEngineFL\movie\RedMoviePlayerRenderer.h" />
+    <ClInclude Include="src\RedEngineFL\movie\pc\FFMovieDecoder.h" />
     <ClInclude Include="src\RedEngineFL\movie\pc\pcRedMoviePlayer.h" />
     <ClInclude Include="src\RedEngineFL\movie\redpipe.h" />
     <ClInclude Include="src\SoundFL\source\sndallocator.h" />
@@ -1726,6 +1728,8 @@
     </ItemGroup>
     <Warning Condition="'$(Platform)'=='x64' and !Exists('third_party\ffmpeg\bin')" Text="third_party\ffmpeg is missing (run tools\setup.ps1): the x64 build will not start without the FFmpeg DLLs." />
     <Copy SourceFiles="@(GameDataFile)" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+    <!-- FFmpeg's LGPL licence ships beside its DLLs -->
+    <Copy Condition="'$(Platform)'=='x64' and Exists('third_party\ffmpeg\LICENSE.txt')" SourceFiles="third_party\ffmpeg\LICENSE.txt" DestinationFiles="$(OutDir)FFmpeg-LICENSE.txt" SkipUnchangedFiles="true" />
     <WriteLinesToFile File="$(OutDir)steam_appid.txt" Lines="6060" Overwrite="true" />
     <MakeDir Directories="$(OutDir)SaveGames" />
   </Target>

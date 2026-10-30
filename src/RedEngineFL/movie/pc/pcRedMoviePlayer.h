@@ -3,6 +3,15 @@
 #include "RedEngineFL/movie/RedMoviePlayerBase.h"
 #include "RedEngineFL/movie/RedMoviePlayerRenderer.h"
 
+#ifdef OPENSWBF2_FFMPEG
+
+// x64 has no binkw32: FFmpeg decodes the movies and a DirectSound buffer plays their audio
+#include "RedEngineFL/movie/pc/FFMovieDecoder.h"
+
+struct IDirectSoundBuffer;
+
+#else
+
 struct BINK
 {
     unsigned long Width;
@@ -64,6 +73,8 @@ struct BINKIO
     void(__stdcall* idle_on_callback)(BINKIO*);
     unsigned long callback_control[16];
 };
+
+#endif
  
  
 class RedBitmapElement;
@@ -103,6 +114,14 @@ public:
     bool CreateBinkDecoder();
     void DestroyBinkDecoder(bool bForce);
 
+#ifdef OPENSWBF2_FFMPEG
+    static int __cdecl MovieRead(void* pUser, unsigned char* pDest, int iSize);
+    void StartClock();
+    double GetClock() const;
+    void UpdateSound();
+    void FillSound();
+    void CloseSound();
+#else
     static BINKFILE* __cdecl BinkFile(BINKIO* bio);
     static long __stdcall BinkFileOpen(BINKIO* bio, const char* pName, unsigned long uiFlags);
     static unsigned long __stdcall BinkFileReadHeader(BINKIO* bio, long iOffset, void* pDest,
@@ -119,14 +138,38 @@ public:
     static bool __cdecl BinkIOSuspendTry(BINKIO* bio);
     static void __cdecl BinkIOResume(BINKIO* bio);
     static void __cdecl BinkIOIdleRun(BINKIO* bio);
+#endif
 
     static RedMoviePlayer* sMoviePlayer;
 
     static unsigned int sReadSize;
 
+#ifdef OPENSWBF2_FFMPEG
+    FFMovieDecoder mDecoder;
+#else
     BINK* mBink;
+#endif
 
     unsigned char mFlags;
+
+#ifdef OPENSWBF2_FFMPEG
+    // Streaming buffer for the movie's audio. Positions count bytes since the first frame:
+    // mSoundPlayed is where the play cursor has got to (the movie clock), mSoundWritten the end
+    // of what is in the buffer, mSoundQueued how much PCM the decoder has handed over.
+    IDirectSoundBuffer* mSoundBuffer;
+    unsigned int mSoundSize;
+    unsigned int mSoundBlock;
+    unsigned int mSoundBytesPerSec;
+    unsigned int mSoundPlayPos;
+    unsigned __int64 mSoundPlayed;
+    unsigned __int64 mSoundWritten;
+    unsigned __int64 mSoundQueued;
+    __int64 mSoundTime;
+    __int64 mClockStart;
+    long mSoundVolume;
+    float mGain;
+    bool mClockRunning;
+#endif
 };
 
  
