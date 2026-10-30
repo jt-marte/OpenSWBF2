@@ -1239,9 +1239,10 @@ function ifs_missionselect_fnBuildScreen(this)
 	---------------------------------------------------
 	this.iColumn = 0
 	this.iMap = 0
-	this.bEra_CloneWar = 1
-	this.bEra_Galactic = 1
-	
+	-- OpenSWBF2: every era and mode box starts ticked (ifs_missionselect_pcMulti_fnModeOn/fnEraOn)
+	this.ModeOff = {}
+	this.EraOff = {}
+
 	this.iLastClickTime = nil
 	this.bDoubleClicked = nil
 	

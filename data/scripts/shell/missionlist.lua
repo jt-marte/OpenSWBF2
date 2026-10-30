@@ -456,6 +456,13 @@ gModeFallbackNames = {
 	rpg = "RPG", wav = "Waves", ctrl = "Control", siege = "Siege", seige = "Siege",
 }
 
+-- English names for era ids when nothing localizes common.era.<id>. Era letters are shared by
+-- many mods, so only k (the Conversion Pack's KotOR era, by far its most used) is named; the
+-- rest read "Era X".
+gEraFallbackNames = {
+	k = "KotOR",
+}
+
 function missionlist_FindEra(Subst)
 	local i
 	for i = 1, table.getn(gMapEras) do
@@ -560,7 +567,7 @@ function missionlist_EraUName(Era)
 	if(UStr) then
 		return UStr
 	end
-	return ScriptCB_tounicode("Era " .. string.upper(Era.subst or "?"))
+	return ScriptCB_tounicode(gEraFallbackNames[Era.subst or ""] or ("Era " .. string.upper(Era.subst or "?")))
 end
 
 function missionlist_ModeUName(Mode)

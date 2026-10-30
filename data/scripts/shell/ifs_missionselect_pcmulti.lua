@@ -214,41 +214,64 @@ function ifs_missionselect_pcMulti_fnShowHostOptionButton( this, bHideButton )
 	end
 end
 
+-- OpenSWBF2: the era and mode checkboxes are rows bound to the eras and modes the selected
+-- map(s) actually have (missionlist.lua's registry), so a mod's own eras and modes can be
+-- picked too. When there are more than a box holds, arrows beside it scroll the rows.
+-- Everything starts ticked; what the player unticks is remembered by key.
+ifs_mspc_kModeRows = 6
+ifs_mspc_kEraRows = 4
+
+function ifs_missionselect_pcMulti_fnModeOn(this, Key)
+	if(Key == "mode_eli") then
+		Key = "mode_assault" -- Hero Assault on Mos Eisley shares the Assault box, as in retail
+	end
+	return not (this.ModeOff and this.ModeOff[Key])
+end
+
+function ifs_missionselect_pcMulti_fnEraOn(this, Key)
+	return not (this.EraOff and this.EraOff[Key])
+end
+
 function ifs_missionselect_pcMulti_fnClickCheckButtons( this )
-	-- update era checkbox
-	if(this.CurButton == "check_era1") then
-		--print("check era1 clicked")
-		if( this.bEra_CloneWar ) then
-			this.bEra_CloneWar = nil
-			IFImage_fnSetTexture(this.Era_C_box.Check_Era,"check_no")
-		else
-			this.bEra_CloneWar = 1
-			IFImage_fnSetTexture(this.Era_C_box.Check_Era,"check_yes")
-		end
-	elseif(this.CurButton == "check_era2") then
-		--print("check era2 clicked")
-		if( this.bEra_Galactic ) then
-			this.bEra_Galactic = nil
-			IFImage_fnSetTexture(this.Era_G_box.Check_Era,"check_no")
-		else
-			this.bEra_Galactic = 1
-			IFImage_fnSetTexture(this.Era_G_box.Check_Era,"check_yes")
-		end
-	else
-		local i
-		for i = 1, table.getn( this.mode_checkbox ) do
-			if( this.CurButton == "check_mode"..i ) then
-				if( this.mode_checkbox[i].bChecked ) then
-					this.mode_checkbox[i].bChecked = nil
-					IFImage_fnSetTexture(this.mode_checkbox[i].checkbox,"check_no")
-				else
-					this.mode_checkbox[i].bChecked = 1
-					IFImage_fnSetTexture(this.mode_checkbox[i].checkbox,"check_yes")
-				end
+	local Tag = this.CurButton
+	if(not Tag) then
+		return
+	end
+	if((Tag == "_mode_up") or (Tag == "_mode_down")) then
+		this.ModeTop = (this.ModeTop or 0) + ((Tag == "_mode_up") and -1 or 1)
+		ifs_missionselect_pcMulti_fnBindModeRows(this)
+		return
+	elseif((Tag == "_era_up") or (Tag == "_era_down")) then
+		this.EraTop = (this.EraTop or 0) + ((Tag == "_era_up") and -1 or 1)
+		ifs_missionselect_pcMulti_fnBindEraRows(this)
+		return
+	end
+
+	local _, _, Kind, Row = string.find(Tag, "^check_(%a+)(%d+)$")
+	Row = tonumber(Row or "")
+	if((Kind == "mode") and Row) then
+		local Slot = this.mode_checkbox[Row]
+		if(Slot and Slot.key) then
+			this.ModeOff = this.ModeOff or {}
+			if(ifs_missionselect_pcMulti_fnModeOn(this, Slot.key)) then
+				this.ModeOff[Slot.key] = 1
+			else
+				this.ModeOff[Slot.key] = nil
 			end
+			ifs_missionselect_pcMulti_fnBindModeRows(this)
+		end
+	elseif((Kind == "era") and Row) then
+		local Slot = this.era_checkbox[Row]
+		if(Slot and Slot.key) then
+			this.EraOff = this.EraOff or {}
+			if(ifs_missionselect_pcMulti_fnEraOn(this, Slot.key)) then
+				this.EraOff[Slot.key] = 1
+			else
+				this.EraOff[Slot.key] = nil
+			end
+			ifs_missionselect_pcMulti_fnBindEraRows(this)
 		end
 	end
-	
 end
 
 function ifs_missionselect_pcMulti_fnSetMapListColor(Dest, Data, bSelected)
@@ -1056,104 +1079,175 @@ function ifs_missionselect_pcMulti_fnGetNumSelectedMaps( this )
 	return number
 end
 
-function ifs_missionselect_pcMulti_fnShowHideGameModesMulti( this )
-	local i, j
+-- The maps the era and mode boxes describe: the ticked ones, else the highlighted one
+function ifs_missionselect_pcMulti_fnSelectedMaps( this )
+	local Maps = {}
+	local i
 	for i = 1, table.getn(missionselect_listbox_contents) do
 		if( missionselect_listbox_contents[i].bSelected ) then
-			local MapSelection = missionselect_listbox_contents[i]
-			local MissionselectModes = missionlist_ExpandModelist(MapSelection.mapluafile)
-			for j = 1, table.getn(MissionselectModes) do
-				for k = 1, table.getn(this.mode_checkbox) do
-					if( ( this.mode_checkbox[k].key == MissionselectModes[j].key ) or 
-						( (this.mode_checkbox[k].key == "mode_assault") and (MissionselectModes[j].key == "mode_eli") ) )then
-						IFObj_fnSetVis(this.mode_checkbox[k], 1)
+			table.insert(Maps, missionselect_listbox_contents[i])
+		end
+	end
+	if((table.getn(Maps) == 0) and ifs_mspc_MapList_layout.SelectedIdx) then
+		local Map = missionselect_listbox_contents[ifs_mspc_MapList_layout.SelectedIdx]
+		if(Map) then
+			table.insert(Maps, Map)
+		end
+	end
+	return Maps
+end
+
+-- Retail's mode order comes first, the rest follow in registry order
+ifs_mspc_ModeOrder = { "mode_con", "mode_ctf", "mode_1flag", "mode_assault", "mode_hunt", "mode_xl" }
+
+-- The modes the selected maps have. Multiplayer leaves out XL, as retail did.
+function ifs_missionselect_pcMulti_fnShownModes( this )
+	local Maps = ifs_missionselect_pcMulti_fnSelectedMaps(this)
+	local Has = {}
+	local i, j, k
+	for i = 1, table.getn(Maps) do
+		for j = 1, table.getn(gMapModes) do
+			for k = 1, table.getn(gMapEras) do
+				if(Maps[i][gMapModes[j].key .. "_" .. gMapEras[k].subst]) then
+					if(gMapModes[j].key == "mode_eli") then
+						Has["mode_assault"] = 1
+					else
+						Has[gMapModes[j].key] = 1
 					end
 				end
 			end
 		end
 	end
+	if(this ~= ifs_missionselect) then
+		Has["mode_xl"] = nil
+	end
+
+	local Shown = {}
+	for i = 1, table.getn(ifs_mspc_ModeOrder) do
+		local Key = ifs_mspc_ModeOrder[i]
+		if(Has[Key] and missionlist_FindMode(Key)) then
+			table.insert(Shown, missionlist_FindMode(Key))
+			Has[Key] = nil
+		end
+	end
+	for j = 1, table.getn(gMapModes) do
+		if(Has[gMapModes[j].key]) then
+			table.insert(Shown, gMapModes[j])
+			Has[gMapModes[j].key] = nil
+		end
+	end
+	return Shown
+end
+
+-- The eras the selected maps have: an era_<id> key, or any mode in that era
+function ifs_missionselect_pcMulti_fnShownEras( this )
+	local Maps = ifs_missionselect_pcMulti_fnSelectedMaps(this)
+	local Shown = {}
+	local i, j, k
+	for k = 1, table.getn(gMapEras) do
+		local Era = gMapEras[k]
+		local bHas = nil
+		for i = 1, table.getn(Maps) do
+			if(Maps[i][Era.key]) then
+				bHas = 1
+			else
+				for j = 1, table.getn(gMapModes) do
+					if(Maps[i][gMapModes[j].key .. "_" .. Era.subst]) then
+						bHas = 1
+						break
+					end
+				end
+			end
+			if(bHas) then
+				break
+			end
+		end
+		if(bHas) then
+			table.insert(Shown, Era)
+		end
+	end
+	return Shown
+end
+
+function ifs_missionselect_pcMulti_fnBindModeRows( this )
+	local Shown = this.ShownModes or {}
+	local Count = table.getn(Shown)
+	local Top = math.max(0, math.min(this.ModeTop or 0, Count - ifs_mspc_kModeRows))
+	this.ModeTop = Top
+	local i
+	for i = 1, ifs_mspc_kModeRows do
+		local Slot = this.mode_checkbox[i]
+		local Mode = Shown[Top + i]
+		Slot.mode = Mode
+		Slot.key = Mode and Mode.key
+		IFObj_fnSetVis(Slot, Mode ~= nil)
+		if(Mode) then
+			IFText_fnSetUString(Slot.text, missionlist_ModeUName(Mode))
+			if(Mode.icon) then
+				IFImage_fnSetTexture(Slot.icon, Mode.icon)
+			end
+			IFObj_fnSetVis(Slot.icon, Mode.icon ~= nil)
+			if(ifs_missionselect_pcMulti_fnModeOn(this, Mode.key)) then
+				IFImage_fnSetTexture(Slot.checkbox, "check_yes")
+			else
+				IFImage_fnSetTexture(Slot.checkbox, "check_no")
+			end
+		end
+	end
+	IFObj_fnSetVis(this.mode_checkbox.up, Top > 0)
+	IFObj_fnSetVis(this.mode_checkbox.down, Top + ifs_mspc_kModeRows < Count)
+end
+
+function ifs_missionselect_pcMulti_fnBindEraRows( this )
+	local Shown = this.ShownEras or {}
+	local Count = table.getn(Shown)
+	local Top = math.max(0, math.min(this.EraTop or 0, Count - ifs_mspc_kEraRows))
+	this.EraTop = Top
+	local i
+	for i = 1, ifs_mspc_kEraRows do
+		local Slot = this.era_checkbox[i]
+		local Era = Shown[Top + i]
+		Slot.era = Era
+		Slot.key = Era and Era.key
+		IFObj_fnSetVis(Slot, Era ~= nil)
+		if(Era) then
+			IFText_fnSetUString(Slot.Text_Era, missionlist_EraUName(Era))
+			if(Era.icon2) then
+				IFImage_fnSetTexture(Slot.Icon2_Era, Era.icon2)
+			end
+			IFObj_fnSetVis(Slot.Icon2_Era, Era.icon2 ~= nil)
+			if(ifs_missionselect_pcMulti_fnEraOn(this, Era.key)) then
+				IFImage_fnSetTexture(Slot.Check_Era, "check_yes")
+			else
+				IFImage_fnSetTexture(Slot.Check_Era, "check_no")
+			end
+		end
+	end
+	IFObj_fnSetVis(this.era_checkbox.up, Top > 0)
+	IFObj_fnSetVis(this.era_checkbox.down, Top + ifs_mspc_kEraRows < Count)
+end
+
+function ifs_missionselect_pcMulti_fnShowHideGameModesMulti( this )
+	ifs_missionselect_pcMulti_fnShowHideGameModes( this )
 end
 
 function ifs_missionselect_pcMulti_fnShowHideGameModes( this )
-	local i, j
-	local number = ifs_missionselect_pcMulti_fnGetNumSelectedMaps( this )
-	if( number > 1 ) then
-		ifs_missionselect_pcMulti_fnShowHideGameModesMulti( this )
-	else
-		for i = 1, table.getn(this.mode_checkbox) do
-			IFObj_fnSetVis(this.mode_checkbox[i], nil)
-			for j = 1, table.getn(gMissionselectModes) do
-				if( ( this.mode_checkbox[i].key == gMissionselectModes[j].key ) or 
-					( (this.mode_checkbox[i].key == "mode_assault") and (gMissionselectModes[j].key == "mode_eli") ) )then
-					-- make "mode_eli" equal to "mode_assault" for mos eisley
-					--print(" missionselect_listbox_contents[ifs_mspc_MapList_layout.SelectedIdx].mapluafile = ", missionlist_GetLocalizedMapName( missionselect_listbox_contents[ifs_mspc_MapList_layout.SelectedIdx].mapluafile ) )
-					IFObj_fnSetVis(this.mode_checkbox[i], 1)
-				end
-			end
-		end
-	end
-	
-	-- reset position
-	number = 0
-	for i = 1, table.getn(this.mode_checkbox) do
-		if( IFObj_fnGetVis(this.mode_checkbox[i] ) ) then
-			-- reset position
-			IFObj_fnSetPos(this.mode_checkbox[i], this.mode_checkbox[i].x, this.mode_checkbox[1].y + 25 * number )			
-			number = number + 1
-		end
-	end	
+	this.ShownModes = ifs_missionselect_pcMulti_fnShownModes( this )
+	this.ModeTop = 0
+	ifs_missionselect_pcMulti_fnBindModeRows( this )
 end
 
 function ifs_missionselect_pcMulti_fnShowHideEra( this )
-	if( ifs_missionselect_pcMulti_fnGetNumSelectedMaps( this ) > 1 ) then
-		IFObj_fnSetVis(this.Era_C_box,1)
-		IFObj_fnSetVis(this.Era_G_box,1)
-	else
-		IFObj_fnSetVis(this.Era_C_box,nil)
-		IFObj_fnSetVis(this.Era_G_box,nil)
-		for i = 1,table.getn(gMissionselectEras) do
-			local EraSelection = gMissionselectEras[i]
-			if(not EraSelection.bIsWildcard) then
-				local DisplayUStr = ScriptCB_getlocalizestr(EraSelection.showstr)
-				print( "EraSelection.subst = ", EraSelection.subst, EraSelection.key )
-				--if( ( EraSelection.subst == "c" ) or ( EraSelection.subst == "C" ) ) then
-				if( ( EraSelection.key == "era_c" ) ) then
-					--print( "it's true! EraSelection.key = ", EraSelection.key )
-					IFObj_fnSetVis(this.Era_C_box,1)
-				else
-					IFObj_fnSetVis(this.Era_G_box,1)
-				end
-			end
-		end	
-	end
-	
-	-- reset position
-	if( IFObj_fnGetVis(this.Era_C_box) ) then
-		IFObj_fnSetPos(this.Era_G_box, this.Era_G_box.x, this.Era_C_box.y + 15)
-	else
-		IFObj_fnSetPos(this.Era_G_box, this.Era_G_box.x, this.Era_C_box.y - 22)
-	end
+	this.ShownEras = ifs_missionselect_pcMulti_fnShownEras( this )
+	this.EraTop = 0
+	ifs_missionselect_pcMulti_fnBindEraRows( this )
 end
 
 function ifs_missionselect_pcMulti_fnInitModeEra( this )
-	-- only first one is checked
-	-- init gamemode
-	local i
-	for i = 1, table.getn( this.mode_checkbox ) do
-		if( i == 1 ) then
-			this.mode_checkbox[i].bChecked = 1
-			IFImage_fnSetTexture(this.mode_checkbox[i].checkbox,"check_yes")		
-		else
-			this.mode_checkbox[i].bChecked = nil
-			IFImage_fnSetTexture(this.mode_checkbox[i].checkbox,"check_no")
-		end
-	end
-	
-	-- init era
-	this.bEra_CloneWar = 1
-	IFImage_fnSetTexture(this.Era_C_box.Check_Era,"check_yes")
-	this.bEra_Galactic = nil
-	IFImage_fnSetTexture(this.Era_G_box.Check_Era,"check_no")
+	this.ModeOff = {}
+	this.EraOff = {}
+	ifs_missionselect_pcMulti_fnShowHideGameModes( this )
+	ifs_missionselect_pcMulti_fnShowHideEra( this )
 end
 
 function ifs_missionselect_pcMulti_fnUpdateLists( this )
@@ -1283,12 +1377,12 @@ function ifs_missionselect_pcMulti_fnUpdateLists( this )
 				IFText_fnSetUString(this.InfoboxBot.Text1, DisplayUStr)
 				local MapMode = missionlist_GetMapMode(MapSelection.Map)
 				if( MapMode ) then
-					IFText_fnSetUString(this.InfoboxBot.Text2, ScriptCB_getlocalizestr(MapMode.showstr))
+					IFText_fnSetUString(this.InfoboxBot.Text2, missionlist_ModeUName(MapMode))
 				end
 				local EraSelection = missionlist_GetMapEra(MapSelection.Map)
 				if( EraSelection ) then
-					IFText_fnSetString(this.InfoboxBot.Text3, EraSelection.showstr)
-				end				
+					IFText_fnSetUString(this.InfoboxBot.Text3, missionlist_EraUName(EraSelection))
+				end
 			else
 				IFText_fnSetString(this.InfoboxBot.Text1, "")
 				IFText_fnSetString(this.InfoboxBot.Text2, "")
@@ -1307,14 +1401,15 @@ function ifs_missionselect_pcMulti_fnUpdateLists( this )
 		end
 	end	
 	
-	-- update checkbox
-	if( gMouseOverImage ) then
-		for i = 1, table.getn( this.mode_checkbox ) do
-			if( gMouseOverImage.tag == "check_mode"..i ) then
-				IFText_fnSetString(this.InfoboxBot.Text1, mode_list[i].descstr)
-				IFText_fnSetString(this.InfoboxBot.Text2, "")
-				IFText_fnSetString(this.InfoboxBot.Text3, "")			
-			end
+	-- update checkbox: the hovered mode's description
+	if( gMouseOverImage and gMouseOverImage.tag ) then
+		local _, _, Row = string.find(gMouseOverImage.tag, "^check_mode(%d+)$")
+		local Slot = Row and this.mode_checkbox[tonumber(Row)]
+		if( Slot and Slot.mode ) then
+			local DescUStr = Slot.mode.descstr and ScriptCB_getlocalizestr(Slot.mode.descstr, 1)
+			IFText_fnSetUString(this.InfoboxBot.Text1, DescUStr or ScriptCB_tounicode(""))
+			IFText_fnSetString(this.InfoboxBot.Text2, "")
+			IFText_fnSetString(this.InfoboxBot.Text3, "")
 		end
 	end
 end
@@ -1380,7 +1475,21 @@ function ifs_missionselect_pcMulti_fnAddMap3(this, MapSelection, ModeSelection, 
 	assert(not ModeSelection.bIsWildcard)
 
 	--print("Add Map3")
-	
+
+	-- OpenSWBF2: a named era is added straight away. Mods often mark an era only through their
+	-- mode keys (mode_bf1_k with no era_k), which the era lookup below would miss; fnAddMap2
+	-- has already checked the map has this mode in this era.
+	if( Era ~= "all" ) then
+		local j
+		for j = 1, table.getn(gMapEras) do
+			if( gMapEras[j].key == Era ) then
+				ifs_missionselect_pcMulti_fnAddMap4(this, MapSelection, ModeSelection, gMapEras[j])
+				return
+			end
+		end
+		return
+	end
+
 	-- find the era
 	gMissionselectEras = missionlist_ExpandEralist(MapSelection.mapluafile)
 	local NumEras = table.getn(gMissionselectEras)
@@ -1450,27 +1559,16 @@ else
 	local i
 	for i = 1,table.getn(gMissionselectModes) do
 		local ModeSelection2 = gMissionselectModes[i]
-		if(not ModeSelection2.bIsWildcard) then
-			local j
-			for j = 1, table.getn( this.mode_checkbox ) do
-				--print( "this.mode_checkbox[j].bChecked =", this.mode_checkbox[j].bChecked )
-				--print( "this.mode_checkbox[j].key =", this.mode_checkbox[j].key )
-				--print( "ModeSelection2.key = ", ModeSelection2.key )
-				if( this.mode_checkbox[j].bChecked ) then
-					if( ( ModeSelection2.key == this.mode_checkbox[j].key ) or
-						( (ModeSelection2.key == "mode_eli" ) and (this.mode_checkbox[j].key == "mode_assault") ) ) then
-						-- make "mode_eli" equal to "mode_assault" for mos eisley and maybe apply to other possibly levels(downloadable content)
-						-- Ensure this map supports this mode before adding.			
-						local Key = ModeSelection2.key .. "_" .. subst
-						if(MapSelection[Key]) then
-							ifs_missionselect_pcMulti_fnAddMap3(this, MapSelection, ModeSelection2, Era)
-						end
-						--print( "Key =", Key )
-						--print( "MapSelection[Key] = ", MapSelection[Key] )					
-					end
-				end
+		-- OpenSWBF2: the mode's box is ticked (its row may be scrolled out of view); "mode_eli"
+		-- counts as "mode_assault", and multiplayer has no XL, as in retail
+		if((not ModeSelection2.bIsWildcard) and ifs_missionselect_pcMulti_fnModeOn(this, ModeSelection2.key) and
+		   ((ModeSelection2.key ~= "mode_xl") or (this == ifs_missionselect))) then
+			-- Ensure this map supports this mode before adding.
+			local Key = ModeSelection2.key .. "_" .. subst
+			if(MapSelection[Key]) then
+				ifs_missionselect_pcMulti_fnAddMap3(this, MapSelection, ModeSelection2, Era)
 			end
-		end		
+		end
 	end	
 end
 
@@ -1496,31 +1594,21 @@ function ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, 
 end
 
 function ifs_missionselect_pcMulti_fnAddMapNew(this)
-	local i
+	-- OpenSWBF2: every ticked era the selected maps have, not just Clone Wars / Galactic Civil War
+	local Eras = this.ShownEras or {}
+	local i, j
 	for i = 1, table.getn(missionselect_listbox_contents) do
 		if( missionselect_listbox_contents[i].bSelected ) then
 			local MapSelection = missionselect_listbox_contents[i]
 			local ModeSelection = gMissionselectModes[ifs_mspc_ModeList_layout.SelectedIdx]
-
-			-- Call helper functions to expand things as necessary
-			print( "bEra_CloneWar = ", this.bEra_CloneWar, " bEra_Galactic = ", this.bEra_Galactic )
-			local clonewar_visable = IFObj_fnGetVis( this.Era_C_box )
-			local galactic_visable = IFObj_fnGetVis( this.Era_G_box )
-			print( "clonewar_visable = ", clonewar_visable, " galactic_visable = ", galactic_visable )
-			
-			if( ( this.bEra_CloneWar and clonewar_visable ) and 
-				( this.bEra_Galactic and galactic_visable ) ) then
-				-- add all eras
-				ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, "era_c")
-				ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, "era_g")
-			elseif( this.bEra_CloneWar and clonewar_visable ) then
-				ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, "era_c")
-			elseif( this.bEra_Galactic and galactic_visable ) then
-				ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, "era_g")
+			for j = 1, table.getn(Eras) do
+				if( ifs_missionselect_pcMulti_fnEraOn(this, Eras[j].key) ) then
+					ifs_missionselect_pcMulti_fnAddMap1(this, MapSelection, ModeSelection, Eras[j].key)
+				end
 			end
 		end
 	end
-	
+
 	ListManager_fnFillContents(this.PlayListbox,gPickedMapList,ifs_mspc_PlayList_layout)
 end
 
@@ -2609,7 +2697,7 @@ function ifs_mspc_ModeList_PopulateItem(Dest, Data, bSelected)
 		end
 		IFObj_fnSetColor(Dest.mode, iColor, iColor, iColor)
 
-		local DisplayUStr = ScriptCB_getlocalizestr(Data.showstr)
+		local DisplayUStr = missionlist_ModeUName(Data)
 
 		-- If Data.icon exists, set the texture on it.
 		if(bShowIcon) then
@@ -3220,7 +3308,7 @@ function ifs_missionselect_pcMulti_fnAddEraBoxes(this)
 
 	-- Now, do the boxes above and below the columns
 	local ColumnWidthL = 170
-	local ColumnWidthC = 200	
+	local ColumnWidthC = 200
 	local ColumnWidthR = 220
 	local ListHeightC = 170
 	local TopBoxHeight = 30 -- enough for two lines of text
@@ -3228,11 +3316,11 @@ function ifs_missionselect_pcMulti_fnAddEraBoxes(this)
 	local infobox_offset_x = -38
 
 	local new_shell_offset_x = 240
-	
+
 	local	icon_x = 9
 	local	icon_y = 18
 	local	icon_height = 18
-	local	icon_era_offset_y = 45	
+	local	icon_era_offset_y = 45
 
 	local era_text_offset_x = 50
 	local era_text_offset_y = 15
@@ -3240,150 +3328,76 @@ function ifs_missionselect_pcMulti_fnAddEraBoxes(this)
 	local era_check_offset_x = 10
 	local era_check_offset_y = 22
 	local era_zpos = 180
-	
+
 	local era_hotspot_width = 150
-	
-	-- era: clone war
-	this.Era_C_box = NewIFContainer { 		
+	local era_row_height = 26
+
+	-- OpenSWBF2: rows filled in from the selected maps' eras (fnBindEraRows)
+	this.era_checkbox = NewIFContainer {
 		ScreenRelativeX = 0, -- left side of screen
 		ScreenRelativeY = 0, -- top
 		x = ColumnWidthL + infobox_offset_x + new_shell_offset_x - 50,
 		y = infobox_offset_y + ListHeightC + TopBoxHeight + icon_era_offset_y, -- top-justify against left box
-		ZPos = era_zpos, 
-		
-		Check_Era = NewIFImage {
---			ZPos = 0, 
-			x = era_check_offset_x, y = era_check_offset_y - 2,
-			texture = "check_yes",
-			localpos_l = 1, localpos_t = 1,
-			localpos_r = 14, localpos_b = 14,
-			AutoHotspot = 1, tag = "check_era1",
-			bIsFlashObj = 1, flash_alpha = 1.0,
-			hotspot_width = era_hotspot_width,
-		},
-
-		Text_Era = NewIFText { 
-			x = era_text_offset_x,
-			y = era_text_offset_y,
-			halign = "left", valign = "vcenter",
-			font = "gamefont_super_tiny", 
-			textw = ColumnWidthR - 80, texth = TopBoxHeight,
-			startdelay=math.random()*0.5, nocreatebackground=1, 
-			string = "common.era.cw",
-		},
-		
---		Icon1_Era = NewIFImage {
---			ZPos = 240, 
---			localpos_l = icon_x,
---			localpos_r = icon_x + icon_height,
---			localpos_t = icon_y,
---			localpos_b = icon_y + icon_height,
---			ColorR = 240,
---			ColorG = 32,
---			ColorB = 32,
---			texture = "cis_icon", 
---		},
-		
-		Icon2_Era = NewIFImage {
---			ZPos = 240, 
-			localpos_l = icon_x + icon_height,
-			localpos_r = icon_x + 2 * icon_height,
-			localpos_t = icon_y,
-			localpos_b = icon_y + icon_height,
---			ColorR = 32,
---			ColorG = 240,
---			ColorB = 32,
-			texture = "rep_icon", 
-		}
+		ZPos = era_zpos,
 	}
 
-	this.Era_G_box = NewIFContainer { 
-		ScreenRelativeX = 0, -- left side of screen
-		ScreenRelativeY = 0, -- top
-		x = ColumnWidthL + infobox_offset_x + new_shell_offset_x - 50,
-		y = infobox_offset_y + ListHeightC + TopBoxHeight + 13 + icon_era_offset_y, -- top-justify against left box
-		ZPos = era_zpos, 
-		
-		Check_Era = NewIFImage {
---			ZPos = 0, 
-			x = era_check_offset_x, y = era_check_offset_y + 20,
-			texture = "check_yes",
-			localpos_l = 1, localpos_t = 1,
-			localpos_r = 14, localpos_b = 14,
-			AutoHotspot = 1, tag = "check_era2",
-			bIsFlashObj = 1, flash_alpha = 1.0,
-			hotspot_width = era_hotspot_width,
-		},
+	local i
+	for i = 1, ifs_mspc_kEraRows do
+		this.era_checkbox[i] = NewIFContainer {
+			y = (i - 1) * era_row_height,
 
-		Text_Era = NewIFText { 
-			x = era_text_offset_x,
-			y = era_text_offset_y + 20,
-			halign = "left", valign = "vcenter",
-			font = "gamefont_super_tiny", 
-			textw = ColumnWidthR - 80, texth = TopBoxHeight,
-			startdelay=math.random()*0.5, nocreatebackground=1, 
-			string = "common.era.gcw",
-		},
+			Check_Era = NewIFImage {
+				x = era_check_offset_x, y = era_check_offset_y - 2,
+				texture = "check_yes",
+				localpos_l = 1, localpos_t = 1,
+				localpos_r = 14, localpos_b = 14,
+				AutoHotspot = 1, tag = "check_era" .. i,
+				bIsFlashObj = 1, flash_alpha = 1.0,
+				hotspot_width = era_hotspot_width,
+			},
 
---		Icon1_Era = NewIFImage {
---			ZPos = 240, 
---			localpos_l = icon_x,
---			localpos_r = icon_x + icon_height,
---			localpos_t = icon_y + icon_height + 5,
---			localpos_b = icon_y + 2 * icon_height + 5,
---			ColorR = 240,
---			ColorG = 32,
---			ColorB = 32,
---			texture = "imp_icon", 
---		},
-		
-		Icon2_Era = NewIFImage {
---			ZPos = 240, 
-			localpos_l = icon_x + icon_height,
-			localpos_r = icon_x + 2 * icon_height,
-			localpos_t = icon_y + icon_height + 5,
-			localpos_b = icon_y + 2 * icon_height + 5,
---			ColorR = 32,
---			ColorG = 240,
---			ColorB = 32,
-			texture = "all_icon", 
-		}		
+			Text_Era = NewIFText {
+				x = era_text_offset_x,
+				y = era_text_offset_y,
+				halign = "left", valign = "vcenter",
+				font = "gamefont_super_tiny",
+				textw = ColumnWidthR - 80, texth = TopBoxHeight,
+				startdelay=math.random()*0.5, nocreatebackground=1,
+			},
+
+			Icon2_Era = NewIFImage {
+				localpos_l = icon_x + icon_height,
+				localpos_r = icon_x + 2 * icon_height,
+				localpos_t = icon_y,
+				localpos_b = icon_y + icon_height,
+				texture = "rep_icon",
+			},
+		}
+	end
+
+	this.era_checkbox.up = NewIFImage {
+		x = era_hotspot_width + 15, y = era_check_offset_y - 2,
+		texture = "window_arrow_solo",
+		localpos_l = 0, localpos_t = 0,
+		localpos_r = 14, localpos_b = 14,
+		AutoHotspot = 1, tag = "_era_up",
+		bIsFlashObj = 1, flash_alpha = 1.0,
+	}
+	this.era_checkbox.down = NewIFImage {
+		x = era_hotspot_width + 15, y = era_check_offset_y - 2 + era_row_height * (ifs_mspc_kEraRows - 1),
+		texture = "window_arrow_solo",
+		localpos_l = 0, localpos_t = 14,
+		localpos_r = 14, localpos_b = 0,
+		AutoHotspot = 1, tag = "_era_down",
+		bIsFlashObj = 1, flash_alpha = 1.0,
 	}
 end
-
-mode_list = {
-	{
-		key = "mode_con", showstr = "modename.name.con", 
-		descstr = "modename.description.con", subst = "con",
-		icon = "mode_icon_con",
-	},
-	{
-		key = "mode_ctf", showstr = "modename.name.ctf",
-		descstr = "modename.description.ctf", subst = "ctf",
-		icon = "mode_icon_2ctf",
-	},
-	{
-		key = "mode_1flag", showstr = "modename.name.1flag",
-		descstr = "modename.description.1flag", subst = "1flag",
-		icon = "mode_icon_ctf",
-	},
-	{
-		key = "mode_assault", showstr = "modename.name.assault",
-		descstr = "modename.description.assault", subst = "ass",
-		icon = "mode_icon_ass",
-	},
-	{
-		key = "mode_hunt", showstr = "modename.name.hunt",
-		descstr = "modename.description.hunt", subst = "hunt",
-		icon = "mode_icon_hunt",
-	},		
-}
 
 function ifs_missionselect_pcMulti_fnAddModeBoxes(this)
 
 	-- Now, do the boxes above and below the columns
 	local ColumnWidthL = 170
-	local ColumnWidthC = 200	
+	local ColumnWidthC = 200
 	local ColumnWidthR = 220
 	local ListHeightC = 170
 	local TopBoxHeight = 30 -- enough for two lines of text
@@ -3391,49 +3405,34 @@ function ifs_missionselect_pcMulti_fnAddModeBoxes(this)
 	local infobox_offset_x = -38
 
 	local new_shell_offset_x = 240
-	
+
 	local	icon_x = 27
 	local	icon_y = 18
 	local	icon_height = 18
-	local	icon_era_offset_y = 45	
+	local	icon_era_offset_y = 45
 
 	local era_text_offset_x = 32 + icon_height
 	local era_text_offset_y = 12
 
 	local era_check_offset_x = 10
 	local era_check_offset_y = 19
-	
-	if( this == ifs_missionselect ) then
-		mode_list[6] = 
-		{
-			key = "mode_xl", showstr = "modename.name.xl",
-			descstr = "modename.description.xl", subst = "xl",
-			icon = "mode_icon_XL",
-		}
-	end
-	
+	local mode_row_height = 25
+
+	-- OpenSWBF2: rows filled in from the selected maps' modes (fnBindModeRows)
 	this.mode_checkbox = NewIFContainer { --container for all the backgrounds
 		ScreenRelativeX = 0, -- left side of screen
 		ScreenRelativeY = 0, -- top
 		x = ColumnWidthL + infobox_offset_x + new_shell_offset_x - 50,
 		y = infobox_offset_y + ListHeightC + TopBoxHeight + icon_era_offset_y - 225, -- top-justify against left box
-		ZPos = 180, 
+		ZPos = 180,
 	}
-	
+
 	local i
-	local Count = table.getn(mode_list)
-	for i = 1,Count do
-		this.mode_checkbox[i] = NewIFContainer { 		
-			--ScreenRelativeX = 0, -- left side of screen
-			--ScreenRelativeY = 0, -- top
-			--x = ColumnWidthL + infobox_offset_x + new_shell_offset_x - 50,
-			y = i * 20, -- top-justify against left box
-			--ZPos = 0,
-			bChecked = 1,
-			key = mode_list[i].key,
-			
+	for i = 1, ifs_mspc_kModeRows do
+		this.mode_checkbox[i] = NewIFContainer {
+			y = 20 + (i - 1) * mode_row_height,
+
 			checkbox = NewIFImage {
-				--ZPos = 0, 
 				x = era_check_offset_x, y = era_check_offset_y,
 				texture = "check_yes",
 				localpos_l = 1, localpos_t = 1,
@@ -3443,29 +3442,41 @@ function ifs_missionselect_pcMulti_fnAddModeBoxes(this)
 				hotspot_width = 100,
 			},
 
-			text= NewIFText { 
+			text= NewIFText {
 				x = era_text_offset_x,
 				y = era_text_offset_y,
 				halign = "left", valign = "vcenter",
-				font = "gamefont_super_tiny", 
+				font = "gamefont_super_tiny",
 				textw = ColumnWidthR - 80, texth = TopBoxHeight,
-				startdelay=math.random()*0.5, nocreatebackground=1, 
-				string = mode_list[i].showstr,
+				startdelay=math.random()*0.5, nocreatebackground=1,
 			},
-			
+
 			icon = NewIFImage {
-				--ZPos = 240, 
 				localpos_l = icon_x,
 				localpos_r = icon_x + icon_height,
 				localpos_t = icon_y,
 				localpos_b = icon_y + icon_height,
-				--ColorR = 240,
-				--ColorG = 32,
-				--ColorB = 32,
-				texture = mode_list[i].icon, 
-			},			
+				texture = "mode_icon_con",
+			},
 		}
 	end
+
+	this.mode_checkbox.up = NewIFImage {
+		x = 165, y = 20 + era_check_offset_y,
+		texture = "window_arrow_solo",
+		localpos_l = 0, localpos_t = 0,
+		localpos_r = 14, localpos_b = 14,
+		AutoHotspot = 1, tag = "_mode_up",
+		bIsFlashObj = 1, flash_alpha = 1.0,
+	}
+	this.mode_checkbox.down = NewIFImage {
+		x = 165, y = 20 + era_check_offset_y + mode_row_height * (ifs_mspc_kModeRows - 1),
+		texture = "window_arrow_solo",
+		localpos_l = 0, localpos_t = 14,
+		localpos_r = 14, localpos_b = 0,
+		AutoHotspot = 1, tag = "_mode_down",
+		bIsFlashObj = 1, flash_alpha = 1.0,
+	}
 end
 
 function ifs_missionselect_pcMulti_fnAddMapButtons(this)

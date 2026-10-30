@@ -8,7 +8,7 @@
 #include "LuaFL/include/lualib.h"
 
 // OpenSWBF2's built-in 1.3-style mod support: the era and mode registry, the numbered
-// script-mod slots and the mission cap. The Lua runs here with the base, string and table
+// script-mod slots and the mission cap. The Lua runs here with the base, string, table and math
 // libraries, as in game.
 
 namespace
@@ -77,6 +77,7 @@ struct Lua
         luaopen_base(L);
         luaopen_string(L);
         luaopen_table(L);
+        luaopen_math(L);
         lua_settop(L, 0);
     }
     ~Lua() { lua_close(L); }
@@ -157,7 +158,7 @@ TEST_CASE("mod registry finds eras and modes from mission list entries" * doctes
     CHECK(lua.Global("modes") == "11"); // + bf1, uber, tdf (con, assault, 1flag were there)
     CHECK(lua.Global("k_key") == "era_k");
     CHECK(lua.Global("k_show") == "common.era.k");
-    CHECK(lua.Global("k_name") == "Era K");
+    CHECK(lua.Global("k_name") == "KotOR");
     CHECK(lua.Global("c_name") == "Clone Wars");
     CHECK(lua.Global("bf1_key") == "mode_bf1");
     CHECK(lua.Global("bf1_subst") == "bf1");
@@ -185,6 +186,7 @@ TEST_CASE("mod registry merges what custom_gc scripts add" * doctest::test_suite
         "z_team = missionlist_FindEra('z').Team1Name\n"
         "z_team2 = missionlist_FindEra('z').Team2Name\n"
         "siege = missionlist_ModeUName(missionlist_FindMode('siege'))\n"
+        "z_name = missionlist_EraUName(missionlist_FindEra('z'))\n"
         "local buttons = custom_GetEraButtonList()\n"
         "button3 = buttons[3].tag .. '=' .. buttons[3].string\n"
         "local gc = custom_GetGCButtonList()\n"
@@ -197,6 +199,7 @@ TEST_CASE("mod registry merges what custom_gc scripts add" * doctest::test_suite
     CHECK(lua.Global("z_team") == "my.team1");
     CHECK(lua.Global("z_team2") == "common.sides.z.name");
     CHECK(lua.Global("siege") == "Siege");
+    CHECK(lua.Global("z_name") == "Era Z");
     CHECK(lua.Global("button3") == "z=common.era.z");
     CHECK(lua.Global("gc_first") == "load");
     CHECK(lua.Global("gc_last") == "custom");
@@ -246,6 +249,89 @@ TEST_CASE("script mod slots run each script once and skip empty files" * doctest
     CHECK(lua.Global("read") == "user_script_3.lvl;user_script_10.lvl;user_script_11.lvl;custom_gc_1.lvl;");
     CHECK(lua.Global("again") == "user_script_3;");
     CHECK(lua.Global("shell") == "custom_gc_1;");
+}
+
+TEST_CASE("mission select offers and adds every era and mode a map has" * doctest::test_suite("unit"))
+{
+    const std::string sPc = ReadScript("../data/scripts/shell/ifs_missionselect_pcmulti.lua");
+    const std::string sList = ReadScript("../data/scripts/shell/missionlist.lua");
+    const std::string sChecks = Between(sPc, "ifs_mspc_kModeRows = 6", "function ifs_missionselect_pcMulti_fnSetMapListColor(");
+    const std::string sShown = Between(sPc, "function ifs_missionselect_pcMulti_fnSelectedMaps( this )",
+                                       "function ifs_missionselect_pcMulti_fnShowHideGameModesMulti( this )");
+    const std::string sAdd = Between(sPc, "function ifs_missionselect_pcMulti_fnAddMap3(",
+                                     "function ifs_missionselect_pcMulti_fnDeleteMapNew(");
+    const std::string sExpand = Between(sList, "function missionlist_ExpandModelist(abbrev)", "\nfunction ");
+    REQUIRE(!sChecks.empty());
+    REQUIRE(!sShown.empty());
+    REQUIRE(!sAdd.empty());
+    REQUIRE(!sExpand.empty());
+
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(RegistryCode()));
+    REQUIRE(lua.Run(
+        "function print() end\n"
+        "function assert(v) return v end\n"
+        "function IFObj_fnSetVis() end\n"
+        "function IFText_fnSetUString() end\n"
+        "textures = ''\n"
+        "function IFImage_fnSetTexture(obj, tex) if obj and obj.tag then textures = textures .. obj.tag .. '=' .. tex .. ';' end end\n"
+        "function ListManager_fnFillContents() end\n" +
+        sChecks + sShown + sAdd + sExpand + "\n"
+        "ifs_missionselect = {}\n" // the single player screen
+        "ifs_mspc_MapList_layout = { SelectedIdx = 1 }\n"
+        "ifs_mspc_ModeList_layout = {}\n"
+        "gMissionselectModes = {}\n"
+        // a BF1 Conversion Pack map: its KotOR era only shows in mode keys; and a stock map
+        "missionselect_listbox_contents = {\n"
+        "  { mapluafile = 'AB1%s_%s', era_c = 1, mode_con_c = 1, mode_bf1_c = 1, mode_xl_c = 1, mode_eli_c = 1,\n"
+        "    mode_con_k = 1, bSelected = 1 },\n"
+        "  { mapluafile = 'tat2%s_%s', era_g = 1, mode_con_g = 1, mode_ctf_g = 1 },\n"
+        "}\n"
+        "missionlist_DiscoverErasAndModes(missionselect_listbox_contents)\n"
+        "function keys(list) local s = '' for i = 1, table.getn(list) do s = s .. list[i].key .. ',' end return s end\n"
+        "local sp = ifs_missionselect\n"
+        "sp_modes = keys(ifs_missionselect_pcMulti_fnShownModes(sp))\n"
+        "mp_modes = keys(ifs_missionselect_pcMulti_fnShownModes({}))\n"
+        "eras = keys(ifs_missionselect_pcMulti_fnShownEras(sp))\n"
+        "added = ''\n"
+        "function ifs_missionselect_pcMulti_fnAddMap4(this, Map, Mode, Era)\n"
+        "  added = added .. string.format(Map.mapluafile, Era.subst, Mode.subst) .. ';'\n"
+        "end\n"
+        "sp.ShownEras = ifs_missionselect_pcMulti_fnShownEras(sp)\n"
+        "ifs_missionselect_pcMulti_fnAddMapNew(sp)\n"
+        "all = added\n"
+        // untick Classic Conquest and the Clone Wars era by clicking their rows
+        "sp.ShownModes = ifs_missionselect_pcMulti_fnShownModes(sp)\n"
+        "sp.mode_checkbox = { { checkbox = { tag = 'check_mode1' } }, { checkbox = { tag = 'check_mode2' } } }\n"
+        "for i = 3, ifs_mspc_kModeRows do sp.mode_checkbox[i] = { checkbox = {} } end\n"
+        "sp.mode_checkbox[1].key = 'mode_bf1'\n"
+        "sp.CurButton = 'check_mode1'\n"
+        "ifs_missionselect_pcMulti_fnClickCheckButtons(sp)\n"
+        "sp.era_checkbox = { { key = 'era_c', Check_Era = {} } }\n"
+        "for i = 2, ifs_mspc_kEraRows do sp.era_checkbox[i] = { Check_Era = {} } end\n"
+        "sp.CurButton = 'check_era1'\n"
+        "ifs_missionselect_pcMulti_fnClickCheckButtons(sp)\n"
+        "bf1_off = tostring(sp.ModeOff['mode_bf1'])\n"
+        "c_off = tostring(sp.EraOff['era_c'])\n"
+        "added = ''\n"
+        "ifs_missionselect_pcMulti_fnAddMapNew(sp)\n"
+        "some = added\n"
+        // four modes, six rows: the scroll arrows clamp at the top
+        "sp.CurButton = '_mode_down'\n"
+        "ifs_missionselect_pcMulti_fnClickCheckButtons(sp)\n"
+        "top = sp.ModeTop\n"));
+
+    // retail's order first, Hero Assault shown as Assault, XL only in single player
+    CHECK(lua.Global("sp_modes") == "mode_con,mode_assault,mode_xl,mode_bf1,");
+    CHECK(lua.Global("mp_modes") == "mode_con,mode_assault,mode_bf1,");
+    // the KotOR era counts although the entry has no era_k key
+    CHECK(lua.Global("eras") == "era_c,era_k,");
+    CHECK(lua.Global("all") == "AB1c_con;AB1c_eli;AB1c_xl;AB1c_bf1;AB1k_con;");
+    CHECK(lua.Global("bf1_off") == "1");
+    CHECK(lua.Global("c_off") == "1");
+    CHECK(lua.Global("some") == "AB1k_con;");
+    CHECK(lua.Global("top") == "0");
 }
 
 TEST_CASE("mod support is wired into the shell" * doctest::test_suite("regression"))
