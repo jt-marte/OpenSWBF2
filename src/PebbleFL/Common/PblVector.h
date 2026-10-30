@@ -1,6 +1,9 @@
 #pragma once
 
 #include <stddef.h>
+#include <cmath>
+
+static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
 
 class PblVector3
 {

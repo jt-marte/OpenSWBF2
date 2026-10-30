@@ -22,12 +22,13 @@
     <ProjectGuid>{F303D4E6-ED54-5075-A41B-A8829D3D67C5}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>BattlefrontII</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.26100.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <CharacterSet>NotSet</CharacterSet>
   </PropertyGroup>
@@ -36,8 +37,8 @@
     <TargetName>BattlefrontII</TargetName>
     <LinkIncremental>false</LinkIncremental>
     <GenerateManifest>false</GenerateManifest>
-    <IncludePath>$(VC_IncludePath);$(WindowsSdk_71A_IncludePath);$(DXSDK_DIR)Include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSdk_71A_LibraryPath_x86);$(DXSDK_DIR)Lib\x86</LibraryPath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(DXSDK_DIR)Include</IncludePath>
+    <LibraryPath>$(VC_LibraryPath_x86);$(WindowsSDK_LibraryPath_x86);$(DXSDK_DIR)Lib\x86</LibraryPath>
     <OutDir>bin\$(Platform)\$(Configuration)\</OutDir>
     <IntDir>obj\$(Platform)\$(Configuration)\</IntDir>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
@@ -49,7 +50,7 @@
        no Galaxy (Modern multiplayer only) and plays movies with FFmpeg (third_party\ffmpeg). -->
   <PropertyGroup Condition="'$(Platform)'=='x64'">
     <IncludePath>$(IncludePath);$(ProjectDir)third_party\ffmpeg\include</IncludePath>
-    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSdk_71A_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(ProjectDir)third_party\ffmpeg\lib</LibraryPath>
+    <LibraryPath>$(VC_LibraryPath_x64);$(WindowsSDK_LibraryPath_x64);$(DXSDK_DIR)Lib\x64;$(ProjectDir)third_party\ffmpeg\lib</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -63,6 +64,10 @@
       <AdditionalIncludeDirectories>src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <SDLCheck>true</SDLCheck>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <ConformanceMode>false</ConformanceMode>
+      <RemoveUnreferencedCodeData>false</RemoveUnreferencedCodeData>
+      <AdditionalOptions>/Zc:alignedNew- /Zc:inline- %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <IntrinsicFunctions>false</IntrinsicFunctions>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -143,7 +148,9 @@
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcVideoEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Platform\Pc\pcWeatherEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIDebug.cpp" />
-    <ClCompile Include="src\Battlefront2\Source\AIDifficulty.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\AIDifficulty.cpp">
+      <FloatingPointModel>Strict</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\AIOverhaul.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIStats.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AITuning.cpp" />
@@ -411,6 +418,7 @@
     <ClCompile Include="src\Battlefront2\Source\NetMatch.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPacket.cpp" />
     <ClCompile Include="src\Battlefront2\Source\MemFailLog.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\OdfValue.cpp" />
     <ClCompile Include="src\Battlefront2\Source\SimDigest.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetWire.cpp" />
     <ClCompile Include="src\Battlefront2\Source\NetPredict.cpp" />
@@ -566,7 +574,9 @@
     <ClCompile Include="src\Battlefront2\Source\Weapon.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponAreaEffect.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponBinoculars.cpp" />
-    <ClCompile Include="src\Battlefront2\Source\WeaponCannon.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\WeaponCannon.cpp">
+      <FloatingPointModel>Strict</FloatingPointModel>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\WeaponCatapult.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponDestruct.cpp" />
     <ClCompile Include="src\Battlefront2\Source\WeaponDetonator.cpp" />
@@ -965,6 +975,7 @@
     <ClInclude Include="src\Battlefront2\Source\AIStats.h" />
     <ClInclude Include="src\Battlefront2\Source\AITuning.h" />
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h" />
+    <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />
     <ClInclude Include="src\Battlefront2\Source\AILowLevel.h" />
@@ -1209,11 +1220,13 @@
     <ClInclude Include="src\Battlefront2\Source\NavigatorPathFollower.h" />
     <ClInclude Include="src\Battlefront2\Source\NavigatorSlide.h" />
     <ClInclude Include="src\Battlefront2\Source\NetAdmin.h" />
+    <ClInclude Include="src\Battlefront2\Source\NetAdminIdText.h" />
     <ClInclude Include="src\Battlefront2\Source\NetComm.h" />
     <ClInclude Include="src\Battlefront2\Source\NetGame.h" />
     <ClInclude Include="src\Battlefront2\Source\NetMatch.h" />
     <ClInclude Include="src\Battlefront2\Source\NetPacket.h" />
     <ClInclude Include="src\Battlefront2\Source\MemFailLog.h" />
+    <ClInclude Include="src\Battlefront2\Source\OdfValue.h" />
     <ClInclude Include="src\Battlefront2\Source\SimDigest.h" />
     <ClInclude Include="src\Battlefront2\Source\SimDigestCore.h" />
     <ClInclude Include="src\Battlefront2\Source\NetWire.h" />
@@ -1297,6 +1310,7 @@
     <ClInclude Include="src\Battlefront2\Source\ShadowEffect.h" />
     <ClInclude Include="src\Battlefront2\Source\ShellLoop.h" />
     <ClInclude Include="src\Battlefront2\Source\ShieldEffect.h" />
+    <ClInclude Include="src\Battlefront2\Source\SideNames.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyDome.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyObject.h" />
     <ClInclude Include="src\Battlefront2\Source\SkyStars.h" />

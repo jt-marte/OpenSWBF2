@@ -80,7 +80,7 @@ void MedalsMgr::HudIndication(int iType, const char* pPrefix, const RedColor& co
             const unsigned short* pText = RedLocalizeDB::Find(PblHash(key), true);
             if (!pText)
             {
-                PblUnicode::ustrncnv(wideKey, key, 64);
+                PblUnicode::ustrncnv(wideKey, key, 63);
                 pText = wideKey;
             }
             MessageDisplay::Instance(i, MessageDisplay::DISPLAY_SYSTEM_MSG)->AddMessage(pText, color);

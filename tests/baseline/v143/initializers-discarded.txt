@@ -1,0 +1,8 @@
+0	0002:ffbb6000	??sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+1	0002:ffbb6000	??sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+2	0002:ffbb6000	??sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+3	0002:ffbb6000	??sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+4	0002:ffbb6000	??sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VEntity@@VEntityClass@@UEntityDesc@@@@2P6AXXZA@@3P6AXXZA	NetSetup.obj
+5	0002:ffbb6000	??sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VOrdnance@@VExplosionClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	NetSetup.obj
+6	0002:ffbb6000	??sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VOrdnance@@VOrdnanceClass@@UOrdnanceDesc@@@@2P6AXXZA@@3P6AXXZA	NetSetup.obj
+7	0002:ffbb6000	??sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@?$Factory@VWeapon@@VWeaponClass@@UWeaponDesc@@@@2P6AXXZA@@3P6AXXZA	NetSetup.obj

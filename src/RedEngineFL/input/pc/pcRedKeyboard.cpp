@@ -8,6 +8,8 @@ void __cdecl PblTraceP(const char* Format, ...);
 
 extern HWND hGlobalWnd;
 
+typedef LONG(WINAPI* RtlGetVersionFn)(OSVERSIONINFOW*);
+
 char sAsciiCodeMap[256][2];
 unsigned char sRedKeyMap[256];
 float s_keyRepeatDelay;
@@ -209,9 +211,14 @@ unsigned char RedKeyboard::pcGetAsciiValue(unsigned int uiScanCode)
     BYTE abKeyState[256];
     GetKeyboardState(abKeyState);
 
-    OSVERSIONINFOA osvi;
+    OSVERSIONINFOW osvi;
+    memset(&osvi, 0, sizeof(osvi));
     osvi.dwOSVersionInfoSize = sizeof(osvi);
-    GetVersionExA(&osvi);
+    RtlGetVersionFn pfnRtlGetVersion = (RtlGetVersionFn)GetProcAddress(GetModuleHandleA("ntdll.dll"), "RtlGetVersion");
+    if (pfnRtlGetVersion)
+    {
+        pfnRtlGetVersion(&osvi);
+    }
 
     unsigned int uiChar = 0;
     int iCount;

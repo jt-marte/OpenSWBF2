@@ -94,7 +94,7 @@ int PlayerProfile::FindByName(const unsigned short* pusName)
 // FUNCTION: SWBF2 0x0061d7a0
 void PlayerProfile::tProfile::SetTrueProfileName(const unsigned short* pusName)
 {
-    PblUnicode::ustrncpy(mName, pusName, 16);
+    PblUnicode::ustrlcpy(mName, pusName, 16);
 }
 
 // FUNCTION: SWBF2 0x0061d7c0
@@ -1475,7 +1475,7 @@ void PlayerProfile::tProfile::ResetProfile()
 void PlayerProfile::tProfile::ResetToDefault()
 {
     ResetProfile();
-    PblUnicode::ustrncpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
+    PblUnicode::ustrlcpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
     mName[15] = 0;
 }
 
@@ -1504,7 +1504,7 @@ void PlayerProfile::tProfile::SanityCheck()
 
     if (!PblUnicode::ustrlen(mName))
     {
-        PblUnicode::ustrncpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
+        PblUnicode::ustrlcpy(mName, RedLocalizeDB::Find(0x62a0afc0, false), 16);
         mName[15] = 0;
     }
     if (!PblUnicode::ustrlen(mName))
@@ -1703,7 +1703,7 @@ void PlayerProfile::tProfile::InitProfile(unsigned short const* pusName)
     mInitialized = true;
     if (pusName)
     {
-        PblUnicode::ustrncpy(mName, pusName, 16);
+        PblUnicode::ustrlcpy(mName, pusName, 16);
         mName[15] = 0;
         mbFakeProfile = false;
     }

@@ -18,6 +18,7 @@
 #include "GameObject.h"
 #include "LightFlash.h"
 #include "NetGame.h"
+#include "OdfValue.h"
 #include "Trackable.h"
 #include "WaterEffect.h"
 #include "PebbleFL/Common/PblMath.h"
@@ -181,7 +182,9 @@ void ExplosionClass::Read(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pClass->SetProperty(uProperty, child.ReadString(acBuffer, sizeof(acBuffer)));
+            char* pcValue = child.ReadString(acBuffer, sizeof(acBuffer));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pClass->SetProperty(uProperty, pcValue);
             break;
         }
         }

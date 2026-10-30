@@ -1404,7 +1404,7 @@ void HUD::ElementMap::UpdatePostIcons(float fElapsed, float fRotation)
                         if (!text.IsEnabled() && post.actor->mDisplayHUDIndex)
                         {
                             unsigned short buffer[128];
-                            PblUnicode::usnprintf(buffer, sizeof(buffer) - 1, "%d", post.actor->mHUDPostIndex);
+                            PblUnicode::usnprintf(buffer, sizeof(buffer) / sizeof(buffer[0]) - 2, "%d", post.actor->mHUDPostIndex);
                             text.SetText(buffer, true);
                             text.Enable(true);
                         }

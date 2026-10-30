@@ -305,20 +305,20 @@ bool BootDisplay::Update(float fDeltaTime)
     unsigned short text[256];
     unsigned short name[64];
     const unsigned short* pFormat = RedLocalizeDB::Find(0x719fdb6fu, false);
-    PblUnicode::ustrncnv(name, (const unsigned char*)NetGame::GetPlayerName(iBootPlayer), 64);
+    PblUnicode::ustrncnv(name, (const unsigned char*)NetGame::GetPlayerName(iBootPlayer), 63);
     int iSeconds = (int)fTimeLeft;
-    PblUnicode::usnprintf(text, 256, pFormat, name, NetGame::GetBootVotes(), iSeconds);
+    PblUnicode::usnprintf(text, 255, pFormat, name, NetGame::GetBootVotes(), iSeconds);
 
     int iCountA, iCountB, iNeeded;
     NetGame::GetBootCount(iCountA, iCountB, iNeeded);
     iNeeded -= NetGame::GetBootVotes();
 
     const unsigned short* pReason = GetBootReasonString(NetGame::GetBootReason());
-    PblUnicode::usnprintf(text, 256, RedLocalizeDB::Find(0xd9a2b95au, false), name, pReason);
+    PblUnicode::usnprintf(text, 255, RedLocalizeDB::Find(0xd9a2b95au, false), name, pReason);
     pText0->SetText(text, true);
     pText0->Enable(true);
 
-    PblUnicode::usnprintf(text, 256, RedLocalizeDB::Find(0xd8a2b7c7u, false), iSeconds, iNeeded);
+    PblUnicode::usnprintf(text, 255, RedLocalizeDB::Find(0xd8a2b7c7u, false), iSeconds, iNeeded);
     pText1->SetText(text, true);
     pText1->Enable(true);
 
@@ -337,7 +337,7 @@ bool BootDisplay::Update(float fDeltaTime)
         return true;
     }
 
-    PblUnicode::usnprintf(text, 256, RedLocalizeDB::Find(0xd7a2b634u, false));
+    PblUnicode::usnprintf(text, 255, RedLocalizeDB::Find(0xd7a2b634u, false));
     pText2->SetText(text, true);
     pText2->Enable(true);
 

@@ -11,7 +11,7 @@
 int RedTextElement::SetTextFormattedV(const char* pcFormat, char* pArgs)
 {
     unsigned short buffer[1024];
-    PblUnicode::uvsnprintf(buffer, 0x3ff, pcFormat, pArgs);
+    PblUnicode::uvsnprintf(buffer, 0x3fe, pcFormat, pArgs);
     return SetText(buffer, true);
 }
 
@@ -632,7 +632,7 @@ unsigned int FindReplaceMagicStrings_(const unsigned short* const pcSource,
             {
                 bInMagic = false;
                 acMagic[uiLen] = 0;
-                PblUnicode::ustrncnv(acMagicA, acMagic, 256);
+                PblUnicode::ustrncnv(acMagicA, acMagic, 255);
                 const unsigned short c = FindMagicChar_(PblHash(acMagicA));
                 if (c)
                 {

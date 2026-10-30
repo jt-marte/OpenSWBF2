@@ -56,6 +56,7 @@
 #include "ReticuleDisplay.h"
 #include "ScopeDisplay.h"
 #include "ShellLoop.h"
+#include "SideNames.h"
 #include "SoldierAnimationBank.h"
 #include "SoldierAnimatorClass.h"
 #include "SoundDebugDisplay.h"
@@ -332,8 +333,8 @@ void UpdateDedicatedNoRender()
     {
         char acTeam1[128];
         char acTeam2[128];
-        PblUnicode::ustrncnv(acTeam1, pTeam1, sizeof(acTeam1));
-        PblUnicode::ustrncnv(acTeam2, pTeam2, sizeof(acTeam2));
+        PblUnicode::ustrncnv(acTeam1, pTeam1, sizeof(acTeam1) - 1);
+        PblUnicode::ustrncnv(acTeam2, pTeam2, sizeof(acTeam2) - 1);
         _snprintf(acLine, sizeof(acLine) - 1, "Teams: %s vs %s\n", acTeam1, acTeam2);
         acLine[sizeof(acLine) - 1] = 0;
         strlcat(acText, acLine, sizeof(acText));
@@ -655,10 +656,6 @@ extern float netSecondsPerTurn;
 extern bool netFrameLock;
 extern bool netIsClient;
 extern int netMinPlayersToAutoLaunchDedicated;
-
-// GLOBAL: SWBF2 0x0079f808
-
-static const char sSideNamePrefixes[][4] = { "Neu", "All", "Imp", "Rep", "CIS", "Loc" };
 
 static const float END_DISPLAY_TIME = 5.0f;
 
@@ -1157,7 +1154,7 @@ void UpdateDedicatedMsg(float fDeltaTime)
             PblUnicode::ustrncnv(acName, "", 128);
         }
         PblUnicode::usnprintf(acCount, 128, " : %d", iCount);
-        PblUnicode::ustrlcat(acName, acCount, 128);
+        PblUnicode::ustrlcat(acName, acCount, 127);
         apText[i]->SetText(acName, true);
     }
 
@@ -1572,7 +1569,7 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
                         const bool bPlayerTeam = AIUtil::IsPlayerTeam(iTeam);
                         fprintf(pFile, "\t%c=%s\t%du@%d%c\t%3dr\t%2dp",
                                 (Team::sWinningTeams & (1 << iTeam)) ? 'W' : 'L',
-                                sSideNamePrefixes[pTeam->mSide],
+                                SideNamePrefix(pTeam->mSide),
                                 pTeam->mMemberCount,
                                 AIDifficulty::GetIntSkill((const UnitController*)bPlayerTeam, false),
                                 bPlayerTeam ? 'P' : ' ',

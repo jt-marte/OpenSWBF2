@@ -66,7 +66,7 @@ filled with `7FA5A5A5` beforehand so a failed conversion shows. `atof` is the do
 - `edge.txt`: hand-picked edge cases. The loose `.cfg`/`.ini` numeric paths go through the same
   `sscanf("%f")` and `atof` entry points, and `edge.txt` covers them with the long-mantissa,
   near-halfway, exponent, leading `+`/`.` and trailing-junk cases, plus `nan`, `inf`, `1.#INF`
-  and `1.#QNAN` forms recorded as VS2013 parses them.
+  and `1.#QNAN` forms recorded as the generating CRT parses them.
 
 ## mathfn
 
@@ -97,10 +97,13 @@ Record it with `tests\run.ps1 -Platform x64 -RecordCorpus` (or `OpenSWBF2Tests.e
 
 ## Provenance of floatparse and mathfn
 
-Generated once on VS2013 Update 5 (`cl` 18.00.40629, `msvcr120.dll` 12.00.40664.0) by running
+Generated on v143 (MSVC 14.44.35207, `ucrtbase.dll` 10.0.26100.9711) by running
 `..\bin\Tests\Release\OpenSWBF2Tests.exe --gen-corpus=corpus` from `tests\` with retail GameData
-present (without it the mode prints `[SKIP]` and exits 77). Do not regenerate them after the
-toolchain switch: Phase 20 compares the v143/UCRT results against these bits. The checker cases
-in the `corpus` suite read only these files and need no GameData, so they never skip (on x64
-`math corpus` skips until `mathfn\x64\math.txt` exists). `mathfn\x64\math.txt` was generated the
-same way on VS2013 Update 5 for x64 (`cl` 18.00.40629 x86_amd64, `msvcr120.dll` 12.00.40664.0).
+present (without it the mode prints `[SKIP]` and exits 77). The VS2013 Update 5 originals (`cl`
+18.00.40629, `msvcr120.dll` 12.00.40664.0) are kept unchanged under
+`tests\baseline\vs2013\corpus\`. `odf.txt` is identical on both toolchains; the `edge.txt` and
+`math.txt` deltas are explained in `tests\baseline\v143\CAUSES.md`. The files are regenerated
+only at a toolchain change, with a written cause. The checker cases in the `corpus` suite read
+only these files and need no GameData, so they never skip (on x64 `math corpus` skips until
+`mathfn\x64\math.txt` exists). `mathfn\x64\math.txt` was first generated on VS2013 Update 5 for
+x64 and regenerated the same way on v143 x64 when the x64 build moved to v143.

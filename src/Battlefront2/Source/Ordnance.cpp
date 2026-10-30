@@ -11,6 +11,7 @@
 #include "FLEffect.h"
 #include "GameObject.h"
 #include "NetGame.h"
+#include "OdfValue.h"
 #include "UnitController.h"
 #include "VisionManager.h"
 #include "WeaponCannonInstance.h"
@@ -560,7 +561,9 @@ void OrdnanceClass::Read(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pClass->SetProperty(uProperty, child.ReadString(acBuffer, sizeof(acBuffer)));
+            char* pcValue = child.ReadString(acBuffer, sizeof(acBuffer));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pClass->SetProperty(uProperty, pcValue);
             if (pClass != pClass->mNextCharge)
             {
                 pClass = pClass->mNextCharge;

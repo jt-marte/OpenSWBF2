@@ -170,7 +170,7 @@ const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing)
 // FUNCTION: SWBF2 0x006c5bf0
 void GetLocalizedString(unsigned short* pusBuffer, unsigned int uiSize, unsigned int uiHash)
 {
-    memset(pusBuffer, 0, uiSize);
+    memset(pusBuffer, 0, uiSize * sizeof(pusBuffer[0]));
     const unsigned short* pusString = Find(uiHash, false);
     if (pusString)
     {

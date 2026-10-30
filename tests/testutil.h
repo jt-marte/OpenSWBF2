@@ -42,6 +42,7 @@ public:
     LogCapture();
     ~LogCapture();
     bool Contains(const char* pcText) const;
+    int Count(const char* pcText) const;
 
 private:
     static void __cdecl Sink(char const* pcLine, ...);
@@ -73,3 +74,5 @@ private:
 
 void __cdecl TestLogObserver(int iSeverity, int iCategory, char const* pcLine);
 int TestStrictnessReport(const char* pcCase);
+
+bool ReadRepoText(const char* pcRelPath, std::string& sOut);

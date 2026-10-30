@@ -21,16 +21,6 @@ $Platform = $script:SmokePlatform
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 if (-not $OutDir) { $OutDir = Join-Path $root "artifacts\guard-revert\$stamp" }
 
-function Find-MSBuild {
-    $msbuild = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\12.0\Bin\MSBuild.exe'
-    if (-not (Test-Path $msbuild)) {
-        $key = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\MSBuild\ToolsVersions\12.0'
-        if (Test-Path $key) { $msbuild = Join-Path (Get-ItemProperty $key).MSBuildToolsPath 'MSBuild.exe' }
-    }
-    if (-not (Test-Path $msbuild)) { Write-Host 'MSBuild 12.0 not found (install VS2013 Update 5).'; exit 2 }
-    return $msbuild
-}
-
 function Invoke-Git([string]$dir, [string[]]$gitArgs) {
     $ErrorActionPreference = 'Continue'
     $out = & git -C $dir @gitArgs 2>&1
@@ -134,9 +124,10 @@ function Set-Anchor([string]$path, [string]$anchor, [string]$replacement) {
     return $bytes
 }
 
-. $RowsFile
-$rows = @($GuardRevertRows)
-if ($Row) { $rows = @($rows | Where-Object { $Row -contains $_.Id }) }
+try {
+    . $RowsFile
+    $rows = @($GuardRevertRows)
+    if ($Row) { $rows = @($rows | Where-Object { $Row -contains $_.Id }) }
 if ($Platform -eq 'x64') {
     # LAA-* rows guard the 32-bit large-address-aware work (unsigned pointer order, the LAA link flag); they mean nothing on x64.
     $laaRows = @($rows | Where-Object { $_.Id -like 'LAA-*' })
@@ -144,208 +135,301 @@ if ($Platform -eq 'x64') {
     $rows = @($rows | Where-Object { $_.Id -notlike 'LAA-*' })
     if ($rows.Count -eq 0 -and $laaRows.Count -gt 0) { exit 0 }
 }
-if ($rows.Count -eq 0) { Write-Host 'No rows selected.'; exit 2 }
-$smokeRows = @($rows | Where-Object { $_.Kind -eq 'Smoke' })
-$hardRows = @($rows | Where-Object { $_.Kind -eq 'Hardening' })
-$rows = @($rows | Where-Object { $_.Kind -ne 'Smoke' -and $_.Kind -ne 'Hardening' })
-$gameData = Find-GameDataRoot
-$smokeCases = @{}
-foreach ($w in 'Crash', 'Standard') {
-    foreach ($c in (Get-SmokeCases $w @() $false $null)) {
-        if ($smokeCases.ContainsKey($c.Name)) { throw "smoke case '$($c.Name)' is defined more than once" }
-        $smokeCases[$c.Name] = $c
-    }
-}
-
-foreach ($dll in 'd3dx9_43.dll', 'msvcr120.dll') {
-    if (-not (Test-Path (Join-Path (Get-RuntimeDllDir) $dll))) {
-        Write-Host "Preflight failed: $dll missing from $(if ($Platform -eq 'x64') { 'System32' } else { 'SysWOW64' })."
-        exit 2
-    }
-}
-
-$msbuild = Find-MSBuild
-New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
-New-Item -ItemType Directory -Force -Path $Scratch | Out-Null
-$wt = Join-Path $Scratch "gr-$stamp"
-$before = (Invoke-Git $root @('status', '--porcelain')) -join "`n"
-$table = @()
-$failed = $false
-$added = $false
-
-try {
-    Invoke-Git $root @('worktree', 'add', '--detach', $wt, 'HEAD') | Out-Null
-    $added = $true
-    $patch = Join-Path $OutDir 'overlay.patch'
-    Invoke-Git $root @('diff', 'HEAD', '--binary', "--output=$patch") | Out-Null
-    if ((Get-Item $patch).Length -gt 0) {
-        Invoke-Git $wt @('apply', '--whitespace=nowarn', $patch) | Out-Null
-    }
-    foreach ($rel in (Invoke-Git $root @('ls-files', '--others', '--exclude-standard'))) {
-        $rel = "$rel".Trim()
-        if (-not $rel) { continue }
-        $dst = Join-Path $wt $rel
-        New-Item -ItemType Directory -Force -Path (Split-Path $dst -Parent) | Out-Null
-        Copy-Item -LiteralPath (Join-Path $root $rel) -Destination $dst -Force
+    if ($rows.Count -eq 0) { Write-Host 'No rows selected.'; exit 2 }
+    $selectedIds = @($rows | ForEach-Object { $_.Id })
+    $smokeRows = @($rows | Where-Object { $_.Kind -eq 'Smoke' })
+    $hardRows = @($rows | Where-Object { $_.Kind -eq 'Hardening' })
+    $tlogRows = @($rows | Where-Object { $_.Kind -eq 'Tlog' })
+    $rows = @($rows | Where-Object { $_.Kind -ne 'Smoke' -and $_.Kind -ne 'Hardening' -and $_.Kind -ne 'Tlog' })
+    $gameData = Find-GameDataRoot
+    $smokeCases = @{}
+    foreach ($w in 'Crash', 'Standard') {
+        foreach ($c in (Get-SmokeCases $w @() $false $null)) {
+            if ($smokeCases.ContainsKey($c.Name)) { throw "smoke case '$($c.Name)' is defined more than once" }
+            $smokeCases[$c.Name] = $c
+        }
     }
 
-    if ($rows.Count -gt 0) {
-        $exe = Get-TestExePath $wt 'Debug'
-        $controlOk = Build-Tests $wt (Join-Path $OutDir 'build-control.log')
-        if (-not $controlOk) { throw "control build failed, see $(Join-Path $OutDir 'build-control.log')" }
+    if ($Platform -eq 'x64') { Assert-Runtimes $T1Runtimes (Get-RuntimeDllDir) } else { Assert-Runtimes $GameRuntimes }
 
-        $control = @{}
-        foreach ($name in ($rows | ForEach-Object { $_.Tests } | Select-Object -Unique)) {
-            $control[$name] = Run-Case $exe $wt $name
-            Set-Content -Path (Join-Path $OutDir (('control-' + ($name -replace '[^A-Za-z0-9_.-]', '_')) + '.txt')) -Value $control[$name].Text -Encoding ASCII
+    $msbuild = Find-MSBuild
+    New-Item -ItemType Directory -Force -Path $OutDir | Out-Null
+    New-Item -ItemType Directory -Force -Path $Scratch | Out-Null
+    $wt = Join-Path $Scratch "gr-$stamp"
+    $before = (Invoke-Git $root @('status', '--porcelain')) -join "`n"
+    $table = @()
+    $failed = $false
+    $added = $false
+    $cleanupFailed = $false
+
+    try {
+        Invoke-Git $root @('worktree', 'add', '--detach', $wt, 'HEAD') | Out-Null
+        $added = $true
+        $patch = Join-Path $OutDir 'overlay.patch'
+        Invoke-Git $root @('diff', 'HEAD', '--binary', "--output=$patch") | Out-Null
+        if ((Get-Item $patch).Length -gt 0) {
+            Invoke-Git $wt @('apply', '--whitespace=nowarn', $patch) | Out-Null
+        }
+        foreach ($rel in (Invoke-Git $root @('ls-files', '--others', '--exclude-standard'))) {
+            $rel = "$rel".Trim()
+            if (-not $rel) { continue }
+            $dst = Join-Path $wt $rel
+            New-Item -ItemType Directory -Force -Path (Split-Path $dst -Parent) | Out-Null
+            Copy-Item -LiteralPath (Join-Path $root $rel) -Destination $dst -Force
         }
 
-        foreach ($r in $rows) {
-            $path = Join-Path $wt $r.File
-            $orig = $null
-            $result = 'BUILD-FAIL'
-            $detail = ''
-            $code = ''
-            $ctl = 'GREEN'
-            foreach ($name in $r.Tests) { if ($control[$name].State -ne 'GREEN') { $ctl = $control[$name].State } }
-            try {
-                $orig = Set-Anchor $path $r.Anchor $r.Replacement
-                $ok = Build-Tests $wt (Join-Path $OutDir ("build-$($r.Id).log"))
-                if ($ok) {
-                    $states = @()
-                    $codes = @()
-                    $details = @()
-                    foreach ($name in $r.Tests) {
-                        $c = Run-Case $exe $wt $name
-                        Set-Content -Path (Join-Path $OutDir (("$($r.Id)-" + ($name -replace '[^A-Za-z0-9_.-]', '_')) + '.txt')) -Value $c.Text -Encoding ASCII
-                        $states += $c.State
-                        $codes += $c.Code
-                        if ($c.Detail) { $details += $c.Detail }
+        if ($rows.Count -gt 0) {
+            $exe = Get-TestExePath $wt 'Debug'
+            $controlOk = Build-Tests $wt (Join-Path $OutDir 'build-control.log')
+            if (-not $controlOk) { throw "control build failed, see $(Join-Path $OutDir 'build-control.log')" }
+
+            $control = @{}
+            foreach ($name in ($rows | ForEach-Object { $_.Tests } | Select-Object -Unique)) {
+                $control[$name] = Run-Case $exe $wt $name
+                Set-Content -Path (Join-Path $OutDir (('control-' + ($name -replace '[^A-Za-z0-9_.-]', '_')) + '.txt')) -Value $control[$name].Text -Encoding ASCII
+            }
+
+            foreach ($r in $rows) {
+                $path = Join-Path $wt $r.File
+                $orig = $null
+                $result = 'BUILD-FAIL'
+                $detail = ''
+                $code = ''
+                $ctl = 'GREEN'
+                foreach ($name in $r.Tests) { if ($control[$name].State -ne 'GREEN') { $ctl = $control[$name].State } }
+                try {
+                    $orig = Set-Anchor $path $r.Anchor $r.Replacement
+                    $ok = Build-Tests $wt (Join-Path $OutDir ("build-$($r.Id).log"))
+                    if ($ok) {
+                        $states = @()
+                        $codes = @()
+                        $details = @()
+                        foreach ($name in $r.Tests) {
+                            $c = Run-Case $exe $wt $name
+                            Set-Content -Path (Join-Path $OutDir (("$($r.Id)-" + ($name -replace '[^A-Za-z0-9_.-]', '_')) + '.txt')) -Value $c.Text -Encoding ASCII
+                            $states += $c.State
+                            $codes += $c.Code
+                            if ($c.Detail) { $details += $c.Detail }
+                        }
+                        $code = ($codes -join ',')
+                        $detail = ($details -join ',')
+                        if ($states -contains 'NO-MATCH') { $result = 'NO-MATCH' }
+                        elseif ($states -contains 'RED') { $result = 'RED' }
+                        elseif ($states -contains 'SKIP') { $result = 'SKIP' }
+                        else { $result = 'STILL-GREEN' }
                     }
-                    $code = ($codes -join ',')
-                    $detail = ($details -join ',')
-                    if ($states -contains 'NO-MATCH') { $result = 'NO-MATCH' }
-                    elseif ($states -contains 'RED') { $result = 'RED' }
-                    elseif ($states -contains 'SKIP') { $result = 'SKIP' }
-                    else { $result = 'STILL-GREEN' }
+                }
+                catch {
+                    $result = 'ERROR'
+                    $detail = $_.Exception.Message
+                }
+                finally {
+                    if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
+                }
+                $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = ($r.Tests -join ' | '); Control = $ctl; Reverted = $result; Exit = $code; Detail = $detail }
+                if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
+                Write-Host ('{0,-12} control={1,-8} reverted={2,-11} exit={3} {4}' -f $r.Id, $ctl, $result, $code, $detail)
+            }
+        }
+
+        if ($hardRows.Count -gt 0) {
+            $wtExe = Join-Path (Get-GameExeDir $wt 'Release') 'BattlefrontII.exe'
+            $getCheck = {
+                param($name)
+                $db = Find-Dumpbin
+                $hdr = (& $db /headers $wtExe) -join "`n"
+                $imp = (& $db /imports $wtExe) -join "`n"
+                return ((@(Get-HardeningChecks $hdr '' 0 0 0) + @(Get-ImportChecks $imp)) | Where-Object { $_.Name -eq $name })
+            }
+            if (-not (Build-Game $wt (Join-Path $OutDir 'build-hardening-control.log'))) { throw "hardening control build failed, see $(Join-Path $OutDir 'build-hardening-control.log')" }
+            $hardControl = @{}
+            foreach ($name in ($hardRows | ForEach-Object { $_.Check } | Select-Object -Unique)) {
+                $hardControl[$name] = [bool](& $getCheck $name).Ok
+            }
+            foreach ($r in $hardRows) {
+                $path = Join-Path $wt $r.File
+                $orig = $null
+                $result = 'BUILD-FAIL'
+                $detail = ''
+                $ctl = 'GREEN'
+                if (-not $hardControl[$r.Check]) { $ctl = 'FAIL' }
+                try {
+                    $orig = Set-Anchor $path $r.Anchor $r.Replacement
+                    if (Build-Game $wt (Join-Path $OutDir "build-$($r.Id).log")) {
+                        $chk = & $getCheck $r.Check
+                        $detail = "check=$($r.Check) ok=$($chk.Ok)"
+                        if ($chk.Ok) { $result = 'STILL-GREEN' } else { $result = 'RED' }
+                    }
+                }
+                catch {
+                    $result = 'ERROR'
+                    $detail = $_.Exception.Message
+                }
+                finally {
+                    if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
+                }
+                $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = "hardening:$($r.Check)"; Control = $ctl; Reverted = $result; Exit = ''; Detail = $detail }
+                if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
+                Write-Host ('{0,-12} control={1,-8} reverted={2,-11} {3}' -f $r.Id, $ctl, $result, $detail)
+            }
+        }
+
+        if ($tlogRows.Count -gt 0) {
+            $buildProj = {
+                param($project, $logPath)
+                if ($project -eq 'tests') { return (Build-Tests $wt $logPath) }
+                return (Build-Game $wt $logPath)
+            }
+            $testsObj = if ($Platform -eq 'x64') { 'obj\Tests\x64\Debug' } else { 'obj\Tests\Debug' }
+            $tlogDirs = @{ game = (Join-Path (Get-GameObjDir $wt 'Release') 'BattlefrontII.tlog'); tests = (Join-Path (Join-Path $wt $testsObj) 'OpenSWBF2Tests.tlog') }
+            $getFlag = {
+                param($name)
+                $game = $null
+                $tests = $null
+                if (Test-Path -LiteralPath $tlogDirs.game) { $game = Get-ClTlogCounts $tlogDirs.game }
+                if (Test-Path -LiteralPath $tlogDirs.tests) { $tests = Get-ClTlogCounts $tlogDirs.tests }
+                return (Get-FlagChecks $game $tests | Where-Object { $_.Name -eq $name })
+            }
+            foreach ($project in ($tlogRows | ForEach-Object { $_.Project } | Select-Object -Unique)) {
+                $log = Join-Path $OutDir "build-tlog-control-$project.log"
+                if (-not (& $buildProj $project $log)) { throw "tlog control build failed, see $log" }
+            }
+            $tlogControl = @{}
+            foreach ($name in ($tlogRows | ForEach-Object { $_.Check } | Select-Object -Unique)) {
+                $tlogControl[$name] = & $getFlag $name
+            }
+            foreach ($r in $tlogRows) {
+                $path = Join-Path $wt $r.File
+                $orig = $null
+                $result = 'BUILD-FAIL'
+                $ctlChk = $tlogControl[$r.Check]
+                $detail = "control: $($ctlChk.Detail)"
+                $ctl = 'GREEN'
+                if (-not $ctlChk.Ok) { $ctl = 'FAIL' }
+                try {
+                    $orig = Set-Anchor $path $r.Anchor $r.Replacement
+                    Get-ChildItem -LiteralPath $tlogDirs[$r.Project] -Filter 'cl.command*.tlog' -ErrorAction SilentlyContinue | Remove-Item -Force
+                    $built = & $buildProj $r.Project (Join-Path $OutDir "build-$($r.Id).log")
+                    $fresh = (Get-ClTlogCounts $tlogDirs[$r.Project]).Total
+                    if ($built -or $fresh -gt 0) {
+                        $chk = & $getFlag $r.Check
+                        $detail = "reverted: $($chk.Detail)"
+                        if (-not $built) { $detail = "build failed after $fresh compiles; $detail" }
+                        if ($chk.Ok) { $result = 'STILL-GREEN' } else { $result = 'RED' }
+                    }
+                }
+                catch {
+                    $result = 'ERROR'
+                    $detail = $_.Exception.Message
+                }
+                finally {
+                    if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
+                }
+                $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = "tlog:$($r.Check)"; Control = $ctl; Reverted = $result; Exit = ''; Detail = $detail }
+                if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
+                Write-Host ('{0,-16} control={1,-8} reverted={2,-11} {3}' -f $r.Id, $ctl, $result, $detail)
+            }
+            foreach ($project in ($tlogRows | ForEach-Object { $_.Project } | Select-Object -Unique)) {
+                $log = Join-Path $OutDir "build-tlog-restored-$project.log"
+                if (-not (& $buildProj $project $log)) { throw "tlog restored build failed, see $log" }
+            }
+            foreach ($name in $tlogControl.Keys) {
+                $chk = & $getFlag $name
+                Write-Host ('tlog restored {0}: ok={1} {2}' -f $name, $chk.Ok, $chk.Detail)
+                if (-not $chk.Ok) { $failed = $true }
+            }
+        }
+
+        if ($smokeRows.Count -gt 0) {
+            $pre = Get-SmokePrecheck $gameData (Get-GameExeDir $root 'Release')
+            if ($pre) { throw "smoke rows need a prior game build and data: $pre" }
+            if (-not (Build-Game $wt (Join-Path $OutDir 'build-smoke-control.log'))) { throw "smoke control build failed, see $(Join-Path $OutDir 'build-smoke-control.log')" }
+            $smokeControl = @{}
+            foreach ($name in ($smokeRows | ForEach-Object { $_.Case } | Select-Object -Unique)) {
+                $smokeControl[$name] = Run-Smoke $wt "control-$name" $smokeCases[$name]
+            }
+            foreach ($r in $smokeRows) {
+                $path = Join-Path $wt $r.File
+                $orig = $null
+                $result = 'BUILD-FAIL'
+                $detail = ''
+                $code = ''
+                $ctlRes = $smokeControl[$r.Case]
+                $ctl = 'GREEN'
+                if (-not $ctlRes.Ok) { $ctl = 'FAIL-' + $ctlRes.Class }
+                try {
+                    $orig = Set-Anchor $path $r.Anchor $r.Replacement
+                    if (Build-Game $wt (Join-Path $OutDir "build-$($r.Id).log")) {
+                        $s = Run-Smoke $wt $r.Id $smokeCases[$r.Case]
+                        $code = ('0x{0:X8}' -f $s.Code)
+                        $detail = "class=$($s.Class) dumps=$($s.Dumps)"
+                        if ($s.Ok) { $result = 'STILL-GREEN' }
+                        elseif ($r.RedRx -and $s.LogText -cnotmatch $r.RedRx) { $result = 'WRONG-RED' }
+                        else { $result = 'RED' }
+                    }
+                }
+                catch {
+                    $result = 'ERROR'
+                    $detail = $_.Exception.Message
+                }
+                finally {
+                    if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
+                }
+                $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = "smoke:$($r.Case)"; Control = $ctl; Reverted = $result; Exit = $code; Detail = $detail }
+                if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
+                Write-Host ('{0,-12} control={1,-8} reverted={2,-11} exit={3} {4}' -f $r.Id, $ctl, $result, $code, $detail)
+            }
+        }
+    }
+    finally {
+        $ErrorActionPreference = 'Continue'
+        if ($added -and -not $Keep) {
+            $reparse = $null
+            try { $reparse = @(Get-ReparsePoints $wt) }
+            catch { Write-Host "REFUSING to remove ${wt}: reparse point scan failed: $($_.Exception.Message)"; $cleanupFailed = $true }
+            if ($reparse -and $reparse.Count -gt 0) {
+                Write-Host "REFUSING to remove ${wt}: reparse points:"
+                $reparse | ForEach-Object { Write-Host "    $_" }
+                $cleanupFailed = $true
+            }
+            elseif ($null -ne $reparse) {
+                & git -C $wt reset --hard -q 2>&1 | Out-Null
+                & git -C $wt clean -fdq 2>&1 | Out-Null
+                & git -C $root worktree remove $wt 2>&1 | Out-Null
+                if ($LASTEXITCODE -ne 0 -or (Test-Path -LiteralPath $wt)) {
+                    Write-Host "Cleanup failed: git worktree remove left $wt in place."
+                    $cleanupFailed = $true
                 }
             }
-            catch {
-                $result = 'ERROR'
-                $detail = $_.Exception.Message
-            }
-            finally {
-                if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
-            }
-            $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = ($r.Tests -join ' | '); Control = $ctl; Reverted = $result; Exit = $code; Detail = $detail }
-            if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
-            Write-Host ('{0,-12} control={1,-8} reverted={2,-11} exit={3} {4}' -f $r.Id, $ctl, $result, $code, $detail)
         }
+        & git -C $root worktree prune 2>&1 | Out-Null
     }
 
-    if ($hardRows.Count -gt 0) {
-        $wtExe = Join-Path (Get-GameExeDir $wt 'Release') 'BattlefrontII.exe'
-        $getCheck = {
-            param($name)
-            $db = Find-Dumpbin
-            $hdr = (& $db /headers $wtExe) -join "`n"
-            $imp = (& $db /imports $wtExe) -join "`n"
-            return ((@(Get-HardeningChecks $hdr '' 0 0 0) + @(Get-ImportChecks $imp)) | Where-Object { $_.Name -eq $name })
-        }
-        if (-not (Build-Game $wt (Join-Path $OutDir 'build-hardening-control.log'))) { throw "hardening control build failed, see $(Join-Path $OutDir 'build-hardening-control.log')" }
-        $hardControl = @{}
-        foreach ($name in ($hardRows | ForEach-Object { $_.Check } | Select-Object -Unique)) {
-            $hardControl[$name] = [bool](& $getCheck $name).Ok
-        }
-        foreach ($r in $hardRows) {
-            $path = Join-Path $wt $r.File
-            $orig = $null
-            $result = 'BUILD-FAIL'
-            $detail = ''
-            $ctl = 'GREEN'
-            if (-not $hardControl[$r.Check]) { $ctl = 'FAIL' }
-            try {
-                $orig = Set-Anchor $path $r.Anchor $r.Replacement
-                if (Build-Game $wt (Join-Path $OutDir "build-$($r.Id).log")) {
-                    $chk = & $getCheck $r.Check
-                    $detail = "check=$($r.Check) ok=$($chk.Ok)"
-                    if ($chk.Ok) { $result = 'STILL-GREEN' } else { $result = 'RED' }
-                }
-            }
-            catch {
-                $result = 'ERROR'
-                $detail = $_.Exception.Message
-            }
-            finally {
-                if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
-            }
-            $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = "hardening:$($r.Check)"; Control = $ctl; Reverted = $result; Exit = ''; Detail = $detail }
-            if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
-            Write-Host ('{0,-12} control={1,-8} reverted={2,-11} {3}' -f $r.Id, $ctl, $result, $detail)
-        }
+    $lines = @()
+    $lines += ('{0,-12} {1,-8} {2,-11} {3,-10} {4}' -f 'Id', 'Control', 'Reverted', 'Exit', 'Tests')
+    foreach ($t in $table) {
+        $lines += ('{0,-12} {1,-8} {2,-11} {3,-10} {4} {5}' -f $t.Id, $t.Control, $t.Reverted, $t.Exit, $t.Tests, $t.Detail)
     }
+    Write-Host ''
+    $lines | ForEach-Object { Write-Host $_ }
+    $lines | Set-Content -Path (Join-Path $OutDir 'summary.txt') -Encoding ASCII
+    Write-Host "Artifacts: $OutDir"
 
-    if ($smokeRows.Count -gt 0) {
-        $pre = Get-SmokePrecheck $gameData (Get-GameExeDir $root 'Release')
-        if ($pre) { throw "smoke rows need a prior game build and data: $pre" }
-        if (-not (Build-Game $wt (Join-Path $OutDir 'build-smoke-control.log'))) { throw "smoke control build failed, see $(Join-Path $OutDir 'build-smoke-control.log')" }
-        $smokeControl = @{}
-        foreach ($name in ($smokeRows | ForEach-Object { $_.Case } | Select-Object -Unique)) {
-            $smokeControl[$name] = Run-Smoke $wt "control-$name" $smokeCases[$name]
-        }
-        foreach ($r in $smokeRows) {
-            $path = Join-Path $wt $r.File
-            $orig = $null
-            $result = 'BUILD-FAIL'
-            $detail = ''
-            $code = ''
-            $ctlRes = $smokeControl[$r.Case]
-            $ctl = 'GREEN'
-            if (-not $ctlRes.Ok) { $ctl = 'FAIL-' + $ctlRes.Class }
-            try {
-                $orig = Set-Anchor $path $r.Anchor $r.Replacement
-                if (Build-Game $wt (Join-Path $OutDir "build-$($r.Id).log")) {
-                    $s = Run-Smoke $wt $r.Id $smokeCases[$r.Case]
-                    $code = ('0x{0:X8}' -f $s.Code)
-                    $detail = "class=$($s.Class) dumps=$($s.Dumps)"
-                    if ($s.Ok) { $result = 'STILL-GREEN' }
-                    elseif ($r.RedRx -and $s.LogText -cnotmatch $r.RedRx) { $result = 'WRONG-RED' }
-                    else { $result = 'RED' }
-                }
-            }
-            catch {
-                $result = 'ERROR'
-                $detail = $_.Exception.Message
-            }
-            finally {
-                if ($orig) { [IO.File]::WriteAllBytes($path, $orig) }
-            }
-            $table += New-Object PSObject -Property @{ Id = $r.Id; Tests = "smoke:$($r.Case)"; Control = $ctl; Reverted = $result; Exit = $code; Detail = $detail }
-            if ($result -ne 'RED' -or $ctl -ne 'GREEN') { $failed = $true }
-            Write-Host ('{0,-12} control={1,-8} reverted={2,-11} exit={3} {4}' -f $r.Id, $ctl, $result, $code, $detail)
-        }
+    $ranIds = @($table | ForEach-Object { $_.Id })
+    $missing = @($selectedIds | Where-Object { $ranIds -notcontains $_ })
+    if ($table.Count -ne $selectedIds.Count) {
+        Write-Host "ERROR: $($table.Count) of $($selectedIds.Count) selected rows ran. Missing: $($missing -join ', ')"
+        $failed = $true
     }
 }
-finally {
-    $ErrorActionPreference = 'Continue'
-    if ($added -and -not $Keep) {
-        & git -C $root worktree remove --force $wt 2>&1 | Out-Null
-        if (Test-Path $wt) { Remove-Item -Recurse -Force $wt -ErrorAction SilentlyContinue }
-    }
-    & git -C $root worktree prune 2>&1 | Out-Null
+catch {
+    Write-Host "ERROR: $($_.Exception.Message)"
+    Write-Host $_.InvocationInfo.PositionMessage
+    if ($_.ScriptStackTrace) { Write-Host $_.ScriptStackTrace }
+    exit 1
 }
-
-$lines = @()
-$lines += ('{0,-12} {1,-8} {2,-11} {3,-10} {4}' -f 'Id', 'Control', 'Reverted', 'Exit', 'Tests')
-foreach ($t in $table) {
-    $lines += ('{0,-12} {1,-8} {2,-11} {3,-10} {4} {5}' -f $t.Id, $t.Control, $t.Reverted, $t.Exit, $t.Tests, $t.Detail)
-}
-Write-Host ''
-$lines | ForEach-Object { Write-Host $_ }
-$lines | Set-Content -Path (Join-Path $OutDir 'summary.txt') -Encoding ASCII
-Write-Host "Artifacts: $OutDir"
 
 $after = (Invoke-Git $root @('status', '--porcelain')) -join "`n"
 if ($before -ne $after) { Write-Host 'WARNING: main tree status changed during the run.'; exit 1 }
-if ($failed) { exit 1 }
+if ($failed -or $cleanupFailed) { exit 1 }
 exit 0

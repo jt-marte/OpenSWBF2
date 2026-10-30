@@ -124,7 +124,8 @@ void RedMoviePlayerBase::CloseHeader()
 unsigned int RedMoviePlayerBase::CreateTextureHash(unsigned int uiIndex) const
 {
     char acName[128];
-    _snprintf(acName, sizeof(acName), "RedMoviePlayer_0x%08x_0x%08x\n", this, uiIndex);
+    // the low 32 bits name the player (all of it on Win32), so the texture names stay unique
+    _snprintf(acName, sizeof(acName), "RedMoviePlayer_0x%08x_0x%08x\n", (unsigned int)(uintptr_t)this, uiIndex);
     return PblHash(acName);
 }
 

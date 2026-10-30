@@ -585,12 +585,12 @@ int ScriptCB_UnicodeStrCat(lua_State*)
         return 0;
     }
 
-    PblUnicode::ustrncpy(sTempReturnString16,
+    PblUnicode::ustrlcpy(sTempReturnString16,
                          (const unsigned short*)luaL_checklstring(LuaHelper::mState, 1, 0), 256);
     for (int i = 2; i <= iTop; ++i)
     {
         PblUnicode::ustrlcat(sTempReturnString16,
-                             (const unsigned short*)luaL_checklstring(LuaHelper::mState, i, 0), 256);
+                             (const unsigned short*)luaL_checklstring(LuaHelper::mState, i, 0), 255);
     }
     LuaHelper::PushString(sTempReturnString16);
     return 1;
@@ -737,7 +737,7 @@ int ScriptCB_ustrupper(lua_State*)
         return 0;
     }
 
-    PblUnicode::ustrncpy(sTempReturnString16,
+    PblUnicode::ustrlcpy(sTempReturnString16,
                          (const unsigned short*)luaL_checklstring(LuaHelper::mState, 1, 0), 256);
     int iLen = PblUnicode::ustrlen(sTempReturnString16);
     for (int i = 0; i < iLen; ++i)

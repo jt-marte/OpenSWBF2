@@ -17,7 +17,8 @@ extern int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcF
 // FUNCTION: SWBF2 0x00631550
 // OpenSWBF2: one variadic function in place of retail's (int) and (pointer, int) overloads, which
 // passed uvsnprintf the address of their own parameters as the argument list. On Win32 the stack
-// layout is the same; x64 passes those parameters in registers.
+// layout is the same; x64 passes those parameters in registers. Both writes stay inside uiSize
+// characters, the terminator included.
 int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, ...)
 {
     const unsigned short* pusFormat = RedLocalizeDB::Find(PblHash(pcFormat), false);
@@ -25,11 +26,11 @@ int SafeLocalizeSPrintf(void* pDest, unsigned int uiSize, char const* pcFormat, 
     {
         va_list args;
         va_start(args, pcFormat);
-        const int iResult = PblUnicode::uvsnprintf((unsigned short*)pDest, unsigned int(-1), pusFormat, args);
+        const int iResult = PblUnicode::uvsnprintf((unsigned short*)pDest, uiSize - 1, pusFormat, args);
         va_end(args);
         return iResult;
     }
-    PblUnicode::ustrncnv((unsigned short*)pDest, pcFormat, uiSize);
+    PblUnicode::ustrncnv((unsigned short*)pDest, pcFormat, uiSize - 1);
     return 0;
 }
 unsigned short* SafeLocalizeStrcpy(unsigned short* pusDest, char const* pcSrc, unsigned int uiSize);
@@ -1119,10 +1120,10 @@ unsigned short* SafeLocalizeStrcpy(unsigned short* pusDest, const char* pcSrc, u
     const unsigned short* pusText = RedLocalizeDB::Find(PblHash(pcSrc), false);
     if (pusText)
     {
-        wcscpy((wchar_t*)pusDest, (const wchar_t*)pusText);
+        PblUnicode::ustrlcpy(pusDest, pusText, uiSize);
         return pusDest;
     }
-    PblUnicode::ustrncnv(pusDest, pcSrc, uiSize);
+    PblUnicode::ustrncnv(pusDest, pcSrc, uiSize - 1);
     return 0;
 }
 

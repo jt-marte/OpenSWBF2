@@ -596,7 +596,7 @@ bool FLInputManager::Update(float fDeltaTime)
 
                     unsigned short awLine[256];
                     PblUnicode::ustrncnv(awLine, acBuffer, 256);
-                    PblUnicode::ustrlcat(awLine, pClass->mLabel, 256);
+                    PblUnicode::ustrlcat(awLine, pClass->mLabel, 255);
                     DrawLCDWideText(pLcd, awLine, 5, y);
                 }
 

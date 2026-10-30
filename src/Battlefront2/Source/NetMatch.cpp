@@ -1,5 +1,7 @@
 #include <string.h>
 #include <winsock2.h>
+#include <string>
+#include <ws2tcpip.h>
 
 #include "NetMatch.h"
 #include "NetSetup.h"
@@ -113,16 +115,18 @@ bool NetMatch::ResolveAddress(const char* pcText, NetAddr& address)
     {
         return false;
     }
-    unsigned long ulIP = inet_addr(acHost);
-    if (ulIP == INADDR_NONE)
+    // getaddrinfo takes dotted addresses and names alike; IPv4 only, like the rest of the netcode
+    addrinfo hints;
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_DGRAM;
+    addrinfo* pResult = 0;
+    if (getaddrinfo(acHost, 0, &hints, &pResult) != 0 || !pResult)
     {
-        hostent* pHost = gethostbyname(acHost);
-        if (!pHost || pHost->h_addrtype != AF_INET || !pHost->h_addr_list[0])
-        {
-            return false;
-        }
-        ulIP = *(unsigned long*)pHost->h_addr_list[0];
+        return false;
     }
+    const unsigned long ulIP = ((const sockaddr_in*)pResult->ai_addr)->sin_addr.s_addr;
+    freeaddrinfo(pResult);
     NetAddr resolved((int)ulIP, iPort, 0);
     if (!resolved.hasPriv)
     {
@@ -590,7 +594,7 @@ char* NetMatch::GetIPAddr()
     {
         for (char** addr = host->h_addr_list; *addr; ++addr)
         {
-            strlcpy(netLocalIPText, inet_ntoa(*(in_addr*)*addr), sizeof(netLocalIPText));
+            inet_ntop(AF_INET, *addr, netLocalIPText, sizeof(netLocalIPText));
         }
         JournalString(netLocalIPText, sizeof(netLocalIPText));
     }

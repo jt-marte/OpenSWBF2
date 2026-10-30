@@ -18,8 +18,7 @@ if ($Platform -eq 'x64') { Write-Host '[SKIP] laa-compare - large-address-aware 
 if ($Runs -lt 5) { Write-Host "INFO: -Runs raised from $Runs to 5 (minimum)"; $Runs = 5 }
 
 if (-not $NoBuild) {
-    $msbuild = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\12.0\Bin\MSBuild.exe'
-    if (-not (Test-Path $msbuild)) { Write-Host 'MSBuild 12.0 not found (install VS2013 Update 5).'; exit 2 }
+    $msbuild = Find-MSBuild
     & $msbuild (Join-Path $root 'BattlefrontII.vcxproj') "/p:Configuration=$Configuration" '/p:Platform=Win32' /m /v:minimal /nologo
     if ($LASTEXITCODE -ne 0) { Write-Host 'Build failed.'; exit 2 }
 }

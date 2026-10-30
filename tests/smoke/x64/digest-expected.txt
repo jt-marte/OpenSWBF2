@@ -1,4 +1,6 @@
 # x64 sim digest baseline: one "case<TAB>full OPENSWBF2 SIM DIGEST line" row per case, from the Release x64 build.
 # Record or refresh with: tests\run.ps1 -Platform x64 -Smoke Standard|Twice|All -RecordDigests
 # The Win32 rows in tests\smoke\digest-expected.txt are separate and never read for x64.
-geo1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=340399953/3875973946 snd=49.923 state=0xE1B4D33D
+digest-dag1c_ctf	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1679185965/768590366 snd=49.923 state=0x7B407A5C
+digest-kas2c_uber	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1043921031/524211552 snd=49.923 state=0xF2D0786D
+geo1c_con	OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=340399953/3875973946 snd=49.923 state=0xA97D54A3

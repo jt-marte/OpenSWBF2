@@ -14,6 +14,7 @@
 #include "GameLoop.h"
 #include "GameObject.h"
 #include "NetGame.h"
+#include "OdfValue.h"
 #include "Ordnance.h"
 #include "ParticleEmitterObject.h"
 #include "SoldierAnimationBank.h"
@@ -456,7 +457,9 @@ void WeaponClass::Read(PblFileChunk& chunk)
         case 0x504F5250:
         {
             const unsigned int uProperty = child._pFile->Read32();
-            pCharge->SetProperty(uProperty, child.ReadString(acBuffer, sizeof(acBuffer)));
+            char* pcValue = child.ReadString(acBuffer, sizeof(acBuffer));
+            OdfValue::Sanitize(uProperty, pcValue);
+            pCharge->SetProperty(uProperty, pcValue);
             if (pCharge->mNextCharge)
             {
                 pCharge = pCharge->mNextCharge;

@@ -2711,8 +2711,8 @@ int ScriptCB_GetKeyBoardCmds(lua_State* L)
             continue;
         }
 
-        RedLocalizeDB::GetLocalizedString(usAction, sizeof(usAction), GetActionName(iAction, iMode));
-        PblUnicode::ustrlcat(usAction, usColon, 256);
+        RedLocalizeDB::GetLocalizedString(usAction, sizeof(usAction) / sizeof(usAction[0]), GetActionName(iAction, iMode));
+        PblUnicode::ustrlcat(usAction, usColon, 255);
 
         ActionKey& rKey = pProfile->mGameOptions.mKeyboardBindings[iMode][iAction];
 
@@ -2733,37 +2733,37 @@ int ScriptCB_GetKeyBoardCmds(lua_State* L)
             }
             else
             {
-                RedLocalizeDB::GetLocalizedString(usButton, sizeof(usButton),
+                RedLocalizeDB::GetLocalizedString(usButton, sizeof(usButton) / sizeof(usButton[0]),
                                                   GetButtonName(ActionKeyToRawInput(usRaw)));
                 unsigned char ucMod = pucMods[j];
                 if (ucMod)
                 {
-                    PblUnicode::ustrlcpy(usKey, usHash, 512);
+                    PblUnicode::ustrlcpy(usKey, usHash, 256);
                     usNum[0] = (unsigned short)(ucMod + '1');
                     usNum[1] = ' ';
                     usNum[2] = 0;
-                    PblUnicode::ustrlcat(usKey, usNum, 512);
-                    PblUnicode::ustrlcat(usKey, usButton, 512);
+                    PblUnicode::ustrlcat(usKey, usNum, 255);
+                    PblUnicode::ustrlcat(usKey, usButton, 255);
                 }
                 else
                 {
-                    PblUnicode::ustrlcpy(usKey, usButton, 512);
+                    PblUnicode::ustrlcpy(usKey, usButton, 256);
                 }
             }
 
             if (PblUnicode::ustrlen(usKeys))
             {
-                PblUnicode::ustrlcat(usKeys, usComma, 256);
+                PblUnicode::ustrlcat(usKeys, usComma, 255);
             }
             strlcat(acKeys, acKey, 256);
-            PblUnicode::ustrlcat(usKeys, usKey, 256);
+            PblUnicode::ustrlcat(usKeys, usKey, 255);
         }
 
         if (!usKeys[0])
         {
 
-            RedLocalizeDB::GetLocalizedString(usKey, sizeof(usKey), 0x6054a42du);
-            PblUnicode::ustrlcat(usKeys, usKey, 256);
+            RedLocalizeDB::GetLocalizedString(usKey, sizeof(usKey) / sizeof(usKey[0]), 0x6054a42du);
+            PblUnicode::ustrlcat(usKeys, usKey, 255);
         }
 
         lua_newtable(LuaHelper::mState);
@@ -3746,7 +3746,7 @@ void LeaderBoard_FilloutTableData(LeaderBoardStatsT& stats)
     iTime = stats.totalPlayingTime;
     iMinutes = iTime % 3600 / 60;
     _snprintf(acBuffer, 256, "%02d:%02d:%02d", iTime / 3600, iMinutes, iTime - iMinutes * 60);
-    PblUnicode::ustrncnv(usBuffer, acBuffer, 512);
+    PblUnicode::ustrncnv(usBuffer, acBuffer, 256);
     LuaHelper::TableWriteVal("totalTimePlayed", usBuffer);
 
     PblUnicode::usnprintf(usBuffer, 256, "%d", stats.wins);
@@ -3830,7 +3830,7 @@ int ScriptCB_GetLeaderBoardPlayerData(lua_State* L)
 
     lua_newtable(LuaHelper::mState);
     unsigned short usBuffer[256];
-    PblUnicode::ustrncnv(usBuffer, stats.username, 256);
+    PblUnicode::ustrncnv(usBuffer, stats.username, 255);
     LuaHelper::TableWriteVal("name", usBuffer);
     PblUnicode::usnprintf(usBuffer, 256, "%d", stats.level, 256);
     LuaHelper::TableWriteVal("level", usBuffer);

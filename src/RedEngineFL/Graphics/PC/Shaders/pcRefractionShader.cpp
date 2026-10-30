@@ -763,9 +763,6 @@ void pcRefractionShader::Render_Prog1(const RenderItem* pItem, unsigned int) con
     pItem->pPrim->Draw();
 }
 
-#pragma warning(push)
-#pragma warning(disable : 4716)
-
 // FUNCTION: SWBF2 0x0070ea20
 int pcRefractionShader::SetBumpMap(unsigned int uiHash, RedTextureTransform* pTransform)
 {
@@ -776,6 +773,7 @@ int pcRefractionShader::SetBumpMap(unsigned int uiHash, RedTextureTransform* pTr
         memcpy(m_bumpMapTransform.m_Transform, pTransform->m_Transform,
                sizeof(m_bumpMapTransform.m_Transform));
     }
+    return 0;
 }
 
 // FUNCTION: SWBF2 0x0070ea50
@@ -788,21 +786,22 @@ int pcRefractionShader::SetDiffuseMap(unsigned int uiHash, RedTextureTransform* 
         memcpy(m_material.detailTexTransform.m_Transform, pTransform->m_Transform,
                sizeof(m_material.detailTexTransform.m_Transform));
     }
+    return 0;
 }
 
 // FUNCTION: SWBF2 0x0070ea90
 int pcRefractionShader::SetDistortionScale(float fScale)
 {
     m_distortionScale = fScale;
+    return 0;
 }
 
 // FUNCTION: SWBF2 0x0070eab0
 int pcRefractionShader::SetRefractionMap(RedTexture* pTexture)
 {
     m_refractionMap = pTexture;
+    return 0;
 }
-
-#pragma warning(pop)
 
 // FUNCTION: SWBF2 0x0070eac0
 bool pcRefractionShader::SortAsZWritingTransparent() const

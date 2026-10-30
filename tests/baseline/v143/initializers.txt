@@ -1,0 +1,944 @@
+0	0002:000006f8	___xc_a	___xc_a	MSVCRT:initializers.obj
+1	0002:000006fc	?pre_cpp_initializer@@3P6AXXZA	void (__cdecl* pre_cpp_initializer)(void)	MSVCRT:exe_winmain.obj
+2	0002:00000700	??s_Instance$initializer$@pcDynamicSprite@@2P6AXXZA@@3P6AXXZA	??s_Instance$initializer$@pcDynamicSprite@@2P6AXXZA@@3P6AXXZA	pcDynamicSprite.obj
+3	0002:00000704	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	pcGodray.obj
+4	0002:00000708	?s_SkyFogPlane$initializer$@@3P6AXXZA	void (__cdecl* s_SkyFogPlane$initializer$)(void)	pcSkyDome.obj
+5	0002:0000070c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	pcSkyDome.obj
+6	0002:00000710	?s_SunSkyRenderable$initializer$@@3P6AXXZA	void (__cdecl* s_SunSkyRenderable$initializer$)(void)	pcSunFlare.obj
+7	0002:00000714	?mCamera$initializer$@TestSpawn@AIDebug@@3P6AXXZA	void (__cdecl* AIDebug::TestSpawn::mCamera$initializer$)(void)	AIDebug.obj
+8	0002:00000718	?camDir$initializer$@TestSpawn@AIDebug@@3P6AXXZA	void (__cdecl* AIDebug::TestSpawn::camDir$initializer$)(void)	AIDebug.obj
+9	0002:0000071c	??rttiHashAIGoal$initializer$@AIGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashAIGoal$initializer$@AIGoal@AI@@2P6AXXZA@@3P6AXXZA	AIGoal.obj
+10	0002:00000720	??sMemoryPool$initializer$@AIGoal@AI@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@AIGoal@AI@@2P6AXXZA@@3P6AXXZA	AIGoal.obj
+11	0002:00000724	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	AIUtil.obj
+12	0002:00000728	??sRegions$initializer$@AIVisRegionManager@@2P6AXXZA@@3P6AXXZA	??sRegions$initializer$@AIVisRegionManager@@2P6AXXZA@@3P6AXXZA	AIVisRegion.obj
+13	0002:0000072c	??sMemoryPool$initializer$@ActiveRegion@ActiveRegions@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ActiveRegion@ActiveRegions@@2P6AXXZA@@3P6AXXZA	ActiveRegion.obj
+14	0002:00000730	??rttiHashAgent$initializer$@Agent@@2P6AXXZA@@3P6AXXZA	??rttiHashAgent$initializer$@Agent@@2P6AXXZA@@3P6AXXZA	Agent.obj
+15	0002:00000734	??sMemoryPool$initializer$@Aimer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Aimer@@2P6AXXZA@@3P6AXXZA	Aimer.obj
+16	0002:00000738	??sMemoryPool$initializer$@AmmoCounter@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@AmmoCounter@@2P6AXXZA@@3P6AXXZA	AmmoCounter.obj
+17	0002:0000073c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Asteroid.obj
+18	0002:00000740	??rttiHashAsteroidClass$initializer$@AsteroidClass@@2P6AXXZA@@3P6AXXZA	??rttiHashAsteroidClass$initializer$@AsteroidClass@@2P6AXXZA@@3P6AXXZA	Asteroid.obj
+19	0002:00000744	??sMemoryPool$initializer$@Asteroid@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Asteroid@@2P6AXXZA@@3P6AXXZA	Asteroid.obj
+20	0002:00000748	??rttiHashAsteroid$initializer$@Asteroid@@2P6AXXZA@@3P6AXXZA	??rttiHashAsteroid$initializer$@Asteroid@@2P6AXXZA@@3P6AXXZA	Asteroid.obj
+21	0002:0000074c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	AttachedEffects.obj
+22	0002:00000750	?_FrontlineSceneManager$initializer$@@3P6AXXZA	void (__cdecl* _FrontlineSceneManager$initializer$)(void)	Battlefront2SceneManager.obj
+23	0002:00000754	??sInstance$initializer$@BonusManager@@2P6AXXZA@@3P6AXXZA	??sInstance$initializer$@BonusManager@@2P6AXXZA@@3P6AXXZA	BonusManager.obj
+24	0002:00000758	??rttiHashCTFGoal$initializer$@CTFGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashCTFGoal$initializer$@CTFGoal@AI@@2P6AXXZA@@3P6AXXZA	CTFGoal.obj
+25	0002:0000075c	??rttiHashCTFGoalD$initializer$@CTFGoalD@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashCTFGoalD$initializer$@CTFGoalD@AI@@2P6AXXZA@@3P6AXXZA	CTFGoalD.obj
+26	0002:00000760	?cameraInterpolator$initializer$@@3P6AXXZA	void (__cdecl* cameraInterpolator$initializer$)(void)	CameraManager.obj
+27	0002:00000764	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Chunk.obj
+28	0002:00000768	??sMemoryPool$initializer$@EntityCloth@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityCloth@@2P6AXXZA@@3P6AXXZA	Cloth.obj
+29	0002:0000076c	??sMemoryPool$initializer$@ClothData@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ClothData@@2P6AXXZA@@3P6AXXZA	Cloth.obj
+30	0002:00000770	?clothData_$initializer$@ClothBE@@3P6AXXZA	void (__cdecl* ClothBE::clothData_$initializer$)(void)	Cloth.obj
+31	0002:00000774	??rttiHashEntityCloth$initializer$@EntityCloth@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityCloth$initializer$@EntityCloth@@2P6AXXZA@@3P6AXXZA	Cloth.obj
+32	0002:00000778	??rttiHashEntityClothClass$initializer$@EntityClothClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityClothClass$initializer$@EntityClothClass@@2P6AXXZA@@3P6AXXZA	Cloth.obj
+33	0002:0000077c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Cloth.obj
+34	0002:00000780	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	CollisionBody.obj
+35	0002:00000784	??sHostCollisionMask$initializer$@CollisionModel@@2P6AXXZA@@3P6AXXZA	??sHostCollisionMask$initializer$@CollisionModel@@2P6AXXZA@@3P6AXXZA	CollisionModel.obj
+36	0002:00000788	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	CollisionModel.obj
+37	0002:0000078c	??sClientCollisionMask$initializer$@CollisionModel@@2P6AXXZA@@3P6AXXZA	??sClientCollisionMask$initializer$@CollisionModel@@2P6AXXZA@@3P6AXXZA	CollisionModel.obj
+38	0002:00000790	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	CollisionPrimitive.obj
+39	0002:00000794	?kRttiHashEntityFlyer$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityFlyer$initializer$)(void)	CombatHelper.obj
+40	0002:00000798	?kRttiHashEntitySoldier$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntitySoldier$initializer$)(void)	CombatHelper.obj
+41	0002:0000079c	?kRttiHashEntityDroideka$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityDroideka$initializer$)(void)	CombatHelper.obj
+42	0002:000007a0	?kRttiHashEntityHover$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityHover$initializer$)(void)	CombatHelper.obj
+43	0002:000007a4	?kRttiHashEntityWalker$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityWalker$initializer$)(void)	CombatHelper.obj
+44	0002:000007a8	?kRttiHashWeaponMelee$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponMelee$initializer$)(void)	CombatHelper.obj
+45	0002:000007ac	?kRttiHashMountedTurret$initializer$@?A0x994e9635@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashMountedTurret$initializer$)(void)	CombatHelper.obj
+46	0002:000007b0	?kRttiHashEntitySoldier$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntitySoldier$initializer$)(void)	CombatUtil.obj
+47	0002:000007b4	?kRttiHashEntityDroideka$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityDroideka$initializer$)(void)	CombatUtil.obj
+48	0002:000007b8	?kRttiHashEntityDroid$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityDroid$initializer$)(void)	CombatUtil.obj
+49	0002:000007bc	?kRttiHashOrdnanceMissileClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceMissileClass$initializer$)(void)	CombatUtil.obj
+50	0002:000007c0	?kRttiHashOrdnanceBeamClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceBeamClass$initializer$)(void)	CombatUtil.obj
+51	0002:000007c4	?kRttiHashWeaponCannonClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponCannonClass$initializer$)(void)	CombatUtil.obj
+52	0002:000007c8	?kRttiHashWeaponGrenadeClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponGrenadeClass$initializer$)(void)	CombatUtil.obj
+53	0002:000007cc	?kRttiHashWeaponMeleeThrowClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponMeleeThrowClass$initializer$)(void)	CombatUtil.obj
+54	0002:000007d0	?kRttiHashWeaponMeleeClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponMeleeClass$initializer$)(void)	CombatUtil.obj
+55	0002:000007d4	?kRttiHashWeaponMelee$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponMelee$initializer$)(void)	CombatUtil.obj
+56	0002:000007d8	?kRttiHashEntityRemoteTerminal$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityRemoteTerminal$initializer$)(void)	CombatUtil.obj
+57	0002:000007dc	?kRttiHashWeaponRemoteClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashWeaponRemoteClass$initializer$)(void)	CombatUtil.obj
+58	0002:000007e0	?kRttiHashEntityFlyerClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityFlyerClass$initializer$)(void)	CombatUtil.obj
+59	0002:000007e4	?kRttiHashEntityFlyer$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityFlyer$initializer$)(void)	CombatUtil.obj
+60	0002:000007e8	?kRttiHashEntityWalker$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityWalker$initializer$)(void)	CombatUtil.obj
+61	0002:000007ec	?kRttiHashEntityHover$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityHover$initializer$)(void)	CombatUtil.obj
+62	0002:000007f0	?kRttiHashCommandFlyer$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashCommandFlyer$initializer$)(void)	CombatUtil.obj
+63	0002:000007f4	?kRttiHashEntityBuilding$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityBuilding$initializer$)(void)	CombatUtil.obj
+64	0002:000007f8	?kRttiHashEntityBuildingArmed$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityBuildingArmed$initializer$)(void)	CombatUtil.obj
+65	0002:000007fc	?kRttiHashEntityTrap$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityTrap$initializer$)(void)	CombatUtil.obj
+66	0002:00000800	?kRttiHashMountedTurret$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashMountedTurret$initializer$)(void)	CombatUtil.obj
+67	0002:00000804	?kRttiHashOrdnanceGrenadeClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceGrenadeClass$initializer$)(void)	CombatUtil.obj
+68	0002:00000808	?kRttiHashOrdnanceStickyClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceStickyClass$initializer$)(void)	CombatUtil.obj
+69	0002:0000080c	?kRttiHashOrdnanceHaywireClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceHaywireClass$initializer$)(void)	CombatUtil.obj
+70	0002:00000810	?kRttiHashOrdnanceShellClass$initializer$@?A0x2ebc6ffc@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashOrdnanceShellClass$initializer$)(void)	CombatUtil.obj
+71	0002:00000814	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Combo.obj
+72	0002:00000818	??sMemoryPool$initializer$@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+73	0002:0000081c	??sMemoryPool$initializer$@Deflect@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Deflect@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+74	0002:00000820	??sMemoryPool$initializer$@Transition@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Transition@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+75	0002:00000824	??sMemoryPool$initializer$@Condition@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Condition@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+76	0002:00000828	??sMemoryPool$initializer$@DamageSample@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@DamageSample@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+77	0002:0000082c	??sMemoryPool$initializer$@Attack@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Attack@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+78	0002:00000830	??sMemoryPool$initializer$@State@Combo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@State@Combo@@2P6AXXZA@@3P6AXXZA	Combo.obj
+79	0002:00000834	??rttiHashCommandBuildingClass$initializer$@CommandBuildingClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuildingClass$initializer$@CommandBuildingClass@@2P6AXXZA@@3P6AXXZA	CommandBuilding.obj
+80	0002:00000838	??rttiHashCommandBuilding$initializer$@CommandBuilding@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuilding$initializer$@CommandBuilding@@2P6AXXZA@@3P6AXXZA	CommandBuilding.obj
+81	0002:0000083c	??rttiHashCommandBuildingAnimatedArmed$initializer$@CommandBuildingAnimatedArmed@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuildingAnimatedArmed$initializer$@CommandBuildingAnimatedArmed@@2P6AXXZA@@3P6AXXZA	CommandBuildingAnimatedArmed.obj
+82	0002:00000840	??rttiHashCommandBuildingAnimatedArmedClass$initializer$@CommandBuildingAnimatedArmedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuildingAnimatedArmedClass$initializer$@CommandBuildingAnimatedArmedClass@@2P6AXXZA@@3P6AXXZA	CommandBuildingAnimatedArmed.obj
+83	0002:00000844	??rttiHashCommandBuildingArmed$initializer$@CommandBuildingArmed@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuildingArmed$initializer$@CommandBuildingArmed@@2P6AXXZA@@3P6AXXZA	CommandBuildingArmed.obj
+84	0002:00000848	??rttiHashCommandBuildingArmedClass$initializer$@CommandBuildingArmedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandBuildingArmedClass$initializer$@CommandBuildingArmedClass@@2P6AXXZA@@3P6AXXZA	CommandBuildingArmed.obj
+85	0002:0000084c	??sMemoryPool$initializer$@CommandFlyer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@CommandFlyer@@2P6AXXZA@@3P6AXXZA	CommandFlyer.obj
+86	0002:00000850	??rttiHashCommandFlyer$initializer$@CommandFlyer@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandFlyer$initializer$@CommandFlyer@@2P6AXXZA@@3P6AXXZA	CommandFlyer.obj
+87	0002:00000854	??rttiHashCommandFlyerClass$initializer$@CommandFlyerClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandFlyerClass$initializer$@CommandFlyerClass@@2P6AXXZA@@3P6AXXZA	CommandFlyer.obj
+88	0002:00000858	??sMemoryPool$initializer$@CommandHover@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@CommandHover@@2P6AXXZA@@3P6AXXZA	CommandHover.obj
+89	0002:0000085c	??rttiHashCommandHover$initializer$@CommandHover@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandHover$initializer$@CommandHover@@2P6AXXZA@@3P6AXXZA	CommandHover.obj
+90	0002:00000860	??rttiHashCommandHoverClass$initializer$@CommandHoverClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandHoverClass$initializer$@CommandHoverClass@@2P6AXXZA@@3P6AXXZA	CommandHover.obj
+91	0002:00000864	??sMemoryPool$initializer$@CommandWalker@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@CommandWalker@@2P6AXXZA@@3P6AXXZA	CommandWalker.obj
+92	0002:00000868	??rttiHashCommandWalker$initializer$@CommandWalker@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandWalker$initializer$@CommandWalker@@2P6AXXZA@@3P6AXXZA	CommandWalker.obj
+93	0002:0000086c	??rttiHashCommandWalkerClass$initializer$@CommandWalkerClass@@2P6AXXZA@@3P6AXXZA	??rttiHashCommandWalkerClass$initializer$@CommandWalkerClass@@2P6AXXZA@@3P6AXXZA	CommandWalker.obj
+94	0002:00000870	??sMemoryPool$initializer$@ConnectivityGraphFollower@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ConnectivityGraphFollower@@2P6AXXZA@@3P6AXXZA	ConnectivityGraphFollower.obj
+95	0002:00000874	??rttiHashConquestGoal$initializer$@ConquestGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashConquestGoal$initializer$@ConquestGoal@AI@@2P6AXXZA@@3P6AXXZA	ConquestGoal.obj
+96	0002:00000878	?ABDumpHardware$initializer$@@3P6AXXZA	void (__cdecl* ABDumpHardware$initializer$)(void)	ConsoleCommands.obj
+97	0002:0000087c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	ConsoleCommands.obj
+98	0002:00000880	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Controllable.obj
+99	0002:00000884	??rttiHashController$initializer$@Controller@@2P6AXXZA@@3P6AXXZA	??rttiHashController$initializer$@Controller@@2P6AXXZA@@3P6AXXZA	Controller.obj
+100	0002:00000888	??rttiHashDeathmatchGoal$initializer$@DeathmatchGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashDeathmatchGoal$initializer$@DeathmatchGoal@AI@@2P6AXXZA@@3P6AXXZA	DeathmatchGoal.obj
+101	0002:0000088c	??sMemoryPool$initializer$@Decal@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Decal@@2P6AXXZA@@3P6AXXZA	Decal.obj
+102	0002:00000890	??rttiHashDefendGoal$initializer$@DefendGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashDefendGoal$initializer$@DefendGoal@AI@@2P6AXXZA@@3P6AXXZA	DefendGoal.obj
+103	0002:00000894	??rttiHashDestroyGoal$initializer$@DestroyGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashDestroyGoal$initializer$@DestroyGoal@AI@@2P6AXXZA@@3P6AXXZA	DestroyGoal.obj
+104	0002:00000898	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	DisplayDroideka.obj
+105	0002:0000089c	??sMemoryPool$initializer$@EnergyBar@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EnergyBar@@2P6AXXZA@@3P6AXXZA	EnergyBar.obj
+106	0002:000008a0	??rttiHashEntity$initializer$@Entity@@2P6AXXZA@@3P6AXXZA	??rttiHashEntity$initializer$@Entity@@2P6AXXZA@@3P6AXXZA	Entity.obj
+107	0002:000008a4	??rttiHashEntityEx$initializer$@EntityEx@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityEx$initializer$@EntityEx@@2P6AXXZA@@3P6AXXZA	Entity.obj
+108	0002:000008a8	??rttiHashEntityClass$initializer$@EntityClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityClass$initializer$@EntityClass@@2P6AXXZA@@3P6AXXZA	Entity.obj
+109	0002:000008ac	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityBuilding.obj
+110	0002:000008b0	??rttiHashEntityBuildingClass$initializer$@EntityBuildingClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingClass$initializer$@EntityBuildingClass@@2P6AXXZA@@3P6AXXZA	EntityBuilding.obj
+111	0002:000008b4	??rttiHashEntityBuilding$initializer$@EntityBuilding@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuilding$initializer$@EntityBuilding@@2P6AXXZA@@3P6AXXZA	EntityBuilding.obj
+112	0002:000008b8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityBuildingAnimated.obj
+113	0002:000008bc	??rttiHashEntityBuildingAnimatedClass$initializer$@EntityBuildingAnimatedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingAnimatedClass$initializer$@EntityBuildingAnimatedClass@@2P6AXXZA@@3P6AXXZA	EntityBuildingAnimated.obj
+114	0002:000008c0	??rttiHashEntityBuildingAnimated$initializer$@EntityBuildingAnimated@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingAnimated$initializer$@EntityBuildingAnimated@@2P6AXXZA@@3P6AXXZA	EntityBuildingAnimated.obj
+115	0002:000008c4	??rttiHashEntityBuildingAnimatedArmedClass$initializer$@EntityBuildingAnimatedArmedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingAnimatedArmedClass$initializer$@EntityBuildingAnimatedArmedClass@@2P6AXXZA@@3P6AXXZA	EntityBuildingAnimatedArmed.obj
+116	0002:000008c8	??rttiHashEntityBuildingAnimatedArmed$initializer$@EntityBuildingAnimatedArmed@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingAnimatedArmed$initializer$@EntityBuildingAnimatedArmed@@2P6AXXZA@@3P6AXXZA	EntityBuildingAnimatedArmed.obj
+117	0002:000008cc	??rttiHashEntityBuildingArmed$initializer$@EntityBuildingArmed@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingArmed$initializer$@EntityBuildingArmed@@2P6AXXZA@@3P6AXXZA	EntityBuildingArmed.obj
+118	0002:000008d0	??rttiHashEntityBuildingArmedClass$initializer$@EntityBuildingArmedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingArmedClass$initializer$@EntityBuildingArmedClass@@2P6AXXZA@@3P6AXXZA	EntityBuildingArmed.obj
+119	0002:000008d4	??rttiHashEntityBuildingArmedDynamicClass$initializer$@EntityBuildingArmedDynamicClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingArmedDynamicClass$initializer$@EntityBuildingArmedDynamicClass@@2P6AXXZA@@3P6AXXZA	EntityBuildingArmedDynamic.obj
+120	0002:000008d8	??rttiHashEntityBuildingArmedDynamic$initializer$@EntityBuildingArmedDynamic@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityBuildingArmedDynamic$initializer$@EntityBuildingArmedDynamic@@2P6AXXZA@@3P6AXXZA	EntityBuildingArmedDynamic.obj
+121	0002:000008dc	??sMemoryPool$initializer$@EntityBuildingArmedDynamic@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityBuildingArmedDynamic@@2P6AXXZA@@3P6AXXZA	EntityBuildingArmedDynamic.obj
+122	0002:000008e0	??rttiHashEntityCarrier$initializer$@EntityCarrier@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityCarrier$initializer$@EntityCarrier@@2P6AXXZA@@3P6AXXZA	EntityCarrier.obj
+123	0002:000008e4	??sMemoryPool$initializer$@EntityCarrier@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityCarrier@@2P6AXXZA@@3P6AXXZA	EntityCarrier.obj
+124	0002:000008e8	??rttiHashEntityCarrierClass$initializer$@EntityCarrierClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityCarrierClass$initializer$@EntityCarrierClass@@2P6AXXZA@@3P6AXXZA	EntityCarrier.obj
+125	0002:000008ec	??rttiHashEntityDefenseGridTurretClass$initializer$@EntityDefenseGridTurretClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDefenseGridTurretClass$initializer$@EntityDefenseGridTurretClass@@2P6AXXZA@@3P6AXXZA	EntityDefenseGridTurret.obj
+126	0002:000008f0	??rttiHashEntityDefenseGridTurret$initializer$@EntityDefenseGridTurret@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDefenseGridTurret$initializer$@EntityDefenseGridTurret@@2P6AXXZA@@3P6AXXZA	EntityDefenseGridTurret.obj
+127	0002:000008f4	??sMemoryPool$initializer$@EntityDefenseGridTurret@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityDefenseGridTurret@@2P6AXXZA@@3P6AXXZA	EntityDefenseGridTurret.obj
+128	0002:000008f8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityDoor.obj
+129	0002:000008fc	??rttiHashEntityDoor$initializer$@EntityDoor@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDoor$initializer$@EntityDoor@@2P6AXXZA@@3P6AXXZA	EntityDoor.obj
+130	0002:00000900	??rttiHashEntityDoorClass$initializer$@EntityDoorClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDoorClass$initializer$@EntityDoorClass@@2P6AXXZA@@3P6AXXZA	EntityDoor.obj
+131	0002:00000904	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityDroid.obj
+132	0002:00000908	??rttiHashEntityDroid$initializer$@EntityDroid@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDroid$initializer$@EntityDroid@@2P6AXXZA@@3P6AXXZA	EntityDroid.obj
+133	0002:0000090c	??sMemoryPool$initializer$@EntityDroid@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityDroid@@2P6AXXZA@@3P6AXXZA	EntityDroid.obj
+134	0002:00000910	??rttiHashEntityDroidClass$initializer$@EntityDroidClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDroidClass$initializer$@EntityDroidClass@@2P6AXXZA@@3P6AXXZA	EntityDroid.obj
+135	0002:00000914	??rttiHashEntityDroideka$initializer$@EntityDroideka@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDroideka$initializer$@EntityDroideka@@2P6AXXZA@@3P6AXXZA	EntityDroideka.obj
+136	0002:00000918	??sMemoryPool$initializer$@EntityDroideka@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityDroideka@@2P6AXXZA@@3P6AXXZA	EntityDroideka.obj
+137	0002:0000091c	??rttiHashEntityDroidekaClass$initializer$@EntityDroidekaClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityDroidekaClass$initializer$@EntityDroidekaClass@@2P6AXXZA@@3P6AXXZA	EntityDroideka.obj
+138	0002:00000920	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityDroideka.obj
+139	0002:00000924	??rttiHashEntityEffectClass$initializer$@EntityEffectClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityEffectClass$initializer$@EntityEffectClass@@2P6AXXZA@@3P6AXXZA	EntityEffect.obj
+140	0002:00000928	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityFlyer.obj
+141	0002:0000092c	??rttiHashEntityFlyerClass$initializer$@EntityFlyerClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityFlyerClass$initializer$@EntityFlyerClass@@2P6AXXZA@@3P6AXXZA	EntityFlyer.obj
+142	0002:00000930	??rttiHashEntityFlyer$initializer$@EntityFlyer@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityFlyer$initializer$@EntityFlyer@@2P6AXXZA@@3P6AXXZA	EntityFlyer.obj
+143	0002:00000934	??sMemoryPool$initializer$@EntityFlyer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityFlyer@@2P6AXXZA@@3P6AXXZA	EntityFlyer.obj
+144	0002:00000938	?cvRenderContrails$initializer$@@3P6AXXZA	void (__cdecl* cvRenderContrails$initializer$)(void)	EntityFlyer.obj
+145	0002:0000093c	??rttiHashEntityGeometryClass$initializer$@EntityGeometryClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityGeometryClass$initializer$@EntityGeometryClass@@2P6AXXZA@@3P6AXXZA	EntityGeometry.obj
+146	0002:00000940	??rttiHashEntityGeometry$initializer$@EntityGeometry@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityGeometry$initializer$@EntityGeometry@@2P6AXXZA@@3P6AXXZA	EntityGeometry.obj
+147	0002:00000944	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityGeometry.obj
+148	0002:00000948	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityHologram.obj
+149	0002:0000094c	??rttiHashEntityHologram$initializer$@EntityHologram@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityHologram$initializer$@EntityHologram@@2P6AXXZA@@3P6AXXZA	EntityHologram.obj
+150	0002:00000950	??rttiHashEntityHologramClass$initializer$@EntityHologramClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityHologramClass$initializer$@EntityHologramClass@@2P6AXXZA@@3P6AXXZA	EntityHologram.obj
+151	0002:00000954	??rttiHashEntityHover$initializer$@EntityHover@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityHover$initializer$@EntityHover@@2P6AXXZA@@3P6AXXZA	EntityHover.obj
+152	0002:00000958	??sMemoryPool$initializer$@EntityHover@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityHover@@2P6AXXZA@@3P6AXXZA	EntityHover.obj
+153	0002:0000095c	??rttiHashEntityHoverClass$initializer$@EntityHoverClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityHoverClass$initializer$@EntityHoverClass@@2P6AXXZA@@3P6AXXZA	EntityHover.obj
+154	0002:00000960	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityHover.obj
+155	0002:00000964	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityItem.obj
+156	0002:00000968	??rttiHashEntityItemClass$initializer$@EntityItemClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityItemClass$initializer$@EntityItemClass@@2P6AXXZA@@3P6AXXZA	EntityItem.obj
+157	0002:0000096c	??rttiHashEntityItem$initializer$@EntityItem@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityItem$initializer$@EntityItem@@2P6AXXZA@@3P6AXXZA	EntityItem.obj
+158	0002:00000970	??rttiHashEntityLight$initializer$@EntityLight@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityLight$initializer$@EntityLight@@2P6AXXZA@@3P6AXXZA	EntityLight.obj
+159	0002:00000974	??rttiHashEntityLightClass$initializer$@EntityLightClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityLightClass$initializer$@EntityLightClass@@2P6AXXZA@@3P6AXXZA	EntityLight.obj
+160	0002:00000978	??sMemoryPool$initializer$@EntityLight@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityLight@@2P6AXXZA@@3P6AXXZA	EntityLight.obj
+161	0002:0000097c	??rttiHashEntityMineClass$initializer$@EntityMineClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityMineClass$initializer$@EntityMineClass@@2P6AXXZA@@3P6AXXZA	EntityMine.obj
+162	0002:00000980	??rttiHashEntityMine$initializer$@EntityMine@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityMine$initializer$@EntityMine@@2P6AXXZA@@3P6AXXZA	EntityMine.obj
+163	0002:00000984	??sMemoryPool$initializer$@EntityMine@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityMine@@2P6AXXZA@@3P6AXXZA	EntityMine.obj
+164	0002:00000988	??rttiHashEntityPortableTurretClass$initializer$@EntityPortableTurretClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityPortableTurretClass$initializer$@EntityPortableTurretClass@@2P6AXXZA@@3P6AXXZA	EntityPortableTurret.obj
+165	0002:0000098c	??rttiHashEntityPortableTurret$initializer$@EntityPortableTurret@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityPortableTurret$initializer$@EntityPortableTurret@@2P6AXXZA@@3P6AXXZA	EntityPortableTurret.obj
+166	0002:00000990	??sMemoryPool$initializer$@EntityPortableTurret@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityPortableTurret@@2P6AXXZA@@3P6AXXZA	EntityPortableTurret.obj
+167	0002:00000994	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityProp.obj
+168	0002:00000998	??rttiHashEntityProp$initializer$@EntityProp@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityProp$initializer$@EntityProp@@2P6AXXZA@@3P6AXXZA	EntityProp.obj
+169	0002:0000099c	??rttiHashEntityPropClass$initializer$@EntityPropClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityPropClass$initializer$@EntityPropClass@@2P6AXXZA@@3P6AXXZA	EntityProp.obj
+170	0002:000009a0	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityPropAnimated.obj
+171	0002:000009a4	??rttiHashEntityPropAnimatedClass$initializer$@EntityPropAnimatedClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityPropAnimatedClass$initializer$@EntityPropAnimatedClass@@2P6AXXZA@@3P6AXXZA	EntityPropAnimated.obj
+172	0002:000009a8	??rttiHashEntityPropAnimated$initializer$@EntityPropAnimated@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityPropAnimated$initializer$@EntityPropAnimated@@2P6AXXZA@@3P6AXXZA	EntityPropAnimated.obj
+173	0002:000009ac	??rttiHashEntityRemoteTerminalClass$initializer$@EntityRemoteTerminalClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityRemoteTerminalClass$initializer$@EntityRemoteTerminalClass@@2P6AXXZA@@3P6AXXZA	EntityRemoteTerminal.obj
+174	0002:000009b0	??rttiHashEntityRemoteTerminal$initializer$@EntityRemoteTerminal@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityRemoteTerminal$initializer$@EntityRemoteTerminal@@2P6AXXZA@@3P6AXXZA	EntityRemoteTerminal.obj
+175	0002:000009b4	??sMemoryPool$initializer$@EntityRemoteTerminal@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityRemoteTerminal@@2P6AXXZA@@3P6AXXZA	EntityRemoteTerminal.obj
+176	0002:000009b8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntitySoldier.obj
+177	0002:000009bc	??rttiHashEntitySoldier$initializer$@EntitySoldier@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoldier$initializer$@EntitySoldier@@2P6AXXZA@@3P6AXXZA	EntitySoldier.obj
+178	0002:000009c0	??sMemoryPool$initializer$@EntitySoldier@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntitySoldier@@2P6AXXZA@@3P6AXXZA	EntitySoldier.obj
+179	0002:000009c4	??rttiHashEntitySoldierClass$initializer$@EntitySoldierClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoldierClass$initializer$@EntitySoldierClass@@2P6AXXZA@@3P6AXXZA	EntitySoldier.obj
+180	0002:000009c8	??sMemoryPool$initializer$@AcklayData@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@AcklayData@@2P6AXXZA@@3P6AXXZA	EntitySoldier.obj
+181	0002:000009cc	?g_SoldierPolyCount$initializer$@@3P6AXXZA	void (__cdecl* g_SoldierPolyCount$initializer$)(void)	EntitySoldier.obj
+182	0002:000009d0	??rttiHashEntitySound$initializer$@EntitySound@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySound$initializer$@EntitySound@@2P6AXXZA@@3P6AXXZA	EntitySound.obj
+183	0002:000009d4	??rttiHashEntitySoundClass$initializer$@EntitySoundClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoundClass$initializer$@EntitySoundClass@@2P6AXXZA@@3P6AXXZA	EntitySound.obj
+184	0002:000009d8	??sMemoryPool$initializer$@SoundSpaceRegion@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@SoundSpaceRegion@@2P6AXXZA@@3P6AXXZA	EntitySound.obj
+185	0002:000009dc	??sEntitySoundList$initializer$@EntitySound@@2P6AXXZA@@3P6AXXZA	??sEntitySoundList$initializer$@EntitySound@@2P6AXXZA@@3P6AXXZA	EntitySound.obj
+186	0002:000009e0	??rttiHashEntitySoundStaticClass$initializer$@EntitySoundStaticClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoundStaticClass$initializer$@EntitySoundStaticClass@@2P6AXXZA@@3P6AXXZA	EntitySoundStatic.obj
+187	0002:000009e4	??sMemoryPool$initializer$@EntitySoundStatic@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntitySoundStatic@@2P6AXXZA@@3P6AXXZA	EntitySoundStatic.obj
+188	0002:000009e8	??rttiHashEntitySoundStatic$initializer$@EntitySoundStatic@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoundStatic$initializer$@EntitySoundStatic@@2P6AXXZA@@3P6AXXZA	EntitySoundStatic.obj
+189	0002:000009ec	??rttiHashEntitySoundStreamClass$initializer$@EntitySoundStreamClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoundStreamClass$initializer$@EntitySoundStreamClass@@2P6AXXZA@@3P6AXXZA	EntitySoundStream.obj
+190	0002:000009f0	??rttiHashEntitySoundStream$initializer$@EntitySoundStream@@2P6AXXZA@@3P6AXXZA	??rttiHashEntitySoundStream$initializer$@EntitySoundStream@@2P6AXXZA@@3P6AXXZA	EntitySoundStream.obj
+191	0002:000009f4	??sMemoryPool$initializer$@EntitySoundStream@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntitySoundStream@@2P6AXXZA@@3P6AXXZA	EntitySoundStream.obj
+192	0002:000009f8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityTrap.obj
+193	0002:000009fc	??rttiHashEntityTrapClass$initializer$@EntityTrapClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityTrapClass$initializer$@EntityTrapClass@@2P6AXXZA@@3P6AXXZA	EntityTrap.obj
+194	0002:00000a00	??rttiHashEntityTrap$initializer$@EntityTrap@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityTrap$initializer$@EntityTrap@@2P6AXXZA@@3P6AXXZA	EntityTrap.obj
+195	0002:00000a04	??rttiHashEntityWalkerClass$initializer$@EntityWalkerClass@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityWalkerClass$initializer$@EntityWalkerClass@@2P6AXXZA@@3P6AXXZA	EntityWalker.obj
+196	0002:00000a08	??rttiHashEntityWalker$initializer$@EntityWalker@@2P6AXXZA@@3P6AXXZA	??rttiHashEntityWalker$initializer$@EntityWalker@@2P6AXXZA@@3P6AXXZA	EntityWalker.obj
+197	0002:00000a0c	??sMemoryPool$initializer$@EntityWalker@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@EntityWalker@@2P6AXXZA@@3P6AXXZA	EntityWalker.obj
+198	0002:00000a10	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	EntityWalker.obj
+199	0002:00000a14	?g_WalkerShowDamage$initializer$@@3P6AXXZA	void (__cdecl* g_WalkerShowDamage$initializer$)(void)	EntityWalker.obj
+200	0002:00000a18	?mDeath$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mDeath$initializer$)(void)	EventManager_Character.obj
+201	0002:00000a1c	?mSpawn$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mSpawn$initializer$)(void)	EventManager_Character.obj
+202	0002:00000a20	?mChangeClass$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mChangeClass$initializer$)(void)	EventManager_Character.obj
+203	0002:00000a24	?mDispensePowerup$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mDispensePowerup$initializer$)(void)	EventManager_Character.obj
+204	0002:00000a28	?mDispenseControllable$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mDispenseControllable$initializer$)(void)	EventManager_Character.obj
+205	0002:00000a2c	?mLandedFlyer$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mLandedFlyer$initializer$)(void)	EventManager_Character.obj
+206	0002:00000a30	?mEnterVehicle$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mEnterVehicle$initializer$)(void)	EventManager_Character.obj
+207	0002:00000a34	?mIssueAICommand$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mIssueAICommand$initializer$)(void)	EventManager_Character.obj
+208	0002:00000a38	?mKillsChange$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mKillsChange$initializer$)(void)	EventManager_Character.obj
+209	0002:00000a3c	?mDeathsChange$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mDeathsChange$initializer$)(void)	EventManager_Character.obj
+210	0002:00000a40	?mScoreChange$initializer$@CharacterEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CharacterEvent::mScoreChange$initializer$)(void)	EventManager_Character.obj
+211	0002:00000a44	?mBeginNeutralize$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mBeginNeutralize$initializer$)(void)	EventManager_CommandPost.obj
+212	0002:00000a48	?mAbortNeutralize$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mAbortNeutralize$initializer$)(void)	EventManager_CommandPost.obj
+213	0002:00000a4c	?mFinishNeutralize$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mFinishNeutralize$initializer$)(void)	EventManager_CommandPost.obj
+214	0002:00000a50	?mBeginCapture$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mBeginCapture$initializer$)(void)	EventManager_CommandPost.obj
+215	0002:00000a54	?mAbortCapture$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mAbortCapture$initializer$)(void)	EventManager_CommandPost.obj
+216	0002:00000a58	?mFinishCapture$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mFinishCapture$initializer$)(void)	EventManager_CommandPost.obj
+217	0002:00000a5c	?mKill$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mKill$initializer$)(void)	EventManager_CommandPost.obj
+218	0002:00000a60	?mRespawn$initializer$@CommandPostEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::CommandPostEvent::mRespawn$initializer$)(void)	EventManager_CommandPost.obj
+219	0002:00000a64	?mWeaponChange$initializer$@ControllableEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ControllableEvent::mWeaponChange$initializer$)(void)	EventManager_Controllable.obj
+220	0002:00000a68	?mTeamChange$initializer$@ControllableEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ControllableEvent::mTeamChange$initializer$)(void)	EventManager_Controllable.obj
+221	0002:00000a6c	?mPlayerChange$initializer$@ControllableEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ControllableEvent::mPlayerChange$initializer$)(void)	EventManager_Controllable.obj
+222	0002:00000a70	?mTargetChange$initializer$@ControllableEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ControllableEvent::mTargetChange$initializer$)(void)	EventManager_Controllable.obj
+223	0002:00000a74	?mPickUp$initializer$@FlagEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::FlagEvent::mPickUp$initializer$)(void)	EventManager_Flag.obj
+224	0002:00000a78	?mDrop$initializer$@FlagEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::FlagEvent::mDrop$initializer$)(void)	EventManager_Flag.obj
+225	0002:00000a7c	?mReturn$initializer$@FlagEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::FlagEvent::mReturn$initializer$)(void)	EventManager_Flag.obj
+226	0002:00000a80	?mCapture$initializer$@FlagEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::FlagEvent::mCapture$initializer$)(void)	EventManager_Flag.obj
+227	0002:00000a84	?mReset$initializer$@FlagEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::FlagEvent::mReset$initializer$)(void)	EventManager_Flag.obj
+228	0002:00000a88	?mCreate$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mCreate$initializer$)(void)	EventManager_Object.obj
+229	0002:00000a8c	?mInit$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mInit$initializer$)(void)	EventManager_Object.obj
+230	0002:00000a90	?mDamage$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mDamage$initializer$)(void)	EventManager_Object.obj
+231	0002:00000a94	?mRepair$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mRepair$initializer$)(void)	EventManager_Object.obj
+232	0002:00000a98	?mHack$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mHack$initializer$)(void)	EventManager_Object.obj
+233	0002:00000a9c	?mKill$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mKill$initializer$)(void)	EventManager_Object.obj
+234	0002:00000aa0	?mHeadshot$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mHeadshot$initializer$)(void)	EventManager_Object.obj
+235	0002:00000aa4	?mRespawn$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mRespawn$initializer$)(void)	EventManager_Object.obj
+236	0002:00000aa8	?mDelete$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mDelete$initializer$)(void)	EventManager_Object.obj
+237	0002:00000aac	?mTeamChange$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mTeamChange$initializer$)(void)	EventManager_Object.obj
+238	0002:00000ab0	?mHealthChange$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mHealthChange$initializer$)(void)	EventManager_Object.obj
+239	0002:00000ab4	?mShieldChange$initializer$@ObjectEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::ObjectEvent::mShieldChange$initializer$)(void)	EventManager_Object.obj
+240	0002:00000ab8	?mEnterRegion$initializer$@RegionEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::RegionEvent::mEnterRegion$initializer$)(void)	EventManager_Region.obj
+241	0002:00000abc	?mLeaveRegion$initializer$@RegionEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::RegionEvent::mLeaveRegion$initializer$)(void)	EventManager_Region.obj
+242	0002:00000ac0	?mTicketCountChange$initializer$@TeamEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::TeamEvent::mTicketCountChange$initializer$)(void)	EventManager_Team.obj
+243	0002:00000ac4	?mTicketBleedChange$initializer$@TeamEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::TeamEvent::mTicketBleedChange$initializer$)(void)	EventManager_Team.obj
+244	0002:00000ac8	?mPointsChange$initializer$@TeamEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::TeamEvent::mPointsChange$initializer$)(void)	EventManager_Team.obj
+245	0002:00000acc	?mElapsed$initializer$@TimerEvent@EventManager@@3P6AXXZA	void (__cdecl* EventManager::TimerEvent::mElapsed$initializer$)(void)	EventManager_Timer.obj
+246	0002:00000ad0	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Explosion.obj
+247	0002:00000ad4	??_Thread$initializer$@FLEffect@@2P6AXXZA@@3P6AXXZA	??_Thread$initializer$@FLEffect@@2P6AXXZA@@3P6AXXZA	FLEffect.obj
+248	0002:00000ad8	??s_OffsetMatrixPool$initializer$@FLEffectObject@@2P6AXXZA@@3P6AXXZA	??s_OffsetMatrixPool$initializer$@FLEffectObject@@2P6AXXZA@@3P6AXXZA	FLEffect.obj
+249	0002:00000adc	??sMemoryPool$initializer$@Event@GuiManager@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Event@GuiManager@@2P6AXXZA@@3P6AXXZA	FLGuiManager.obj
+250	0002:00000ae0	?sInstances$initializer$@@3P6AXXZA	void (__cdecl* sInstances$initializer$)(void)	FLGuiManager.obj
+251	0002:00000ae4	?sKeygrabber$initializer$@@3P6AXXZA	void (__cdecl* sKeygrabber$initializer$)(void)	FLGuiManager.obj
+252	0002:00000ae8	??s_instance$initializer$@FLInputManager@@2P6AXXZA@@3P6AXXZA	??s_instance$initializer$@FLInputManager@@2P6AXXZA@@3P6AXXZA	FLInputManager.obj
+253	0002:00000aec	?gAlternateActionKeys$initializer$@@3P6AXXZA	void (__cdecl* gAlternateActionKeys$initializer$)(void)	FLInputManager.obj
+254	0002:00000af0	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	FirstPerson.obj
+255	0002:00000af4	??rttiHashFlagItem$initializer$@FlagItem@@2P6AXXZA@@3P6AXXZA	??rttiHashFlagItem$initializer$@FlagItem@@2P6AXXZA@@3P6AXXZA	FlagItem.obj
+256	0002:00000af8	??rttiHashFlagItemClass$initializer$@FlagItemClass@@2P6AXXZA@@3P6AXXZA	??rttiHashFlagItemClass$initializer$@FlagItemClass@@2P6AXXZA@@3P6AXXZA	FlagItem.obj
+257	0002:00000afc	??sMemoryPool$initializer$@FlagItem@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@FlagItem@@2P6AXXZA@@3P6AXXZA	FlagItem.obj
+258	0002:00000b00	?sFlashyTextManagerInstance$initializer$@@3P6AXXZA	void (__cdecl* sFlashyTextManagerInstance$initializer$)(void)	FlashyTextElement.obj
+259	0002:00000b04	??sRegions$initializer$@FlyRegionManager@@2P6AXXZA@@3P6AXXZA	??sRegions$initializer$@FlyRegionManager@@2P6AXXZA@@3P6AXXZA	FlyRegion.obj
+260	0002:00000b08	??rttiHashFoleyFX$initializer$@FoleyFX@@2P6AXXZA@@3P6AXXZA	??rttiHashFoleyFX$initializer$@FoleyFX@@2P6AXXZA@@3P6AXXZA	FoleyFX.obj
+261	0002:00000b0c	??smList$initializer$@FoleyFX@@2P6AXXZA@@3P6AXXZA	??smList$initializer$@FoleyFX@@2P6AXXZA@@3P6AXXZA	FoleyFX.obj
+262	0002:00000b10	??smList$initializer$@FoleyFXGroup@@2P6AXXZA@@3P6AXXZA	??smList$initializer$@FoleyFXGroup@@2P6AXXZA@@3P6AXXZA	FoleyFXGroup.obj
+263	0002:00000b14	??rttiHashFoleyFXImpact$initializer$@FoleyFXImpact@@2P6AXXZA@@3P6AXXZA	??rttiHashFoleyFXImpact$initializer$@FoleyFXImpact@@2P6AXXZA@@3P6AXXZA	FoleyFXOrdnance.obj
+264	0002:00000b18	??smFreeList$initializer$@FoleyFXImpact@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@FoleyFXImpact@@2P6AXXZA@@3P6AXXZA	FoleyFXOrdnance.obj
+265	0002:00000b1c	??smList$initializer$@FoleyFXRegion@@2P6AXXZA@@3P6AXXZA	??smList$initializer$@FoleyFXRegion@@2P6AXXZA@@3P6AXXZA	FoleyFXRegion.obj
+266	0002:00000b20	??rttiHashFoleyFXSoldier$initializer$@FoleyFXSoldier@@2P6AXXZA@@3P6AXXZA	??rttiHashFoleyFXSoldier$initializer$@FoleyFXSoldier@@2P6AXXZA@@3P6AXXZA	FoleyFXSoldier.obj
+267	0002:00000b24	??smFreeList$initializer$@FoleyFXSoldier@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@FoleyFXSoldier@@2P6AXXZA@@3P6AXXZA	FoleyFXSoldier.obj
+268	0002:00000b28	??rttiHashFoleyFXWalker$initializer$@FoleyFXWalker@@2P6AXXZA@@3P6AXXZA	??rttiHashFoleyFXWalker$initializer$@FoleyFXWalker@@2P6AXXZA@@3P6AXXZA	FoleyFXWalker.obj
+269	0002:00000b2c	??smFreeList$initializer$@FoleyFXWalker@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@FoleyFXWalker@@2P6AXXZA@@3P6AXXZA	FoleyFXWalker.obj
+270	0002:00000b30	??rttiHashFollowGoal$initializer$@FollowGoal@AI@@2P6AXXZA@@3P6AXXZA	??rttiHashFollowGoal$initializer$@FollowGoal@AI@@2P6AXXZA@@3P6AXXZA	FollowGoal.obj
+271	0002:00000b34	?_frameUpdateTimer$initializer$@@3P6AXXZA	void (__cdecl* _frameUpdateTimer$initializer$)(void)	FrameUpdate.obj
+272	0002:00000b38	?gNormalizedMagentaColor$initializer$@@3P6AXXZA	void (__cdecl* gNormalizedMagentaColor$initializer$)(void)	FrameUpdate.obj
+273	0002:00000b3c	?sAspectRatio$initializer$@@3P6AXXZA	void (__cdecl* sAspectRatio$initializer$)(void)	GameCamera.obj
+274	0002:00000b40	?mAttractGroup$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mAttractGroup$initializer$)(void)	GameLoop.obj
+275	0002:00000b44	?mAttractInfoText$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mAttractInfoText$initializer$)(void)	GameLoop.obj
+276	0002:00000b48	?mDedicatedGroup$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mDedicatedGroup$initializer$)(void)	GameLoop.obj
+277	0002:00000b4c	?mDedicatedTitleText$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mDedicatedTitleText$initializer$)(void)	GameLoop.obj
+278	0002:00000b50	?mDedicatedTeam1Text$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mDedicatedTeam1Text$initializer$)(void)	GameLoop.obj
+279	0002:00000b54	?mDedicatedTeam2Text$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mDedicatedTeam2Text$initializer$)(void)	GameLoop.obj
+280	0002:00000b58	?mWaitMessageGroup$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mWaitMessageGroup$initializer$)(void)	GameLoop.obj
+281	0002:00000b5c	?mWaitTextElement$initializer$@GameLoop@@3P6AXXZA	void (__cdecl* GameLoop::mWaitTextElement$initializer$)(void)	GameLoop.obj
+282	0002:00000b60	?netAutoAssignTeamsOriginalSetting$initializer$@@3P6AXXZA	void (__cdecl* netAutoAssignTeamsOriginalSetting$initializer$)(void)	GameLoop.obj
+283	0002:00000b64	?frameTimer$initializer$@@3P6AXXZA	void (__cdecl* frameTimer$initializer$)(void)	GameLoop.obj
+284	0002:00000b68	?g_InGameMovieQueue$initializer$@@3P6AXXZA	void (__cdecl* g_InGameMovieQueue$initializer$)(void)	GameMovie.obj
+285	0002:00000b6c	??rttiHashGameObjectClass$initializer$@GameObjectClass@@2P6AXXZA@@3P6AXXZA	??rttiHashGameObjectClass$initializer$@GameObjectClass@@2P6AXXZA@@3P6AXXZA	GameObject.obj
+286	0002:00000b70	??rttiHashGameObject$initializer$@GameObject@@2P6AXXZA@@3P6AXXZA	??rttiHashGameObject$initializer$@GameObject@@2P6AXXZA@@3P6AXXZA	GameObject.obj
+287	0002:00000b74	?gSoundHeap$initializer$@GameSoundEngine@@3P6AXXZA	void (__cdecl* GameSoundEngine::gSoundHeap$initializer$)(void)	GameSoundEngine.obj
+288	0002:00000b78	??smFreeList$initializer$@Layer@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Layer@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	GameSoundEngine.obj
+289	0002:00000b7c	?sSoundDamping$initializer$@@3P6AXXZA	void (__cdecl* sSoundDamping$initializer$)(void)	GameSoundEngine.obj
+290	0002:00000b80	?_MissionState$initializer$@@3P6AXXZA	void (__cdecl* _MissionState$initializer$)(void)	GameState.obj
+291	0002:00000b84	?_ShellState$initializer$@@3P6AXXZA	void (__cdecl* _ShellState$initializer$)(void)	GameState.obj
+292	0002:00000b88	?_TimeBase$initializer$@GameState@@3P6AXXZA	void (__cdecl* GameState::_TimeBase$initializer$)(void)	GameState.obj
+293	0002:00000b8c	?_TotalTimeBase$initializer$@GameState@@3P6AXXZA	void (__cdecl* GameState::_TotalTimeBase$initializer$)(void)	GameState.obj
+294	0002:00000b90	?_SystemTimeBase$initializer$@GameState@@3P6AXXZA	void (__cdecl* GameState::_SystemTimeBase$initializer$)(void)	GameState.obj
+295	0002:00000b94	?sStatsLeaderboard$initializer$@@3P6AXXZA	void (__cdecl* sStatsLeaderboard$initializer$)(void)	GameState.obj
+296	0002:00000b98	??_PlayState$initializer$@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	??_PlayState$initializer$@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	GameState.obj
+297	0002:00000b9c	??_NormalState$initializer$@PlayState@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	??_NormalState$initializer$@PlayState@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	GameState.obj
+298	0002:00000ba0	??_PausedState$initializer$@PlayState@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	??_PausedState$initializer$@PlayState@MissionState@GameState@@2P6AXXZA@@3P6AXXZA	GameState.obj
+299	0002:00000ba4	?sStatsScratchBytes$initializer$@@3P6AXXZA	void (__cdecl* sStatsScratchBytes$initializer$)(void)	GameState.obj
+300	0002:00000ba8	?sEncoderStorage$initializer$@@3P6AXXZA	void (__cdecl* sEncoderStorage$initializer$)(void)	GameVoiceChat.obj
+301	0002:00000bac	?sDecoderStorage$initializer$@@3P6AXXZA	void (__cdecl* sDecoderStorage$initializer$)(void)	GameVoiceChat.obj
+302	0002:00000bb0	?sNodeStorage$initializer$@@3P6AXXZA	void (__cdecl* sNodeStorage$initializer$)(void)	GameVoiceChat.obj
+303	0002:00000bb4	?gTransport$initializer$@GameVoiceChat@@3P6AXXZA	void (__cdecl* GameVoiceChat::gTransport$initializer$)(void)	GameVoiceChat.obj
+304	0002:00000bb8	?gPacketQueue$initializer$@GameVoiceChat@@3P6AXXZA	void (__cdecl* GameVoiceChat::gPacketQueue$initializer$)(void)	GameVoiceChatUtil.obj
+305	0002:00000bbc	??sList$initializer$@Element@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Element@HUD@@2P6AXXZA@@3P6AXXZA	HUDElement.obj
+306	0002:00000bc0	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	HUDElement.obj
+307	0002:00000bc4	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	HUDElementBarSegmented.obj
+308	0002:00000bc8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	HUDElementGroup.obj
+309	0002:00000bcc	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	HUDElementMap.obj
+310	0002:00000bd0	??sMapList$initializer$@ElementMap@HUD@@2P6AXXZA@@3P6AXXZA	??sMapList$initializer$@ElementMap@HUD@@2P6AXXZA@@3P6AXXZA	HUDElementMap.obj
+311	0002:00000bd4	??sModelList$initializer$@ElementModel3D@HUD@@2P6AXXZA@@3P6AXXZA	??sModelList$initializer$@ElementModel3D@HUD@@2P6AXXZA@@3P6AXXZA	HUDElementModel3D.obj
+312	0002:00000bd8	??sSeatingDisplays$initializer$@ElementVehicleSeating@HUD@@2P6AXXZA@@3P6AXXZA	??sSeatingDisplays$initializer$@ElementVehicleSeating@HUD@@2P6AXXZA@@3P6AXXZA	HUDElementVehicleSeating.obj
+313	0002:00000bdc	??sList$initializer$@EventClass@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@EventClass@HUD@@2P6AXXZA@@3P6AXXZA	HUDEvent.obj
+314	0002:00000be0	?gEventList$initializer$@HUD@@3P6AXXZA	void (__cdecl* HUD::gEventList$initializer$)(void)	HUDEventQueue.obj
+315	0002:00000be4	??sEventQueue$initializer$@EventQueue@HUD@@2P6AXXZA@@3P6AXXZA	??sEventQueue$initializer$@EventQueue@HUD@@2P6AXXZA@@3P6AXXZA	HUDEventQueue.obj
+316	0002:00000be8	?gPlayerData$initializer$@GameEvents@HUD@@3P6AXXZA	void (__cdecl* HUD::GameEvents::gPlayerData$initializer$)(void)	HUDGameEvents.obj
+317	0002:00000bec	??sList$initializer$@Factory@Item@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Factory@Item@HUD@@2P6AXXZA@@3P6AXXZA	HUDItem.obj
+318	0002:00000bf0	??sList$initializer$@Item@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Item@HUD@@2P6AXXZA@@3P6AXXZA	HUDItem.obj
+319	0002:00000bf4	??sList$initializer$@Sound@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Sound@HUD@@2P6AXXZA@@3P6AXXZA	HUDSound.obj
+320	0002:00000bf8	??sList$initializer$@Transform@HUD@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Transform@HUD@@2P6AXXZA@@3P6AXXZA	HUDTransform.obj
+321	0002:00000bfc	??sTransformNameMeshList$initializer$@TransformNameMesh@HUD@@2P6AXXZA@@3P6AXXZA	??sTransformNameMeshList$initializer$@TransformNameMesh@HUD@@2P6AXXZA@@3P6AXXZA	HUDTransformNameMesh.obj
+322	0002:00000c00	??sMemoryPool$initializer$@BaseHint@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@BaseHint@@2P6AXXZA@@3P6AXXZA	HintManager.obj
+323	0002:00000c04	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	IFaceSoldierAnimator.obj
+324	0002:00000c08	??rttiHashIFaceSoldierAnimator$initializer$@IFaceSoldierAnimator@@2P6AXXZA@@3P6AXXZA	??rttiHashIFaceSoldierAnimator$initializer$@IFaceSoldierAnimator@@2P6AXXZA@@3P6AXXZA	IFaceSoldierAnimator.obj
+325	0002:00000c0c	??sMemoryPool$initializer$@LightFlash@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@LightFlash@@2P6AXXZA@@3P6AXXZA	LightFlash.obj
+326	0002:00000c10	??sMemoryPool$initializer$@LightningBoltEffectObject@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@LightningBoltEffectObject@@2P6AXXZA@@3P6AXXZA	LightningBoltEffect.obj
+327	0002:00000c14	?DEFAULT_LED_TEXTURE_HASH$initializer$@@3P6AXXZA	void (__cdecl* DEFAULT_LED_TEXTURE_HASH$initializer$)(void)	LoadDisplay.obj
+328	0002:00000c18	??sTipsDatabase$initializer$@LoadDisplay@@2P6AXXZA@@3P6AXXZA	??sTipsDatabase$initializer$@LoadDisplay@@2P6AXXZA@@3P6AXXZA	LoadDisplay.obj
+329	0002:00000c1c	??sLVLDatabase$initializer$@LoadDisplay@@2P6AXXZA@@3P6AXXZA	??sLVLDatabase$initializer$@LoadDisplay@@2P6AXXZA@@3P6AXXZA	LoadDisplay.obj
+330	0002:00000c20	??sTargetLockSound$initializer$@LockOnManager@@2P6AXXZA@@3P6AXXZA	??sTargetLockSound$initializer$@LockOnManager@@2P6AXXZA@@3P6AXXZA	LockOnManager.obj
+331	0002:00000c24	??sTargetCommon$initializer$@LockOnManager@@2P6AXXZA@@3P6AXXZA	??sTargetCommon$initializer$@LockOnManager@@2P6AXXZA@@3P6AXXZA	LockOnManager.obj
+332	0002:00000c28	?sDefaultFont$initializer$@@3P6AXXZA	void (__cdecl* sDefaultFont$initializer$)(void)	LuaCallbacks_IFace.obj
+333	0002:00000c2c	?sSavedPlayerOne$initializer$@@3P6AXXZA	void (__cdecl* sSavedPlayerOne$initializer$)(void)	LuaCallbacks_LoadSave.obj
+334	0002:00000c30	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	LuaCallbacks_Mission.obj
+335	0002:00000c34	?gGlobalNumBots$initializer$@@3P6AXXZA	void (__cdecl* gGlobalNumBots$initializer$)(void)	LuaCallbacks_Options.obj
+336	0002:00000c38	?sDelayedSounds$initializer$@Lua_Callbacks@@3P6AXXZA	void (__cdecl* Lua_Callbacks::sDelayedSounds$initializer$)(void)	LuaCallbacks_Sound.obj
+337	0002:00000c3c	?sAuditionEffects$initializer$@@3P6AXXZA	void (__cdecl* sAuditionEffects$initializer$)(void)	LuaCallbacks_Sound.obj
+338	0002:00000c40	??_EventInstances$initializer$@LuaEventManager@@2P6AXXZA@@3P6AXXZA	??_EventInstances$initializer$@LuaEventManager@@2P6AXXZA@@3P6AXXZA	LuaEvent.obj
+339	0002:00000c44	??_Instance$initializer$@LuaEventManager@@2P6AXXZA@@3P6AXXZA	??_Instance$initializer$@LuaEventManager@@2P6AXXZA@@3P6AXXZA	LuaEvent.obj
+340	0002:00000c48	?sMedalHudColor$initializer$@@3P6AXXZA	void (__cdecl* sMedalHudColor$initializer$)(void)	MedalsMgr.obj
+341	0002:00000c4c	?sAwardHudColor$initializer$@@3P6AXXZA	void (__cdecl* sAwardHudColor$initializer$)(void)	MedalsMgr.obj
+342	0002:00000c50	??rttiHashMountedTurret$initializer$@MountedTurret@@2P6AXXZA@@3P6AXXZA	??rttiHashMountedTurret$initializer$@MountedTurret@@2P6AXXZA@@3P6AXXZA	MountedTurret.obj
+343	0002:00000c54	??rttiHashMountedTurretClass$initializer$@MountedTurretClass@@2P6AXXZA@@3P6AXXZA	??rttiHashMountedTurretClass$initializer$@MountedTurretClass@@2P6AXXZA@@3P6AXXZA	MountedTurret.obj
+344	0002:00000c58	??sMemoryPool$initializer$@MountedTurret@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@MountedTurret@@2P6AXXZA@@3P6AXXZA	MountedTurret.obj
+345	0002:00000c5c	??sMemoryPool$initializer$@Music@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Music@@2P6AXXZA@@3P6AXXZA	Music.obj
+346	0002:00000c60	??sMusicInactive$initializer$@Music@@2P6AXXZA@@3P6AXXZA	??sMusicInactive$initializer$@Music@@2P6AXXZA@@3P6AXXZA	Music.obj
+347	0002:00000c64	??sMusicActive$initializer$@Music@@2P6AXXZA@@3P6AXXZA	??sMusicActive$initializer$@Music@@2P6AXXZA@@3P6AXXZA	Music.obj
+348	0002:00000c68	??sMemoryPool$initializer$@Navigator@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Navigator@@2P6AXXZA@@3P6AXXZA	Navigator.obj
+349	0002:00000c6c	??rttiHashNavigator$initializer$@Navigator@@2P6AXXZA@@3P6AXXZA	??rttiHashNavigator$initializer$@Navigator@@2P6AXXZA@@3P6AXXZA	Navigator.obj
+350	0002:00000c70	??rttiHashNavigatorFollowTarget$initializer$@NavigatorFollowTarget@@2P6AXXZA@@3P6AXXZA	??rttiHashNavigatorFollowTarget$initializer$@NavigatorFollowTarget@@2P6AXXZA@@3P6AXXZA	NavigatorFollowTarget.obj
+351	0002:00000c74	??rttiHashNavigatorGraphFollower$initializer$@NavigatorGraphFollower@@2P6AXXZA@@3P6AXXZA	??rttiHashNavigatorGraphFollower$initializer$@NavigatorGraphFollower@@2P6AXXZA@@3P6AXXZA	NavigatorGraphFollower.obj
+352	0002:00000c78	??rttiHashNavigatorPathFollower$initializer$@NavigatorPathFollower@@2P6AXXZA@@3P6AXXZA	??rttiHashNavigatorPathFollower$initializer$@NavigatorPathFollower@@2P6AXXZA@@3P6AXXZA	NavigatorPathFollower.obj
+353	0002:00000c7c	??rttiHashNavigatorSlide$initializer$@NavigatorSlide@@2P6AXXZA@@3P6AXXZA	??rttiHashNavigatorSlide$initializer$@NavigatorSlide@@2P6AXXZA@@3P6AXXZA	NavigatorSlide.obj
+354	0002:00000c80	?sLoginLimiter$initializer$@@3P6AXXZA	void (__cdecl* sLoginLimiter$initializer$)(void)	NetAdmin.obj
+355	0002:00000c84	?netDests$initializer$@@3P6AXXZA	void (__cdecl* netDests$initializer$)(void)	NetComm.obj
+356	0002:00000c88	?netTimeBase$initializer$@@3P6AXXZA	void (__cdecl* netTimeBase$initializer$)(void)	NetComm.obj
+357	0002:00000c8c	?netTimeStamp$initializer$@@3P6AXXZA	void (__cdecl* netTimeStamp$initializer$)(void)	NetComm.obj
+358	0002:00000c90	?inPktGroups$initializer$@@3P6AXXZA	void (__cdecl* inPktGroups$initializer$)(void)	NetComm.obj
+359	0002:00000c94	?bandwidthQueue$initializer$@@3P6AXXZA	void (__cdecl* bandwidthQueue$initializer$)(void)	NetDrag.obj
+360	0002:00000c98	?netPlayers$initializer$@@3P6AXXZA	void (__cdecl* netPlayers$initializer$)(void)	NetGame.obj
+361	0002:00000c9c	?netGameChatMsgClient$initializer$@@3P6AXXZA	void (__cdecl* netGameChatMsgClient$initializer$)(void)	NetGame.obj
+362	0002:00000ca0	?netGameChatMsgServer$initializer$@@3P6AXXZA	void (__cdecl* netGameChatMsgServer$initializer$)(void)	NetGame.obj
+363	0002:00000ca4	??sMemoryPool$initializer$@NetObj@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@NetObj@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+364	0002:00000ca8	?clientSoldierPool$initializer$@@3P6AXXZA	void (__cdecl* clientSoldierPool$initializer$)(void)	NetGame.obj
+365	0002:00000cac	?clientDroidPool$initializer$@@3P6AXXZA	void (__cdecl* clientDroidPool$initializer$)(void)	NetGame.obj
+366	0002:00000cb0	?clientWalkerPool$initializer$@@3P6AXXZA	void (__cdecl* clientWalkerPool$initializer$)(void)	NetGame.obj
+367	0002:00000cb4	?clientCommandWalkerPool$initializer$@@3P6AXXZA	void (__cdecl* clientCommandWalkerPool$initializer$)(void)	NetGame.obj
+368	0002:00000cb8	?clientCommandFlyerPool$initializer$@@3P6AXXZA	void (__cdecl* clientCommandFlyerPool$initializer$)(void)	NetGame.obj
+369	0002:00000cbc	?clientDroidekaPool$initializer$@@3P6AXXZA	void (__cdecl* clientDroidekaPool$initializer$)(void)	NetGame.obj
+370	0002:00000cc0	?clientFlyerPool$initializer$@@3P6AXXZA	void (__cdecl* clientFlyerPool$initializer$)(void)	NetGame.obj
+371	0002:00000cc4	?clientCarrierPool$initializer$@@3P6AXXZA	void (__cdecl* clientCarrierPool$initializer$)(void)	NetGame.obj
+372	0002:00000cc8	?clientHoverPool$initializer$@@3P6AXXZA	void (__cdecl* clientHoverPool$initializer$)(void)	NetGame.obj
+373	0002:00000ccc	?clientCommandHoverPool$initializer$@@3P6AXXZA	void (__cdecl* clientCommandHoverPool$initializer$)(void)	NetGame.obj
+374	0002:00000cd0	?clientMountedTurretPool$initializer$@@3P6AXXZA	void (__cdecl* clientMountedTurretPool$initializer$)(void)	NetGame.obj
+375	0002:00000cd4	?clientPowerupPool$initializer$@@3P6AXXZA	void (__cdecl* clientPowerupPool$initializer$)(void)	NetGame.obj
+376	0002:00000cd8	?clientArmedDynamicPool$initializer$@@3P6AXXZA	void (__cdecl* clientArmedDynamicPool$initializer$)(void)	NetGame.obj
+377	0002:00000cdc	?clientWalkerLegPairPool$initializer$@@3P6AXXZA	void (__cdecl* clientWalkerLegPairPool$initializer$)(void)	NetGame.obj
+378	0002:00000ce0	?clientWalkerBlendPool$initializer$@@3P6AXXZA	void (__cdecl* clientWalkerBlendPool$initializer$)(void)	NetGame.obj
+379	0002:00000ce4	?clientWalkerBlendUnitPool$initializer$@@3P6AXXZA	void (__cdecl* clientWalkerBlendUnitPool$initializer$)(void)	NetGame.obj
+380	0002:00000ce8	?clientAimerPool$initializer$@@3P6AXXZA	void (__cdecl* clientAimerPool$initializer$)(void)	NetGame.obj
+381	0002:00000cec	?clientWeaponPool$initializer$@@3P6AXXZA	void (__cdecl* clientWeaponPool$initializer$)(void)	NetGame.obj
+382	0002:00000cf0	?clientAmmoCounterPool$initializer$@@3P6AXXZA	void (__cdecl* clientAmmoCounterPool$initializer$)(void)	NetGame.obj
+383	0002:00000cf4	?clientEnergyBarPool$initializer$@@3P6AXXZA	void (__cdecl* clientEnergyBarPool$initializer$)(void)	NetGame.obj
+384	0002:00000cf8	?clientTreeGridPool$initializer$@@3P6AXXZA	void (__cdecl* clientTreeGridPool$initializer$)(void)	NetGame.obj
+385	0002:00000cfc	?clientOrdnanceTowCablePool$initializer$@@3P6AXXZA	void (__cdecl* clientOrdnanceTowCablePool$initializer$)(void)	NetGame.obj
+386	0002:00000d00	?clientAsteroidPool$initializer$@@3P6AXXZA	void (__cdecl* clientAsteroidPool$initializer$)(void)	NetGame.obj
+387	0002:00000d04	?clientFlagPool$initializer$@@3P6AXXZA	void (__cdecl* clientFlagPool$initializer$)(void)	NetGame.obj
+388	0002:00000d08	?clientRemoteTerminalPool$initializer$@@3P6AXXZA	void (__cdecl* clientRemoteTerminalPool$initializer$)(void)	NetGame.obj
+389	0002:00000d0c	?hostSoldierPool$initializer$@@3P6AXXZA	void (__cdecl* hostSoldierPool$initializer$)(void)	NetGame.obj
+390	0002:00000d10	?hostDroidPool$initializer$@@3P6AXXZA	void (__cdecl* hostDroidPool$initializer$)(void)	NetGame.obj
+391	0002:00000d14	?hostWalkerPool$initializer$@@3P6AXXZA	void (__cdecl* hostWalkerPool$initializer$)(void)	NetGame.obj
+392	0002:00000d18	?hostCommandWalkerPool$initializer$@@3P6AXXZA	void (__cdecl* hostCommandWalkerPool$initializer$)(void)	NetGame.obj
+393	0002:00000d1c	?hostCommandFlyerPool$initializer$@@3P6AXXZA	void (__cdecl* hostCommandFlyerPool$initializer$)(void)	NetGame.obj
+394	0002:00000d20	?hostDroidekaPool$initializer$@@3P6AXXZA	void (__cdecl* hostDroidekaPool$initializer$)(void)	NetGame.obj
+395	0002:00000d24	?hostFlyerPool$initializer$@@3P6AXXZA	void (__cdecl* hostFlyerPool$initializer$)(void)	NetGame.obj
+396	0002:00000d28	?hostCarrierPool$initializer$@@3P6AXXZA	void (__cdecl* hostCarrierPool$initializer$)(void)	NetGame.obj
+397	0002:00000d2c	?hostHoverPool$initializer$@@3P6AXXZA	void (__cdecl* hostHoverPool$initializer$)(void)	NetGame.obj
+398	0002:00000d30	?hostCommandHoverPool$initializer$@@3P6AXXZA	void (__cdecl* hostCommandHoverPool$initializer$)(void)	NetGame.obj
+399	0002:00000d34	?hostMountedTurretPool$initializer$@@3P6AXXZA	void (__cdecl* hostMountedTurretPool$initializer$)(void)	NetGame.obj
+400	0002:00000d38	?hostPowerupPool$initializer$@@3P6AXXZA	void (__cdecl* hostPowerupPool$initializer$)(void)	NetGame.obj
+401	0002:00000d3c	?hostArmedDynamicPool$initializer$@@3P6AXXZA	void (__cdecl* hostArmedDynamicPool$initializer$)(void)	NetGame.obj
+402	0002:00000d40	?hostWalkerLegPairPool$initializer$@@3P6AXXZA	void (__cdecl* hostWalkerLegPairPool$initializer$)(void)	NetGame.obj
+403	0002:00000d44	?hostWalkerBlendPool$initializer$@@3P6AXXZA	void (__cdecl* hostWalkerBlendPool$initializer$)(void)	NetGame.obj
+404	0002:00000d48	?hostWalkerBlendUnitPool$initializer$@@3P6AXXZA	void (__cdecl* hostWalkerBlendUnitPool$initializer$)(void)	NetGame.obj
+405	0002:00000d4c	?hostAimerPool$initializer$@@3P6AXXZA	void (__cdecl* hostAimerPool$initializer$)(void)	NetGame.obj
+406	0002:00000d50	?hostWeaponPool$initializer$@@3P6AXXZA	void (__cdecl* hostWeaponPool$initializer$)(void)	NetGame.obj
+407	0002:00000d54	?hostAmmoCounterPool$initializer$@@3P6AXXZA	void (__cdecl* hostAmmoCounterPool$initializer$)(void)	NetGame.obj
+408	0002:00000d58	?hostEnergyBarPool$initializer$@@3P6AXXZA	void (__cdecl* hostEnergyBarPool$initializer$)(void)	NetGame.obj
+409	0002:00000d5c	?hostTreeGridPool$initializer$@@3P6AXXZA	void (__cdecl* hostTreeGridPool$initializer$)(void)	NetGame.obj
+410	0002:00000d60	?hostOrdnanceTowCablePool$initializer$@@3P6AXXZA	void (__cdecl* hostOrdnanceTowCablePool$initializer$)(void)	NetGame.obj
+411	0002:00000d64	?hostAsteroidPool$initializer$@@3P6AXXZA	void (__cdecl* hostAsteroidPool$initializer$)(void)	NetGame.obj
+412	0002:00000d68	?hostFlagPool$initializer$@@3P6AXXZA	void (__cdecl* hostFlagPool$initializer$)(void)	NetGame.obj
+413	0002:00000d6c	?hostRemoteTerminalPool$initializer$@@3P6AXXZA	void (__cdecl* hostRemoteTerminalPool$initializer$)(void)	NetGame.obj
+414	0002:00000d70	?netLocalPos$initializer$@@3P6AXXZA	void (__cdecl* netLocalPos$initializer$)(void)	NetGame.obj
+415	0002:00000d74	?remoteClientTurns$initializer$@@3P6AXXZA	void (__cdecl* remoteClientTurns$initializer$)(void)	NetGame.obj
+416	0002:00000d78	?localClientTurns$initializer$@@3P6AXXZA	void (__cdecl* localClientTurns$initializer$)(void)	NetGame.obj
+417	0002:00000d7c	?hostTurns$initializer$@@3P6AXXZA	void (__cdecl* hostTurns$initializer$)(void)	NetGame.obj
+418	0002:00000d80	?noInputs$initializer$@@3P6AXXZA	void (__cdecl* noInputs$initializer$)(void)	NetGame.obj
+419	0002:00000d84	?lateState$initializer$@@3P6AXXZA	void (__cdecl* lateState$initializer$)(void)	NetGame.obj
+420	0002:00000d88	?clientNdObjMap$initializer$@@3P6AXXZA	void (__cdecl* clientNdObjMap$initializer$)(void)	NetGame.obj
+421	0002:00000d8c	?nearObjects$initializer$@@3P6AXXZA	void (__cdecl* nearObjects$initializer$)(void)	NetGame.obj
+422	0002:00000d90	?netCenter$initializer$@@3P6AXXZA	void (__cdecl* netCenter$initializer$)(void)	NetGame.obj
+423	0002:00000d94	?spawnInfo$initializer$@@3P6AXXZA	void (__cdecl* spawnInfo$initializer$)(void)	NetGame.obj
+424	0002:00000d98	?sendCenter$initializer$@@3P6AXXZA	void (__cdecl* sendCenter$initializer$)(void)	NetGame.obj
+425	0002:00000d9c	?sendFront$initializer$@@3P6AXXZA	void (__cdecl* sendFront$initializer$)(void)	NetGame.obj
+426	0002:00000da0	?relChunkClusterData$initializer$@@3P6AXXZA	void (__cdecl* relChunkClusterData$initializer$)(void)	NetGame.obj
+427	0002:00000da4	?farToNearCenter$initializer$@@3P6AXXZA	void (__cdecl* farToNearCenter$initializer$)(void)	NetGame.obj
+428	0002:00000da8	?gCameraFrontPos$initializer$@@3P6AXXZA	void (__cdecl* gCameraFrontPos$initializer$)(void)	NetGame.obj
+429	0002:00000dac	?trackDesc$initializer$@@3P6AXXZA	void (__cdecl* trackDesc$initializer$)(void)	NetGame.obj
+430	0002:00000db0	?aloReinforcements$initializer$@@3P6AXXZA	void (__cdecl* aloReinforcements$initializer$)(void)	NetGame.obj
+431	0002:00000db4	?aloHeroData0$initializer$@@3P6AXXZA	void (__cdecl* aloHeroData0$initializer$)(void)	NetGame.obj
+432	0002:00000db8	?aloHeroData1$initializer$@@3P6AXXZA	void (__cdecl* aloHeroData1$initializer$)(void)	NetGame.obj
+433	0002:00000dbc	?aloHeroData2$initializer$@@3P6AXXZA	void (__cdecl* aloHeroData2$initializer$)(void)	NetGame.obj
+434	0002:00000dc0	?aloMiniStats$initializer$@@3P6AXXZA	void (__cdecl* aloMiniStats$initializer$)(void)	NetGame.obj
+435	0002:00000dc4	?aloTrackable$initializer$@@3P6AXXZA	void (__cdecl* aloTrackable$initializer$)(void)	NetGame.obj
+436	0002:00000dc8	?aloStats$initializer$@@3P6AXXZA	void (__cdecl* aloStats$initializer$)(void)	NetGame.obj
+437	0002:00000dcc	?aloNextGameInfo$initializer$@@3P6AXXZA	void (__cdecl* aloNextGameInfo$initializer$)(void)	NetGame.obj
+438	0002:00000dd0	?aloMissionTimer$initializer$@@3P6AXXZA	void (__cdecl* aloMissionTimer$initializer$)(void)	NetGame.obj
+439	0002:00000dd4	??sMemoryPool$initializer$@NetObjState@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@NetObjState@@2P6AXXZA@@3P6AXXZA	NetGame.obj
+440	0002:00000dd8	?frameLockTimeBase$initializer$@@3P6AXXZA	void (__cdecl* frameLockTimeBase$initializer$)(void)	NetGame.obj
+441	0002:00000ddc	?aloMapDisplayMarkers$initializer$@@3P6AXXZA	void (__cdecl* aloMapDisplayMarkers$initializer$)(void)	NetGame.obj
+442	0002:00000de0	?frameLockStamp$initializer$@@3P6AXXZA	void (__cdecl* frameLockStamp$initializer$)(void)	NetGame.obj
+443	0002:00000de4	?recentGuestObjects$initializer$@@3P6AXXZA	void (__cdecl* recentGuestObjects$initializer$)(void)	NetGame.obj
+444	0002:00000de8	?smoothInfo$initializer$@@3P6AXXZA	void (__cdecl* smoothInfo$initializer$)(void)	NetPredict.obj
+445	0002:00000dec	?netRandom$initializer$@@3P6AXXZA	void (__cdecl* netRandom$initializer$)(void)	NetSetup.obj
+446	0002:00000df0	?netPrevSessionId$initializer$@@3P6AXXZA	void (__cdecl* netPrevSessionId$initializer$)(void)	NetSetup.obj
+447	0002:00000df4	?clientAddrs$initializer$@@3P6AXXZA	void (__cdecl* clientAddrs$initializer$)(void)	NetSetup.obj
+448	0002:00000df8	?netSessionId$initializer$@@3P6AXXZA	void (__cdecl* netSessionId$initializer$)(void)	NetSetup.obj
+449	0002:00000dfc	?hostAddrs$initializer$@@3P6AXXZA	void (__cdecl* hostAddrs$initializer$)(void)	NetSetup.obj
+450	0002:00000e00	?myAddr$initializer$@@3P6AXXZA	void (__cdecl* myAddr$initializer$)(void)	NetSetup.obj
+451	0002:00000e04	?autoNetTimeStamp$initializer$@@3P6AXXZA	void (__cdecl* autoNetTimeStamp$initializer$)(void)	NetSetup.obj
+452	0002:00000e08	??mSpecialJoinAddress$initializer$@NetSetup@@2P6AXXZA@@3P6AXXZA	??mSpecialJoinAddress$initializer$@NetSetup@@2P6AXXZA@@3P6AXXZA	NetSetup.obj
+453	0002:00000e0c	??rttiHashOrdnance$initializer$@Ordnance@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnance$initializer$@Ordnance@@2P6AXXZA@@3P6AXXZA	Ordnance.obj
+454	0002:00000e10	??rttiHashOrdnanceClass$initializer$@OrdnanceClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceClass$initializer$@OrdnanceClass@@2P6AXXZA@@3P6AXXZA	Ordnance.obj
+455	0002:00000e14	??sMemoryPool$initializer$@Ordnance@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Ordnance@@2P6AXXZA@@3P6AXXZA	Ordnance.obj
+456	0002:00000e18	??rttiHashOrdnanceBeacon$initializer$@OrdnanceBeacon@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBeacon$initializer$@OrdnanceBeacon@@2P6AXXZA@@3P6AXXZA	OrdnanceBeacon.obj
+457	0002:00000e1c	??rttiHashOrdnanceBeaconClass$initializer$@OrdnanceBeaconClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBeaconClass$initializer$@OrdnanceBeaconClass@@2P6AXXZA@@3P6AXXZA	OrdnanceBeacon.obj
+458	0002:00000e20	??rttiHashOrdnanceBeam$initializer$@OrdnanceBeam@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBeam$initializer$@OrdnanceBeam@@2P6AXXZA@@3P6AXXZA	OrdnanceBeam.obj
+459	0002:00000e24	??rttiHashOrdnanceBeamClass$initializer$@OrdnanceBeamClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBeamClass$initializer$@OrdnanceBeamClass@@2P6AXXZA@@3P6AXXZA	OrdnanceBeam.obj
+460	0002:00000e28	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	OrdnanceBullet.obj
+461	0002:00000e2c	??rttiHashOrdnanceBulletClass$initializer$@OrdnanceBulletClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBulletClass$initializer$@OrdnanceBulletClass@@2P6AXXZA@@3P6AXXZA	OrdnanceBullet.obj
+462	0002:00000e30	??rttiHashOrdnanceBullet$initializer$@OrdnanceBullet@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceBullet$initializer$@OrdnanceBullet@@2P6AXXZA@@3P6AXXZA	OrdnanceBullet.obj
+463	0002:00000e34	??rttiHashOrdnanceEmitterClass$initializer$@OrdnanceEmitterClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceEmitterClass$initializer$@OrdnanceEmitterClass@@2P6AXXZA@@3P6AXXZA	OrdnanceEmitter.obj
+464	0002:00000e38	??rttiHashOrdnanceFatRay$initializer$@OrdnanceFatRay@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceFatRay$initializer$@OrdnanceFatRay@@2P6AXXZA@@3P6AXXZA	OrdnanceFatRay.obj
+465	0002:00000e3c	??rttiHashOrdnanceFatRayClass$initializer$@OrdnanceFatRayClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceFatRayClass$initializer$@OrdnanceFatRayClass@@2P6AXXZA@@3P6AXXZA	OrdnanceFatRay.obj
+466	0002:00000e40	??rttiHashOrdnanceGrapplingHook$initializer$@OrdnanceGrapplingHook@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceGrapplingHook$initializer$@OrdnanceGrapplingHook@@2P6AXXZA@@3P6AXXZA	OrdnanceGrapplingHook.obj
+467	0002:00000e44	??rttiHashOrdnanceGrapplingHookClass$initializer$@OrdnanceGrapplingHookClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceGrapplingHookClass$initializer$@OrdnanceGrapplingHookClass@@2P6AXXZA@@3P6AXXZA	OrdnanceGrapplingHook.obj
+468	0002:00000e48	??rttiHashOrdnanceGrenade$initializer$@OrdnanceGrenade@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceGrenade$initializer$@OrdnanceGrenade@@2P6AXXZA@@3P6AXXZA	OrdnanceGrenade.obj
+469	0002:00000e4c	??rttiHashOrdnanceGrenadeClass$initializer$@OrdnanceGrenadeClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceGrenadeClass$initializer$@OrdnanceGrenadeClass@@2P6AXXZA@@3P6AXXZA	OrdnanceGrenade.obj
+470	0002:00000e50	??rttiHashOrdnanceHaywire$initializer$@OrdnanceHaywire@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceHaywire$initializer$@OrdnanceHaywire@@2P6AXXZA@@3P6AXXZA	OrdnanceHaywire.obj
+471	0002:00000e54	??rttiHashOrdnanceHaywireClass$initializer$@OrdnanceHaywireClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceHaywireClass$initializer$@OrdnanceHaywireClass@@2P6AXXZA@@3P6AXXZA	OrdnanceHaywire.obj
+472	0002:00000e58	??rttiHashOrdnanceLaserClass$initializer$@OrdnanceLaserClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceLaserClass$initializer$@OrdnanceLaserClass@@2P6AXXZA@@3P6AXXZA	OrdnanceLaser.obj
+473	0002:00000e5c	??rttiHashOrdnanceLaser$initializer$@OrdnanceLaser@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceLaser$initializer$@OrdnanceLaser@@2P6AXXZA@@3P6AXXZA	OrdnanceLaser.obj
+474	0002:00000e60	??rttiHashOrdnanceMeleeThrow$initializer$@OrdnanceMeleeThrow@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceMeleeThrow$initializer$@OrdnanceMeleeThrow@@2P6AXXZA@@3P6AXXZA	OrdnanceMeleeThrow.obj
+475	0002:00000e64	??rttiHashOrdnanceMeleeThrowClass$initializer$@OrdnanceMeleeThrowClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceMeleeThrowClass$initializer$@OrdnanceMeleeThrowClass@@2P6AXXZA@@3P6AXXZA	OrdnanceMeleeThrow.obj
+476	0002:00000e68	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	OrdnanceMeleeThrow.obj
+477	0002:00000e6c	??rttiHashOrdnanceMissile$initializer$@OrdnanceMissile@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceMissile$initializer$@OrdnanceMissile@@2P6AXXZA@@3P6AXXZA	OrdnanceMissile.obj
+478	0002:00000e70	??rttiHashOrdnanceMissileClass$initializer$@OrdnanceMissileClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceMissileClass$initializer$@OrdnanceMissileClass@@2P6AXXZA@@3P6AXXZA	OrdnanceMissile.obj
+479	0002:00000e74	??rttiHashOrdnanceShell$initializer$@OrdnanceShell@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceShell$initializer$@OrdnanceShell@@2P6AXXZA@@3P6AXXZA	OrdnanceShell.obj
+480	0002:00000e78	??rttiHashOrdnanceShellClass$initializer$@OrdnanceShellClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceShellClass$initializer$@OrdnanceShellClass@@2P6AXXZA@@3P6AXXZA	OrdnanceShell.obj
+481	0002:00000e7c	??rttiHashOrdnanceSticky$initializer$@OrdnanceSticky@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceSticky$initializer$@OrdnanceSticky@@2P6AXXZA@@3P6AXXZA	OrdnanceSticky.obj
+482	0002:00000e80	??rttiHashOrdnanceStickyClass$initializer$@OrdnanceStickyClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceStickyClass$initializer$@OrdnanceStickyClass@@2P6AXXZA@@3P6AXXZA	OrdnanceSticky.obj
+483	0002:00000e84	??rttiHashOrdnanceTowCable$initializer$@OrdnanceTowCable@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceTowCable$initializer$@OrdnanceTowCable@@2P6AXXZA@@3P6AXXZA	OrdnanceTowCable.obj
+484	0002:00000e88	??rttiHashOrdnanceTowCableClass$initializer$@OrdnanceTowCableClass@@2P6AXXZA@@3P6AXXZA	??rttiHashOrdnanceTowCableClass$initializer$@OrdnanceTowCableClass@@2P6AXXZA@@3P6AXXZA	OrdnanceTowCable.obj
+485	0002:00000e8c	??sMemoryPool$initializer$@OrdnanceTowCable@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@OrdnanceTowCable@@2P6AXXZA@@3P6AXXZA	OrdnanceTowCable.obj
+486	0002:00000e90	??sMemoryPool$initializer$@ParticleEmitter@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ParticleEmitter@@2P6AXXZA@@3P6AXXZA	ParticleEmitter.obj
+487	0002:00000e94	?sPEO$initializer$@@3P6AXXZA	void (__cdecl* sPEO$initializer$)(void)	ParticleEmitter.obj
+488	0002:00000e98	?sParticleCache$initializer$@@3P6AXXZA	void (__cdecl* sParticleCache$initializer$)(void)	ParticleEmitter.obj
+489	0002:00000e9c	?sEmitterCache$initializer$@@3P6AXXZA	void (__cdecl* sEmitterCache$initializer$)(void)	ParticleEmitter.obj
+490	0002:00000ea0	??sMemoryPool$initializer$@ParticleEmitterInfoData@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ParticleEmitterInfoData@@2P6AXXZA@@3P6AXXZA	ParticleEmitterInfo.obj
+491	0002:00000ea4	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	ParticleEmitterObject.obj
+492	0002:00000ea8	??sMemoryPool$initializer$@ParticleEmitterObject@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ParticleEmitterObject@@2P6AXXZA@@3P6AXXZA	ParticleEmitterObject.obj
+493	0002:00000eac	??sMemoryPool$initializer$@PositionTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PositionTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	ParticleTransformer.obj
+494	0002:00000eb0	??sMemoryPool$initializer$@SizeTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@SizeTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	ParticleTransformer.obj
+495	0002:00000eb4	??sMemoryPool$initializer$@RotationTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@RotationTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	ParticleTransformer.obj
+496	0002:00000eb8	??sMemoryPool$initializer$@ColorTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ColorTransformer@ParticleTransformer@@2P6AXXZA@@3P6AXXZA	ParticleTransformer.obj
+497	0002:00000ebc	??sMemoryPool$initializer$@PassengerSlot@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PassengerSlot@@2P6AXXZA@@3P6AXXZA	PassengerSlot.obj
+498	0002:00000ec0	??rttiHashPassengerSlot$initializer$@PassengerSlot@@2P6AXXZA@@3P6AXXZA	??rttiHashPassengerSlot$initializer$@PassengerSlot@@2P6AXXZA@@3P6AXXZA	PassengerSlot.obj
+499	0002:00000ec4	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	PassengerSlot.obj
+500	0002:00000ec8	??sMemoryPool$initializer$@Obstacle@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Obstacle@@2P6AXXZA@@3P6AXXZA	PathFinder.obj
+501	0002:00000ecc	??sMemoryPool$initializer$@PathNode@PathFinder@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PathNode@PathFinder@@2P6AXXZA@@3P6AXXZA	PathFinder.obj
+502	0002:00000ed0	??sMemoryPool$initializer$@PathFollower@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PathFollower@@2P6AXXZA@@3P6AXXZA	PathFollower.obj
+503	0002:00000ed4	?kRttiHashEntityFlyer$initializer$@?A0x625dd2e2@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityFlyer$initializer$)(void)	PathFollower.obj
+504	0002:00000ed8	?kRttiHashEntityHover$initializer$@?A0x625dd2e2@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityHover$initializer$)(void)	PathFollower.obj
+505	0002:00000edc	?kRttiHashEntityWalker$initializer$@?A0x625dd2e2@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityWalker$initializer$)(void)	PathFollower.obj
+506	0002:00000ee0	?kRttiHashEntityDroideka$initializer$@?A0x625dd2e2@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityDroideka$initializer$)(void)	PathFollower.obj
+507	0002:00000ee4	?kRttiHashEntitySoldier$initializer$@?A0x625dd2e2@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntitySoldier$initializer$)(void)	PathFollower.obj
+508	0002:00000ee8	??sMemoryPool$initializer$@AIPathNode@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@AIPathNode@@2P6AXXZA@@3P6AXXZA	PathManager.obj
+509	0002:00000eec	??sMemoryPool$initializer$@AIPath@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@AIPath@@2P6AXXZA@@3P6AXXZA	PathManager.obj
+510	0002:00000ef0	??sMemoryPool$initializer$@PathRequest@PathManager@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PathRequest@PathManager@@2P6AXXZA@@3P6AXXZA	PathManager.obj
+511	0002:00000ef4	?mTimer$initializer$@PathManager@@3P6AXXZA	void (__cdecl* PathManager::mTimer$initializer$)(void)	PathManager.obj
+512	0002:00000ef8	?_sPauseMenuInstance$initializer$@@3P6AXXZA	void (__cdecl* _sPauseMenuInstance$initializer$)(void)	PauseMenu.obj
+513	0002:00000efc	?gTogglePauseReverbCommand$initializer$@@3P6AXXZA	void (__cdecl* gTogglePauseReverbCommand$initializer$)(void)	PauseMenu.obj
+514	0002:00000f00	??rttiHashPlayerController$initializer$@PlayerController@@2P6AXXZA@@3P6AXXZA	??rttiHashPlayerController$initializer$@PlayerController@@2P6AXXZA@@3P6AXXZA	PlayerController.obj
+515	0002:00000f04	??sMemoryPool$initializer$@PlayerController@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PlayerController@@2P6AXXZA@@3P6AXXZA	PlayerController.obj
+516	0002:00000f08	?mProfiles$initializer$@@3P6AXXZA	void (__cdecl* mProfiles$initializer$)(void)	PlayerProfile.obj
+517	0002:00000f0c	?mDefaultProfile$initializer$@@3P6AXXZA	void (__cdecl* mDefaultProfile$initializer$)(void)	PlayerProfile.obj
+518	0002:00000f10	?mAllUserPrefs$initializer$@PlayerPrefs@@3P6AXXZA	void (__cdecl* PlayerPrefs::mAllUserPrefs$initializer$)(void)	PlayerProfile.obj
+519	0002:00000f14	??rttiHashPowerupItemClass$initializer$@PowerupItemClass@@2P6AXXZA@@3P6AXXZA	??rttiHashPowerupItemClass$initializer$@PowerupItemClass@@2P6AXXZA@@3P6AXXZA	PowerupItem.obj
+520	0002:00000f18	??sMemoryPool$initializer$@PowerupItem@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@PowerupItem@@2P6AXXZA@@3P6AXXZA	PowerupItem.obj
+521	0002:00000f1c	??rttiHashPowerupItem$initializer$@PowerupItem@@2P6AXXZA@@3P6AXXZA	??rttiHashPowerupItem$initializer$@PowerupItem@@2P6AXXZA@@3P6AXXZA	PowerupItem.obj
+522	0002:00000f20	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	PowerupStation.obj
+523	0002:00000f24	??rttiHashPowerupStationClass$initializer$@PowerupStationClass@@2P6AXXZA@@3P6AXXZA	??rttiHashPowerupStationClass$initializer$@PowerupStationClass@@2P6AXXZA@@3P6AXXZA	PowerupStation.obj
+524	0002:00000f28	??rttiHashPowerupStation$initializer$@PowerupStation@@2P6AXXZA@@3P6AXXZA	??rttiHashPowerupStation$initializer$@PowerupStation@@2P6AXXZA@@3P6AXXZA	PowerupStation.obj
+525	0002:00000f2c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	ProceduralAnimation.obj
+526	0002:00000f30	?pamanagerInterpolator$initializer$@@3P6AXXZA	void (__cdecl* pamanagerInterpolator$initializer$)(void)	ProceduralAnimation.obj
+527	0002:00000f34	?mPropLayers$initializer$@PropGenerator@@3P6AXXZA	void (__cdecl* PropGenerator::mPropLayers$initializer$)(void)	PropGenerator.obj
+528	0002:00000f38	?mThread$initializer$@PropGenerator@@3P6AXXZA	void (__cdecl* PropGenerator::mThread$initializer$)(void)	PropGenerator.obj
+529	0002:00000f3c	?afScore$initializer$@@3P6AXXZA	void (__cdecl* afScore$initializer$)(void)	PropGenerator.obj
+530	0002:00000f40	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	PropGenerator.obj
+531	0002:00000f44	?sObjectCache$initializer$@@3P6AXXZA	void (__cdecl* sObjectCache$initializer$)(void)	PropModelMesh.obj
+532	0002:00000f48	?msgGroup$initializer$@@3P6AXXZA	void (__cdecl* msgGroup$initializer$)(void)	QOSDisplay.obj
+533	0002:00000f4c	?hostQosText$initializer$@@3P6AXXZA	void (__cdecl* hostQosText$initializer$)(void)	QOSDisplay.obj
+534	0002:00000f50	?clientQosText1$initializer$@@3P6AXXZA	void (__cdecl* clientQosText1$initializer$)(void)	QOSDisplay.obj
+535	0002:00000f54	?clientQosText2$initializer$@@3P6AXXZA	void (__cdecl* clientQosText2$initializer$)(void)	QOSDisplay.obj
+536	0002:00000f58	?QosIcon$initializer$@@3P6AXXZA	void (__cdecl* QosIcon$initializer$)(void)	QOSDisplay.obj
+537	0002:00000f5c	?qosText$initializer$@@3P6AXXZA	void (__cdecl* qosText$initializer$)(void)	QOSDisplay.obj
+538	0002:00000f60	?qosTextDbg$initializer$@@3P6AXXZA	void (__cdecl* qosTextDbg$initializer$)(void)	QOSDisplay.obj
+539	0002:00000f64	?reticuleInterpolator$initializer$@@3P6AXXZA	void (__cdecl* reticuleInterpolator$initializer$)(void)	ReticuleDisplay.obj
+540	0002:00000f68	??rttiHashRotatingModel$initializer$@RotatingModel@@2P6AXXZA@@3P6AXXZA	??rttiHashRotatingModel$initializer$@RotatingModel@@2P6AXXZA@@3P6AXXZA	RotatingModel.obj
+541	0002:00000f6c	??s_RumbleEffectClassList$initializer$@RumbleEffectClass@@2P6AXXZA@@3P6AXXZA	??s_RumbleEffectClassList$initializer$@RumbleEffectClass@@2P6AXXZA@@3P6AXXZA	RumbleRegion.obj
+542	0002:00000f70	??sRegions$initializer$@RumbleRegionManager@@2P6AXXZA@@3P6AXXZA	??sRegions$initializer$@RumbleRegionManager@@2P6AXXZA@@3P6AXXZA	RumbleRegion.obj
+543	0002:00000f74	??s_RumbleEffectList$initializer$@RumbleEffectClass@@2P6AXXZA@@3P6AXXZA	??s_RumbleEffectList$initializer$@RumbleEffectClass@@2P6AXXZA@@3P6AXXZA	RumbleRegion.obj
+544	0002:00000f78	?rumbleRandom$initializer$@@3P6AXXZA	void (__cdecl* rumbleRandom$initializer$)(void)	RumbleRegion.obj
+545	0002:00000f7c	?mSaveFsm$initializer$@SaveGameManager@@3P6AXXZA	void (__cdecl* SaveGameManager::mSaveFsm$initializer$)(void)	SaveGameManager.obj
+546	0002:00000f80	??sMemoryPool$initializer$@ShieldEffect@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ShieldEffect@@2P6AXXZA@@3P6AXXZA	ShieldEffect.obj
+547	0002:00000f84	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	SkyDome.obj
+548	0002:00000f88	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	SkyStars.obj
+549	0002:00000f8c	??sMemoryPool$initializer$@SoldierAnimation@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@SoldierAnimation@@2P6AXXZA@@3P6AXXZA	SoldierAnimation.obj
+550	0002:00000f90	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	SoldierAnimator.obj
+551	0002:00000f94	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	SoldierAnimatorClass.obj
+552	0002:00000f98	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	SoldierAnimatorLowRes.obj
+553	0002:00000f9c	??sMemoryPool$initializer$@ViewportData@SpaceAssault@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@ViewportData@SpaceAssault@@2P6AXXZA@@3P6AXXZA	SpaceAssault.obj
+554	0002:00000fa0	??m_emitter$initializer$@SpaceDustEffect@@2P6AXXZA@@3P6AXXZA	??m_emitter$initializer$@SpaceDustEffect@@2P6AXXZA@@3P6AXXZA	SpaceDustEffect.obj
+555	0002:00000fa4	??sRelativeX$initializer$@SquadCommandGroup@@2P6AXXZA@@3P6AXXZA	??sRelativeX$initializer$@SquadCommandGroup@@2P6AXXZA@@3P6AXXZA	StatusDisplay.obj
+556	0002:00000fa8	??sRelativeY$initializer$@SquadCommandGroup@@2P6AXXZA@@3P6AXXZA	??sRelativeY$initializer$@SquadCommandGroup@@2P6AXXZA@@3P6AXXZA	StatusDisplay.obj
+557	0002:00000fac	??sData$initializer$@DamageArrowGroup@@2P6AXXZA@@3P6AXXZA	??sData$initializer$@DamageArrowGroup@@2P6AXXZA@@3P6AXXZA	StatusDisplay.obj
+558	0002:00000fb0	?gVoiceChatTeamColors$initializer$@@3P6AXXZA	void (__cdecl* gVoiceChatTeamColors$initializer$)(void)	StatusDisplay.obj
+559	0002:00000fb4	??sMemoryPool$initializer$@StickInfo@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@StickInfo@@2P6AXXZA@@3P6AXXZA	StickInfo.obj
+560	0002:00000fb8	?gMarkers$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::gMarkers$initializer$)(void)	TargetManager.obj
+561	0002:00000fbc	?_gPost$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::_gPost$initializer$)(void)	TargetManager.obj
+562	0002:00000fc0	?_gTarget$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::_gTarget$initializer$)(void)	TargetManager.obj
+563	0002:00000fc4	?gColorTable$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::gColorTable$initializer$)(void)	TargetManager.obj
+564	0002:00000fc8	?_gHostMarkers$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::_gHostMarkers$initializer$)(void)	TargetManager.obj
+565	0002:00000fcc	?_gClientMarkers$initializer$@TargetManager@@3P6AXXZA	void (__cdecl* TargetManager::_gClientMarkers$initializer$)(void)	TargetManager.obj
+566	0002:00000fd0	?gEnemyColor$initializer$@@3P6AXXZA	void (__cdecl* gEnemyColor$initializer$)(void)	Team.obj
+567	0002:00000fd4	?gLocalColor$initializer$@@3P6AXXZA	void (__cdecl* gLocalColor$initializer$)(void)	Team.obj
+568	0002:00000fd8	?gNeutralColor$initializer$@@3P6AXXZA	void (__cdecl* gNeutralColor$initializer$)(void)	Team.obj
+569	0002:00000fdc	??sMemoryPool$initializer$@TeamAssist@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@TeamAssist@@2P6AXXZA@@3P6AXXZA	TeamAssist.obj
+570	0002:00000fe0	?sTeamList$initializer$@@3P6AXXZA	void (__cdecl* sTeamList$initializer$)(void)	TeamManager.obj
+571	0002:00000fe4	??sMemoryPool$initializer$@TentacleSimulator@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@TentacleSimulator@@2P6AXXZA@@3P6AXXZA	TentacleSimulator.obj
+572	0002:00000fe8	?sHostFrameThreadList$initializer$@@3P6AXXZA	void (__cdecl* sHostFrameThreadList$initializer$)(void)	Thread.obj
+573	0002:00000fec	?sHostTurnThreadList$initializer$@@3P6AXXZA	void (__cdecl* sHostTurnThreadList$initializer$)(void)	Thread.obj
+574	0002:00000ff0	?sClientFrameThreadList$initializer$@@3P6AXXZA	void (__cdecl* sClientFrameThreadList$initializer$)(void)	Thread.obj
+575	0002:00000ff4	?sClientTurnThreadList$initializer$@@3P6AXXZA	void (__cdecl* sClientTurnThreadList$initializer$)(void)	Thread.obj
+576	0002:00000ff8	?sClientLocalTurnThreadList$initializer$@@3P6AXXZA	void (__cdecl* sClientLocalTurnThreadList$initializer$)(void)	Thread.obj
+577	0002:00000ffc	??sExecutingThread$initializer$@Thread@@2P6AXXZA@@3P6AXXZA	??sExecutingThread$initializer$@Thread@@2P6AXXZA@@3P6AXXZA	Thread.obj
+578	0002:00001000	??sMemoryPool$initializer$@Timer@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Timer@@2P6AXXZA@@3P6AXXZA	Timer.obj
+579	0002:00001004	?sHostInstances$initializer$@@3P6AXXZA	void (__cdecl* sHostInstances$initializer$)(void)	Tracker.obj
+580	0002:00001008	?sClientInstances$initializer$@@3P6AXXZA	void (__cdecl* sClientInstances$initializer$)(void)	Tracker.obj
+581	0002:0000100c	??sMemoryPool$initializer$@TreeGridStack@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@TreeGridStack@@2P6AXXZA@@3P6AXXZA	TreeGrid.obj
+582	0002:00001010	??sList$initializer$@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+583	0002:00001014	??sMemoryPool$initializer$@Group@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Group@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+584	0002:00001018	??sMemoryPool$initializer$@Properties@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Properties@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+585	0002:0000101c	??sMemoryPool$initializer$@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+586	0002:00001020	??sList$initializer$@Group@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Group@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+587	0002:00001024	??sList$initializer$@Properties@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@Properties@TriggerSoundRegion@@2P6AXXZA@@3P6AXXZA	TriggerSoundRegion.obj
+588	0002:00001028	??rttiHashUnitAgent$initializer$@UnitAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitAgent$initializer$@UnitAgent@@2P6AXXZA@@3P6AXXZA	UnitAgent.obj
+589	0002:0000102c	??sMemoryPool$initializer$@UnitAgent@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@UnitAgent@@2P6AXXZA@@3P6AXXZA	UnitAgent.obj
+590	0002:00001030	?kRttiHashEntitySoldier$initializer$@?A0x7622969b@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntitySoldier$initializer$)(void)	UnitAttackPatterns.obj
+591	0002:00001034	?kRttiHashEntityHover$initializer$@?A0x7622969b@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityHover$initializer$)(void)	UnitAttackPatterns.obj
+592	0002:00001038	?kRttiHashEntityWalker$initializer$@?A0x7622969b@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityWalker$initializer$)(void)	UnitAttackPatterns.obj
+593	0002:0000103c	??rttiHashUnitBoardAgent$initializer$@UnitBoardAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitBoardAgent$initializer$@UnitBoardAgent@@2P6AXXZA@@3P6AXXZA	UnitBoardAgent.obj
+594	0002:00001040	??rttiHashUnitCTFOffenseAgent$initializer$@UnitCTFOffenseAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitCTFOffenseAgent$initializer$@UnitCTFOffenseAgent@@2P6AXXZA@@3P6AXXZA	UnitCTFOffenseAgent.obj
+595	0002:00001044	??rttiHashUnitCaptureCPAgent$initializer$@UnitCaptureCPAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitCaptureCPAgent$initializer$@UnitCaptureCPAgent@@2P6AXXZA@@3P6AXXZA	UnitCaptureCPAgent.obj
+596	0002:00001048	??rttiHashUnitCombatAgent$initializer$@UnitCombatAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitCombatAgent$initializer$@UnitCombatAgent@@2P6AXXZA@@3P6AXXZA	UnitCombatAgent.obj
+597	0002:0000104c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	UnitController.obj
+598	0002:00001050	??rttiHashUnitController$initializer$@UnitController@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitController$initializer$@UnitController@@2P6AXXZA@@3P6AXXZA	UnitController.obj
+599	0002:00001054	??sMemoryPool$initializer$@UnitController@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@UnitController@@2P6AXXZA@@3P6AXXZA	UnitController.obj
+600	0002:00001058	??rttiHashUnitDeathmatchAgent$initializer$@UnitDeathmatchAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitDeathmatchAgent$initializer$@UnitDeathmatchAgent@@2P6AXXZA@@3P6AXXZA	UnitDeathmatchAgent.obj
+601	0002:0000105c	??rttiHashUnitDefendAgent$initializer$@UnitDefendAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitDefendAgent$initializer$@UnitDefendAgent@@2P6AXXZA@@3P6AXXZA	UnitDefendAgent.obj
+602	0002:00001060	??rttiHashUnitDestroyAgent$initializer$@UnitDestroyAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitDestroyAgent$initializer$@UnitDestroyAgent@@2P6AXXZA@@3P6AXXZA	UnitDestroyAgent.obj
+603	0002:00001064	??rttiHashUnitFlyAgent$initializer$@UnitFlyAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitFlyAgent$initializer$@UnitFlyAgent@@2P6AXXZA@@3P6AXXZA	UnitFlyAgent.obj
+604	0002:00001068	??rttiHashUnitFlyController$initializer$@UnitFlyController@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitFlyController$initializer$@UnitFlyController@@2P6AXXZA@@3P6AXXZA	UnitFlyController.obj
+605	0002:0000106c	?kRttiHashEntitySoldier$initializer$@?A0x8f95c8be@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntitySoldier$initializer$)(void)	UnitFollowAgent.obj
+606	0002:00001070	?kRttiHashEntityDroideka$initializer$@?A0x8f95c8be@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityDroideka$initializer$)(void)	UnitFollowAgent.obj
+607	0002:00001074	??rttiHashUnitFollowAgent$initializer$@UnitFollowAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitFollowAgent$initializer$@UnitFollowAgent@@2P6AXXZA@@3P6AXXZA	UnitFollowAgent.obj
+608	0002:00001078	??rttiHashUnitHoldAgent$initializer$@UnitHoldAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitHoldAgent$initializer$@UnitHoldAgent@@2P6AXXZA@@3P6AXXZA	UnitHoldAgent.obj
+609	0002:0000107c	??rttiHashUnitMobileController$initializer$@UnitMobileController@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitMobileController$initializer$@UnitMobileController@@2P6AXXZA@@3P6AXXZA	UnitMobileController.obj
+610	0002:00001080	??rttiHashUnitRandomAgent$initializer$@UnitRandomAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitRandomAgent$initializer$@UnitRandomAgent@@2P6AXXZA@@3P6AXXZA	UnitRandomAgent.obj
+611	0002:00001084	??rttiHashUnitStationaryController$initializer$@UnitStationaryController@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitStationaryController$initializer$@UnitStationaryController@@2P6AXXZA@@3P6AXXZA	UnitStationaryController.obj
+612	0002:00001088	??rttiHashUnitTrooperAgent$initializer$@UnitTrooperAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitTrooperAgent$initializer$@UnitTrooperAgent@@2P6AXXZA@@3P6AXXZA	UnitTrooperAgent.obj
+613	0002:0000108c	??rttiHashUnitUnBoardAgent$initializer$@UnitUnBoardAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitUnBoardAgent$initializer$@UnitUnBoardAgent@@2P6AXXZA@@3P6AXXZA	UnitUnBoardAgent.obj
+614	0002:00001090	??rttiHashUnitWaitAgent$initializer$@UnitWaitAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitWaitAgent$initializer$@UnitWaitAgent@@2P6AXXZA@@3P6AXXZA	UnitWaitAgent.obj
+615	0002:00001094	??rttiHashUnitWaitSecondaryAgent$initializer$@UnitWaitSecondaryAgent@@2P6AXXZA@@3P6AXXZA	??rttiHashUnitWaitSecondaryAgent$initializer$@UnitWaitSecondaryAgent@@2P6AXXZA@@3P6AXXZA	UnitWaitSecondaryAgent.obj
+616	0002:00001098	?mSndQueue$initializer$@VOHelper@AI@@3P6AXXZA	void (__cdecl* AI::VOHelper::mSndQueue$initializer$)(void)	VOHelper.obj
+617	0002:0000109c	?kRttiHashEntityHover$initializer$@?A0x1eeeccfd@@3P6AXXZA	void (__cdecl* `anonymous namespace'::kRttiHashEntityHover$initializer$)(void)	VehicleCoverHelper.obj
+618	0002:000010a0	??sEngineList$initializer$@VehicleEngine@@2P6AXXZA@@3P6AXXZA	??sEngineList$initializer$@VehicleEngine@@2P6AXXZA@@3P6AXXZA	VehicleEngine.obj
+619	0002:000010a4	??sGlobalList$initializer$@Boost@VehicleEngineClass@@2P6AXXZA@@3P6AXXZA	??sGlobalList$initializer$@Boost@VehicleEngineClass@@2P6AXXZA@@3P6AXXZA	VehicleEngine.obj
+620	0002:000010a8	??smFreeList$initializer$@Boost@VehicleEngineClass@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Boost@VehicleEngineClass@@2P6AXXZA@@3P6AXXZA	VehicleEngine.obj
+621	0002:000010ac	?sHostVehicles$initializer$@@3P6AXXZA	void (__cdecl* sHostVehicles$initializer$)(void)	VehicleManager.obj
+622	0002:000010b0	?sClientVehicles$initializer$@@3P6AXXZA	void (__cdecl* sClientVehicles$initializer$)(void)	VehicleManager.obj
+623	0002:000010b4	??sMemoryPool$initializer$@VehicleTracker@VehicleSpawn@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@VehicleTracker@VehicleSpawn@@2P6AXXZA@@3P6AXXZA	VehicleSpawn.obj
+624	0002:000010b8	??sMemoryPool$initializer$@RayRequest@VisionManager@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@RayRequest@VisionManager@@2P6AXXZA@@3P6AXXZA	VisionManager.obj
+625	0002:000010bc	??sMemoryPool$initializer$@WalkerBlend@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@WalkerBlend@@2P6AXXZA@@3P6AXXZA	WalkerAnimation.obj
+626	0002:000010c0	??sMemoryPool$initializer$@WalkerBlendUnit@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@WalkerBlendUnit@@2P6AXXZA@@3P6AXXZA	WalkerAnimation.obj
+627	0002:000010c4	??sMemoryPool$initializer$@WalkerLegPair@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@WalkerLegPair@@2P6AXXZA@@3P6AXXZA	WalkerLegPair.obj
+628	0002:000010c8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	WalkerLegPair.obj
+629	0002:000010cc	??rttiHashWeapon$initializer$@Weapon@@2P6AXXZA@@3P6AXXZA	??rttiHashWeapon$initializer$@Weapon@@2P6AXXZA@@3P6AXXZA	Weapon.obj
+630	0002:000010d0	??rttiHashWeaponClass$initializer$@WeaponClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponClass$initializer$@WeaponClass@@2P6AXXZA@@3P6AXXZA	Weapon.obj
+631	0002:000010d4	??sWeaponChangeUnableSound$initializer$@WeaponClass@@2P6AXXZA@@3P6AXXZA	??sWeaponChangeUnableSound$initializer$@WeaponClass@@2P6AXXZA@@3P6AXXZA	Weapon.obj
+632	0002:000010d8	??sMemoryPool$initializer$@Weapon@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Weapon@@2P6AXXZA@@3P6AXXZA	Weapon.obj
+633	0002:000010dc	??rttiHashWeaponAreaEffect$initializer$@WeaponAreaEffect@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponAreaEffect$initializer$@WeaponAreaEffect@@2P6AXXZA@@3P6AXXZA	WeaponAreaEffect.obj
+634	0002:000010e0	??rttiHashWeaponAreaEffectClass$initializer$@WeaponAreaEffectClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponAreaEffectClass$initializer$@WeaponAreaEffectClass@@2P6AXXZA@@3P6AXXZA	WeaponAreaEffect.obj
+635	0002:000010e4	??rttiHashWeaponBinoculars$initializer$@WeaponBinoculars@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponBinoculars$initializer$@WeaponBinoculars@@2P6AXXZA@@3P6AXXZA	WeaponBinoculars.obj
+636	0002:000010e8	??rttiHashWeaponBinocularsClass$initializer$@WeaponBinocularsClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponBinocularsClass$initializer$@WeaponBinocularsClass@@2P6AXXZA@@3P6AXXZA	WeaponBinoculars.obj
+637	0002:000010ec	??rttiHashWeaponCannon$initializer$@WeaponCannon@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponCannon$initializer$@WeaponCannon@@2P6AXXZA@@3P6AXXZA	WeaponCannon.obj
+638	0002:000010f0	??rttiHashWeaponCannonClass$initializer$@WeaponCannonClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponCannonClass$initializer$@WeaponCannonClass@@2P6AXXZA@@3P6AXXZA	WeaponCannon.obj
+639	0002:000010f4	??rttiHashWeaponCatapult$initializer$@WeaponCatapult@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponCatapult$initializer$@WeaponCatapult@@2P6AXXZA@@3P6AXXZA	WeaponCatapult.obj
+640	0002:000010f8	??rttiHashWeaponCatapultClass$initializer$@WeaponCatapultClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponCatapultClass$initializer$@WeaponCatapultClass@@2P6AXXZA@@3P6AXXZA	WeaponCatapult.obj
+641	0002:000010fc	??rttiHashWeaponDestruct$initializer$@WeaponDestruct@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDestruct$initializer$@WeaponDestruct@@2P6AXXZA@@3P6AXXZA	WeaponDestruct.obj
+642	0002:00001100	??rttiHashWeaponDestructClass$initializer$@WeaponDestructClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDestructClass$initializer$@WeaponDestructClass@@2P6AXXZA@@3P6AXXZA	WeaponDestruct.obj
+643	0002:00001104	??rttiHashWeaponDetonatorClass$initializer$@WeaponDetonatorClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDetonatorClass$initializer$@WeaponDetonatorClass@@2P6AXXZA@@3P6AXXZA	WeaponDetonator.obj
+644	0002:00001108	??rttiHashWeaponDetonator$initializer$@WeaponDetonator@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDetonator$initializer$@WeaponDetonator@@2P6AXXZA@@3P6AXXZA	WeaponDetonator.obj
+645	0002:0000110c	??rttiHashWeaponDisguiseClass$initializer$@WeaponDisguiseClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDisguiseClass$initializer$@WeaponDisguiseClass@@2P6AXXZA@@3P6AXXZA	WeaponDisguise.obj
+646	0002:00001110	??rttiHashWeaponDisguise$initializer$@WeaponDisguise@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDisguise$initializer$@WeaponDisguise@@2P6AXXZA@@3P6AXXZA	WeaponDisguise.obj
+647	0002:00001114	??rttiHashWeaponDispenserClass$initializer$@WeaponDispenserClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDispenserClass$initializer$@WeaponDispenserClass@@2P6AXXZA@@3P6AXXZA	WeaponDispenser.obj
+648	0002:00001118	??rttiHashWeaponDispenser$initializer$@WeaponDispenser@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponDispenser$initializer$@WeaponDispenser@@2P6AXXZA@@3P6AXXZA	WeaponDispenser.obj
+649	0002:0000111c	??rttiHashWeaponGrapplingHookClass$initializer$@WeaponGrapplingHookClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponGrapplingHookClass$initializer$@WeaponGrapplingHookClass@@2P6AXXZA@@3P6AXXZA	WeaponGrapplingHook.obj
+650	0002:00001120	??rttiHashWeaponGrapplingHook$initializer$@WeaponGrapplingHook@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponGrapplingHook$initializer$@WeaponGrapplingHook@@2P6AXXZA@@3P6AXXZA	WeaponGrapplingHook.obj
+651	0002:00001124	??rttiHashWeaponGrenadeClass$initializer$@WeaponGrenadeClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponGrenadeClass$initializer$@WeaponGrenadeClass@@2P6AXXZA@@3P6AXXZA	WeaponGrenade.obj
+652	0002:00001128	??rttiHashWeaponGrenade$initializer$@WeaponGrenade@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponGrenade$initializer$@WeaponGrenade@@2P6AXXZA@@3P6AXXZA	WeaponGrenade.obj
+653	0002:0000112c	??rttiHashWeaponInvisibility$initializer$@WeaponInvisibility@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponInvisibility$initializer$@WeaponInvisibility@@2P6AXXZA@@3P6AXXZA	WeaponInvisibility.obj
+654	0002:00001130	??rttiHashWeaponInvisibilityClass$initializer$@WeaponInvisibilityClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponInvisibilityClass$initializer$@WeaponInvisibilityClass@@2P6AXXZA@@3P6AXXZA	WeaponInvisibility.obj
+655	0002:00001134	??rttiHashWeaponLaser$initializer$@WeaponLaser@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponLaser$initializer$@WeaponLaser@@2P6AXXZA@@3P6AXXZA	WeaponLaser.obj
+656	0002:00001138	??rttiHashWeaponLaserClass$initializer$@WeaponLaserClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponLaserClass$initializer$@WeaponLaserClass@@2P6AXXZA@@3P6AXXZA	WeaponLaser.obj
+657	0002:0000113c	??rttiHashWeaponLauncherClass$initializer$@WeaponLauncherClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponLauncherClass$initializer$@WeaponLauncherClass@@2P6AXXZA@@3P6AXXZA	WeaponLauncher.obj
+658	0002:00001140	??rttiHashWeaponLauncher$initializer$@WeaponLauncher@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponLauncher$initializer$@WeaponLauncher@@2P6AXXZA@@3P6AXXZA	WeaponLauncher.obj
+659	0002:00001144	?_IdentityMatrix$initializer$@?A0x402ffbf3@@3P6AXXZA	void (__cdecl* `anonymous namespace'::_IdentityMatrix$initializer$)(void)	WeaponMelee.obj
+660	0002:00001148	??rttiHashWeaponMelee$initializer$@WeaponMelee@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponMelee$initializer$@WeaponMelee@@2P6AXXZA@@3P6AXXZA	WeaponMelee.obj
+661	0002:0000114c	??rttiHashWeaponMeleeClass$initializer$@WeaponMeleeClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponMeleeClass$initializer$@WeaponMeleeClass@@2P6AXXZA@@3P6AXXZA	WeaponMelee.obj
+662	0002:00001150	?gDefaultHash$initializer$@@3P6AXXZA	void (__cdecl* gDefaultHash$initializer$)(void)	WeaponMelee.obj
+663	0002:00001154	??rttiHashWeaponMeleeThrow$initializer$@WeaponMeleeThrow@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponMeleeThrow$initializer$@WeaponMeleeThrow@@2P6AXXZA@@3P6AXXZA	WeaponMeleeThrow.obj
+664	0002:00001158	??rttiHashWeaponMeleeThrowClass$initializer$@WeaponMeleeThrowClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponMeleeThrowClass$initializer$@WeaponMeleeThrowClass@@2P6AXXZA@@3P6AXXZA	WeaponMeleeThrow.obj
+665	0002:0000115c	??rttiHashWeaponRemoteClass$initializer$@WeaponRemoteClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponRemoteClass$initializer$@WeaponRemoteClass@@2P6AXXZA@@3P6AXXZA	WeaponRemote.obj
+666	0002:00001160	??rttiHashWeaponRemote$initializer$@WeaponRemote@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponRemote$initializer$@WeaponRemote@@2P6AXXZA@@3P6AXXZA	WeaponRemote.obj
+667	0002:00001164	??rttiHashWeaponRepairClass$initializer$@WeaponRepairClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponRepairClass$initializer$@WeaponRepairClass@@2P6AXXZA@@3P6AXXZA	WeaponRepair.obj
+668	0002:00001168	??rttiHashWeaponRepair$initializer$@WeaponRepair@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponRepair$initializer$@WeaponRepair@@2P6AXXZA@@3P6AXXZA	WeaponRepair.obj
+669	0002:0000116c	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	WeaponShield.obj
+670	0002:00001170	??rttiHashWeaponShield$initializer$@WeaponShield@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponShield$initializer$@WeaponShield@@2P6AXXZA@@3P6AXXZA	WeaponShield.obj
+671	0002:00001174	??rttiHashWeaponShieldClass$initializer$@WeaponShieldClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponShieldClass$initializer$@WeaponShieldClass@@2P6AXXZA@@3P6AXXZA	WeaponShield.obj
+672	0002:00001178	??rttiHashWeaponTowCable$initializer$@WeaponTowCable@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponTowCable$initializer$@WeaponTowCable@@2P6AXXZA@@3P6AXXZA	WeaponTowCable.obj
+673	0002:0000117c	??rttiHashWeaponTowCableClass$initializer$@WeaponTowCableClass@@2P6AXXZA@@3P6AXXZA	??rttiHashWeaponTowCableClass$initializer$@WeaponTowCableClass@@2P6AXXZA@@3P6AXXZA	WeaponTowCable.obj
+674	0002:00001180	?test$initializer$@@3P6AXXZA	void (__cdecl* test$initializer$)(void)	PblHeap.obj
+675	0002:00001184	?_TheSinCosTable$initializer$@@3P6AXXZA	void (__cdecl* _TheSinCosTable$initializer$)(void)	PblMath.obj
+676	0002:00001188	?sNegativeXRotation80$initializer$@@3P6AXXZA	void (__cdecl* sNegativeXRotation80$initializer$)(void)	PblMath.obj
+677	0002:0000118c	??_Sim$initializer$@PblRandom@@2P6AXXZA@@3P6AXXZA	??_Sim$initializer$@PblRandom@@2P6AXXZA@@3P6AXXZA	PblRandom.obj
+678	0002:00001190	??sList$initializer$@PblRegion@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@PblRegion@@2P6AXXZA@@3P6AXXZA	PblRegion.obj
+679	0002:00001194	?pblTime$initializer$@@3P6AXXZA	void (__cdecl* pblTime$initializer$)(void)	PblTime.obj
+680	0002:00001198	?sStartupWordCopy$initializer$@@3P6AXXZA	void (__cdecl* sStartupWordCopy$initializer$)(void)	PblTime.obj
+681	0002:0000119c	??_UnderWaterRenderable$initializer$@RedWater@@2P6AXXZA@@3P6AXXZA	??_UnderWaterRenderable$initializer$@RedWater@@2P6AXXZA@@3P6AXXZA	RedWater.obj
+682	0002:000011a0	??_WaterRenderable$initializer$@RedWater@@2P6AXXZA@@3P6AXXZA	??_WaterRenderable$initializer$@RedWater@@2P6AXXZA@@3P6AXXZA	RedWater.obj
+683	0002:000011a4	?g_Enable$initializer$@@3P6AXXZA	void (__cdecl* g_Enable$initializer$)(void)	pcFLRender.obj
+684	0002:000011a8	?cvReflectionsEnable$initializer$@@3P6AXXZA	void (__cdecl* cvReflectionsEnable$initializer$)(void)	pcFLRender.obj
+685	0002:000011ac	?cvReflectionsDraw$initializer$@@3P6AXXZA	void (__cdecl* cvReflectionsDraw$initializer$)(void)	pcFLRender.obj
+686	0002:000011b0	?cvarNearScenePushInf$initializer$@@3P6AXXZA	void (__cdecl* cvarNearScenePushInf$initializer$)(void)	pcFLRender.obj
+687	0002:000011b4	?s_cvRenderFarScene$initializer$@@3P6AXXZA	void (__cdecl* s_cvRenderFarScene$initializer$)(void)	pcFLRender.obj
+688	0002:000011b8	?_enableReflection$initializer$@@3P6AXXZA	void (__cdecl* _enableReflection$initializer$)(void)	pcFLRender.obj
+689	0002:000011bc	?_RenderableLists$initializer$@FLRenderer@@3P6AXXZA	void (__cdecl* FLRenderer::_RenderableLists$initializer$)(void)	pcFLRender.obj
+690	0002:000011c0	?mCursorImage$initializer$@FLRenderer@@3P6AXXZA	void (__cdecl* FLRenderer::mCursorImage$initializer$)(void)	pcFLRender.obj
+691	0002:000011c4	?mCursorGroup$initializer$@FLRenderer@@3P6AXXZA	void (__cdecl* FLRenderer::mCursorGroup$initializer$)(void)	pcFLRender.obj
+692	0002:000011c8	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	pcRedDebug.obj
+693	0002:000011cc	??_PrintfColor$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_PrintfColor$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+694	0002:000011d0	??_ScreenGroup$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_ScreenGroup$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+695	0002:000011d4	??_aMarkers3D$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_aMarkers3D$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+696	0002:000011d8	??_aSpheres$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_aSpheres$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+697	0002:000011dc	??_aText3D$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_aText3D$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+698	0002:000011e0	??_aTextLines$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_aTextLines$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+699	0002:000011e4	??_kStaticRenderable$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	??_kStaticRenderable$initializer$@RedDebug@@0P6AXXZA@@3P6AXXZA	pcRedDebug.obj
+700	0002:000011e8	?kuiShader$initializer$@@3P6AXXZA	void (__cdecl* kuiShader$initializer$)(void)	pcRedDropShadow.obj
+701	0002:000011ec	?kuiParticleShader$initializer$@@3P6AXXZA	void (__cdecl* kuiParticleShader$initializer$)(void)	pcRedParticle.obj
+702	0002:000011f0	??_Instance$initializer$@RedParticleRenderer@@2P6AXXZA@@3P6AXXZA	??_Instance$initializer$@RedParticleRenderer@@2P6AXXZA@@3P6AXXZA	pcRedParticle.obj
+703	0002:000011f4	??_FarInstance$initializer$@RedParticleRenderer@@2P6AXXZA@@3P6AXXZA	??_FarInstance$initializer$@RedParticleRenderer@@2P6AXXZA@@3P6AXXZA	pcRedParticle.obj
+704	0002:000011f8	?cvForceFullDetail$initializer$@@3P6AXXZA	void (__cdecl* cvForceFullDetail$initializer$)(void)	pcRedTerrain.obj
+705	0002:000011fc	?_TerrainRenderable$initializer$@@3P6AXXZA	void (__cdecl* _TerrainRenderable$initializer$)(void)	pcRedTerrain.obj
+706	0002:00001200	?WATERSPLASH_COLOR$initializer$@@3P6AXXZA	void (__cdecl* WATERSPLASH_COLOR$initializer$)(void)	pcRedWater.obj
+707	0002:00001204	?kuiNormalMapAdderShader$initializer$@@3P6AXXZA	void (__cdecl* kuiNormalMapAdderShader$initializer$)(void)	pcRedWater.obj
+708	0002:00001208	?kuiOceanShader$initializer$@@3P6AXXZA	void (__cdecl* kuiOceanShader$initializer$)(void)	pcRedWater.obj
+709	0002:0000120c	?kuiPreReflectionShader$initializer$@@3P6AXXZA	void (__cdecl* kuiPreReflectionShader$initializer$)(void)	pcRedWater.obj
+710	0002:00001210	?kuiUnderWaterShader$initializer$@@3P6AXXZA	void (__cdecl* kuiUnderWaterShader$initializer$)(void)	pcRedWater.obj
+711	0002:00001214	?kuiWaterDistortionRingTextureHash$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterDistortionRingTextureHash$initializer$)(void)	pcRedWater.obj
+712	0002:00001218	?kuiWaterRingShader$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterRingShader$initializer$)(void)	pcRedWater.obj
+713	0002:0000121c	?kuiWaterRingTextureHash$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterRingTextureHash$initializer$)(void)	pcRedWater.obj
+714	0002:00001220	?kuiWaterShader$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterShader$initializer$)(void)	pcRedWater.obj
+715	0002:00001224	?kuiWaterSplashShader$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterSplashShader$initializer$)(void)	pcRedWater.obj
+716	0002:00001228	?kuiWaterSplashTextureHash$initializer$@@3P6AXXZA	void (__cdecl* kuiWaterSplashTextureHash$initializer$)(void)	pcRedWater.obj
+717	0002:0000122c	?kuiClearShader$initializer$@@3P6AXXZA	void (__cdecl* kuiClearShader$initializer$)(void)	pcShadowQuadRenderable.obj
+718	0002:00001230	?kuiFilterShader$initializer$@@3P6AXXZA	void (__cdecl* kuiFilterShader$initializer$)(void)	pcShadowQuadRenderable.obj
+719	0002:00001234	??s_shaderDef$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	pcClearShader.obj
+720	0002:00001238	??s_uiRenderTypeHash$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	pcClearShader.obj
+721	0002:0000123c	??s_Factory$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcClearShader@@2P6AXXZA@@3P6AXXZA	pcClearShader.obj
+722	0002:00001240	??s_uiRenderTypeHash$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	pcDecalShader.obj
+723	0002:00001244	??s_Factory$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	pcDecalShader.obj
+724	0002:00001248	??s_shaderDef$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcDecalShader@@2P6AXXZA@@3P6AXXZA	pcDecalShader.obj
+725	0002:0000124c	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcDecalShader.obj
+726	0002:00001250	??s_shaderDef$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	pcFilterCopyShader.obj
+727	0002:00001254	??s_uiRenderTypeHash$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	pcFilterCopyShader.obj
+728	0002:00001258	??s_Factory$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcFilterCopyShader@@2P6AXXZA@@3P6AXXZA	pcFilterCopyShader.obj
+729	0002:0000125c	??s_shaderDef$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	pcFlareShader.obj
+730	0002:00001260	??s_uiRenderTypeHash$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	pcFlareShader.obj
+731	0002:00001264	??s_Factory$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcFlareShader@@2P6AXXZA@@3P6AXXZA	pcFlareShader.obj
+732	0002:00001268	??s_shaderDef$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	pcHDRShader.obj
+733	0002:0000126c	??s_uiRenderTypeHash$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	pcHDRShader.obj
+734	0002:00001270	??s_Factory$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcHDRShader@@2P6AXXZA@@3P6AXXZA	pcHDRShader.obj
+735	0002:00001274	??s_uiRenderTypeHash$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	pcInterfaceShader.obj
+736	0002:00001278	??s_Factory$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	pcInterfaceShader.obj
+737	0002:0000127c	??s_shaderDef$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcInterfaceShader@@2P6AXXZA@@3P6AXXZA	pcInterfaceShader.obj
+738	0002:00001280	??s_uiRenderTypeHash$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	pcLightBeamShader.obj
+739	0002:00001284	??s_Factory$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	pcLightBeamShader.obj
+740	0002:00001288	??s_shaderDef$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcLightBeamShader@@2P6AXXZA@@3P6AXXZA	pcLightBeamShader.obj
+741	0002:0000128c	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcLightBeamShader.obj
+742	0002:00001290	??s_shaderDef$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	pcNormalMapAdderShader.obj
+743	0002:00001294	?kuiHemisphereNormalizationMap$initializer$@@3P6AXXZA	void (__cdecl* kuiHemisphereNormalizationMap$initializer$)(void)	pcNormalMapAdderShader.obj
+744	0002:00001298	??s_uiRenderTypeHash$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	pcNormalMapAdderShader.obj
+745	0002:0000129c	??s_Factory$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcNormalMapAdderShader@@2P6AXXZA@@3P6AXXZA	pcNormalMapAdderShader.obj
+746	0002:000012a0	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcNormalShader.obj
+747	0002:000012a4	??s_uiRenderTypeHash$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	pcNormalShader.obj
+748	0002:000012a8	??s_Factory$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	pcNormalShader.obj
+749	0002:000012ac	??s_shaderDef$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcNormalShader@@2P6AXXZA@@3P6AXXZA	pcNormalShader.obj
+750	0002:000012b0	??s_shaderDef$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	pcOceanShader.obj
+751	0002:000012b4	?kuiCubeNormalizationMap$initializer$@@3P6AXXZA	void (__cdecl* kuiCubeNormalizationMap$initializer$)(void)	pcOceanShader.obj
+752	0002:000012b8	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcOceanShader.obj
+753	0002:000012bc	??s_uiRenderTypeHash$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	pcOceanShader.obj
+754	0002:000012c0	??s_Factory$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcOceanShader@@2P6AXXZA@@3P6AXXZA	pcOceanShader.obj
+755	0002:000012c4	??s_uiRenderTypeHash$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	pcParticleShader.obj
+756	0002:000012c8	??s_Factory$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	pcParticleShader.obj
+757	0002:000012cc	??s_shaderDef$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcParticleShader@@2P6AXXZA@@3P6AXXZA	pcParticleShader.obj
+758	0002:000012d0	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcParticleShader.obj
+759	0002:000012d4	?s_uiDefaultSpotLightMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiDefaultSpotLightMapHash$initializer$)(void)	pcPerPixelDiffuseLightingShader.obj
+760	0002:000012d8	?s_uiLightVolumeMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiLightVolumeMapHash$initializer$)(void)	pcPerPixelDiffuseLightingShader.obj
+761	0002:000012dc	?s_uiNormalizationCubeMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiNormalizationCubeMapHash$initializer$)(void)	pcPerPixelDiffuseLightingShader.obj
+762	0002:000012e0	??s_uiRenderTypeHash$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerPixelDiffuseLightingShader.obj
+763	0002:000012e4	??s_Factory$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerPixelDiffuseLightingShader.obj
+764	0002:000012e8	??s_shaderDef$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcPerPixelDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerPixelDiffuseLightingShader.obj
+765	0002:000012ec	??s_uiRenderTypeHash$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerVertexDiffuseLightingShader.obj
+766	0002:000012f0	??s_Factory$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerVertexDiffuseLightingShader.obj
+767	0002:000012f4	??s_shaderDef$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcPerVertexDiffuseLightingShader@@2P6AXXZA@@3P6AXXZA	pcPerVertexDiffuseLightingShader.obj
+768	0002:000012f8	??s_shaderDef$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	pcPreReflectionShader.obj
+769	0002:000012fc	??s_uiRenderTypeHash$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	pcPreReflectionShader.obj
+770	0002:00001300	??s_Factory$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcPreReflectionShader@@2P6AXXZA@@3P6AXXZA	pcPreReflectionShader.obj
+771	0002:00001304	??s_shaderDef$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	pcRainShader.obj
+772	0002:00001308	??s_uiRenderTypeHash$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	pcRainShader.obj
+773	0002:0000130c	??s_Factory$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcRainShader@@2P6AXXZA@@3P6AXXZA	pcRainShader.obj
+774	0002:00001310	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	pcRefractionShader.obj
+775	0002:00001314	??s_uiRenderTypeHash$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	pcRefractionShader.obj
+776	0002:00001318	??s_Factory$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	pcRefractionShader.obj
+777	0002:0000131c	??s_shaderDef$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcRefractionShader@@2P6AXXZA@@3P6AXXZA	pcRefractionShader.obj
+778	0002:00001320	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcRefractionShader.obj
+779	0002:00001324	??s_shaderDef$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	pcSampleShader.obj
+780	0002:00001328	??s_uiRenderTypeHash$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	pcSampleShader.obj
+781	0002:0000132c	??s_Factory$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcSampleShader@@2P6AXXZA@@3P6AXXZA	pcSampleShader.obj
+782	0002:00001330	??s_shaderDef$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	pcShadowQuadShader.obj
+783	0002:00001334	??s_uiRenderTypeHash$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	pcShadowQuadShader.obj
+784	0002:00001338	??s_Factory$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcShadowQuadShader@@2P6AXXZA@@3P6AXXZA	pcShadowQuadShader.obj
+785	0002:0000133c	??s_shaderDef$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	pcShieldShader.obj
+786	0002:00001340	?kuiSpecularSpotMap$initializer$@@3P6AXXZA	void (__cdecl* kuiSpecularSpotMap$initializer$)(void)	pcShieldShader.obj
+787	0002:00001344	??s_uiRenderTypeHash$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	pcShieldShader.obj
+788	0002:00001348	??s_Factory$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcShieldShader@@2P6AXXZA@@3P6AXXZA	pcShieldShader.obj
+789	0002:0000134c	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcShieldShader.obj
+790	0002:00001350	??s_shaderDef$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	pcSkyFogShader.obj
+791	0002:00001354	??s_uiRenderTypeHash$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	pcSkyFogShader.obj
+792	0002:00001358	??s_Factory$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcSkyFogShader@@2P6AXXZA@@3P6AXXZA	pcSkyFogShader.obj
+793	0002:0000135c	?s_uiSpecularCubeMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiSpecularCubeMapHash$initializer$)(void)	pcSpecularLightingShader.obj
+794	0002:00001360	?s_uiSpecularSpotMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiSpecularSpotMapHash$initializer$)(void)	pcSpecularLightingShader.obj
+795	0002:00001364	??s_uiRenderTypeHash$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	pcSpecularLightingShader.obj
+796	0002:00001368	??s_Factory$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	pcSpecularLightingShader.obj
+797	0002:0000136c	??s_shaderDef$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcSpecularLightingShader@@2P6AXXZA@@3P6AXXZA	pcSpecularLightingShader.obj
+798	0002:00001370	?s_uiLightVolumeMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiLightVolumeMapHash$initializer$)(void)	pcSpecularLightingShader.obj
+799	0002:00001374	?s_uiNormalizationCubeMapHash$initializer$@@3P6AXXZA	void (__cdecl* s_uiNormalizationCubeMapHash$initializer$)(void)	pcSpecularLightingShader.obj
+800	0002:00001378	?kfSpecSizeInvDefault$initializer$@@3P6AXXZA	void (__cdecl* kfSpecSizeInvDefault$initializer$)(void)	pcSpecularLightingShader.obj
+801	0002:0000137c	??s_uiRenderTypeHash$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	pcStencilShadowShader.obj
+802	0002:00001380	??s_Factory$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	pcStencilShadowShader.obj
+803	0002:00001384	??s_shaderDef$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcStencilShadowShader@@2P6AXXZA@@3P6AXXZA	pcStencilShadowShader.obj
+804	0002:00001388	??s_uiRenderTypeHash$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	pcTerrainShader.obj
+805	0002:0000138c	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcTerrainShader.obj
+806	0002:00001390	??s_Factory$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	pcTerrainShader.obj
+807	0002:00001394	??s_shaderDef$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcTerrainShader@@2P6AXXZA@@3P6AXXZA	pcTerrainShader.obj
+808	0002:00001398	??s_uiRenderTypeHash$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	pcTerrainShader2.obj
+809	0002:0000139c	??s_shaderDef$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	pcTerrainShader2.obj
+810	0002:000013a0	??s_Factory$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcTerrainShader2@@2P6AXXZA@@3P6AXXZA	pcTerrainShader2.obj
+811	0002:000013a4	??s_shaderDef$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	pcWaterShader.obj
+812	0002:000013a8	?kuiCubeNormalizationMap$initializer$@@3P6AXXZA	void (__cdecl* kuiCubeNormalizationMap$initializer$)(void)	pcWaterShader.obj
+813	0002:000013ac	?kuiLinearRamp$initializer$@@3P6AXXZA	void (__cdecl* kuiLinearRamp$initializer$)(void)	pcWaterShader.obj
+814	0002:000013b0	??s_uiRenderTypeHash$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	pcWaterShader.obj
+815	0002:000013b4	??s_Factory$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcWaterShader@@2P6AXXZA@@3P6AXXZA	pcWaterShader.obj
+816	0002:000013b8	??s_uiRenderTypeHash$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	??s_uiRenderTypeHash$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	pcZPrepassShader.obj
+817	0002:000013bc	??s_Factory$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	??s_Factory$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	pcZPrepassShader.obj
+818	0002:000013c0	??s_shaderDef$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	??s_shaderDef$initializer$@pcZPrepassShader@@2P6AXXZA@@3P6AXXZA	pcZPrepassShader.obj
+819	0002:000013c4	?sCustomRenderPresets$initializer$@RedAutoSettings@@3P6AXXZA	void (__cdecl* RedAutoSettings::sCustomRenderPresets$initializer$)(void)	pcRedAutoSettings.obj
+820	0002:000013c8	??m_renderItemPool$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_renderItemPool$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+821	0002:000013cc	??m_preShadowTransparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_preShadowTransparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+822	0002:000013d0	??m_transparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_transparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+823	0002:000013d4	??m_posttransparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_posttransparentItems$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+824	0002:000013d8	??m_colorFog$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_colorFog$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+825	0002:000013dc	??m_opaqueQueues$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_opaqueQueues$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+826	0002:000013e0	??m_aLightingStatePool$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	??m_aLightingStatePool$initializer$@RedRenderer@@2P6AXXZA@@3P6AXXZA	pcRedRenderer.obj
+827	0002:000013e4	?s_pcNormalShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcNormalShaderLinked$initializer$)(void)	pcRedShader.obj
+828	0002:000013e8	?s_pcInterfaceShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcInterfaceShaderLinked$initializer$)(void)	pcRedShader.obj
+829	0002:000013ec	?s_pcZPrepassShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcZPrepassShaderLinked$initializer$)(void)	pcRedShader.obj
+830	0002:000013f0	?s_pcParticleShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcParticleShaderLinked$initializer$)(void)	pcRedShader.obj
+831	0002:000013f4	?s_pcTerrainShader2Linked$initializer$@@3P6AXXZA	void (__cdecl* s_pcTerrainShader2Linked$initializer$)(void)	pcRedShader.obj
+832	0002:000013f8	?s_pcSkyFogShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcSkyFogShaderLinked$initializer$)(void)	pcRedShader.obj
+833	0002:000013fc	?s_pcLightBeamShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcLightBeamShaderLinked$initializer$)(void)	pcRedShader.obj
+834	0002:00001400	?s_pcRainShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcRainShaderLinked$initializer$)(void)	pcRedShader.obj
+835	0002:00001404	?s_pcSampleShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcSampleShaderLinked$initializer$)(void)	pcRedShader.obj
+836	0002:00001408	?s_pcFlareShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcFlareShaderLinked$initializer$)(void)	pcRedShader.obj
+837	0002:0000140c	?s_pcClearShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcClearShaderLinked$initializer$)(void)	pcRedShader.obj
+838	0002:00001410	?s_pcStencilShadowShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcStencilShadowShaderLinked$initializer$)(void)	pcRedShader.obj
+839	0002:00001414	?s_pcShadowQuadShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcShadowQuadShaderLinked$initializer$)(void)	pcRedShader.obj
+840	0002:00001418	?s_pcWaterShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcWaterShaderLinked$initializer$)(void)	pcRedShader.obj
+841	0002:0000141c	?s_pcPreReflectionShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcPreReflectionShaderLinked$initializer$)(void)	pcRedShader.obj
+842	0002:00001420	?s_pcNormalMapAdderShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcNormalMapAdderShaderLinked$initializer$)(void)	pcRedShader.obj
+843	0002:00001424	?s_pcOceanShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcOceanShaderLinked$initializer$)(void)	pcRedShader.obj
+844	0002:00001428	?s_pcRefractionShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcRefractionShaderLinked$initializer$)(void)	pcRedShader.obj
+845	0002:0000142c	?s_pcDecalShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcDecalShaderLinked$initializer$)(void)	pcRedShader.obj
+846	0002:00001430	?s_pcFilterCopyShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcFilterCopyShaderLinked$initializer$)(void)	pcRedShader.obj
+847	0002:00001434	?s_pcShieldShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcShieldShaderLinked$initializer$)(void)	pcRedShader.obj
+848	0002:00001438	?s_pcPerVertexDiffuseLightingShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcPerVertexDiffuseLightingShaderLinked$initializer$)(void)	pcRedShader.obj
+849	0002:0000143c	?s_pcPerPixelDiffuseLightingShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcPerPixelDiffuseLightingShaderLinked$initializer$)(void)	pcRedShader.obj
+850	0002:00001440	?s_pcSpecularLightingShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcSpecularLightingShaderLinked$initializer$)(void)	pcRedShader.obj
+851	0002:00001444	?s_pcHDRShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcHDRShaderLinked$initializer$)(void)	pcRedShader.obj
+852	0002:00001448	?s_pcTerrainShaderLinked$initializer$@@3P6AXXZA	void (__cdecl* s_pcTerrainShaderLinked$initializer$)(void)	pcRedShader.obj
+853	0002:0000144c	??BLACK$initializer$@RedAmbientLight@@2P6AXXZA@@3P6AXXZA	??BLACK$initializer$@RedAmbientLight@@2P6AXXZA@@3P6AXXZA	RedAmbientLight.obj
+854	0002:00001450	??WHITE$initializer$@RedAmbientLight@@2P6AXXZA@@3P6AXXZA	??WHITE$initializer$@RedAmbientLight@@2P6AXXZA@@3P6AXXZA	RedAmbientLight.obj
+855	0002:00001454	??BLACK$initializer$@RedDirectionalLight@@2P6AXXZA@@3P6AXXZA	??BLACK$initializer$@RedDirectionalLight@@2P6AXXZA@@3P6AXXZA	RedDirectionalLight.obj
+856	0002:00001458	??sMemoryPool$initializer$@RedOmniLight@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@RedOmniLight@@2P6AXXZA@@3P6AXXZA	RedOmniLight.obj
+857	0002:0000145c	??BLACK$initializer$@RedOmniLight@@2P6AXXZA@@3P6AXXZA	??BLACK$initializer$@RedOmniLight@@2P6AXXZA@@3P6AXXZA	RedOmniLight.obj
+858	0002:00001460	??sMemoryPool$initializer$@Entry@RedShadingPose@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@Entry@RedShadingPose@@2P6AXXZA@@3P6AXXZA	RedShadingState.obj
+859	0002:00001464	??sMemoryPool$initializer$@RedShadingState@@2P6AXXZA@@3P6AXXZA	??sMemoryPool$initializer$@RedShadingState@@2P6AXXZA@@3P6AXXZA	RedShadingState.obj
+860	0002:00001468	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	RedSkeleton.obj
+861	0002:0000146c	??BLACK$initializer$@RedSpotLight@@2P6AXXZA@@3P6AXXZA	??BLACK$initializer$@RedSpotLight@@2P6AXXZA@@3P6AXXZA	RedSpotLight.obj
+862	0002:00001470	?_IdentityMatrix$initializer$@@3P6AXXZA	void (__cdecl* _IdentityMatrix$initializer$)(void)	Red3DModelAnimator.obj
+863	0002:00001474	??rttiHashRed3DModelAnimator$initializer$@Red3DModelAnimator@@2P6AXXZA@@3P6AXXZA	??rttiHashRed3DModelAnimator$initializer$@Red3DModelAnimator@@2P6AXXZA@@3P6AXXZA	Red3DModelAnimator.obj
+864	0002:00001478	?SQRT3$initializer$@@3P6AXXZA	void (__cdecl* SQRT3$initializer$)(void)	RedHotSpot.obj
+865	0002:0000147c	??s_fCotHalfFOVx$initializer$@RedHotSpot@@2P6AXXZA@@3P6AXXZA	??s_fCotHalfFOVx$initializer$@RedHotSpot@@2P6AXXZA@@3P6AXXZA	RedHotSpot.obj
+866	0002:00001480	??s_fCotHalfFOVy$initializer$@RedHotSpot@@2P6AXXZA@@3P6AXXZA	??s_fCotHalfFOVy$initializer$@RedHotSpot@@2P6AXXZA@@3P6AXXZA	RedHotSpot.obj
+867	0002:00001484	??sSQRT3$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??sSQRT3$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+868	0002:00001488	??s_directionalLight$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??s_directionalLight$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+869	0002:0000148c	??s_lightingState$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??s_lightingState$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+870	0002:00001490	??s_screenFull$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??s_screenFull$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+871	0002:00001494	??sfHeight$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??sfHeight$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+872	0002:00001498	??sfWidth$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	??sfWidth$initializer$@RedInterfaceScreen@@2P6AXXZA@@3P6AXXZA	RedInterfaceScreen.obj
+873	0002:0000149c	?shadowBlobRandom$initializer$@@3P6AXXZA	void (__cdecl* shadowBlobRandom$initializer$)(void)	RedShadowBlob.obj
+874	0002:000014a0	??s_aPoints$initializer$@RedVectorElement@@2P6AXXZA@@3P6AXXZA	??s_aPoints$initializer$@RedVectorElement@@2P6AXXZA@@3P6AXXZA	RedVectorElement.obj
+875	0002:000014a4	?displayableSuballoc_$initializer$@pvs@@3P6AXXZA	void (__cdecl* pvs::displayableSuballoc_$initializer$)(void)	Portal.obj
+876	0002:000014a8	?g_Enable$initializer$@@3P6AXXZA	void (__cdecl* g_Enable$initializer$)(void)	Portal.obj
+877	0002:000014ac	?g_SaveCam$initializer$@@3P6AXXZA	void (__cdecl* g_SaveCam$initializer$)(void)	Portal.obj
+878	0002:000014b0	?g_BackFaceCull$initializer$@@3P6AXXZA	void (__cdecl* g_BackFaceCull$initializer$)(void)	Portal.obj
+879	0002:000014b4	?g_ProximityTest$initializer$@@3P6AXXZA	void (__cdecl* g_ProximityTest$initializer$)(void)	Portal.obj
+880	0002:000014b8	?g_DebugDraw$initializer$@@3P6AXXZA	void (__cdecl* g_DebugDraw$initializer$)(void)	Portal.obj
+881	0002:000014bc	??sList$initializer$@RedRegionFactory@@2P6AXXZA@@3P6AXXZA	??sList$initializer$@RedRegionFactory@@2P6AXXZA@@3P6AXXZA	RedRegion.obj
+882	0002:000014c0	??sRegionFactory$initializer$@RedRegionFactory@@2P6AXXZA@@3P6AXXZA	??sRegionFactory$initializer$@RedRegionFactory@@2P6AXXZA@@3P6AXXZA	RedRegion.obj
+883	0002:000014c4	?globals$initializer$@util@@3P6AXXZA	void (__cdecl* util::globals$initializer$)(void)	Globals.obj
+884	0002:000014c8	?m_keyboards$initializer$@RedInputManager@@3P6AXXZA	void (__cdecl* RedInputManager::m_keyboards$initializer$)(void)	pcRedInputManager.obj
+885	0002:000014cc	?m_mouses$initializer$@RedInputManager@@3P6AXXZA	void (__cdecl* RedInputManager::m_mouses$initializer$)(void)	pcRedInputManager.obj
+886	0002:000014d0	?m_joysticks$initializer$@RedInputManager@@3P6AXXZA	void (__cdecl* RedInputManager::m_joysticks$initializer$)(void)	pcRedInputManager.obj
+887	0002:000014d4	??sRandom$initializer$@Properties@RedMovie@@2P6AXXZA@@3P6AXXZA	??sRandom$initializer$@Properties@RedMovie@@2P6AXXZA@@3P6AXXZA	RedMovie.obj
+888	0002:000014d8	??smFreeList$initializer$@Bus@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Bus@Snd@@2P6AXXZA@@3P6AXXZA	sndbus.obj
+889	0002:000014dc	??smRootBus$initializer$@Bus@Snd@@2P6AXXZA@@3P6AXXZA	??smRootBus$initializer$@Bus@Snd@@2P6AXXZA@@3P6AXXZA	sndbus.obj
+890	0002:000014e0	??smVoiceVirtualManager$initializer$@EngineBase@Snd@@2P6AXXZA@@3P6AXXZA	??smVoiceVirtualManager$initializer$@EngineBase@Snd@@2P6AXXZA@@3P6AXXZA	sndenginebase.obj
+891	0002:000014e4	??smListeners$initializer$@EngineBase@Snd@@2P6AXXZA@@3P6AXXZA	??smListeners$initializer$@EngineBase@Snd@@2P6AXXZA@@3P6AXXZA	sndenginebase.obj
+892	0002:000014e8	??smQueuedFileOpListLock$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	??smQueuedFileOpListLock$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	sndfile.obj
+893	0002:000014ec	??smQueuedCommands$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	??smQueuedCommands$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	sndfile.obj
+894	0002:000014f0	??smQueuedFileOpList$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	??smQueuedFileOpList$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	sndfile.obj
+895	0002:000014f4	??smFileList$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	??smFileList$initializer$@File@Snd@@2P6AXXZA@@3P6AXXZA	sndfile.obj
+896	0002:000014f8	?sndRandom$initializer$@Snd@@3P6AXXZA	void (__cdecl* Snd::sndRandom$initializer$)(void)	sndglobals.obj
+897	0002:000014fc	??smFreeList$initializer$@I3DL2ReverbPreset@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@I3DL2ReverbPreset@Snd@@2P6AXXZA@@3P6AXXZA	sndi3dl2reverbpreset.obj
+898	0002:00001500	??smList$initializer$@I3DL2ReverbPreset@Snd@@2P6AXXZA@@3P6AXXZA	??smList$initializer$@I3DL2ReverbPreset@Snd@@2P6AXXZA@@3P6AXXZA	sndi3dl2reverbpreset.obj
+899	0002:00001504	??smFreeList$initializer$@Node@ObjectList@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Node@ObjectList@Snd@@2P6AXXZA@@3P6AXXZA	sndobjectlist.obj
+900	0002:00001508	??smFreeList$initializer$@ObjectWeight@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@ObjectWeight@Snd@@2P6AXXZA@@3P6AXXZA	sndobjectweightlist.obj
+901	0002:0000150c	??smFreeList$initializer$@ControlPoint@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@ControlPoint@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	sndparametergraph.obj
+902	0002:00001510	??smFreeList$initializer$@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	sndparametergraph.obj
+903	0002:00001514	??smParameterGraphs$initializer$@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	??smParameterGraphs$initializer$@ParameterGraph@Snd@@2P6AXXZA@@3P6AXXZA	sndparametergraph.obj
+904	0002:00001518	??smSampleBankList$initializer$@SampleBankBase@Snd@@2P6AXXZA@@3P6AXXZA	??smSampleBankList$initializer$@SampleBankBase@Snd@@2P6AXXZA@@3P6AXXZA	sndsamplebankbase.obj
+905	0002:0000151c	??smSource3Ds$initializer$@Sound@Snd@@2P6AXXZA@@3P6AXXZA	??smSource3Ds$initializer$@Sound@Snd@@2P6AXXZA@@3P6AXXZA	sndsound.obj
+906	0002:00001520	??smFreeList$initializer$@Properties@Sound@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@Sound@Snd@@2P6AXXZA@@3P6AXXZA	sndsound.obj
+907	0002:00001524	??smPropertyList$initializer$@Properties@Sound@Snd@@2P6AXXZA@@3P6AXXZA	??smPropertyList$initializer$@Properties@Sound@Snd@@2P6AXXZA@@3P6AXXZA	sndsound.obj
+908	0002:00001528	??smSoundList$initializer$@Sound@Snd@@2P6AXXZA@@3P6AXXZA	??smSoundList$initializer$@Sound@Snd@@2P6AXXZA@@3P6AXXZA	sndsound.obj
+909	0002:0000152c	??smInactiveList$initializer$@FireForgetLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smInactiveList$initializer$@FireForgetLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+910	0002:00001530	??smActiveList$initializer$@FireForgetLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smActiveList$initializer$@FireForgetLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+911	0002:00001534	??smFreeList$initializer$@Layer@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Layer@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+912	0002:00001538	??smFreeList$initializer$@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+913	0002:0000153c	??smFreeList$initializer$@SoundLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@SoundLayer@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+914	0002:00001540	??smPropertyList$initializer$@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smPropertyList$initializer$@Properties@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+915	0002:00001544	??smSoundLayeredList$initializer$@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	??smSoundLayeredList$initializer$@SoundLayered@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundlayered.obj
+916	0002:00001548	??smFreeList$initializer$@Properties@Controller@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@Controller@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundparameterized.obj
+917	0002:0000154c	??smFreeList$initializer$@Properties@Layer@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@Layer@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundparameterized.obj
+918	0002:00001550	??smFreeList$initializer$@Properties@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundparameterized.obj
+919	0002:00001554	??smPropertyList$initializer$@Properties@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smPropertyList$initializer$@Properties@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundparameterized.obj
+920	0002:00001558	??smSoundParameterizedList$initializer$@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	??smSoundParameterizedList$initializer$@SoundParameterized@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundparameterized.obj
+921	0002:0000155c	??smQueue$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smQueue$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+922	0002:00001560	??smFireForget$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smFireForget$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+923	0002:00001564	??smFree$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smFree$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+924	0002:00001568	??smFreeList$initializer$@Properties@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Properties@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+925	0002:0000156c	??smPropertyList$initializer$@Properties@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smPropertyList$initializer$@Properties@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+926	0002:00001570	??smFreeList$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+927	0002:00001574	??smList$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	??smList$initializer$@SoundStream@Snd@@2P6AXXZA@@3P6AXXZA	sndsoundstream.obj
+928	0002:00001578	??smDefaultSpace$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	??smDefaultSpace$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	sndspace.obj
+929	0002:0000157c	??smSpaceList$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	??smSpaceList$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	sndspace.obj
+930	0002:00001580	??smFreeList$initializer$@Connected@Space@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Connected@Space@Snd@@2P6AXXZA@@3P6AXXZA	sndspace.obj
+931	0002:00001584	??smFreeList$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	??smFreeList$initializer$@Space@Snd@@2P6AXXZA@@3P6AXXZA	sndspace.obj
+932	0002:00001588	??smInfoList$initializer$@Info@StreamBase@Snd@@2P6AXXZA@@3P6AXXZA	??smInfoList$initializer$@Info@StreamBase@Snd@@2P6AXXZA@@3P6AXXZA	sndstreambase.obj
+933	0002:0000158c	??smList$initializer$@DSBuffer@Snd@@0P6AXXZA@@3P6AXXZA	??smList$initializer$@DSBuffer@Snd@@0P6AXXZA@@3P6AXXZA	snddsbuffer.obj
+934	0002:00001590	??smRendererList$initializer$@DSBufferRenderer@Snd@@2P6AXXZA@@3P6AXXZA	??smRendererList$initializer$@DSBufferRenderer@Snd@@2P6AXXZA@@3P6AXXZA	snddsbufferrenderer.obj
+935	0002:00001594	??smDummySecBuffer$initializer$@Engine@Snd@@2P6AXXZA@@3P6AXXZA	??smDummySecBuffer$initializer$@Engine@Snd@@2P6AXXZA@@3P6AXXZA	sndengine.obj
+936	0002:00001598	?sndEngineThreadUpdate$initializer$@Snd@@3P6AXXZA	void (__cdecl* Snd::sndEngineThreadUpdate$initializer$)(void)	sndengine.obj
+937	0002:0000159c	?smEngineUpdater$initializer$@@3P6AXXZA	void (__cdecl* smEngineUpdater$initializer$)(void)	sndengine.obj
+938	0002:000015a0	?_smHighLowPass$initializer$@@3P6AXXZA	void (__cdecl* _smHighLowPass$initializer$)(void)	sndengine.obj
+939	0002:000015a4	?gEncryptedAppTicket$initializer$@@3P6AXXZA	void (__cdecl* gEncryptedAppTicket$initializer$)(void)	gfSteamAuth.obj
+940	0002:000015a8	?gFriendConnectionStrings$initializer$@@3P6AXXZA	void (__cdecl* gFriendConnectionStrings$initializer$)(void)	gfSteamAuth.obj
+941	0002:000015ac	?kuiDummyRootHash$initializer$@@3P6AXXZA	void (__cdecl* kuiDummyRootHash$initializer$)(void)	ZephyrSkeleton.obj
+942	0002:000015b0	?gLCDPanels$initializer$@@3P6AXXZA	void (__cdecl* gLCDPanels$initializer$)(void)	lgLcd.obj
+943	0002:000015b4	___xc_z	___xc_z	MSVCRT:initializers.obj

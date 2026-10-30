@@ -173,7 +173,7 @@ void SpawnManager::AddPlayerCharacter(int iTeam, int iPlayer)
     unsigned short name[32];
     if (NetGame::IsEnabled())
     {
-        PblUnicode::ustrncnv(name, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 32);
+        PblUnicode::ustrncnv(name, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 31);
     }
     else
     {

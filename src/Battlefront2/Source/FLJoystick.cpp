@@ -2,6 +2,9 @@
 
 #include <math.h>
 #include <string.h>
+#include <cmath>
+
+static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
 
 #include "FLInputManager.h"
 #include "LuaHelper.h"

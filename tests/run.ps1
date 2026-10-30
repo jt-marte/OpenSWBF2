@@ -23,6 +23,7 @@ if ($Jobs -eq 0) { $Jobs = [Math]::Max(1, [Math]::Min(8, [int][Math]::Floor([Env
 $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
+Write-ToolBanner
 $script:SmokeDigestConfiguration = $SmokeConfiguration
 Set-SmokePlatform $Platform
 $Platform = $script:SmokePlatform
@@ -52,29 +53,13 @@ if ($RecordDigests -and $SmokeConfiguration -ne 'Release') {
     exit 2
 }
 
-function Find-MSBuild {
-    $msbuild = Join-Path ${env:ProgramFiles(x86)} 'MSBuild\12.0\Bin\MSBuild.exe'
-    if (-not (Test-Path $msbuild)) {
-        $key = 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\MSBuild\ToolsVersions\12.0'
-        if (Test-Path $key) { $msbuild = Join-Path (Get-ItemProperty $key).MSBuildToolsPath 'MSBuild.exe' }
-    }
-    if (-not (Test-Path $msbuild)) { Write-Host 'MSBuild 12.0 not found (install VS2013 Update 5).'; exit 2 }
-    return $msbuild
-}
-
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $outDir = Join-Path $root "artifacts\tests\$stamp"
 $results = @()
 $bad = 0
 
 if ($runUnit) {
-    $dllDir = Get-RuntimeDllDir
-    foreach ($dll in 'd3dx9_43.dll', 'msvcr120.dll') {
-        if (-not (Test-Path (Join-Path $dllDir $dll))) {
-            Write-Host "Preflight failed: $dll missing from $(if ($Platform -eq 'x64') { 'System32' } else { 'SysWOW64' }). $(Get-RuntimeDllHint)"
-            exit 2
-        }
-    }
+    if ($Platform -eq 'x64') { Assert-Runtimes $T1Runtimes (Get-RuntimeDllDir) } else { Assert-Runtimes $T1Runtimes }
 
     if (-not $NoBuild) {
         $msbuild = Find-MSBuild
@@ -217,6 +202,7 @@ if ($runUnit) {
 }
 
 if ($hardenActive) {
+    if ($Platform -eq 'x64') { Assert-Runtimes $T1Runtimes (Get-RuntimeDllDir) } else { Assert-Runtimes $GameRuntimes }
     $exeDir = Get-GameExeDir $root $SmokeConfiguration
     $gameExe = Join-Path $exeDir 'BattlefrontII.exe'
     $gameDataRoot = Find-GameDataRoot
@@ -266,6 +252,17 @@ if ($hardenActive) {
         foreach ($c in (Get-HardeningChecks $hdr $cfg $tl.Total $tl.GsMinus $tl.Sdl)) {
             if ($hardSkips.ContainsKey($c.Name)) { Add-SmokeResult "[SKIP] hardening:$($c.Name) - $($hardSkips[$c.Name])" 'SKIP' }
             elseif ($c.Ok) { Add-SmokeResult "[PASS] hardening:$($c.Name)" 'PASS' }
+            else {
+                Add-SmokeResult "[FAIL] hardening:$($c.Name) - $($c.Detail)" 'FAIL'
+                $bad++
+            }
+        }
+        $ttDir = Join-Path $root "obj\Tests\$Configuration\OpenSWBF2Tests.tlog"
+        $tt = $null
+        if (Test-Path -LiteralPath $ttDir) { $tt = Get-ClTlogCounts $ttDir }
+        else { Add-SmokeResult '[SKIP] hardening:flag-alignednew-tests - tests not built' 'SKIP' }
+        foreach ($c in (Get-FlagChecks $tl $tt)) {
+            if ($c.Ok) { Add-SmokeResult "[PASS] hardening:$($c.Name)" 'PASS' }
             else {
                 Add-SmokeResult "[FAIL] hardening:$($c.Name) - $($c.Detail)" 'FAIL'
                 $bad++

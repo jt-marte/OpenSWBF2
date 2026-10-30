@@ -157,6 +157,22 @@ void __cdecl operator delete[](void* block)
     }
 }
 
+void __cdecl operator delete(void* block, unsigned int)
+{
+    if (block)
+    {
+        RedFreeToHeap(__RedCurrHeap, block, 0);
+    }
+}
+
+void __cdecl operator delete[](void* block, unsigned int)
+{
+    if (block)
+    {
+        RedFreeToHeap(__RedCurrHeap, block, 0);
+    }
+}
+
 // FUNCTION: SWBF2 0x006c35c0
 void* RedAllocFromHeapInternal(int heap, unsigned int size, int bTop)
 {

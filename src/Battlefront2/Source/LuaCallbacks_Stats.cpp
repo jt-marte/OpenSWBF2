@@ -592,7 +592,7 @@ static void Stats_AddLabelNameTime(const unsigned short* pusLabel, const unsigne
         _snprintf(acTime, 64, " %d:%02d", iSeconds / 60, iSeconds % 60);
         unsigned short usTime[32];
         ustrncnv(usTime, acTime, 32);
-        ustrlcat(usText, usTime, 64);
+        ustrlcat(usText, usTime, 63);
     }
     Stats_AddItem(pusLabel, usText);
 }
@@ -608,7 +608,7 @@ static void Stats_AddPlayerAward(const unsigned short* pusLabel, const Character
         _snprintf(acBuf, 16, " (%d)", iValue);
         unsigned short usBuf[16];
         ustrncnv(usBuf, acBuf, 16);
-        ustrlcat(usText, usBuf, 64);
+        ustrlcat(usText, usBuf, 63);
         Stats_AddItem(pusLabel, usText);
     }
     else
@@ -907,7 +907,7 @@ int ScriptCB_TeamStatsSetTitles(lua_State* L)
         _snprintf(acBuf, 100, " : %d", iCount1);
     }
     ustrncnv(usBuf, acBuf, 100);
-    ustrlcat(usTitle, usBuf, 100);
+    ustrlcat(usTitle, usBuf, 99);
     ((RedTextElement*)RedInterfaceElement::Find(0x964e1d4bu))->SetText(usTitle, true);
 
     ustrlcpy(usTitle, pTeam2->mName, 100);
@@ -920,7 +920,7 @@ int ScriptCB_TeamStatsSetTitles(lua_State* L)
         _snprintf(acBuf, 100, " : %d", iCount2);
     }
     ustrncnv(usBuf, acBuf, 100);
-    ustrlcat(usTitle, usBuf, 100);
+    ustrlcat(usTitle, usBuf, 99);
     ((RedTextElement*)RedInterfaceElement::Find(0x0a25d764u))->SetText(usTitle, true);
 
     if (GetSideIcon(pTeam1->GetSide()) && GetSideIcon(pTeam2->GetSide()))
@@ -1175,7 +1175,7 @@ int ScriptCB_GetAwardStats(lua_State* L)
                 _snprintf(acBuf, 32, " (%d:%02d)", iValue / 60, iValue % 60);
                 unsigned short usTime[16];
                 ustrncnv(usTime, acBuf, 16);
-                ustrlcat(usText, usTime, 64);
+                ustrlcat(usText, usTime, 63);
             }
             else
             {

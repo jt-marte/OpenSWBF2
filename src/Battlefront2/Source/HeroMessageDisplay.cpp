@@ -148,15 +148,15 @@ void HeroMessageDisplay::PlayHeroSoundSpawn(int iTeam)
     unsigned short playerName[64];
     if (NetGame::IsEnabled())
     {
-        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(netHeroPlayerID[iTeam]), 64);
+        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(netHeroPlayerID[iTeam]), 63);
     }
     else
     {
-        PblUnicode::ustrncpy(playerName, pHero->GetRegularName(), 64);
+        PblUnicode::ustrlcpy(playerName, pHero->GetRegularName(), 64);
     }
 
     unsigned short message[256];
-    PblUnicode::usnprintf(message, 256, pFormat, playerName, heroName);
+    PblUnicode::usnprintf(message, 255, pFormat, playerName, heroName);
 
     int iNumViewports = CameraManager::sInstance->m_iNumCam;
     for (int i = 0; i < iNumViewports; ++i)
@@ -366,7 +366,7 @@ void HeroMessageDisplay::UpdateHeroSelect(float fDeltaTime, int iTeam, float& fT
     }
 
     unsigned short message[256];
-    PblUnicode::usnprintf(message, 256, pFormat, heroName);
+    PblUnicode::usnprintf(message, 255, pFormat, heroName);
 
     if ((unsigned int)mViewport < CameraManager::sInstance->m_iNumCam)
     {

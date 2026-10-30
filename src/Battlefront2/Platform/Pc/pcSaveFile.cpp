@@ -18,10 +18,23 @@ void SaveFile::SplitMetagameFilename(unsigned short const* pusFilename,
 
     const unsigned int uiLen = PblUnicode::ustrlen(pusFilename);
 
+    if (uiLen < 8)
+    {
+        if (pusName)
+        {
+            pusName[0] = 0;
+        }
+        if (pusDate)
+        {
+            pusDate[0] = 0;
+        }
+        return;
+    }
+
     if (pusName)
     {
-        PblUnicode::ustrncpy(pusName, pusFilename, uiLen - 7);
-        pusName[uiLen - 8] = 0;
+        const unsigned int uiNameLen = uiLen - 8 < 127 ? uiLen - 8 : 127;
+        PblUnicode::ustrlcpy(pusName, pusFilename, uiNameLen + 1);
     }
 
     if (pusDate)
@@ -33,7 +46,7 @@ void SaveFile::SplitMetagameFilename(unsigned short const* pusFilename,
         char acDate[64];
         _snprintf(acDate, 64, "%04d-%02d-%02d %02d:%02d.%02d", iYear, iMonth, iDay,
                   iHour, iMinute, iSecond);
-        PblUnicode::ustrncnv(pusDate, acDate, 128);
+        PblUnicode::ustrncnv(pusDate, acDate, 64);
     }
 }
 
@@ -47,7 +60,7 @@ SaveFile::SaveFile()
 // FUNCTION: SWBF2 0x00426650
 void SaveFile::SetFileInfo(unsigned short const* pusFileName, int iType)
 {
-    PblUnicode::ustrncpy(mFileName, pusFileName, sizeof(mFileName) / sizeof(mFileName[0]));
+    PblUnicode::ustrlcpy(mFileName, pusFileName, sizeof(mFileName) / sizeof(mFileName[0]));
     PblUnicode::ustrlcpy(mGameName, pusFileName, sizeof(mGameName) / sizeof(mGameName[0]));
     mType = iType;
 }

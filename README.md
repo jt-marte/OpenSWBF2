@@ -50,29 +50,37 @@
 - **Movies play through FFmpeg**, since Bink has no 64-bit DLL (see Third-party code).
 
 ### Tooling
-- `tools\setup.ps1` installs the 2013-era toolchain on a current PC.
+- `tools\setup.ps1` installs the build tools and dependencies on a current PC.
 - `tests\run.ps1` runs the unit, regression and smoke tests; `-Platform x64` runs them against the 64-bit build.
 - `tests\netpair.ps1` plays a server and clients against each other with simulated lag, jitter and loss; `-ClientPlatform` mixes 32-bit and 64-bit peers.
 
 ## Setup
 
-You need Visual Studio 2013 (Update 5) with the v120_xp toolset and the DirectX SDK (June 2010). Their old installers no longer run on current systems, so let the script handle it:
+You need the Visual Studio 2022 Build Tools (or any VS2022 edition) with the C++ build tools for x86 and x64 (v143) and the Windows SDK 10.0.26100.0, plus the DirectX SDK (June 2010) for d3dx9. The script installs what is missing:
 
 ```
 powershell -ExecutionPolicy Bypass -File tools\setup.ps1
 ```
 
-It installs VS2013 from the offline ISO, extracts the SDK headers and libs, and fetches DXVK into `third_party\dxvk` and FFmpeg (for the 64-bit build) into `third_party\ffmpeg`. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
+It installs the VS2022 Build Tools with those components (accept the UAC prompt), extracts the DirectX SDK headers and libs, and fetches DXVK into `third_party\dxvk` and FFmpeg (for the 64-bit build) into `third_party\ffmpeg`. It also checks that your GameData is unmodded: the 1.3 patch and the Remaster replace files the build needs. Add `-CheckOnly` to only report what is missing.
+
+The game needs Windows 10 or later and these runtimes, which are not shipped beside the exe:
+
+- Microsoft Visual C++ 2015-2022 Redistributable, x86 for the 32-bit build and x64 for the 64-bit build
+- Visual C++ 2013 Redistributable (x86), for the 32-bit build's Galaxy DLLs
+- DirectX End-User Runtime (June 2010), for `d3dx9_43.dll`
 
 ## Build and run
 
 ```
-"C:\Program Files (x86)\MSBuild\12.0\Bin\MSBuild.exe" BattlefrontII.sln /p:Configuration=Release /p:Platform=Win32
+"C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\MSBuild.exe" BattlefrontII.sln /p:Configuration=Release /p:Platform=Win32
 ```
 
-The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the Steam install's GameData through the registry; set `SWBF2_GAMEDATA` to use another copy.
+Use the MSBuild of whichever VS2022 edition is installed; `tests\vstools.ps1` finds it through `vswhere`. The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the Steam install's GameData through the registry; set `SWBF2_GAMEDATA` to use another copy.
 
 For the 64-bit build use `/p:Platform=x64`; it goes to `bin\x64\Release\BattlefrontII.exe`. Each build keeps its own settings and `SaveGames` folder next to its exe.
+
+The toolchain moved from VS2013 to VS2022 without changing the 32-bit simulation: the few places where the newer compiler rounds floats differently are pinned, so matches and the test digests stay bit-identical (see `tests\baseline\v143\CAUSES.md`).
 
 ## Hosting
 

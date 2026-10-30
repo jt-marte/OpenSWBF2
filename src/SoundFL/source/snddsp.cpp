@@ -1,4 +1,7 @@
 #include <math.h>
+#include <cmath>
+
+static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
 
 #include "snddsp.h"
 

@@ -139,7 +139,7 @@ int ScriptCB_GetLoginList(lua_State* L)
     {
         PlayerProfile::SetNumMemoryProfiles(1);
         unsigned short ausName[64];
-        PblUnicode::usnprintf(ausName, 64, RedLocalizeDB::Find(0x3802F15B, false), 1);
+        PblUnicode::usnprintf(ausName, 63, RedLocalizeDB::Find(0x3802F15B, false), 1);
         PlayerProfile::GetProfile(0)->InitProfile(ausName);
     }
 
@@ -457,7 +457,7 @@ int ScriptCB_AddProfile(lua_State* L)
     PlayerProfile::SetCurProfile(iViewport);
 
     char acName[130];
-    PblUnicode::ustrncnv(acName, (unsigned short const*)pcName, sizeof(acName));
+    PblUnicode::ustrncnv(acName, (unsigned short const*)pcName, sizeof(acName) - 1);
     NetSetup::SetLoginName(iViewport, acName);
     lua_pushnumber(LuaHelper::mState, 1.0f);
     return 1;
@@ -517,7 +517,7 @@ static void LoadProfileDoneCallback()
                 if (pusName && pusName[0])
                 {
                     char acName[66];
-                    PblUnicode::ustrncnv(acName, pusName, sizeof(acName));
+                    PblUnicode::ustrncnv(acName, pusName, sizeof(acName) - 1);
                     NetSetup::SetLoginName(0, acName);
                 }
             }
@@ -571,7 +571,7 @@ int ScriptCB_StartLoadProfile(lua_State* L)
     if (pcName)
     {
         char acName[130];
-        PblUnicode::ustrncnv(acName, (unsigned short const*)pcName, sizeof(acName));
+        PblUnicode::ustrncnv(acName, (unsigned short const*)pcName, sizeof(acName) - 1);
         NetSetup::SetLoginName(gActiveViewport, acName);
     }
     return 0;
@@ -605,7 +605,7 @@ static void Make1FakeProfile(int iIndex, unsigned short const* pusName)
     }
 
     char acName[66];
-    PblUnicode::ustrncnv(acName, pusName, sizeof(acName));
+    PblUnicode::ustrncnv(acName, pusName, sizeof(acName) - 1);
     NetSetup::SetLoginName(iIndex, acName);
     PlayerProfile::SetCurProfile(uiCur);
 }
@@ -772,7 +772,7 @@ int ScriptCB_StartLoadMetagame(lua_State* L)
     SaveGameManager::StartQueue();
     SaveGameManager::QueueLoad(pusName, 2, sMetagameBuffer, sizeof(sMetagameBuffer));
     SaveGameManager::FinishQueue(LoadMetagameDoneCallback);
-    PblUnicode::ustrlcpy(sMetagameFilename, pusName, sizeof(sMetagameFilename));
+    PblUnicode::ustrlcpy(sMetagameFilename, pusName, sizeof(sMetagameFilename) / sizeof(sMetagameFilename[0]));
     return 0;
 }
 
@@ -848,7 +848,7 @@ int ScriptCB_StartLoadCampaign(lua_State* L)
     SaveGameManager::StartQueue();
     SaveGameManager::QueueLoad(pusName, 3, sCampaignBuffer, sizeof(sCampaignBuffer));
     SaveGameManager::FinishQueue(LoadCampaignDoneCallback);
-    PblUnicode::ustrlcpy(sCampaignFilename, pusName, sizeof(sCampaignFilename));
+    PblUnicode::ustrlcpy(sCampaignFilename, pusName, sizeof(sCampaignFilename) / sizeof(sCampaignFilename[0]));
     return 0;
 }
 
@@ -948,7 +948,7 @@ int ScriptCB_GetUniqueLoginName(lua_State* L)
         return 1;
     }
 
-    PblUnicode::ustrncpy(Lua_Callbacks::sTempReturnString16, pusBase, 256);
+    PblUnicode::ustrlcpy(Lua_Callbacks::sTempReturnString16, pusBase, 256);
     if (!SaveGameManager::InMemoryMode())
     {
         SaveGameManager::GetUniqueFilename(Lua_Callbacks::sTempReturnString16, 1, 0, 0);
@@ -958,7 +958,7 @@ int ScriptCB_GetUniqueLoginName(lua_State* L)
 
     for (unsigned int uiTry = 1; uiTry <= 2; ++uiTry)
     {
-        PblUnicode::usnprintf(Lua_Callbacks::sTempReturnString16, 512, pusBase, uiTry);
+        PblUnicode::usnprintf(Lua_Callbacks::sTempReturnString16, 255, pusBase, uiTry);
         bool bUnique = true;
         for (int i = 0; i < PlayerProfile::GetNumMemoryProfiles(); ++i)
         {
@@ -1524,11 +1524,11 @@ void SaveFile::MakeMetagameFilename(unsigned short* pusDest, unsigned short cons
 {
     unsigned short ausStamp[16];
     SYSTEMTIME localTime;
-    PblUnicode::ustrncpy(pusDest, pusSource, 128);
+    PblUnicode::ustrlcpy(pusDest, pusSource, 128);
     GetLocalTime(&localTime);
     SaveFile::TimeToString(ausStamp, localTime.wYear, localTime.wMonth, localTime.wDay,
                localTime.wHour, localTime.wMinute, localTime.wSecond);
-    PblUnicode::ustrlcat(pusDest, ausStamp, 128);
+    PblUnicode::ustrlcat(pusDest, ausStamp, 127);
 }
 
 namespace Lua_Callbacks {

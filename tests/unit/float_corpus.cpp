@@ -3,6 +3,7 @@
 #include <windows.h>
 #include <float.h>
 #include <math.h>
+#include <cmath>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,8 @@
 #include <set>
 #include <string>
 #include <vector>
+
+static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
 
 #include "testutil.h"
 

@@ -3579,7 +3579,7 @@ void HandleEvent_Message(ReliableNetEvent& event)
         {
             GameVoiceChat::PlayerChange();
         }
-        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 64);
+        PblUnicode::ustrncnv(playerName, (const unsigned char*)NetGame::GetPlayerName(iPlayer), 63);
         const unsigned short* pName = playerName;
         PblUnicode::usnprintf(message, kMaxMessage - 1, pFormat, pName);
         if (pCharacter1 && event.u.message.mTeam && pCharacter1->GetTeamPtr() != event.u.message.mTeam)
@@ -3607,7 +3607,7 @@ void HandleEvent_Message(ReliableNetEvent& event)
         }
 
         const char* pszName = netPlayers[iPlayer].prevName;
-        PblUnicode::ustrncnv(playerName, pszName, 64);
+        PblUnicode::ustrncnv(playerName, pszName, 63);
         const unsigned short* pName = playerName;
         PblUnicode::usnprintf(message, kMaxMessage - 1, pFormat, pName);
         break;
@@ -7708,7 +7708,7 @@ void NetGame::AddChatMessageToQue(bool local, int player, unsigned __int64 mask,
     SteamChatMsg* message = new SteamChatMsg;
     message->playerID = player;
     message->mask = mask;
-    PblUnicode::ustrncpy(message->text, text, 128);
+    PblUnicode::ustrlcpy(message->text, text, 128);
     message->text[127] = 0;
     message->flag = flag;
     message->code = code;
@@ -9314,7 +9314,7 @@ void DisplayMessage(NG_ChatMsg& opaque)
         const unsigned short* admin = RedLocalizeDB::Find(0x10e2f4e1, true);
         if (admin)
         {
-            PblUnicode::ustrlcat(text, admin, 128);
+            PblUnicode::ustrlcat(text, admin, 127);
         }
         else
         {
@@ -9327,17 +9327,17 @@ void DisplayMessage(NG_ChatMsg& opaque)
         sender = Character::FindPlayer(message.playerID);
         if (sender)
         {
-            PblUnicode::ustrlcat(text, sender->GetName(), 128);
+            PblUnicode::ustrlcat(text, sender->GetName(), 127);
         }
     }
-    PblUnicode::ustrlcat(text, separator, 128);
+    PblUnicode::ustrlcat(text, separator, 127);
     if (message.code == TeamAssistManager::None)
     {
-        PblUnicode::ustrlcat(text, message.text, 128);
+        PblUnicode::ustrlcat(text, message.text, 127);
     }
     else
     {
-        PblUnicode::ustrlcat(text, RedLocalizeDB::Find(requestKeys[message.code], false), 128);
+        PblUnicode::ustrlcat(text, RedLocalizeDB::Find(requestKeys[message.code], false), 127);
     }
 
     const unsigned int teamOnly = 1;
