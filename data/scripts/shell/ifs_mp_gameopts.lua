@@ -188,6 +188,8 @@ function ifs_mp_gameopts_fnSetOptionText(this)
         NewStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",EasyStr)
     elseif(this.Prefs.iDifficulty==2) then
         NewStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",MediumStr)
+    elseif(this.Prefs.iDifficulty==4) then
+        NewStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",ScriptCB_getlocalizestr("ifs.difficulty.overhaul"))
     else
         NewStr = ScriptCB_usprintf("ifs.mp.createopts.difficulty",HardStr)
     end
@@ -549,7 +551,7 @@ ifs_mp_gameopts = NewIFShellScreen {
         elseif (this.CurButton == "difficulty") then
             this.Prefs.iDifficulty = this.Prefs.iDifficulty-1
             if(this.Prefs.iDifficulty<=0) then
-                this.Prefs.iDifficulty = 3
+                this.Prefs.iDifficulty = 4 -- OpenSWBF2 Overhaul
             end
         elseif (this.CurButton == "dedicated") then
             this.bDedicated = not this.bDedicated
@@ -651,7 +653,7 @@ ifs_mp_gameopts = NewIFShellScreen {
             this.Prefs.bAutoAssignTeams = not this.Prefs.bAutoAssignTeams
         elseif (this.CurButton == "difficulty") then
             this.Prefs.iDifficulty = this.Prefs.iDifficulty+1
-            if(this.Prefs.iDifficulty>3) then
+            if(this.Prefs.iDifficulty>4) then -- OpenSWBF2: 4 is Overhaul
                 this.Prefs.iDifficulty = 1
             end
         elseif (this.CurButton == "dedicated") then

@@ -117,6 +117,10 @@ const unsigned short* Find(unsigned int uiHash, bool bNullIfMissing)
     {
         return (const unsigned short*)L"Cannot join: unable to connect";
     }
+    if (uiHash == 0xea8e8a80) // ifs.difficulty.overhaul, OpenSWBF2's AI difficulty
+    {
+        return (const unsigned short*)L"Overhaul";
+    }
 
     FLLocalizeEntry* pEntry = sMasterLocalizeHash.Find(uiHash);
     if (pEntry)

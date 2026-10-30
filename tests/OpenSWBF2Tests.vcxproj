@@ -97,6 +97,7 @@
     <ClCompile Include="..\src\Battlefront2\Source\NetPacket.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\NetComm.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\NetWire.cpp" />
+    <ClCompile Include="..\src\Battlefront2\Source\AITuning.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\MemFailLog.cpp" />
     <ClCompile Include="..\src\LuaFL\src\lapi.cpp" />
     <ClCompile Include="..\src\LuaFL\src\lcode.cpp" />

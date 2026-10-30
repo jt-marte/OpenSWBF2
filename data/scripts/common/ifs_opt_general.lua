@@ -432,6 +432,8 @@ ifs_opt_general = NewIFShellScreen {
 			local NewDiff
 			if(CurDiff < 3) then
 				NewDiff = 3 -- hard
+			elseif(CurDiff == 3) then
+				NewDiff = 4 -- OpenSWBF2 overhaul
 			else
 				NewDiff = 2 -- medium
 			end
@@ -485,7 +487,7 @@ ifs_opt_general_layout = {
 	flashy = 0,
 	width = 300,
 	elements = {
-		{ tag = "diff", title = "ifs.gameopt.difficulty", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.difficulty.medium", "ifs.difficulty.hard"}},
+		{ tag = "diff", title = "ifs.gameopt.difficulty", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.difficulty.medium", "ifs.difficulty.hard", "ifs.difficulty.overhaul"}},
 		{ tag = "persp", title = "ifs.gameopt.camera", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.GameOpt.cam_cockpit", "ifs.GameOpt.cam_forward"}},
 		{ tag = "rumble", title = "ifs.gameopt.rumble", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"}},
 		{ tag = "friendlyfire", title = "ifs.gameopt.friendlyfire", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"}},

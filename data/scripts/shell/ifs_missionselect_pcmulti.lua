@@ -1614,10 +1614,11 @@ function ifs_missionselect_pcMulti_fnChangeOptions( this, mode )
 				else
 					ifs_mp_gameopts.Prefs.iDifficulty = ifs_mp_gameopts.Prefs.iDifficulty - 1
 				end
-				if( ifs_mp_gameopts.Prefs.iDifficulty > 3 ) then
+				-- OpenSWBF2: 4 is Overhaul
+				if( ifs_mp_gameopts.Prefs.iDifficulty > 4 ) then
 					ifs_mp_gameopts.Prefs.iDifficulty = 1
-				elseif( ifs_mp_gameopts.Prefs.iDifficulty < 0 ) then
-					ifs_mp_gameopts.Prefs.iDifficulty = 3
+				elseif( ifs_mp_gameopts.Prefs.iDifficulty < 1 ) then
+					ifs_mp_gameopts.Prefs.iDifficulty = 4
 				end
 			elseif( Selection.tag == "hero" ) then
 				ifs_mp_gameopts.Prefs.bHeroesEnabled = not ifs_mp_gameopts.Prefs.bHeroesEnabled
@@ -2782,6 +2783,8 @@ function ifs_mspc_OptionList_PopulateItem(Dest, Data, bSelected)
 				diff_str = ScriptCB_getlocalizestr("ifs.difficulty.easy")
 			elseif(ifs_mp_gameopts.Prefs.iDifficulty == 2) then
 				diff_str = ScriptCB_getlocalizestr("ifs.difficulty.medium")
+			elseif(ifs_mp_gameopts.Prefs.iDifficulty == 4) then
+				diff_str = ScriptCB_getlocalizestr("ifs.difficulty.overhaul")
 			else
 				diff_str = ScriptCB_getlocalizestr("ifs.difficulty.hard")
 			end

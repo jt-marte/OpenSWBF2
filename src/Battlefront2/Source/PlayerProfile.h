@@ -13,7 +13,9 @@ enum eGAME_DIFFICULTY
     eDIFFICULTY_EASY = 1,
     eDIFFICULTY_MEDIUM = 2,
     eDIFFICULTY_HARD = 3,
-    eDIFFICULTY_LAST = 4
+    // OpenSWBF2: the reworked AI ("Overhaul" in the menus).
+    eDIFFICULTY_OVERHAUL = 4,
+    eDIFFICULTY_LAST = 5
 };
 
 namespace PlayerProfile

@@ -2,6 +2,7 @@
 #include "RedEngineFL/Application/pc/pcRedParticle.h"
 
 #include "PlayerProfile.h"
+#include "AITuning.h"
 
 #include "CommandLine.h"
 #include "FLInputManager.h"
@@ -1517,6 +1518,9 @@ void PlayerProfile::tProfile::SanityCheck()
     mOnlineOptions.SanityCheck();
     mToolTipOptions.SanityCheck();
     mPCOptions.SanityCheck();
+    // OpenSWBF2: the AI tables are indexed by this, and retail never range-checked it.
+    mGameOptions.mCurDiffLevel =
+        (eGAME_DIFFICULTY)AITuning::ValidLevelOr(mGameOptions.mCurDiffLevel, eDIFFICULTY_MEDIUM);
     if (mSafeMode)
     {
         mSoundOptions.EnsureIsSafe();

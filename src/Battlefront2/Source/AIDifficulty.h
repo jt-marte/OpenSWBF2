@@ -6,6 +6,8 @@ namespace AIDifficulty
 {
     void Init();
     int GetProfileDifficulty();
+    // OpenSWBF2: the reworked AI is on (difficulty level 4, "Overhaul").
+    bool IsOverhaul();
 
     void SetAILuaModifier(int iPlayer, int iEnemy, int iDifficulty);
 

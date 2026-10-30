@@ -5,6 +5,7 @@
 #include <winsock2.h>
 
 #include "NetSetup.h"
+#include "AITuning.h"
 #include "pcNetSocket.h"
 #include "NetMatch.h"
 #include "GameLoop.h"
@@ -6568,7 +6569,8 @@ void PublishNextMissionToLobby()
             group.WriteBits(1, 3);
             group.WriteBits(u8Turns, 8);
             group.WriteBits(netMinPlayersToAutoLaunchDedicated, 7);
-            group.WriteBits(PlayerPrefs::mAllUserPrefs[0].mDifficulty, 2);
+            // OpenSWBF2: Overhaul (4) does not fit the 2-bit field stock clients read; it goes out as Elite.
+            group.WriteBits(AITuning::WireLevel(PlayerPrefs::mAllUserPrefs[0].mDifficulty), 2);
             group.WriteBits(netShowNames != 0, 1);
             group.WriteBits(gSpawnInvicibility, 6);
             group.WriteBits(netHeroesEnabled != 0, 1);
@@ -6632,7 +6634,8 @@ void PublishNextMissionToLobby()
         SetLobbyData("fgd_int_serverType", gf::utils::ToString(1));
         SetLobbyData("fgd_int_turns_per_second", gf::utils::ToString((int)u8Turns));
         SetLobbyData("fgr_int_netMinPlayersToAutoLaunchDedicated", gf::utils::ToString(netMinPlayersToAutoLaunchDedicated));
-        SetLobbyData("fgr_int_mDifficulty", gf::utils::ToString(PlayerPrefs::mAllUserPrefs[0].mDifficulty));
+        SetLobbyData("fgr_int_mDifficulty",
+                     gf::utils::ToString(AITuning::WireLevel(PlayerPrefs::mAllUserPrefs[0].mDifficulty)));
         SetLobbyData("fgr_int_netShowNames", gf::utils::ToString(netShowNames));
         SetLobbyData("fgr_int_gSpawnInvicibility", gf::utils::ToString(gSpawnInvicibility));
         SetLobbyData("fgr_int_netHeroesEnabled", gf::utils::ToString(netHeroesEnabled));

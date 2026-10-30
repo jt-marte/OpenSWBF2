@@ -1,5 +1,6 @@
 #include "AIDifficulty.h"
 
+#include "AITuning.h"
 #include "AIUtil.h"
 #include "Controllable.h"
 #include "EventInfo.h"
@@ -84,6 +85,11 @@ int AIDifficulty::GetProfileDifficulty()
     return mProfileDifficulty;
 }
 
+bool AIDifficulty::IsOverhaul()
+{
+    return mProfileDifficulty == AITuning::kLevelOverhaul;
+}
+
 // FUNCTION: SWBF2 0x00438c80
 int AIDifficulty::GetIntSkill(const UnitController* pController, bool bClamp)
 {
@@ -103,7 +109,13 @@ int AIDifficulty::GetIntSkill(const UnitController* pController, bool bClamp)
 
     int iDifficulty = GetProfileDifficulty();
     int iSkill;
-    if (bPlayer)
+    if (IsOverhaul())
+    {
+        // OpenSWBF2: both teams fight at one skill, with no script or autobalance modifiers, so
+        // the bots fight an even war and only the humans tip it.
+        iSkill = AITuning::kOverhaulSkill;
+    }
+    else if (bPlayer)
     {
         iSkill = sDifficultyPlayer[iDifficulty - 1] + mScriptPlayerModifier[iDifficulty - 1] +
                  mAutoBalancePlayerModifier;

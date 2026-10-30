@@ -796,7 +796,7 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
             autoNetPlayers = atoi(apcArgv[++i]);
             break;
         case 0xCA15D036:
-            PlayerPrefs::gDefaultDifficulty = Clamp(atoi(apcArgv[++i]), 1, 3);
+            PlayerPrefs::gDefaultDifficulty = Clamp(atoi(apcArgv[++i]), 1, 4); // 4: OpenSWBF2 Overhaul
             break;
         case 0xCD154944:
             netFrameLock = false;
