@@ -15,6 +15,11 @@ $vsIsoSha = '7DE2340D9570895451C5F5D9F2081DB860A4F753E7596E31B2742390A6D0E6BC'
 $dxSdkUrl = 'https://download.microsoft.com/download/A/E/7/AE743F1F-632B-4809-87A9-AA1BB3458E31/DXSDK_Jun10.exe'
 $dxSdkSha = '705271DC83BFEE54D9B94E028426E288D5F070784B7446D164F48ECFBB2A02CB'
 $dxRedistUrl = 'https://download.microsoft.com/download/8/4/A/84A35BF1-DAFE-4AE8-82AF-AD2AE20B6B14/directx_Jun2010_redist.exe'
+# There is no 64-bit binkw32, so the x64 build decodes the movies with FFmpeg: BtbN's LGPL shared
+# build of FFmpeg n8.1.3, pinned. It lands in third_party\ffmpeg (include, lib, bin).
+$ffmpegUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/download/autobuild-2026-10-30-13-01/ffmpeg-n8.1.3-27-g8dca1586f4-win64-lgpl-shared-8.1.zip'
+$ffmpegSha = '21B96A5B382B031E89C1C91D7AF8EFC3DB989C4C11BFF27422A4C4EA24CF45ED'
+$ffmpegDir = Join-Path $root 'third_party\ffmpeg'
 # Depot 6061 manifest whose lvls match the hashes pinned in tools\lvl_build.cpp.
 $stockDepot = 6061
 $stockManifest = '6184123930358608135'
@@ -149,6 +154,28 @@ function Install-DxRedist {
     if ($code -ne 0) { throw "DXSETUP exited with $code." }
 }
 
+function Test-FFmpeg {
+    foreach ($f in 'include\libavcodec\avcodec.h', 'lib\avcodec.lib', 'lib\avformat.lib', 'lib\avutil.lib', 'lib\swscale.lib', 'lib\swresample.lib',
+                   'bin\avcodec-62.dll', 'bin\avformat-62.dll', 'bin\avutil-60.dll', 'bin\swscale-9.dll', 'bin\swresample-6.dll', 'LICENSE.txt') {
+        if (-not (Test-Path (Join-Path $ffmpegDir $f))) { return $false }
+    }
+    return $true
+}
+
+function Install-FFmpeg {
+    if (Test-Path $ffmpegDir) { throw "$ffmpegDir already exists but is incomplete, remove it and run setup again." }
+    $zip = Get-Download $ffmpegUrl $ffmpegSha
+    $tmp = Join-Path $CacheDir 'ffmpeg_extract'
+    if (Test-Path $tmp) { Remove-Item -Recurse -Force $tmp }
+    Expand-Archive -LiteralPath $zip -DestinationPath $tmp
+    # Everything sits under one folder named after the build
+    $top = @(Get-ChildItem -LiteralPath $tmp -Directory)
+    if ($top.Count -ne 1) { throw "Unexpected layout in $zip." }
+    New-Item -ItemType Directory -Force -Path (Split-Path $ffmpegDir -Parent) | Out-Null
+    Move-Item $top[0].FullName $ffmpegDir
+    Remove-Item -Recurse -Force $tmp
+}
+
 function Get-KnownLvlHashes {
     $src = Get-Content -Raw (Join-Path $root 'tools\lvl_build.cpp')
     $known = @{}
@@ -209,6 +236,14 @@ try {
     else { Add-Result 'DirectX runtime' 'OK' 'd3dx9_43.dll' }
     if (Test-Path (Join-Path $sys 'msvcr120.dll')) { Add-Result 'VC++ 2013 runtime' 'OK' 'msvcr120.dll' }
     else { Add-Result 'VC++ 2013 runtime' 'MISSING' 'msvcr120.dll not in SysWOW64; install vcredist 2013 x86 (Visual Studio 2013 includes it)' }
+
+    if (Test-FFmpeg) { Add-Result 'FFmpeg (x64 movies)' 'OK' $ffmpegDir }
+    elseif ($CheckOnly) { Add-Result 'FFmpeg (x64 movies)' 'MISSING' "run without -CheckOnly to fetch the pinned LGPL build (80 MB) into $ffmpegDir" }
+    else {
+        Install-FFmpeg
+        if (Test-FFmpeg) { Add-Result 'FFmpeg (x64 movies)' 'FIX' "fetched FFmpeg n8.1.3 (LGPL, shared) into $ffmpegDir" }
+        else { Add-Result 'FFmpeg (x64 movies)' 'MISSING' "$ffmpegDir is still incomplete after extracting the zip" }
+    }
 
     $known = Get-KnownLvlHashes
     $steam = Get-SteamPath

@@ -87,3 +87,12 @@ The game is built to `bin\Win32\Release\BattlefrontII.exe`. The build finds the 
 | `-log file` | also write the log to a file |
 
 The command line overrides the config files.
+
+## Third-party code
+
+The x64 build plays the game's Bink movies with FFmpeg, since binkw32 only exists as a 32-bit DLL. It ships FFmpeg's LGPL DLLs (`avcodec`, `avformat`, `avutil`, `swscale`, `swresample`) unmodified next to `BattlefrontII.exe` and links them dynamically, so they can be swapped for another build of the same versions. The Win32 build still uses the game's `binkw32.dll`.
+
+- Build: [BtbN FFmpeg-Builds](https://github.com/BtbN/FFmpeg-Builds) `ffmpeg-n8.1.3-27-g8dca1586f4-win64-lgpl-shared-8.1.zip` (release `autobuild-2026-10-30-13-01`), fetched by `tools\setup.ps1` into `third_party\ffmpeg`
+- SHA-256: 21b96a5b382b031e89c1c91d7af8efc3db989c4c11bff27422a4c4ea24cf45ed
+- Source: FFmpeg tag [n8.1](https://github.com/FFmpeg/FFmpeg/tree/n8.1); this build is commit 8dca1586f4 on its `release/8.1` branch
+- License: LGPL version 3 or later (`third_party\ffmpeg\LICENSE.txt`)
