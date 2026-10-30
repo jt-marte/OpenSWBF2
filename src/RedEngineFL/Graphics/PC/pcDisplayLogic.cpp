@@ -609,6 +609,84 @@ float ShellUiScale(unsigned int uiScreenH)
     return (float)uiScreenH / 600.0f;
 }
 
+unsigned int CrispFactor(unsigned int uiScreenH)
+{
+    if (uiScreenH > 1080)
+    {
+        return 4;
+    }
+    return uiScreenH > 600 ? 2 : 1;
+}
+
+float TexelInset(float fTexels)
+{
+    const float fInset = fTexels - (float)floor(fTexels + 0.001f);
+    return fInset > 0.0f ? fInset : 0.0f;
+}
+
+// The ink along iCount lines (iAlong bytes apart) of iSpan texels each
+// (iAcross bytes apart), each line counted by its darkest texel.
+static InkSpan MeasureInkLines(const unsigned char* pucBits, int iCount, int iSpan, int iAlong,
+                               int iAcross, int iFull)
+{
+    InkSpan out;
+    out.fWidth = 0.0f;
+    out.fCentre = 0.0f;
+    if (!pucBits || iCount <= 0 || iSpan <= 0 || iFull <= 0)
+    {
+        return out;
+    }
+    float fSum = 0.0f;
+    float fMoment = 0.0f;
+    for (int i = 0; i < iCount; ++i)
+    {
+        int iMax = 0;
+        for (int j = 0; j < iSpan; ++j)
+        {
+            const int iValue = pucBits[i * iAlong + j * iAcross];
+            iMax = iValue > iMax ? iValue : iMax;
+        }
+        const float fLine = (float)(iMax < iFull ? iMax : iFull) / (float)iFull;
+        fSum += fLine;
+        fMoment += fLine * ((float)i + 0.5f);
+    }
+    if (fSum > 0.0f)
+    {
+        out.fWidth = fSum;
+        out.fCentre = fMoment / fSum;
+    }
+    return out;
+}
+
+InkSpan MeasureInk(const unsigned char* pucBits, int iW, int iH, int iPitch, int iFull)
+{
+    return MeasureInkLines(pucBits, iW, iH, 1, iPitch, iFull);
+}
+
+InkSpan MeasureInkRows(const unsigned char* pucBits, int iW, int iH, int iPitch, int iFull)
+{
+    return MeasureInkLines(pucBits, iH, iW, iPitch, 1, iFull);
+}
+
+float CrispStretch(float fAtlasW, float fInkW, int iK)
+{
+    if (fAtlasW <= 0.0f || fInkW <= 0.0f || iK <= 0)
+    {
+        return 1.0f;
+    }
+    const float fStretch = fAtlasW * (float)iK / fInkW;
+    return fStretch < 0.75f ? 0.75f : (fStretch > 1.5f ? 1.5f : fStretch);
+}
+
+void CrispPlace(int iBoxX, int iBoxY, int iK, int iGlyphTop, float fBaseline, int iOriginY,
+                float fAtlasCentre, float fInkCentre, int& iDstX, int& iDstY)
+{
+    const float fX = fAtlasCentre * (float)iK - fInkCentre;
+    const float fY = (fBaseline - (float)iGlyphTop) * (float)iK - (float)iOriginY;
+    iDstX = iBoxX + (int)(fX < 0.0f ? fX - 0.5f : fX + 0.5f);
+    iDstY = iBoxY + (int)(fY < 0.0f ? fY - 0.5f : fY + 0.5f);
+}
+
 ShellStretch ShellStretchPlan(DisplayMode m, bool bIsShell, unsigned int uiBackW,
                               unsigned int uiBackH, unsigned int uiClientW, unsigned int uiClientH,
                               bool bLinearCaps)

@@ -169,6 +169,9 @@ public:
 
     void Read(PblFileChunk& chunk);
 
+    // OpenSWBF2: redraws the atlas pages sharp above 1080p (pcCrispFont).
+    void MakeCrisp();
+
     struct Range
     {
         unsigned short first;

@@ -17,6 +17,7 @@ const unsigned int kPadLayout = 1024; // OpenSWBF2: controller layout, 0 modern 
 const unsigned int kPadLookSpeed = 2048; // OpenSWBF2: controller sensitivity level, 1..10 (default 4)
 const unsigned int kHudScale = 4096; // OpenSWBF2: HUD scale, percent 50..150 (default 100)
 const unsigned int kFov = 8192; // OpenSWBF2: field of view, degrees at 16:9 55..100 (default 61)
+const unsigned int kCrispFonts = 16384; // OpenSWBF2: redraw the font atlases sharp above 1080p (default on)
 
 const unsigned int kAdapterMax = 15;
 const unsigned int kRefreshMax = 1000;
@@ -58,6 +59,7 @@ struct DisplaySettings
     unsigned int uiPadLookSpeed;
     unsigned int uiHudScale;
     unsigned int uiFov;
+    bool bCrispFonts;
     char acDisplayIni[260];
     unsigned int uiSet;
     unsigned int uiCliMask;

@@ -1806,6 +1806,9 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcCrispFont.cpp">
+      <Filter>src\RedEngineFL\Graphics\PC</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp">
       <Filter>src\RedEngineFL\Graphics\PC</Filter>
     </ClCompile>

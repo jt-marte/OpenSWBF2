@@ -573,6 +573,11 @@ TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("
     SetDefaults(kSettings);
     CHECK(kSettings.uiHudScale == 100);
     CHECK(kSettings.uiFov == 61);
+    CHECK(kSettings.bCrispFonts);
+    CHECK(SetFromText(kSettings, kCrispFonts, "0", "test"));
+    CHECK_FALSE(kSettings.bCrispFonts);
+    CHECK(SetFromText(kSettings, kCrispFonts, "1", "test"));
+    CHECK(kSettings.bCrispFonts);
     CHECK((kSettings.uiSet & (kHudScale | kFov)) == 0);
     CHECK(SetFromText(kSettings, kHudScale, "75", "test"));
     CHECK(kSettings.uiHudScale == 75);

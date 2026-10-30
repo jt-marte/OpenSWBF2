@@ -1865,3 +1865,95 @@ TEST_CASE("display logic hud group scale" * doctest::test_suite("unit"))
     CHECK(HudGroupScale(1080, 400) == doctest::Approx(1.5f));
     CHECK(HudGroupScale(720, 100) == 1.0f);
 }
+
+TEST_CASE("display logic crisp font factor and placement" * doctest::test_suite("unit"))
+{
+    // 4x above 1080 lines, 2x above 600, untouched below
+    CHECK(CrispFactor(2160) == 4);
+    CHECK(CrispFactor(1440) == 4);
+    CHECK(CrispFactor(1081) == 4);
+    CHECK(CrispFactor(1080) == 2);
+    CHECK(CrispFactor(720) == 2);
+    CHECK(CrispFactor(600) == 1);
+    CHECK(CrispFactor(0) == 1);
+    // a glyph box at (10, 20), K = 4: 'H' (top row 4, baseline row 11) whose
+    // ink is centred 3.5 across at 1x, a black box 28 high with its ink's
+    // middle 12 from its left: the middles line up, its top at the box top
+    int x = 0;
+    int y = 0;
+    CrispPlace(40, 80, 4, 4, 11.0f, 28, 3.5f, 12.0f, x, y);
+    CHECK(x == 40 + 14 - 12);
+    CHECK(y == 80 + 11 * 4 - 28 - 4 * 4);
+    CHECK(y == 80);
+    // a lower-case 'x' (box from row 6) whose black box rises 20 above the
+    // baseline; an ink middle left of the box's rounds away from zero
+    CrispPlace(0, 0, 4, 6, 11.0f, 20, 1.0f, 5.5f, x, y);
+    CHECK(x == -2);
+    CHECK(y == 11 * 4 - 20 - 6 * 4);
+    // a baseline between rows lands on the nearest pixel at K
+    CrispPlace(0, 0, 4, 4, 10.9f, 28, 0.0f, 0.0f, x, y);
+    CHECK(y == 44 - 28 - 16);
+    CrispPlace(0, 0, 4, 4, 10.6f, 28, 0.0f, 0.0f, x, y);
+    CHECK(y == 42 - 28 - 16);
+}
+
+TEST_CASE("display logic crisp font texel inset" * doctest::test_suite("unit"))
+{
+    // the atlases' UVs sit on texel centres; whole texels, and float noise
+    // just short of one, are no inset
+    CHECK(TexelInset(65.5f) == doctest::Approx(0.5f));
+    CHECK(TexelInset(0.5f) == doctest::Approx(0.5f));
+    CHECK(TexelInset(66.0f) == 0.0f);
+    CHECK(TexelInset(65.9996f) == 0.0f);
+    CHECK(TexelInset(0.25f) == doctest::Approx(0.25f));
+}
+
+TEST_CASE("display logic crisp font ink and stretch" * doctest::test_suite("unit"))
+{
+    // a 6x3 bitmap (pitch 8, solid = 64): solid columns 1 and 2, a half
+    // column 3, blank 0, 4 and 5
+    const unsigned char aucBits[3 * 8] = {
+        0, 64, 64, 0,  0, 0, 9, 9,
+        0, 64, 64, 32, 0, 0, 9, 9,
+        0, 0,  64, 0,  0, 0, 9, 9,
+    };
+    InkSpan ink = MeasureInk(aucBits, 6, 3, 8, 64);
+    CHECK(ink.fWidth == doctest::Approx(2.5f));
+    CHECK(ink.fCentre == doctest::Approx((1.5f + 2.5f + 0.5f * 3.5f) / 2.5f));
+    // values past solid count as solid; blank and bad bitmaps are 0
+    const unsigned char aucHot[2] = { 255, 0 };
+    CHECK(MeasureInk(aucHot, 2, 1, 2, 64).fWidth == doctest::Approx(1.0f));
+    const unsigned char aucBlank[4] = { 0, 0, 0, 0 };
+    CHECK(MeasureInk(aucBlank, 2, 2, 2, 255).fWidth == 0.0f);
+    CHECK(MeasureInk(aucBlank, 2, 2, 2, 255).fCentre == 0.0f);
+    CHECK(MeasureInk(0, 2, 2, 2, 255).fWidth == 0.0f);
+    CHECK(MeasureInk(aucBlank, 0, 2, 2, 255).fWidth == 0.0f);
+    // down the same bitmap: rows 0 and 1 are solid, row 2 too (column 2)
+    ink = MeasureInkRows(aucBits, 6, 3, 8, 64);
+    CHECK(ink.fWidth == doctest::Approx(3.0f));
+    CHECK(ink.fCentre == doctest::Approx(1.5f));
+    // an atlas 'H' with a blank padding row under it: 2 rows tall, its
+    // baseline 2 rows down; a soft top row counts in part
+    const unsigned char aucH[4 * 3] = {
+        0,   0,   0,
+        255, 0,   255,
+        255, 255, 255,
+        0,   0,   0,
+    };
+    ink = MeasureInkRows(aucH, 3, 4, 3, 255);
+    CHECK(ink.fWidth == doctest::Approx(2.0f));
+    CHECK(ink.fCentre + ink.fWidth * 0.5f == doctest::Approx(3.0f));
+    const unsigned char aucSoft[3] = { 51, 255, 255 };
+    ink = MeasureInkRows(aucSoft, 1, 3, 1, 255);
+    CHECK(ink.fWidth == doctest::Approx(2.2f));
+    CHECK(ink.fCentre + ink.fWidth * 0.5f == doctest::Approx((0.2f * 0.5f + 1.5f + 2.5f) / 2.2f + 1.1f));
+
+    // a 6-wide atlas glyph at K = 4 is 24 wide: a 20-wide one widens 1.2x
+    CHECK(CrispStretch(6.0f, 20.0f, 4) == doctest::Approx(1.2f));
+    CHECK(CrispStretch(6.0f, 24.0f, 4) == doctest::Approx(1.0f));
+    // kept within 0.75..1.5, and 1 for blank glyphs
+    CHECK(CrispStretch(6.0f, 8.0f, 4) == doctest::Approx(1.5f));
+    CHECK(CrispStretch(1.0f, 40.0f, 4) == doctest::Approx(0.75f));
+    CHECK(CrispStretch(0.0f, 20.0f, 4) == 1.0f);
+    CHECK(CrispStretch(6.0f, 0.0f, 4) == 1.0f);
+}
