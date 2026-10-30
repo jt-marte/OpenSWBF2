@@ -1,3 +1,6 @@
+param(
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32'
+)
 $ErrorActionPreference = 'Stop'
 $run = Join-Path $PSScriptRoot 'run.ps1'
 $tmp = Join-Path $env:TEMP ("openswbf2-selftest-" + [guid]::NewGuid().ToString('N'))
@@ -26,7 +29,7 @@ try {
         $env:OPENSWBF2_TEST_EXE = $stub
         if ($sc[3]) { $env:OPENSWBF2_LIST_TIMEOUT_MS = $sc[3] }
         try {
-            $out = (& powershell -NoProfile -File $run -NoBuild -Smoke None -Suite $sc[1] 2>&1 | Out-String)
+            $out = (& powershell -NoProfile -File $run -NoBuild -Platform $Platform -Smoke None -Suite $sc[1] 2>&1 | Out-String)
             $code = $LASTEXITCODE
         }
         finally {
@@ -45,6 +48,9 @@ finally {
     Remove-Item -Recurse -Force $tmp -ErrorAction SilentlyContinue
 }
 . (Join-Path $PSScriptRoot 'smoke.ps1')
+# The checks below pin Win32 data shapes (Bink, Galaxy and Steam DLL names, x86 hardening text, the hog regex), so they
+# run as Win32 whatever -Platform says; the platform scenarios further down switch explicitly.
+Set-SmokePlatform 'Win32'
 $smokeTmp = Join-Path $env:TEMP ("openswbf2-smoke-" + [guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $smokeTmp | Out-Null
 $smokeScenarios = @(
@@ -275,7 +281,99 @@ foreach ($p in @(@('nab2g_c', $parTw, 'twice-digest-1'), @('hot1g_con', $parTw, 
 if (-not $why -and $parAll['nab2g_c'].Timeout -ne 0) { $why = 'All nab2g_c must use the default timeout' }
 if ($why) { $failed++; Write-Host "FAILED ${n}: all/twice digest parity: $why" }
 else { Write-Host "OK $n all/twice digest parity" }
-$testExe = Join-Path (Split-Path $PSScriptRoot -Parent) 'bin\Tests\Debug\OpenSWBF2Tests.exe'
+$testsRoot = Split-Path $PSScriptRoot -Parent
+$platTmp = Join-Path $env:TEMP ("openswbf2-platform-" + [guid]::NewGuid().ToString('N'))
+New-Item -ItemType Directory -Path $platTmp | Out-Null
+$savedExpected2 = $env:OPENSWBF2_DIGEST_EXPECTED
+try {
+    $env:OPENSWBF2_DIGEST_EXPECTED = $null
+    $n++
+    $why = $null
+    $paths = @{}
+    foreach ($p in 'Win32', 'x64') {
+        Set-SmokePlatform $p
+        $paths[$p] = @{
+            Exe = Get-GameExeDir $testsRoot 'Release'; Obj = Get-GameObjDir $testsRoot 'Release'
+            Test = Get-TestExePath $testsRoot 'Debug'; Digest = Get-DigestExpectedFile; Base = Get-PreferredImageBase
+        }
+    }
+    $w = $paths['Win32']
+    $x = $paths['x64']
+    if ($w.Exe -ne (Join-Path $testsRoot 'bin\Win32\Release') -or $w.Obj -ne (Join-Path $testsRoot 'obj\Win32\Release')) { $why = 'Win32 game paths changed' }
+    elseif ($w.Test -ne (Join-Path $testsRoot 'bin\Tests\Debug\OpenSWBF2Tests.exe')) { $why = 'Win32 test exe path changed' }
+    elseif ($w.Digest -ne (Join-Path $PSScriptRoot 'smoke\digest-expected.txt') -or $w.Base -ne 0x400000) { $why = 'Win32 digest file or image base changed' }
+    elseif ($x.Exe -ne (Join-Path $testsRoot 'bin\x64\Release') -or $x.Obj -ne (Join-Path $testsRoot 'obj\x64\Release')) { $why = 'x64 game paths' }
+    elseif ($x.Test -ne (Join-Path $testsRoot 'bin\Tests\x64\Debug\OpenSWBF2Tests.exe')) { $why = 'x64 test exe path' }
+    elseif ($x.Digest -ne (Join-Path $PSScriptRoot 'smoke\x64\digest-expected.txt') -or $x.Base -ne 0x140000000) { $why = 'x64 digest file or image base' }
+    if ($why) { $failed++; Write-Host "FAILED ${n}: platform paths: $why" }
+    else { Write-Host "OK $n platform paths (Win32 unchanged, x64 under its own folders)" }
+
+    $n++
+    $why = $null
+    Set-SmokePlatform 'x64'
+    $x64Digest = Join-Path $platTmp 'x64-digest.txt'
+    $env:OPENSWBF2_DIGEST_EXPECTED = $x64Digest
+    $lineA = 'OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=1/2 snd=49.923 state=0x0000ABCD'
+    $lineB = 'OPENSWBF2 SIM DIGEST turns=1500 time=50.000 rand=3/4 snd=49.923 state=0x0000BEEF'
+    Save-DigestBaseline $x64Digest @{ 'case-a' = $lineA }
+    Save-DigestBaseline $x64Digest @{ 'case-b' = $lineB; 'case-a' = $lineA.Replace('ABCD', 'ABCE') }
+    $bytes = [IO.File]::ReadAllBytes($x64Digest)
+    $text = [Text.Encoding]::UTF8.GetString($bytes)
+    $loneLf = [regex]::Matches($text, '(?<!\r)\n').Count
+    if ((Get-DigestExpected 'case-a') -cne $lineA.Replace('ABCD', 'ABCE')) { $why = 'merge did not replace case-a' }
+    elseif ((Get-DigestExpected 'case-b') -cne $lineB) { $why = 'merge dropped or lost case-b' }
+    elseif ((Get-DigestExpected 'case-c')) { $why = 'unknown case has a row' }
+    elseif ($loneLf -ne 0 -or -not $text.StartsWith('# x64 sim digest baseline')) { $why = 'file is not CRLF with the header' }
+    if ($why) { $failed++; Write-Host "FAILED ${n}: x64 digest baseline: $why" }
+    else { Write-Host "OK $n x64 digest baseline records, merges and reads back" }
+    $env:OPENSWBF2_DIGEST_EXPECTED = $null
+
+    $n++
+    $why = $null
+    Set-SmokePlatform 'Win32'
+    $w32Skips = Get-HardeningSkips
+    Set-SmokePlatform 'x64'
+    $x64Skips = Get-HardeningSkips
+    $testsProj = Join-Path $PSScriptRoot 'OpenSWBF2Tests.vcxproj'
+    if ($w32Skips.Count -ne 0) { $why = 'Win32 skips a hardening check' }
+    elseif (-not $x64Skips.ContainsKey('laa') -or -not $x64Skips.ContainsKey('safeseh') -or $x64Skips.Count -ne 2) { $why = 'x64 must skip exactly laa and safeseh' }
+    elseif (-not (Test-ProjectConfig $testsProj 'Debug') -or -not (Test-ProjectConfig $testsProj 'Release') -or (Test-ProjectConfig $testsProj 'Fast')) { $why = 'x64 test project configurations' }
+    else {
+        Set-SmokePlatform 'Win32'
+        if (-not (Test-ProjectConfig $testsProj 'Debug') -or (Test-ProjectConfig $testsProj 'Fast')) { $why = 'Win32 test project configurations' }
+    }
+    if ($why) { $failed++; Write-Host "FAILED ${n}: platform checks: $why" }
+    else { Write-Host "OK $n platform hardening skips and project configurations" }
+
+    $n++
+    $why = $null
+    Set-SmokePlatform 'x64'
+    $preDir = Join-Path $platTmp 'x64pre'
+    New-Item -ItemType Directory -Force -Path (Join-Path $preDir 'data\_lvl_pc') | Out-Null
+    Set-Content -Path (Join-Path $preDir 'data\_lvl_pc\shell.lvl') -Value 'x'
+    Copy-Item -LiteralPath (Join-Path $env:windir 'System32\cmd.exe') -Destination (Join-Path $preDir 'BattlefrontII.exe')
+    $pre = Get-SmokePrecheck $platTmp $preDir
+    if ($pre) { $why = "x64 precheck asked for something it should not: $pre" }
+    Set-SmokePlatform 'Win32'
+    $pre = Get-SmokePrecheck $platTmp $preDir
+    if (-not $why -and $pre -notmatch 'binkw32\.dll missing') { $why = "Win32 precheck lost its DLL list: $pre" }
+    if ($why) { $failed++; Write-Host "FAILED ${n}: x64 smoke precheck: $why" }
+    else { Write-Host "OK $n x64 smoke precheck needs no Bink, Galaxy or 32-bit Steam DLLs" }
+
+    foreach ($sw in @(@('-RecordDigests', 'only for -Platform x64'), @('-RecordCorpus', 'only for -Platform x64'))) {
+        $n++
+        $out = (& powershell -NoProfile -File $run -NoBuild $sw[0] 2>&1 | Out-String)
+        $code = $LASTEXITCODE
+        if ($code -ne 2 -or $out -notmatch $sw[1]) { $failed++; Write-Host "FAILED ${n}: Win32 run.ps1 $($sw[0]): exit $code, output: $out" }
+        else { Write-Host "OK $n Win32 run.ps1 refuses $($sw[0])" }
+    }
+}
+finally {
+    $env:OPENSWBF2_DIGEST_EXPECTED = $savedExpected2
+    Remove-Item -Recurse -Force $platTmp -ErrorAction SilentlyContinue
+}
+Set-SmokePlatform $Platform
+$testExe = Get-TestExePath $testsRoot 'Debug'
 foreach ($probe in 'strictness probe emits an undeclared error', 'strictness probe unmatched expectation') {
     $n++
     if (-not (Test-Path $testExe)) { $failed++; Write-Host "FAILED ${n}: ${probe}: test exe not built"; continue }

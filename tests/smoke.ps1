@@ -1,7 +1,55 @@
+$script:SmokePlatform = 'Win32'
+$script:SmokeRecordDigests = $false
+$script:SmokeRecorded = @{}
 $script:SmokeStandardMission = 'geo1c_con'
 $script:SmokeMarker = 'OPENSWBF2 RUN COMPLETE'
 $script:WerKeyPath = 'SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\BattlefrontII.exe'
 $script:WerBasePath = 'SOFTWARE\Microsoft\Windows\Windows Error Reporting'
+
+# Platform helpers. 'Win32' (the default) resolves every path exactly as before; 'x64' swaps in the
+# x64 build folders, the x64 baselines and the 64-bit system DLL folder.
+function Set-SmokePlatform([string]$platform) {
+    if ($platform -ieq 'Win32') { $script:SmokePlatform = 'Win32' }
+    elseif ($platform -ieq 'x64') { $script:SmokePlatform = 'x64' }
+    else { throw "unknown platform '$platform' (Win32 or x64)" }
+}
+
+function Get-GameExeDir([string]$root, [string]$config) {
+    return (Join-Path $root "bin\$($script:SmokePlatform)\$config")
+}
+
+function Get-GameObjDir([string]$root, [string]$config) {
+    return (Join-Path $root "obj\$($script:SmokePlatform)\$config")
+}
+
+function Get-TestExePath([string]$root, [string]$config) {
+    if ($script:SmokePlatform -eq 'x64') { return (Join-Path $root "bin\Tests\x64\$config\OpenSWBF2Tests.exe") }
+    return (Join-Path $root "bin\Tests\$config\OpenSWBF2Tests.exe")
+}
+
+function Get-RuntimeDllDir {
+    if ($script:SmokePlatform -eq 'x64') {
+        if ([Environment]::Is64BitProcess) { return (Join-Path $env:windir 'System32') }
+        return (Join-Path $env:windir 'Sysnative')
+    }
+    return (Join-Path $env:windir 'SysWOW64')
+}
+
+function Get-RuntimeDllHint {
+    if ($script:SmokePlatform -eq 'x64') { return 'Install the DirectX June 2010 redist and the VS2013 (vcredist 2013 x64) runtime.' }
+    return 'Install the DirectX June 2010 redist and the VS2013 (vcredist 2013 x86) runtime.'
+}
+
+function Get-PreferredImageBase {
+    if ($script:SmokePlatform -eq 'x64') { return [int64]0x140000000 }
+    return [int64]0x400000
+}
+
+# True when the vcxproj declares the configuration for the current platform.
+function Test-ProjectConfig([string]$vcxproj, [string]$config) {
+    if (-not (Test-Path -LiteralPath $vcxproj)) { return $false }
+    return [IO.File]::ReadAllText($vcxproj).Contains('ProjectConfiguration Include="' + $config + '|' + $script:SmokePlatform + '"')
+}
 
 function Find-GameDataRoot {
     $candidate = $null
@@ -31,11 +79,50 @@ function Find-GameDataRoot {
     return $null
 }
 
+# DLLs the exe imports (dumpbin /dependents); $null when dumpbin is not installed.
+function Get-ExeDependents([string]$exe) {
+    $db = $null
+    $cands = @()
+    if ($env:VS120COMNTOOLS) { $cands += (Join-Path $env:VS120COMNTOOLS '..\..\VC\bin\dumpbin.exe') }
+    $cands += (Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio 12.0\VC\bin\dumpbin.exe')
+    foreach ($c in $cands) { if (Test-Path -LiteralPath $c) { $db = (Resolve-Path -LiteralPath $c).Path; break } }
+    if (-not $db) { return $null }
+    $names = @()
+    $in = $false
+    foreach ($line in (& $db /dependents $exe)) {
+        if ($line -match '^\s+Image has the following dependencies') { $in = $true; continue }
+        if ($line -match '^\s+Summary') { break }
+        if ($in -and $line -match '^\s+(\S+\.dll)\s*$') { $names += $Matches[1] }
+    }
+    return $names
+}
+
+# The x64 build ships no Bink, Galaxy or 32-bit Steam DLLs, so its precheck asks the exe itself which
+# DLLs it needs and looks for each beside the exe or in the 64-bit system folder.
+function Get-X64MissingDll([string]$exeDir) {
+    $deps = Get-ExeDependents (Join-Path $exeDir 'BattlefrontII.exe')
+    if ($null -eq $deps) { return $null }
+    $sys = Get-RuntimeDllDir
+    foreach ($dll in $deps) {
+        if ($dll -like 'api-ms-*' -or $dll -like 'ext-ms-*') { continue }
+        if (Test-Path -LiteralPath (Join-Path $exeDir $dll)) { continue }
+        if (Test-Path -LiteralPath (Join-Path $sys $dll)) { continue }
+        return $dll
+    }
+    return $null
+}
+
 function Get-SmokePrecheck($gameDataRoot, $exeDir) {
     if (-not $gameDataRoot) { return 'no retail GameData found (set SWBF2_GAMEDATA or install Steam App 6060)' }
     if (-not (Test-Path -LiteralPath (Join-Path $exeDir 'BattlefrontII.exe'))) { return "BattlefrontII.exe not found in $exeDir" }
-    foreach ($dll in 'binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll') {
-        if (-not (Test-Path -LiteralPath (Join-Path $exeDir $dll))) { return "$dll missing beside the exe in $exeDir" }
+    if ($script:SmokePlatform -eq 'x64') {
+        $missing = Get-X64MissingDll $exeDir
+        if ($missing) { return "$missing missing beside the exe in $exeDir" }
+    }
+    else {
+        foreach ($dll in 'binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll') {
+            if (-not (Test-Path -LiteralPath (Join-Path $exeDir $dll))) { return "$dll missing beside the exe in $exeDir" }
+        }
     }
     $data = Get-Item -LiteralPath (Join-Path $exeDir 'data') -Force -ErrorAction SilentlyContinue
     if (-not $data -or ($data.Attributes -band [IO.FileAttributes]::ReparsePoint) -or -not (Test-Path -LiteralPath (Join-Path $exeDir 'data\_lvl_pc\shell.lvl'))) { return "staged data missing in $exeDir (build without SWBF2_NOSTAGE)" }
@@ -182,7 +269,11 @@ function Invoke-SmokeCase($name, $exe, $workDir, $argLine, $timeoutSec, $caseDir
 
 function New-SmokeWorkerDir($srcDir, $dir) {
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
-    foreach ($f in 'BattlefrontII.exe', 'binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll', 'unicows.dll', 'steam_appid.txt') {
+    $files = @('BattlefrontII.exe', 'binkw32.dll', 'Galaxy.dll', 'GalaxyPeer.dll', 'steam_api.dll', 'unicows.dll', 'steam_appid.txt')
+    if ($script:SmokePlatform -eq 'x64') {
+        $files = @('BattlefrontII.exe', 'steam_appid.txt') + @(Get-ChildItem -LiteralPath $srcDir -Filter '*.dll' -File -ErrorAction SilentlyContinue | ForEach-Object { $_.Name })
+    }
+    foreach ($f in $files) {
         $s = Join-Path $srcDir $f
         if (Test-Path -LiteralPath $s) { Copy-Item -LiteralPath $s -Destination $dir -Force }
     }
@@ -252,9 +343,74 @@ function Get-SmokeAllowed($caseName) {
     return $allowed
 }
 
-function Get-DigestExpected($caseName) {
+# Win32 reads tests\smoke\digest-expected.txt as always. x64 reads its own tests\smoke\x64\digest-expected.txt
+# (x64 float codegen gives different digests). OPENSWBF2_DIGEST_EXPECTED overrides both.
+function Get-DigestExpectedFile {
     $file = $env:OPENSWBF2_DIGEST_EXPECTED
-    if (-not $file) { $file = Join-Path $PSScriptRoot 'smoke\digest-expected.txt' }
+    if ($file) { return $file }
+    if ($script:SmokePlatform -eq 'x64') { return (Join-Path $PSScriptRoot 'smoke\x64\digest-expected.txt') }
+    return (Join-Path $PSScriptRoot 'smoke\digest-expected.txt')
+}
+
+# Case names that carry a digest row in the checked-in Win32 file; -RecordDigests records the same set.
+function Get-DigestRowNames {
+    $names = @()
+    $file = Join-Path $PSScriptRoot 'smoke\digest-expected.txt'
+    if (-not (Test-Path -LiteralPath $file)) { return $names }
+    foreach ($line in [IO.File]::ReadAllLines($file)) {
+        $t = $line.Trim()
+        if (-not $t -or $t.StartsWith('#')) { continue }
+        $i = $t.IndexOf("`t")
+        if ($i -gt 0) { $names += $t.Substring(0, $i) }
+    }
+    return $names
+}
+
+# Merge recorded rows (case -> digest line) into a digest file: rows already there are replaced, the
+# rest are kept. The file is written CRLF, like the Win32 one.
+function Save-DigestBaseline([string]$file, $rows) {
+    $dir = Split-Path $file -Parent
+    if ($dir) { New-Item -ItemType Directory -Force -Path $dir | Out-Null }
+    $header = @()
+    $order = New-Object System.Collections.ArrayList
+    $map = @{}
+    if (Test-Path -LiteralPath $file) {
+        foreach ($line in [IO.File]::ReadAllLines($file)) {
+            $t = $line.Trim()
+            if (-not $t) { continue }
+            if ($t.StartsWith('#')) { if ($order.Count -eq 0) { $header += $t }; continue }
+            $i = $t.IndexOf("`t")
+            if ($i -lt 0) { continue }
+            $name = $t.Substring(0, $i)
+            if (-not $map.ContainsKey($name)) { [void]$order.Add($name) }
+            $map[$name] = $t.Substring($i + 1)
+        }
+    }
+    if ($header.Count -eq 0) {
+        $header = @(
+            '# x64 sim digest baseline: one "case<TAB>full OPENSWBF2 SIM DIGEST line" row per case, from the Release x64 build.',
+            '# Record or refresh with: tests\run.ps1 -Platform x64 -Smoke Standard|Twice|All -RecordDigests',
+            '# The Win32 rows in tests\smoke\digest-expected.txt are separate and never read for x64.'
+        )
+    }
+    foreach ($k in @($rows.Keys | Sort-Object)) {
+        if (-not $map.ContainsKey($k)) { [void]$order.Add($k) }
+        $map[$k] = $rows[$k]
+    }
+    $out = @($header)
+    foreach ($k in $order) { $out += ($k + "`t" + $map[$k]) }
+    [IO.File]::WriteAllText($file, (($out -join "`r`n") + "`r`n"))
+}
+
+# -RecordDigests: remember the digest line of a passing case that has a row in the Win32 file.
+function Add-RecordedDigest([string]$caseName, [string]$caseDir) {
+    if (@(Get-DigestRowNames) -cnotcontains $caseName) { return }
+    $got = Get-DigestKey $caseDir
+    if ($got) { $script:SmokeRecorded[$caseName] = $got }
+}
+
+function Get-DigestExpected($caseName) {
+    $file = Get-DigestExpectedFile
     if (-not (Test-Path -LiteralPath $file)) { return $null }
     foreach ($line in [IO.File]::ReadAllLines($file)) {
         $t = $line.Trim()
@@ -301,7 +457,7 @@ function Test-SmokeExpect($case, $res) {
     }
     if (-not $script:SmokeDigestConfiguration -or $script:SmokeDigestConfiguration -eq 'Release') {
         $want = Get-DigestExpected $case.Name
-        if ($want) {
+        if ($want -and -not $script:SmokeRecordDigests) {
             $got = Get-DigestKey $res.CaseDir
             if ($want -cne $got) {
                 Write-Host "    digest expected: $want"
@@ -322,6 +478,9 @@ $script:SmokeAddrSpaceRx = 'OPENSWBF2 ADDRSPACE arena=0x[89A-F][0-9A-F]{7} arena
 
 function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $false) {
     $standard = $script:SmokeStandardMission
+    # The recorded d3dx9_43.dll crash offset is the x86 build's; the x64 DLL has another one.
+    $fatalSig = 'FATAL: exception 0xC0000005 at 0x[0-9A-F]+ \(d3dx9_43\.dll\+0x1BA553\)'
+    if ($script:SmokePlatform -eq 'x64') { $fatalSig = 'FATAL: exception 0xC0000005 at 0x[0-9A-F]+ \(d3dx9_43\.dll\+0x[0-9A-F]+\)' }
     $render = '-norender'
     if ($movies) { $render = '' }
     $tail = (("$render -nosound -fixedrate 30 -nowait -logfinalscore -DecompCONMinutes 5 -seed 1 -exitongameover -nofocuspause -log ""{CASEDIR}\run.log""") -replace '^\s+', '')
@@ -345,7 +504,7 @@ function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $fals
         $to = 0
         if ($class -eq 'TimeOut') { $x = @{ Class = 'TimeOut'; LogRx = (@('OPENSWBF2 MISSION RUNNING') + $hrx) } }
         elseif ($class -eq 'Fatal') {
-            $x = @{ Class = 'Fatal'; Code = 3; MinDumps = 1; MaxDumps = 1; LogRx = (@('FATAL: exception 0xC0000005 at 0x[0-9A-F]+ \(d3dx9_43\.dll\+0x1BA553\)') + $hrx) }
+            $x = @{ Class = 'Fatal'; Code = 3; MinDumps = 1; MaxDumps = 1; LogRx = (@($fatalSig) + $hrx) }
         }
         elseif ($class -ne 'Pass') { throw "unknown expected class '$class' for $m in missions file" }
         New-Object PSObject -Property @{ Name = $m; Args = "$m $htail"; Expect = $x; Twice = 0; Timeout = $to }
@@ -686,6 +845,17 @@ function Compare-LaaRuns($base, $laa, $minRuns = 5) {
     $keys = @(($base + $laa) | ForEach-Object { "$($_.Key) [f=$($_.Frames)]" } | Select-Object -Unique)
     if ($keys.Count -gt 1) { [void]$failures.Add("runs differ: $($keys -join ' | ')") }
     return New-Object PSObject -Property @{ Ok = ($failures.Count -eq 0); Failures = $failures; Keys = $keys }
+}
+
+# Hardening checks that mean nothing on the current platform: name -> reason. Win32 skips none.
+function Get-HardeningSkips {
+    if ($script:SmokePlatform -eq 'x64') {
+        return @{
+            laa = 'large-address-aware has no meaning for a 64-bit image'
+            safeseh = 'SafeSEH is x86-only (x64 unwinds through tables)'
+        }
+    }
+    return @{}
 }
 
 function Get-HardeningChecks($hdr, $cfg, $clTotal, $clGsMinus, $clSdl) {

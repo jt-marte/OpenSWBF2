@@ -3,6 +3,7 @@
 #include "third_party/doctest/doctest.h"
 
 #include <windows.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -55,6 +56,11 @@ int FloatCorpusGenerate(const char* pcOutDir);
 
 int main(int argc, char** argv)
 {
+#ifdef _WIN64
+    // msvcr120's x64 libm switches to FMA3 code on CPUs that have it, which changes some results in the
+    // last bit. Pin the generic SSE2 path so the x64 math corpus does not depend on the machine.
+    _set_FMA3_enable(0);
+#endif
     for (int i = 1; i < argc; ++i)
     {
         if (strcmp(argv[i], "--debug-output-child") == 0)

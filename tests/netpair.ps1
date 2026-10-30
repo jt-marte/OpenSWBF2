@@ -8,7 +8,8 @@ param(
     [switch]$Direct,
     [string]$ServerArgs = '',
     [string]$ClientArgs = '',
-    [string]$OutDir
+    [string]$OutDir,
+    [ValidateSet('Win32','x64')][string]$Platform = 'Win32'
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
 # each in its own worker folder (-Direct: clients join 127.0.0.1 by address instead of LAN
@@ -18,8 +19,10 @@ $ErrorActionPreference = 'Stop'
 $testsDir = $PSScriptRoot
 $root = Split-Path $testsDir -Parent
 . (Join-Path $testsDir 'smoke.ps1')
+Set-SmokePlatform $Platform
+$Platform = $script:SmokePlatform
 
-$exeDir = Join-Path $root "bin\Win32\$Configuration"
+$exeDir = Get-GameExeDir $root $Configuration
 $gameData = Find-GameDataRoot
 $skip = Get-SmokePrecheck $gameData $exeDir
 if (-not $skip) {

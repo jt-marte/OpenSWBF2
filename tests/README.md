@@ -6,7 +6,7 @@ Headless doctest harness (doctest 1.2.9, vendored). Built with the same VS2013 `
 
     MSBuild tests\OpenSWBF2Tests.vcxproj /p:Configuration=Debug /p:Platform=Win32
 
-Output: `bin\Tests\<Config>\OpenSWBF2Tests.exe`.
+Output: `bin\Tests\<Config>\OpenSWBF2Tests.exe`. The x64 build (`/p:Platform=x64`, toolset `v120`) writes `bin\Tests\x64\<Config>\` and `obj\Tests\x64\<Config>\`; see "x64" below.
 
 ## Run
 
@@ -24,6 +24,7 @@ Builds, then runs every case in its own process. Switches (the only ones):
 | `-Seed` | fuzz seed (default 1) |
 | `-Iterations` | fuzz iterations (default 100000) |
 | `-Timeout` | per-case seconds (default 10); the runner kills the process after Timeout+10 s |
+| `-Platform` | `Win32` (default, behaves exactly as without the switch) or `x64`; see "x64" below |
 
 Results: `artifacts\tests\<timestamp>\results.txt` plus one stdout file per case (`artifacts\` is self-ignored).
 
@@ -124,10 +125,43 @@ The runner prints `WARNING:` lines when the crash dump setup is missing. Import 
 
 With `-Movies` the retail `vidmode.ini` in `data\_lvl_pc` decides the video mode, so a stale or fullscreen entry can change what the run shows.
 
+## x64
+
+`-Platform x64` is accepted by `run.ps1`, `netpair.ps1`, `guard-revert.ps1`, `laa-compare.ps1` and `selftest.ps1`. Leaving it out is Win32, with the same paths, output and test count as before.
+
+- `run.ps1 -Platform x64` builds `OpenSWBF2Tests.vcxproj` for x64 (the same as `MSBuild tests\OpenSWBF2Tests.vcxproj /p:Configuration=Debug /p:Platform=x64`; toolset `v120`, `OPENSWBF2_NO_GALAXY` and `OPENSWBF2_FFMPEG` defined, the Windows 8.1 SDK beside the DirectX SDK `Lib\x64`) and runs `bin\Tests\x64\<Config>\OpenSWBF2Tests.exe`. The preflight looks for `d3dx9_43.dll` and `msvcr120.dll` in `System32` (the x64 DirectX June 2010 redist and vcredist 2013 x64). A failed build prints `Build failed (OpenSWBF2Tests, Platform=x64).` and exits 2. Skipped cases print their reason under the `[SKIP]` line.
+- The smoke and hardening steps use `bin\x64\<SmokeConfiguration>` and `obj\x64\<SmokeConfiguration>`. While `BattlefrontII.vcxproj` has no `<Config>|x64` configuration, or the exe is not built and `-NoBuild` is given, they print `[SKIP]` lines saying so and the run still exits 0. The smoke precheck asks the exe (`dumpbin /dependents`) which DLLs it needs instead of demanding the Bink, Galaxy and 32-bit Steam DLLs, and parallel workers copy every DLL beside the exe. Expected `FATAL:` crash signatures in the `-Smoke All` list do not pin the `d3dx9_43.dll` offset on x64 (the x64 DLL has a different one).
+- Large-address-aware checks have no meaning on a 64-bit image and print `[SKIP]`: `hardening:laa` and `hardening:safeseh` (SafeSEH is x86-only), `-HogAddrSpace` (ignored with a `[SKIP] smoke:hogaddrspace` line), `laa-compare.ps1` (exits 0 with `[SKIP] laa-compare`) and the `LAA-*` rows of `guard-revert.ps1`. The ASLR probe compares the image base with the x64 default `0x140000000`.
+- VS2013 reports pointer truncation (C4311, C4312, C4302) on x64 only at `/Wall`, so a plain `/W3` build hides it. The x64 test project passes `/w34311 /w34312 /w34302` to bring those three to level 3; the warnings are not errors.
+
+### x64 baselines
+
+x64 float codegen and libm differ from x86, so the expected values are kept per platform. The Win32 files stay where they are and are never read for x64.
+
+| What | Win32 | x64 |
+|------|-------|-----|
+| Sim digests | `tests\smoke\digest-expected.txt` | `tests\smoke\x64\digest-expected.txt` |
+| Math corpus | `tests\corpus\mathfn\math.txt` | `tests\corpus\mathfn\x64\math.txt` |
+| Float parse corpora | `tests\corpus\floatparse\*.txt` | same files (x64 parses identically; the cases check it) |
+| VS2013 reference capture | `tests\baseline\vs2013` | none (a one-off Win32 record, no run reads it) |
+
+When an x64 baseline is missing the runner does not fail. A missing digest file or row prints `[SKIP] smoke:digest - no x64 baseline yet in <file> for: <cases>. Record one with: ...` and the digest is left unchecked; a missing math corpus makes `math corpus` print `[SKIP]` with the same advice. `math corpus x87 pc24` is skipped on x64 (no x87 precision control).
+
+The x64 math corpus is checked in. The x64 digest file is not: it needs a working x64 game build, so until someone records it the digest checks print the `[SKIP]` above. Record them from a good Release x64 build:
+
+    tests\run.ps1 -Platform x64 -Smoke Standard -RecordDigests
+    tests\run.ps1 -Platform x64 -Smoke Twice -RecordDigests
+    tests\run.ps1 -Platform x64 -Smoke All -RecordDigests
+    tests\run.ps1 -Platform x64 -RecordCorpus
+
+`-RecordDigests` runs the selected smoke cases without comparing, and for every passing case that has a row in the Win32 file it merges the case's `OPENSWBF2 SIM DIGEST` line into `tests\smoke\x64\digest-expected.txt` (the file is created with a header, written CRLF, and rows already there are replaced). It needs `-Platform x64`, a smoke run and `-SmokeConfiguration Release`. `-RecordCorpus` builds the x64 test exe and runs `OpenSWBF2Tests.exe --gen-corpus=corpus`, which on x64 writes only `corpus\mathfn\x64\math.txt` (no GameData needed). Both refuse to run for Win32, whose baselines are pinned. Review and commit the changed files like any other baseline change.
+
+The x64 test exe calls `_set_FMA3_enable(0)` first: msvcr120's x64 libm takes FMA3 code paths on CPUs that have them, which changes some results in the last bit (17 of the 10636 math corpus lines on the AVX2 machine the baseline was recorded on; 225 lines of the recorded x64 file differ from the x86 file). Pinning the generic SSE2 path keeps the recorded corpus the same on every machine. A game binary that does not do the same gets machine-dependent `sin`, `cos`, `pow` and friends, and with them machine-dependent sim digests.
+
 ## Network pair runs
 
 `tests
-etpair.ps1 [-Profile clean|lag100|lag200|jitter|all] [-Clients N] [-Seconds 45] [-Direct] [-ServerArgs "/tps 60"] [-Map geo1c_con] [-Configuration Release]` is opt-in and not part of `run.ps1`. It starts a headless dedicated LAN server (`/autonet dedicated -lan`) in its own worker folder, waits for its `OPENSWBF2 NET mission start` line, then starts N headless autonet clients that find it by LAN broadcast and join (with `-Direct` they skip discovery and join `127.0.0.1` by address through `/connect`, the Join IP path). After every client logs `mission start` it lets them play for `-Seconds`, kills the process trees and reads the logs. `-ServerArgs` adds switches to the server's command line (for example `/tps 60`). `lag100` and `lag200` pass `-latency`/`-loss` to the server, which pushes them to its clients; `jitter` passes `-latency 60 -jitter 50 -loss 1` (each packet 60 ms plus or minus 30 ms each way: `-jitter` is a percentage of `-latency`). Clients started with `-ClientArgs -nettestplayer` spawn by themselves and play a fixed pattern of moves (walk, strafe, steady aim changes, fire), so the host gets real inputs to guess, replay and lose. A run fails on any `align mismatch`, `bad soldier state`, `bad walker state`, `drop`, `host lost`, `join lost`, `join refused`, `join rejected` or `FATAL:` line, an early exit, server and client `characters` lines that differ, or an average below the profile's update floor (clean 8/s, lag100 3/s, lag200 2/s, jitter 3/s). It prints `[PASS]`/`[FAIL] netpair:<profile> join=lan|direct clients=N updates=<avg/s> ping=<ms> loss=<%> fills/s=<turns the host guessed> replayed/s=<late moves replayed> lost/s=<guessed turns never repaired> corr=<average>/<largest correction, m>` and writes logs to `artifacts
+etpair.ps1 [-Profile clean|lag100|lag200|jitter|all] [-Clients N] [-Seconds 45] [-Direct] [-ServerArgs "/tps 60"] [-Map geo1c_con] [-Configuration Release] [-Platform Win32|x64]` is opt-in and not part of `run.ps1`. It starts a headless dedicated LAN server (`/autonet dedicated -lan`) in its own worker folder, waits for its `OPENSWBF2 NET mission start` line, then starts N headless autonet clients that find it by LAN broadcast and join (with `-Direct` they skip discovery and join `127.0.0.1` by address through `/connect`, the Join IP path). After every client logs `mission start` it lets them play for `-Seconds`, kills the process trees and reads the logs. `-ServerArgs` adds switches to the server's command line (for example `/tps 60`). `lag100` and `lag200` pass `-latency`/`-loss` to the server, which pushes them to its clients; `jitter` passes `-latency 60 -jitter 50 -loss 1` (each packet 60 ms plus or minus 30 ms each way: `-jitter` is a percentage of `-latency`). Clients started with `-ClientArgs -nettestplayer` spawn by themselves and play a fixed pattern of moves (walk, strafe, steady aim changes, fire), so the host gets real inputs to guess, replay and lose. A run fails on any `align mismatch`, `bad soldier state`, `bad walker state`, `drop`, `host lost`, `join lost`, `join refused`, `join rejected` or `FATAL:` line, an early exit, server and client `characters` lines that differ, or an average below the profile's update floor (clean 8/s, lag100 3/s, lag200 2/s, jitter 3/s). It prints `[PASS]`/`[FAIL] netpair:<profile> join=lan|direct clients=N updates=<avg/s> ping=<ms> loss=<%> fills/s=<turns the host guessed> replayed/s=<late moves replayed> lost/s=<guessed turns never repaired> corr=<average>/<largest correction, m>` and writes logs to `artifacts
 etpair\<stamp>\<profile>\`. It skips (exit 0) without GameData or without a private LAN address.
 
 Network log lines start `OPENSWBF2 NET` (category `LogNet`, Inform unless noted): `socket open host=<0|1> port=`, `broadcast open port=3656` (Warning on a failed bind), `host registered lan addr=`, `join sent to=`, `join accepted from= player= guests=` (`late=1` for a join into a running mission), `join rejected from= reason=full|password|version`, `join refused reason=` (client side), `joined player=`, `mission start host= dedicated= tps= game=`, `characters total= players= bots=` (the character table size, which host and clients must agree on), `direct find <ip:port>` and `join ip: cannot use address` (Warning), `drop player= reason=quit|timeout|load|boot silent=`, `host lost silent=`, `join lost silent= player=`. Desync detectors log a Warning: `align mismatch` (the per-object alignment marker read back wrong, which retail release builds never checked; at most 8 per process), `bad soldier state` and `bad walker state` (an index the local object cannot use; the rest of that update is dropped instead of crashing), and `powerup station state host= local=`. LAN discovery logs `lan find` and `lan found` at Verbose. `-netstats` adds one line a second in a mission: clients log `NET STATS client player= ping= updates= in= out= loss= lag= ts= corr=` (kbit/s in and out, lag in turns, timescale, and the average/largest jump in metres when an update corrected a remote soldier's predicted position, respawns excluded), hosts log `NET STATS player= ping= updates= fills= loss= fills_s= same_s= fixed_s= lost_s= fire_s=` per remote player (per second: turns filled with a guess because the move was missing, late moves that matched the guess, late moves replayed, guessed turns never repaired, and replayed moves whose fire buttons differed from the guess) and `NET STATS host players= in= out= replays_s= shots_s= replay_shots_s= events_s= stale_s= split_s=` (turns replayed, shots created and those on replayed turns, shot events sent to clients and dropped as stale, and updates that needed a second packet).
