@@ -581,10 +581,15 @@ bool RedMoviePlayer::Open(const char* const pFileName, unsigned int uiNumTexture
                           int iUnused, unsigned int uiArg4, unsigned int uiBufferSize,
                           unsigned int uiReadSize, unsigned int uiNumBitmaps)
 {
-    char* pBlock = (char*)RedAllocFromHeap(iHeap, uiBufferSize + 4 * (uiNumBitmaps + 4 * uiNumTextures), 0);
+    // One block: the stream buffer, then 4 texture pointers per texture, then a bitmap pointer per
+    // bitmap. Retail sized the pointers as 4 bytes; on x64 the texture table's clear wiped the
+    // bitmap pointers after it.
+    const unsigned int uiTextureTable = 4 * uiNumTextures * (unsigned int)sizeof(RedTexture*);
+    char* pBlock = (char*)RedAllocFromHeap(
+        iHeap, uiBufferSize + uiTextureTable + uiNumBitmaps * (unsigned int)sizeof(RedBitmapElement*), 0);
     if (pBlock)
     {
-        if (OpenRenderer(iHeap, (RedBitmapElement**)(pBlock + 16 * uiNumTextures + uiBufferSize),
+        if (OpenRenderer(iHeap, (RedBitmapElement**)(pBlock + uiTextureTable + uiBufferSize),
                          uiNumBitmaps))
         {
             if (RedMoviePlayerBase::Open(pFileName, (RedTexture**)(pBlock + uiBufferSize),
