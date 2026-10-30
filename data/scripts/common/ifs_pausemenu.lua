@@ -239,8 +239,8 @@ function ifs_pausemenu_fnEnter(this, bFwd, iInstance)
 		local iJoystick = ScriptCB_GetPausingJoystick()
 		bShowFriends = ScriptCB_XL_IsLoggedIn(nil, iJoystick + 1) -- only visible if successfully signed in
 	else
-		-- GS has only one viewport to worry about 
-		bShowFriends = ScriptCB_IsLoggedIn()
+		-- OpenSWBF2: no friends list on PC
+		bShowFriends = nil
 	end
 	this.buttons.friends.hidden = not bShowFriends
 	this.bIsLoggedIn = bShowFriends

@@ -11,9 +11,11 @@ gPCMultiPlayerTabsLayout = {
 	{ tag = "_tab_join",		string = "ifs.mp.tabs.join",		screen = "ifs_mp_sessionlist",		  xPos = 87, width = opt_tab_width, yPos = mp_tab_ypos, },
 	{ tag = "_tab_create",		string = "ifs.mp.tabs.create",		screen = "ifs_missionselect_pcMulti", width = opt_tab_width, yPos = mp_tab_ypos, },
 	--{ tag = "_tab_mp_opt",		string = "ifs.mp.tabs.options",		screen = "ifs_opt_mp",				  xPos = 320,width = 133, yPos = mp_tab_ypos, },
-	{ tag = "_tab_gamespy",		string = "ifs.mp.tabs.gamespy",		screen = "ifs_mpgs_login",			  width = opt_tab_width, yPos = mp_tab_ypos, },
-	{ tag = "_tab_friends",		string = "ifs.mp.tabs.friends",		screen = "ifs_mpgs_friends",		  width = opt_tab_width, yPos = mp_tab_ypos, },
-	{ tag = "_tab_leaderboard", string = "ifs.mp.tabs.leaderboard",	screen = "ifs_mp_leaderboard",		  width = opt_tab_width, yPos = mp_tab_ypos, },
+	-- OpenSWBF2: no Galaxy account, friends list or leaderboard tabs. The screens stay
+	-- loadable for mods; tab calls that name these tags find nothing and do nothing.
+	--{ tag = "_tab_gamespy",		string = "ifs.mp.tabs.gamespy",		screen = "ifs_mpgs_login",			  width = opt_tab_width, yPos = mp_tab_ypos, },
+	--{ tag = "_tab_friends",		string = "ifs.mp.tabs.friends",		screen = "ifs_mpgs_friends",		  width = opt_tab_width, yPos = mp_tab_ypos, },
+	--{ tag = "_tab_leaderboard", string = "ifs.mp.tabs.leaderboard",	screen = "ifs_mp_leaderboard",		  width = opt_tab_width, yPos = mp_tab_ypos, },
 }
 
 gMPSessionList_Listbox_ColumnInfo = {

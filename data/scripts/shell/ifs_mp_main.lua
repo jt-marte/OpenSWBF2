@@ -268,6 +268,11 @@ function ifs_main_fnAdjustButtonVis(this, bSetCurButton)
 	this.fFriendCheck = 0.1
 	this.buttons.friends.hidden = not this.bIsLoggedIn
 	this.buttons.leaderboard.hidden = not this.bIsLoggedIn
+	-- OpenSWBF2: no friends list or leaderboard on PC
+	if(gPlatformStr == "PC") then
+		this.buttons.friends.hidden = 1
+		this.buttons.leaderboard.hidden = 1
+	end
 	if(bForXLive) then
 		local RealUser = ScriptCB_XL_GetLoginName(ScriptCB_GetPrimaryController() + 1, 1) -- returns nil if guest
 		if(not RealUser) then
@@ -609,8 +614,8 @@ ifs_mp_main = NewIFShellScreen {
 			local bIsLoggedIn = ScriptCB_IsLoggedIn()
 			if(this.bIsLoggedIn ~= bIsLoggedIn) then
 				this.bIsLoggedIn = bIsLoggedIn
-				this.buttons.friends.hidden = not this.bIsLoggedIn
-				IFObj_fnSetVis(this.buttons.FriendIcon, this.bIsLoggedIn)
+				this.buttons.friends.hidden = (not this.bIsLoggedIn) or (gPlatformStr == "PC")
+				IFObj_fnSetVis(this.buttons.FriendIcon, this.bIsLoggedIn and gPlatformStr ~= "PC")
 				ShowHideVerticalButtons(this.buttons,ifs_mp_main_vbutton_layout) -- refresh buttons
 				if (this.CurButton == "friends") then
 					this:Input_GeneralUp(this.iPrimaryPort - 1) -- move off now-disabled option
