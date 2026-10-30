@@ -8,6 +8,10 @@
 #include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
+#include "RedEngineFL/Graphics/PC/pcCrispFont.h"
+#include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
+#include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Memory/RedMemory.h"
 #include "RedTextElement.h"
 #include "PebbleFL/Common/PblMath.h"
@@ -2369,7 +2373,41 @@ void RedFont::Read(PblFileChunk& chunk)
     if (s_fontHashTable.Store(pFont->m_crcName, pFont))
     {
         s_fontHashTableNumEntries++;
+        pFont->MakeCrisp();
     }
+}
+
+void RedVariableWidthFont::MakeCrisp()
+{
+    if (!DisplayCfg::gDisplay.bCrispFonts || m_crcName == (unsigned int)PblHash("japanese"))
+    {
+        return;
+    }
+    const unsigned int uiK = DisplayLogic::CrispFactor(RedInterfaceScreen::GetScreenHeight());
+    if (uiK < 2 || !m_aGlyphs || !m_apTextures)
+    {
+        return;
+    }
+    for (unsigned short i = 0; i < m_uiNumGlyphs; ++i)
+    {
+        if (m_aGlyphs[i].value > 0xFF)
+        {
+            return; // only the Latin-1 fonts are Arial Black
+        }
+    }
+    CrispFont::CapLine kCap;
+    const bool bCap = CrispFont::FindCapLine(m_apTextures, m_uiNumTextures, m_aGlyphs, m_uiNumGlyphs, kCap);
+    for (unsigned char t = 0; t < m_uiNumTextures; ++t)
+    {
+        // a page shared with another font (super_tiny and tiny) is only redrawn
+        // once: the redrawn ones are the only atlases with a mip chain
+        RedTexture* pPage = m_apTextures[t];
+        if (pPage && !CrispFont::IsRedrawn(pPage))
+        {
+            CrispFont::RedrawPage(pPage, m_aGlyphs, m_uiNumGlyphs, t, uiK, bCap ? &kCap : 0);
+        }
+    }
+    CrispFont::RebaseGlyphs(m_aGlyphs, m_uiNumGlyphs, m_apTextures, m_uiNumTextures);
 }
 
 // FUNCTION: SWBF2 0x006d9e30

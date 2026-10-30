@@ -701,6 +701,7 @@
     <ClCompile Include="src\RedEngineFL\Graphics\PC\StateManager_DX.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcRedAutoSettings.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.cpp" />
+    <ClCompile Include="src\RedEngineFL\Graphics\PC\pcCrispFont.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.cpp" />
     <ClCompile Include="src\RedEngineFL\Graphics\PC\pcGammaPass.cpp" />
     <ClCompile Include="src\RedEngineFL\Application\pc\pcFrameLimiter.cpp" />
@@ -1180,6 +1181,7 @@
     <ClInclude Include="src\Battlefront2\Source\NetWire.h" />
     <ClInclude Include="src\Battlefront2\Source\LocalLimits.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplaySettings.h" />
+    <ClInclude Include="src\RedEngineFL\Graphics\PC\pcCrispFont.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcDisplayLogic.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPass.h" />
     <ClInclude Include="src\RedEngineFL\Graphics\PC\pcGammaPassPS.h" />

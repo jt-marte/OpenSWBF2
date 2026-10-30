@@ -171,6 +171,45 @@ void ShellBackSize(unsigned int uiClientW, unsigned int uiClientH, unsigned int&
 // 800x600 on a 4:3 back buffer of any size. 1.0 at 600 lines and below.
 float ShellUiScale(unsigned int uiScreenH);
 
+// OpenSWBF2: crisp fonts (pcCrispFont). The magnification to redraw the font
+// atlases at for a screen height: 4 above 1080 lines (the 2x game UI and
+// 3.6x shell at 4K), 2 above 600, 1 (leave them as they are) otherwise.
+unsigned int CrispFactor(unsigned int uiScreenH);
+
+// How far a texel coordinate sits past the texel edge before it (0 <= f < 1,
+// float noise ignored): 0.5 for the font atlases' UVs, on texel centres.
+float TexelInset(float fTexels);
+
+// The ink of a glyph bitmap (iW x iH, iPitch bytes a row, iFull = solid):
+// how wide it is in pixels (each column counted by its darkest texel, so soft
+// edges count in part) and where its middle is, from the bitmap's left edge.
+// Both 0 for a blank bitmap.
+struct InkSpan
+{
+    float fWidth;
+    float fCentre;
+};
+
+InkSpan MeasureInk(const unsigned char* pucBits, int iW, int iH, int iPitch, int iFull);
+
+// The same down the bitmap: how tall its ink is and where its middle is,
+// from the bitmap's top edge.
+InkSpan MeasureInkRows(const unsigned char* pucBits, int iW, int iH, int iPitch, int iFull);
+
+// How much to widen a GDI glyph (fInkW wide at K) so it is as wide as the
+// atlas glyph it replaces (fAtlasW wide at 1x): 1 if either is blank, else
+// kept within 0.75..1.5 so a misread glyph can't turn into a smear.
+float CrispStretch(float fAtlasW, float fInkW, int iK);
+
+// Where a GDI glyph's black box (its ink's middle fInkCentre from its left,
+// its top iOriginY above the baseline) goes in a glyph's atlas box at K
+// (top-left iBoxX, iBoxY): across so its ink's middle lands on the atlas
+// glyph's (fAtlasCentre from the box's left at 1x), and down so its baseline
+// sits on the font's (fBaseline rows below the line top, the glyph's box
+// iGlyphTop rows below).
+void CrispPlace(int iBoxX, int iBoxY, int iK, int iGlyphTop, float fBaseline, int iOriginY,
+                float fAtlasCentre, float fInkCentre, int& iDstX, int& iDstY);
+
 struct ShellStretch
 {
     bool bActive;

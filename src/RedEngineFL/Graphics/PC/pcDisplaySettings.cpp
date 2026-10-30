@@ -47,6 +47,8 @@ static const char* KeyName(unsigned int uiKey)
         return "HudScale";
     case kFov:
         return "Fov";
+    case kCrispFonts:
+        return "CrispFonts";
     }
     return "?";
 }
@@ -80,6 +82,7 @@ void SetDefaults(DisplaySettings& kSettings)
     kSettings.uiPadLookSpeed = XInputPad::kLookSpeedDefaultLevel;
     kSettings.uiHudScale = DisplayLogic::kHudScaleDefault;
     kSettings.uiFov = DisplayLogic::kFovDefault;
+    kSettings.bCrispFonts = true;
 }
 
 bool ParseUInt(const char* pcText, unsigned int uiLo, unsigned int uiHi, unsigned int& uiOut)
@@ -249,6 +252,13 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
             kSettings.uiFov = uiValue;
         }
         break;
+    case kCrispFonts:
+        bValid = ParseBool(pcValue, bBool);
+        if (bValid)
+        {
+            kSettings.bCrispFonts = bBool;
+        }
+        break;
     case kDisplayIni:
         bValid = pcValue != 0 && pcValue[0] != '\0' && strlen(pcValue) < sizeof(kSettings.acDisplayIni);
         if (bValid)
@@ -350,6 +360,10 @@ void Merge(DisplaySettings& dst, const DisplaySettings& cli)
     {
         dst.uiFov = cli.uiFov;
     }
+    if (cli.uiSet & kCrispFonts)
+    {
+        dst.bCrispFonts = cli.bCrispFonts;
+    }
     if (cli.uiSet & kDisplayIni)
     {
         strcpy(dst.acDisplayIni, cli.acDisplayIni);
@@ -367,7 +381,7 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath)
     }
     static const unsigned int auiKeys[] = {kAdapter, kAdapterName, kBorderless, kRefresh,
                                            kVsync,   kFps,         kNoWaitQuery, kNoDpi,
-                                           kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov};
+                                           kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov, kCrispFonts};
     for (unsigned int i = 0; i < sizeof(auiKeys) / sizeof(auiKeys[0]); ++i)
     {
         char acValue[256];
@@ -458,6 +472,10 @@ bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFra
     {
         sprintf(acValue, "%u", kSettings.uiFov);
         bOk = PutKey("Fov", acValue, acTemp) && bOk;
+    }
+    if (ShouldWrite(kSettings, kCrispFonts))
+    {
+        bOk = PutKey("CrispFonts", kSettings.bCrispFonts ? "1" : "0", acTemp) && bOk;
     }
     WritePrivateProfileStringA(0, 0, 0, acTemp);
     if (bOk)

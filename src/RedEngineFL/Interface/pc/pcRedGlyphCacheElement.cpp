@@ -5,6 +5,8 @@
 
 #include "RedEngineFL/Interface/RedFont.h"
 #include "RedEngineFL/Interface/RedGlyphMemoryManager.h"
+#include "RedEngineFL/Interface/Red3DModelElementLite.h"
+#include "RedEngineFL/Graphics/PC/pcCrispFont.h"
 #include "RedEngineFL/Graphics/PC/Shaders/pcInterfaceShader.h"
 #include "RedEngineFL/Graphics/PC/pcRedPrimitive.h"
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
@@ -289,8 +291,19 @@ void RedGlyphCacheElement::RenderUsingContext(const PblMatrix& mContext,
 
         m_ppInterfaceShader[i]->m_shadowEnable = (m_eStyle == TEXT_STYLE_SHADOW);
 
+        // OpenSWBF2: a redrawn page (pcCrispFont) is drawn with D3D9's half-pixel
+        // offset, as its UVs sit on texel edges: half a pixel up and left (the
+        // context is in pixels, y up, except in the 3D-perspective groups).
+        PblMatrix mPixel = mContext;
+        if (CrispFont::IsRedrawn(m_pFont->GetTexture((unsigned char)i)) &&
+            !Red3DModelElementLite::sPerspectiveHackEnabled)
+        {
+            mPixel.m[3][0] -= 0.5f;
+            mPixel.m[3][1] += 0.5f;
+        }
+
         RedRenderer::pcRenderPrimitive(pPrimitive, m_ppInterfaceShader[i],
-                                       mContext, color, 0x200, 0, 0, 0);
+                                       mPixel, color, 0x200, 0, 0, 0);
 
         pPrimitive->Release();
     }
