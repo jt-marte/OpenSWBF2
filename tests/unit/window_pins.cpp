@@ -755,6 +755,20 @@ TEST_CASE("display menu lua source pins" * doctest::test_suite("unit"))
     CHECK(CountOf(sVideo, "ifs_opt_pcvideo_fnSaveDisplay(") == 4);
 }
 
+TEST_CASE("pad snap lands on a dropdown box like a slider bar" * doctest::test_suite("regression"))
+{
+    // Instant Action's AI difficulty: the box's hotspot starts at its left end, so its centre
+    // sat outside the up/down cone from the rows around it and the pad skipped it.
+    std::string sTabRaw;
+    REQUIRE(ReadSource("../data/scripts/common/ifelem_tabmanager.lua", sTabRaw));
+    const std::string sTab = StripCr(sTabRaw);
+    const std::string sCollect = LuaFunctionBody(sTab, "function PadSnap_Collect(this, List, Seen, iDepth)");
+    REQUIRE(!sCollect.empty());
+    CHECK(Has(sCollect, "if( this.bDropDownBox and this.btnw ) then"));
+    CHECK(Has(sCollect, "fHalfW = this.btnw * 0.45"));
+    CHECK(Has(sCollect, "PadSnap_Add(List, this.label, nil, fHalfW)"));
+}
+
 TEST_CASE("display menu lua save failure waits" * doctest::test_suite("unit"))
 {
     std::string sRaw;

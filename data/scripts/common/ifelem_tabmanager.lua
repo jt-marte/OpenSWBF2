@@ -952,7 +952,14 @@ function PadSnap_Collect(this, List, Seen, iDepth)
 	if( Type == "button" ) then
 		if( this.label and (not this.bDimmed) and
 			  not (this._PadTabRowKey and ifelem_tabmanager_IsPadCycledTab(this)) ) then
-			PadSnap_Add(List, this.label)
+			-- a dropdown box's hotspot starts at its left end, so its centre sits
+			-- far right of the rows around it (Instant Action's AI difficulty);
+			-- like a slider, it's the whole box
+			local fHalfW = nil
+			if( this.bDropDownBox and this.btnw ) then
+				fHalfW = this.btnw * 0.45
+			end
+			PadSnap_Add(List, this.label, nil, fHalfW)
 		end
 		return
 	elseif( (Type == "image") or (Type == "maskimage") ) then
