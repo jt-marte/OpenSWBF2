@@ -26,6 +26,7 @@ protected:
     static bool sIsPilotingVehicle(Character* pChr);
     static bool sIsPassenger(Character* pChr);
     static float sGetImportance(const CommandPost* pPost, int iTeam);
+    static float sOverhaulWeight(Character* pChr, const CommandPost* pCP, float fImportance);
 
 public:
     static PblHash rttiHashConquestGoal;

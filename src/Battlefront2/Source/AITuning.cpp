@@ -22,6 +22,45 @@ int WireLevel(int iLevel)
     return iLevel > kLevelElite ? kLevelElite : iLevel;
 }
 
+float OverhaulPostWeight(float fImportance, float fDistance, int iTeammatesThere, int iTeamSize)
+{
+    if (fImportance <= 0.0f)
+    {
+        return 0.0f;
+    }
+    if (fDistance < 0.0f)
+    {
+        fDistance = 0.0f;
+    }
+    float fWeight = fImportance * 150.0f / (150.0f + fDistance);
+    fWeight /= 1.0f + 0.5f * (float)iTeammatesThere;
+    if (iTeamSize > 0 && 2 * iTeammatesThere >= iTeamSize)
+    {
+        fWeight *= 0.25f;
+    }
+    return fWeight;
+}
+
+bool ShouldRetreat(float fMyHealth, float fEnemyHealth)
+{
+    return fMyHealth < kRetreatHealth && fEnemyHealth > fMyHealth;
+}
+
+unsigned int PatternSeed(unsigned int uBotSeed, unsigned int uTargetId, float fMissionTime)
+{
+    unsigned int uHash = 2166136261u; // FNV-1a over the three words
+    const unsigned int auWords[3] = { uBotSeed, uTargetId, (unsigned int)(fMissionTime / 15.0f) };
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int b = 0; b < 4; ++b)
+        {
+            uHash ^= (auWords[i] >> (8 * b)) & 0xFFu;
+            uHash *= 16777619u;
+        }
+    }
+    return uHash;
+}
+
 int OverhaulThreatScore(const ThreatInputs& in)
 {
     // Status as retail: 100 + 18 per step, so a seen enemy outranks an unseen one.

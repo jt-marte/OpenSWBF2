@@ -1,6 +1,8 @@
 #include "PatrolHelper.h"
 
+#include "AIDifficulty.h"
 #include "AIGoal.h"
+#include "AITuning.h"
 #include "AILowLevel.h"
 #include "AIUtil.h"
 #include "Character.h"
@@ -8,6 +10,7 @@
 #include "GameLoop.h"
 #include "GameObject.h"
 #include "HintManager.h"
+#include "Team.h"
 #include "UnitAgent.h"
 #include "UnitCmdInfo.h"
 #include "UnitController.h"
@@ -177,6 +180,23 @@ void PatrolHelper::EnterState()
     }
 }
 
+// OpenSWBF2 Overhaul: teammates other than me assigned to this post.
+int PatrolHelper::OthersHoldingPost(const CommandPost* pPost)
+{
+    const Character* pMe = GetMe()->mCharacter;
+    const Team* pTeam = pMe->mTeamPtr;
+    int iCount = 0;
+    for (int i = 0; i < pTeam->mMemberCount; ++i)
+    {
+        const Character* pMember = pTeam->GetMemberPtr(i);
+        if (pMember && pMember != pMe && pMember->mUnit && pMember->GetAssignedCP() == pPost)
+        {
+            ++iCount;
+        }
+    }
+    return iCount;
+}
+
 // FUNCTION: SWBF2 0x006153c0
 void PatrolHelper::UpdateState(float dt)
 {
@@ -190,7 +210,20 @@ void PatrolHelper::UpdateState(float dt)
     if (GameLoop::GetMissionTime() > mBeginTime + 5.0f)
     {
         mBeginTime = 1.0e8f;
-        if (!pPost->mCaptureRegion || pPost->CanTeamSpawnHere(GetMe()->mCharacter->mTeamNumber))
+        if (AIDifficulty::IsOverhaul())
+        {
+            // OpenSWBF2: retail decides once, 5 s after arriving, so bots that came mid-capture
+            // guard the post for good. Overhaul checks again every 5 to 10 s and, once the post is
+            // taken, leaves it to AITuning::kPostGuards teammates.
+            if (!pPost->mCaptureRegion ||
+                (pPost->CanTeamSpawnHere(GetMe()->mCharacter->mTeamNumber) && OthersHoldingPost(pPost) >= AITuning::kPostGuards))
+            {
+                SetNextState(100);
+                return;
+            }
+            mBeginTime = GameLoop::GetMissionTime() + AIUtil::GetRandomFloat(0.0f, 5.0f);
+        }
+        else if (!pPost->mCaptureRegion || pPost->CanTeamSpawnHere(GetMe()->mCharacter->mTeamNumber))
         {
             SetNextState(100);
             return;

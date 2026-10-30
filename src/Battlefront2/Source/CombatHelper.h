@@ -54,6 +54,7 @@ protected:
 
     void SetRandomHeading();
     bool DeadBodyCheck();
+    bool UnderRangedFire();
 
 public:
     UnitAgent* mOwner;

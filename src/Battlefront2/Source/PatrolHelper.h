@@ -52,6 +52,7 @@ protected:
     virtual void EnterState();
     virtual void ExitState();
     virtual void UpdateState(float dt);
+    int OthersHoldingPost(const CommandPost* pPost);
 
     const PatrolHint* SelectHint(int i, const BaseHint** ppHint);
     const Controllable* GetMe() const;

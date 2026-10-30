@@ -3,6 +3,7 @@
 #include <math.h>
 
 #include "AIDifficulty.h"
+#include "AITuning.h"
 #include "AILowLevel.h"
 #include "AIUtil.h"
 #include "Character.h"
@@ -727,6 +728,21 @@ void CombatUtil::sUseGrenadeAgainstCrowds(const Controllable* pMe, bool bSoldier
             *pbUse = true;
         }
     }
+    // OpenSWBF2 Overhaul: retail never throws at a lone soldier. Overhaul also throws at one that
+    // has stopped (in cover, crouched, sniping), at half the crowd odds; the heavy-weapon
+    // reservation still allows only a few throws at one target.
+    else if (AIDifficulty::IsOverhaul() && pEntity->IsRtti(kRttiHashEntitySoldier) &&
+             LengthSq(GetVelocity(pTarget)) < 1.0f)
+    {
+        Controller* pCtrl = pMe->mCtrl;
+        int iRoll = (((UnitController*)pCtrl)->GetRandomSeed() -
+                     (int)(GameLoop::GetMissionTime() * -10.0f)) %
+                    100;
+        if (iRoll <= (int)(AIDifficulty::GetCrowdGrenadeThrowPercentage(UnitControllerPtr(pCtrl)) * 50.0f))
+        {
+            *pbUse = true;
+        }
+    }
 }
 
 // FUNCTION: SWBF2 0x0046ed10
@@ -1035,6 +1051,18 @@ void CombatUtil::sRegularInfantryAttackPattern(Controllable* pMe, const GameObje
     };
 
     *pDesc->mCoverPercent = 0.5f;
+    if (AIDifficulty::IsOverhaul() && !(pMe->mCharacter && pMe->mCharacter->mHeroFlag))
+    {
+        const GameObject* pMine = pMe->GetGameObject();
+        const float fMine = pMine->GetMaxHealth() > 0.0f ? pMine->mCurHealth / pMine->GetMaxHealth() : 1.0f;
+        const float fHis = pTarget->GetMaxHealth() > 0.0f ? pTarget->mCurHealth / pTarget->GetMaxHealth() : 1.0f;
+        if (AITuning::ShouldRetreat(fMine, fHis))
+        {
+            *pDesc->mPattern = AttackPatterns::STATE_RETREAT;
+            *pDesc->mCoverPercent = 1.0f;
+            return;
+        }
+    }
     int iDifficulty = AIDifficulty::GetProfileDifficulty() - 1;
     float fOpenRadius = pMe->mCtrl->mOpenRadius;
     int iTotal = 0;
@@ -1051,7 +1079,20 @@ void CombatUtil::sRegularInfantryAttackPattern(Controllable* pMe, const GameObje
         iTotal += kWeights[iDifficulty][3];
     }
 
-    int iRoll = ((UnitController*)pMe->mCtrl)->GetRandomSeed() % iTotal;
+    // Retail rolls with a seed fixed per bot, so each bot uses one pattern for life. OpenSWBF2
+    // Overhaul mixes in the target and a 15 s epoch: the pattern changes between engagements
+    // but stays put within one (this runs on every combat update and must not flicker).
+    int iRoll;
+    if (AIDifficulty::IsOverhaul())
+    {
+        iRoll = (int)(AITuning::PatternSeed((unsigned int)((UnitController*)pMe->mCtrl)->GetRandomSeed(),
+                                            pTarget ? pTarget->mHandleId : 0u, GameLoop::GetMissionTime()) %
+                      (unsigned int)iTotal);
+    }
+    else
+    {
+        iRoll = ((UnitController*)pMe->mCtrl)->GetRandomSeed() % iTotal;
+    }
     int i;
     for (i = 0; i < 4; ++i)
     {

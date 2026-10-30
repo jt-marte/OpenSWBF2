@@ -1,5 +1,6 @@
 #include "CombatHelper.h"
 
+#include "AIDifficulty.h"
 #include "AIUtil.h"
 #include "AILowLevel.h"
 #include "AttackHelper.h"
@@ -400,6 +401,26 @@ void CombatHelper::SetRandomHeading()
     ++mLookCount;
 }
 
+// OpenSWBF2 Overhaul: the target holds a ranged weapon, faces me and is beyond sword reach.
+bool CombatHelper::UnderRangedFire()
+{
+    const GameObject* pTarget = GetAttackHelper().GetTarget();
+    Controllable* pHim = pTarget ? const_cast<GameObject*>(pTarget)->GetControllable() : 0;
+    Weapon* pHisWpn = pHim ? pHim->GetCurWpn() : 0;
+    if (!pHisWpn || WeaponIsRtti(pHisWpn, kRttiHashWeaponMelee))
+    {
+        return false;
+    }
+    const PblVector3& vMe = GetMe()->GetMatrix().GetTranslation();
+    const PblVector3& vHim = pHim->GetMatrix().GetTranslation();
+    const PblVector3 vToMe(vMe.x - vHim.x, 0.0f, vMe.z - vHim.z);
+    if (vToMe.x * vToMe.x + vToMe.z * vToMe.z < 25.0f)
+    {
+        return false;
+    }
+    return DotXZ(vToMe, pHim->GetMatrix().GetZAxis()) > 0.8f;
+}
+
 // FUNCTION: SWBF2 0x0046cf70
 void CombatHelper::UpdateState(float dt)
 {
@@ -409,7 +430,18 @@ void CombatHelper::UpdateState(float dt)
     GetLowLevel().SetAlert();
 
     Weapon* pWpn = GetMe()->GetCurWpn();
-    if (pWpn && WeaponIsRtti(pWpn, kRttiHashWeaponMelee))
+    if (pWpn && WeaponIsRtti(pWpn, kRttiHashWeaponMelee) && AIDifficulty::IsOverhaul())
+    {
+        // OpenSWBF2 Overhaul: deflect while an enemy with a gun aims this way from beyond sword
+        // reach, rather than on retail's random timer; checked twice a second.
+        if (GameLoop::GetMissionTime() > mDeflectTimer)
+        {
+            mDeflect = UnderRangedFire();
+            mDeflectTimer = GameLoop::GetMissionTime() + 0.5f;
+        }
+        AI_ForceDeflectState(pWpn, mDeflect);
+    }
+    else if (pWpn && WeaponIsRtti(pWpn, kRttiHashWeaponMelee))
     {
         if (GameLoop::GetMissionTime() > mDeflectTimer)
         {
@@ -443,7 +475,8 @@ void CombatHelper::UpdateState(float dt)
             if (!mWaiting)
             {
                 mWaiting = true;
-                mWaitOverTime = GameLoop::GetMissionTime() + 0.75f;
+                // OpenSWBF2 Overhaul: a shorter look before giving up on the turn.
+                mWaitOverTime = GameLoop::GetMissionTime() + (AIDifficulty::IsOverhaul() ? 0.3f : 0.75f);
             }
             else if (GameLoop::GetMissionTime() > mWaitOverTime)
             {
@@ -471,7 +504,7 @@ void CombatHelper::UpdateState(float dt)
             if (!mWaiting)
             {
                 mWaiting = true;
-                mWaitOverTime = GameLoop::GetMissionTime() + 0.4f;
+                mWaitOverTime = GameLoop::GetMissionTime() + (AIDifficulty::IsOverhaul() ? 0.25f : 0.4f);
             }
             else if (GameLoop::GetMissionTime() > mWaitOverTime)
             {
@@ -499,7 +532,9 @@ void CombatHelper::UpdateState(float dt)
         const float fTime = GameLoop::GetMissionTime();
         if (fTime > mPauseTime)
         {
-            mPauseTime = AIUtil::GetRandomFloat(3.0f, 6.0f) + fTime;
+            // OpenSWBF2 Overhaul: investigating bots stop to glance around less often.
+            mPauseTime = (AIDifficulty::IsOverhaul() ? AIUtil::GetRandomFloat(5.0f, 8.0f)
+                                                     : AIUtil::GetRandomFloat(3.0f, 6.0f)) + fTime;
             const bool bRight = (PblRandom::GetGlobalInt() & 1) != 0;
             const float fTurnTo = AIUtil::GetRandomFloat(0.1f, 0.3f);
             const float fStay = AIUtil::GetRandomFloat(0.4f, 0.7f);
@@ -619,7 +654,9 @@ void CombatHelper::UpdateState(float dt)
 // FUNCTION: SWBF2 0x0046cd50
 bool CombatHelper::DeadBodyCheck()
 {
-    if (GetCtrl()->mLodState < 4)
+    // OpenSWBF2 Overhaul: rebels near a human stop fighting to shoot enemy corpses (127 times in
+    // 128 in retail); Overhaul bots keep fighting.
+    if (GetCtrl()->mLodState < 4 || AIDifficulty::IsOverhaul())
     {
         return false;
     }
