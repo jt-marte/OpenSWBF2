@@ -12,13 +12,15 @@
 -- the background.
 
 local opt_tab_ypos = 45
-local opt_tab_width = 158.5
+-- OpenSWBF2: six tabs (Controller added) across the same 800-wide row
+local opt_tab_width = 132
 
 gPCOptionsTabsLayout = {
-	{ tag = "_tab_general", string = "ifs.options.tabs.game", screen = "ifs_opt_general", yPos = opt_tab_ypos, xPos = 87, width = opt_tab_width},
+	{ tag = "_tab_general", string = "ifs.options.tabs.game", screen = "ifs_opt_general", yPos = opt_tab_ypos, xPos = 74, width = opt_tab_width},
 	{ tag = "_tab_video", string = "ifs.options.tabs.video", screen = "ifs_opt_pcvideo", yPos = opt_tab_ypos, width = opt_tab_width},
 	{ tag = "_tab_sound", string = "ifs.options.tabs.audio", screen = "ifs_opt_sound", yPos = opt_tab_ypos, width = opt_tab_width},
 	{ tag = "_tab_controls", string = "ifs.options.tabs.controls", screen = "ifs_opt_pccontrols", yPos = opt_tab_ypos, width = opt_tab_width},
+	{ tag = "_tab_pad", string = "Controller", screen = "ifs_opt_pcpad", yPos = opt_tab_ypos, width = opt_tab_width},
 	{ tag = "_tab_mp", string = "ifs.options.tabs.online", screen = "ifs_opt_mp", yPos = opt_tab_ypos, width = opt_tab_width},
 }
 

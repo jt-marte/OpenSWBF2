@@ -31,6 +31,7 @@
 #include "PlayerProfile.h"
 #include "Battlefront2/Platform/Pc/pcFLJoystick.h"
 #include "RedEngineFL/input/RedKeyboard.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "RedEngineFL/Graphics/PC/pcRedTexture.h"
@@ -612,7 +613,9 @@ namespace Lua_Callbacks
 {
 
 // GLOBAL: SWBF2 0x007e6cc0
-static const CallbackEntryT sIFaceCallbacks[150] =
+static int ScriptCB_GetPadBindings(lua_State* L);
+
+static const CallbackEntryT sIFaceCallbacks[151] =
 {
     { "ScriptCB_AddIFText", ScriptCB_AddIFText },
     { "ScriptCB_AddIFFlashyText", ScriptCB_AddIFFlashyText },
@@ -764,6 +767,7 @@ static const CallbackEntryT sIFaceCallbacks[150] =
     { "ScriptCB_RemoveTexture", ScriptCB_RemoveTexture },
     { "ScriptCB_ShowLoadDisplay", ScriptCB_ShowLoadDisplay },
     { "ScriptCB_SetInputRepeat", ScriptCB_SetInputRepeat },
+    { "ScriptCB_GetPadBindings", ScriptCB_GetPadBindings },
 };
 
 // GLOBAL: SWBF2 0x01e57714
@@ -2778,6 +2782,50 @@ int ScriptCB_GetKeyBoardCmds(lua_State* L)
     return 0;
 }
 
+// OpenSWBF2: the Options -> Controller page. A list of {actionStr, keyStr} for
+// a built-in pad layout (0 Modern, 1 Legacy) in an input mode (0 soldier,
+// 1 vehicle, 2 flyer, 3 jedi, 4 turret), in the keyboard page's order, with
+// what the pad leaves unbound (and the keyboard-only key halves of the axes)
+// left out.
+static int ScriptCB_GetPadBindings(lua_State*)
+{
+    int iLayout = (int)luaL_checknumber(LuaHelper::mState, 1);
+    int iMode = (int)luaL_checknumber(LuaHelper::mState, 2);
+    if (iMode < 0 || iMode >= 5)
+    {
+        iMode = 0;
+    }
+
+    lua_newtable(LuaHelper::mState);
+    unsigned short usAction[256];
+    int iIndex = 1;
+    for (int i = 0; i < 43; ++i)
+    {
+        const int iAction = sKeyboardCmdsPerMode[iMode][i];
+        if (iAction == ePROCESSEDINPUT_NONE || iAction == ePROCESSEDINPUT_MAX)
+        {
+            continue;
+        }
+        const char* pcButton = XInputPad::ActionLabel(iLayout, iMode, iAction);
+        if (!pcButton)
+        {
+            continue;
+        }
+        memset(usAction, 0, sizeof(usAction));
+        // the size in characters: GetLocalizedString copies (and pads) up to that
+        // many, so the retail sizeof() in bytes would run off the buffer
+        RedLocalizeDB::GetLocalizedString(usAction, sizeof(usAction) / sizeof(usAction[0]),
+                                          GetActionName(iAction, iMode));
+
+        lua_newtable(LuaHelper::mState);
+        LuaHelper::TableWriteVal("actionStr", usAction);
+        LuaHelper::TableWriteVal("keyStr", pcButton);
+        lua_rawseti(LuaHelper::mState, -2, iIndex);
+        ++iIndex;
+    }
+    return 1;
+}
+
 // FUNCTION: SWBF2 0x005876e0
 unsigned int GetButtonName(int iButton)
 {
@@ -2945,7 +2993,7 @@ int ScriptCB_RemoveTexture(lua_State* L)
 // FUNCTION: SWBF2 0x00588280
 void InitIFace()
 {
-    for (int i = 0; i < 150; ++i)
+    for (int i = 0; i < 151; ++i)
     {
         LuaHelper::Register(sIFaceCallbacks[i].pcName, sIFaceCallbacks[i].pfnCallback, 0);
     }

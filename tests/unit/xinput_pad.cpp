@@ -689,3 +689,57 @@ TEST_CASE("xinput double tap crouch while moving rolls" * doctest::test_suite("u
     CHECK(!RollDoubleTap(still, true, 200, kRollStick - 0.01f));
     CHECK(RollDoubleTap(still, true, 300, kRollStick));
 }
+
+TEST_CASE("xinput controller page labels every button" * doctest::test_suite("unit"))
+{
+    CHECK(strcmp(SlotLabel(kBitA), "A") == 0);
+    CHECK(strcmp(SlotLabel(kBitRB), "RB") == 0);
+    CHECK(strcmp(SlotLabel(kBitDPadUp), "D-pad Up") == 0);
+    CHECK(strcmp(SlotLabel(kSlotLeftTrigger), "LT") == 0);
+    CHECK(strcmp(SlotLabel(kSlotRightTrigger), "RT") == 0);
+    CHECK(strcmp(SlotLabel(kSlotLeftUp), "Left stick (up/down)") == 0);
+    CHECK(strcmp(SlotLabel(kSlotRightRight), "Right stick (left/right)") == 0);
+    CHECK(!SlotLabel(-1));
+    CHECK(!SlotLabel(20));
+    // every slot a layout uses has a label
+    for (int iLayout = 0; iLayout < kLayoutCount; ++iLayout)
+    {
+        for (int iMode = 0; iMode < kModeCount; ++iMode)
+        {
+            for (int iAction = 0; iAction < kActionCount; ++iAction)
+            {
+                const int iSlot = DefaultSlot(iLayout, iMode, iAction);
+                if (iSlot >= 0)
+                {
+                    CHECK(SlotLabel(iSlot) != (const char*)0);
+                }
+            }
+        }
+    }
+}
+
+TEST_CASE("xinput controller page names each layout's actions" * doctest::test_suite("unit"))
+{
+    // Modern: aim on LT, throw on RB, swap on Y, X tap/hold
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActPrimaryFire), "RT") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActSecondaryFire), "RB") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActPrimaryNext), "Y") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActReload), "Tap X") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActUse), "Hold X") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActZoom), "Hold LT (RS: next zoom)") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutModern, 1, kActZoom), "LT") == 0); // vehicles toggle
+    // Legacy: the console layout
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActSecondaryFire), "LT") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActReload), "X") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActUse), "Y") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 0, kActZoom), "Click RS") == 0);
+    // roll on foot only, in both
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActRoll), "Double-tap B + move") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 3, kActRoll), "Double-tap B + move") == 0);
+    CHECK(!ActionLabel(kLayoutModern, 1, kActRoll));
+    // sticks, and what the pad leaves unbound
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActMoveAxis), "Left stick (up/down)") == 0);
+    CHECK(strcmp(ActionLabel(kLayoutLegacy, 2, kActTurnAxis), "Right stick (left/right)") == 0);
+    CHECK(!ActionLabel(kLayoutModern, 0, 28)); // map
+    CHECK(!ActionLabel(kLayoutModern, 3, kActZoom)); // jedi
+}
