@@ -847,6 +847,23 @@ unsigned int EntityPathFollower::CreateSquadronFromClosestEntities(const PblVect
                     }
                     break;
                 }
+                // OpenSWBF2: retail retried with this follower still leading the partial squadron,
+                // so the next CreateSquadron added its node to its own list a second time and broke
+                // the list (a later walk of it crashed). Break the partial squadron up first: the
+                // members leave one by one and the leader leaves once it is alone.
+                for (int iGuard = 0; InSquadron() && iGuard < 16; ++iGuard)
+                {
+                    PblListDouble::Node* pLast = mList.mTerminator.mPrev;
+                    EntitySquadron* pMember = (EntitySquadron*)((char*)pLast - offsetof(EntitySquadron, mNode));
+                    if (pLast == &mList.mTerminator || pMember == static_cast<EntitySquadron*>(this))
+                    {
+                        RemoveFromSquadron();
+                    }
+                    else
+                    {
+                        pMember->RemoveFromSquadron();
+                    }
+                }
             }
         } while (--uCount > 1);
     }
