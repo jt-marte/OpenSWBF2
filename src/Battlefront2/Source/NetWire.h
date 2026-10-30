@@ -38,6 +38,8 @@ bool IsRconAuthorized(const char* pcData, int iAvail, char cKey0, char cKey1);
 int ClampPlayerCount(unsigned int uWire);
 bool IsValidGuestCount(unsigned int uGuests);
 int DecodeLanMaxPlayers(unsigned int uWire);
+bool IsUsableIPv4(unsigned long ulNetOrder);
+bool ParseHostPort(const char* pcText, char* pcHost, unsigned int uHostCap, int& iPort, int iDefaultPort);
 bool IsValidTurnRate(int iDuration, int iTurns);
 
 void WriteString(NetPktGroup& group, const char* pcText, unsigned int uCapacity);

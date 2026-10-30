@@ -1,5 +1,7 @@
 #include "third_party/doctest/doctest.h"
 
+#include <string>
+
 #include <string.h>
 
 #include "testutil.h"
@@ -448,6 +450,56 @@ TEST_CASE("lan player limit zero means a 64 player host" * doctest::test_suite("
     CHECK(NetWire::DecodeLanMaxPlayers(1) == 1);
     CHECK(NetWire::DecodeLanMaxPlayers(32) == 32);
     CHECK(NetWire::DecodeLanMaxPlayers(63) == 63);
+}
+
+static unsigned long Ip4(unsigned int a, unsigned int b, unsigned int c, unsigned int d)
+{
+    return (unsigned long)(a | (b << 8) | (c << 16) | (d << 24)); // network byte order in memory
+}
+
+TEST_CASE("lan transport accepts any unicast ipv4" * doctest::test_suite("regression"))
+{
+    CHECK(NetWire::IsUsableIPv4(Ip4(192, 168, 1, 20)));
+    CHECK(NetWire::IsUsableIPv4(Ip4(10, 0, 0, 1)));
+    CHECK(NetWire::IsUsableIPv4(Ip4(100, 73, 24, 63)));
+    CHECK(NetWire::IsUsableIPv4(Ip4(25, 1, 2, 3)));
+    CHECK(NetWire::IsUsableIPv4(Ip4(8, 8, 8, 8)));
+    CHECK(NetWire::IsUsableIPv4(Ip4(127, 0, 0, 1)));
+    CHECK(!NetWire::IsUsableIPv4(0));
+    CHECK(!NetWire::IsUsableIPv4(0xffffffffu));
+    CHECK(!NetWire::IsUsableIPv4(Ip4(0, 1, 2, 3)));
+    CHECK(!NetWire::IsUsableIPv4(Ip4(224, 0, 0, 1)));
+    CHECK(!NetWire::IsUsableIPv4(Ip4(239, 255, 255, 250)));
+    CHECK(!NetWire::IsUsableIPv4(Ip4(240, 0, 0, 1)));
+}
+
+TEST_CASE("join ip text parses host and optional port" * doctest::test_suite("regression"))
+{
+    char acHost[32];
+    int iPort = 0;
+    CHECK(NetWire::ParseHostPort("192.168.1.20", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(std::string(acHost) == "192.168.1.20");
+    CHECK(iPort == 3658);
+    CHECK(NetWire::ParseHostPort("  10.0.0.5:3700 ", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(std::string(acHost) == "10.0.0.5");
+    CHECK(iPort == 3700);
+    CHECK(NetWire::ParseHostPort("my-server.example.com:65535", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(std::string(acHost) == "my-server.example.com");
+    CHECK(iPort == 65535);
+    CHECK(!NetWire::ParseHostPort("", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("   ", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort(":3658", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4:", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4:0", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4:65536", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4:123456", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4:36x", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.4 5.6.7.8", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("::1", acHost, sizeof(acHost), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("host/name", acHost, sizeof(acHost), iPort, 3658));
+    char acSmall[8];
+    CHECK(NetWire::ParseHostPort("1.2.3.4", acSmall, sizeof(acSmall), iPort, 3658));
+    CHECK(!NetWire::ParseHostPort("1.2.3.45", acSmall, sizeof(acSmall), iPort, 3658));
 }
 
 TEST_CASE("turn rate outside the retail range is rejected" * doctest::test_suite("regression"))

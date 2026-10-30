@@ -30,6 +30,8 @@ public:
 
     static bool StartConnect();
 
+    static bool ResolveAddress(const char* pcText, NetAddr& address);
+
     static bool UpdateConnect(const NetAddr* pAddr, const NetKey* pKey, int iDest, int* pReason);
 
     static void EndConnect();

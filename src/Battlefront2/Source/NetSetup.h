@@ -513,6 +513,7 @@ public:
     void UpdateGame(const NetAddr* address, const void* session, const void* key,
                     const char* version, const void* playerData, const void* extra);
     void GetHostAddr(NetAddr* address, NetKey* key) const;
+    void SetDirectTarget(const NetAddr& address);
 
     bool mDirty;
     int mNumVisible;
@@ -536,6 +537,8 @@ public:
     float mQueryFinishTime;
     int mSelectedSession;
     int mPercentDone;
+    // OpenSWBF2: an FT_FIXED find aimed at one LAN-transport address (Join IP).
+    bool mDirectTarget;
 };
  
  

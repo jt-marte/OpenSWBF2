@@ -76,22 +76,60 @@ bool __fastcall IsPrivateIP(unsigned long netAddr)
 }
 
 // FUNCTION: SWBF2 0x005d4b40
+// Retail returned the first private address or 0, and a host with only a VPN or public
+// address could not host or join. Fall back to the first other usable address, then to
+// loopback, so the LAN transport still works there (and offline, against this PC).
 unsigned long GetPrivateIP()
 {
     hostent* host = getlocalhost();
-    if (!host)
+    unsigned long ulOther = 0;
+    if (host)
     {
-        return 0;
-    }
-    for (char** addr = host->h_addr_list; *addr; ++addr)
-    {
-        unsigned long ip = *(unsigned long*)*addr;
-        if (IsPrivateIP(ip))
+        for (char** addr = host->h_addr_list; *addr; ++addr)
         {
-            return ip;
+            unsigned long ip = *(unsigned long*)*addr;
+            if (IsPrivateIP(ip))
+            {
+                return ip;
+            }
+            if (!ulOther && NetWire::IsUsableIPv4(ip) && (ip & 0xff) != 127)
+            {
+                ulOther = ip;
+            }
         }
     }
-    return 0;
+    return ulOther ? ulOther : htonl(INADDR_LOOPBACK);
+}
+
+extern int hostshort;
+
+// Join IP: "host" or "host:port" to a LAN-transport address. The port defaults to the host
+// port (3658 unless the config changes it); names go through the system resolver.
+bool NetMatch::ResolveAddress(const char* pcText, NetAddr& address)
+{
+    char acHost[64];
+    int iPort = 0;
+    if (!NetWire::ParseHostPort(pcText, acHost, sizeof(acHost), iPort, hostshort))
+    {
+        return false;
+    }
+    unsigned long ulIP = inet_addr(acHost);
+    if (ulIP == INADDR_NONE)
+    {
+        hostent* pHost = gethostbyname(acHost);
+        if (!pHost || pHost->h_addrtype != AF_INET || !pHost->h_addr_list[0])
+        {
+            return false;
+        }
+        ulIP = *(unsigned long*)pHost->h_addr_list[0];
+    }
+    NetAddr resolved((int)ulIP, iPort, 0);
+    if (!resolved.hasPriv)
+    {
+        return false;
+    }
+    address = resolved;
+    return true;
 }
 
 // FUNCTION: SWBF2 0x005d5a60
@@ -152,7 +190,7 @@ void NetMatch::StartRegisterGame(bool)
             }
             else
             {
-                LOG(LogNet, Warning, "OPENSWBF2 NET host not registered: no private LAN address");
+                LOG(LogNet, Warning, "OPENSWBF2 NET host not registered: no local address");
             }
         }
         return;
@@ -253,7 +291,7 @@ char __fastcall NetMatch::StartJoinGame(const NetSessionId* id)
         else
         {
             // Retail hit a breakpoint here; with no private address the join just cannot start.
-            LOG(LogNet, Warning, "OPENSWBF2 NET join not started: no private LAN address");
+            LOG(LogNet, Warning, "OPENSWBF2 NET join not started: no local address");
         }
     }
     else if (gf::isInitialized())
@@ -520,7 +558,7 @@ unsigned int NetMatch::HostGetAddr(const NetAddr* pAddr, void* pOut, int iDest)
     }
     int ip, port;
     NetSocket::GetAddr(peer, ip, port);
-    if (!IsPrivateIP(ip))
+    if (!NetWire::IsUsableIPv4((unsigned long)ip))
     {
         NetAddr* output = (NetAddr*)pOut;
         output->pubAddr = pAddr->pubAddr;

@@ -280,6 +280,77 @@ int DecodeLanMaxPlayers(unsigned int uWire)
     return uWire == 0 ? (int)kMaxPlayers : (int)uWire;
 }
 
+// Any unicast IPv4 a LAN-transport peer can use: private, VPN (100.64/10), public and loopback.
+// Retail accepted only 10/8, 172.16/12 and 192.168/16, which kept Direct and VPN play out.
+bool IsUsableIPv4(unsigned long ulNetOrder)
+{
+    const unsigned int uFirst = (unsigned int)(ulNetOrder & 0xff);
+    if (ulNetOrder == 0 || ulNetOrder == 0xffffffffu)
+    {
+        return false;
+    }
+    return uFirst != 0 && uFirst < 224;
+}
+
+// "host", "host:port", with surrounding spaces. Host names and dotted IPv4 only: letters,
+// digits, '.' and '-'. The port must be 1..65535; without one, iDefaultPort is used.
+bool ParseHostPort(const char* pcText, char* pcHost, unsigned int uHostCap, int& iPort, int iDefaultPort)
+{
+    if (!pcText || !pcHost || uHostCap < 2)
+    {
+        return false;
+    }
+    while (*pcText == ' ' || *pcText == '	')
+    {
+        ++pcText;
+    }
+    unsigned int uLen = 0;
+    while (pcText[uLen] && pcText[uLen] != ':' && pcText[uLen] != ' ' && pcText[uLen] != '	')
+    {
+        const char c = pcText[uLen];
+        const bool bOk = (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '.' ||
+                         c == '-';
+        if (!bOk || uLen + 1 >= uHostCap)
+        {
+            return false;
+        }
+        pcHost[uLen] = c;
+        ++uLen;
+    }
+    if (!uLen)
+    {
+        return false;
+    }
+    pcHost[uLen] = 0;
+    const char* pcRest = pcText + uLen;
+    iPort = iDefaultPort;
+    if (*pcRest == ':')
+    {
+        ++pcRest;
+        int iValue = 0;
+        int iDigits = 0;
+        while (*pcRest >= '0' && *pcRest <= '9')
+        {
+            iValue = iValue * 10 + (*pcRest - '0');
+            if (++iDigits > 5)
+            {
+                return false;
+            }
+            ++pcRest;
+        }
+        if (!iDigits || iValue < 1 || iValue > 65535)
+        {
+            return false;
+        }
+        iPort = iValue;
+    }
+    while (*pcRest == ' ' || *pcRest == '	')
+    {
+        ++pcRest;
+    }
+    return *pcRest == 0;
+}
+
 int ClampPlayerCount(unsigned int uWire)
 {
     int iCount = uWire > kMaxPlayers ? (int)kMaxPlayers : (int)uWire;
