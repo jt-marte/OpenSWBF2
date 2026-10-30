@@ -27,6 +27,7 @@
 #include "Steam/gfSteamAuth.h"
 #include "Steam/galaxy_api.h"
 #include "PebbleFL/Common/PblUnicode.h"
+#include "NetWire.h"
 #include "CommandLine.h"
 #include "pcCrash.h"
 #include "GameLoop.h"
@@ -198,6 +199,7 @@ static bool sCloseDeferred;
 extern char autoNetSession[64];
 extern int hostshort;
 namespace GameLoop { extern bool sQuitRequested; }
+extern int gAutoNetPlayers;
 
 // True when pcLine holds pcWord as its own -word or /word token.
 static bool HasSwitchWord(const char* pcLine, const char* pcWord)
@@ -482,6 +484,10 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         if (!gLogStdout)
         {
             gLogStdout = true;
+        }
+        if (!gAutoNetPlayers) // no /netplayers: a server's upload cap defaults to the 100M option
+        {
+            gAutoNetPlayers = NetWire::HostBandwidthSlots(12);
         }
     }
     RedLog::SetStdout(gLogConsole ? RedLog::StdoutConsole

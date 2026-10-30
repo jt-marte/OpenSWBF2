@@ -1728,10 +1728,11 @@ void NetPlayer::Init(bool bMission)
         skippedSends[i] = 0;
     }
     updateWindowSize = 1;
-    for (unsigned int i = 0; i < 2; i++)
+    for (unsigned int i = 0; i < kUpdateWindowMax; i++)
     {
         sentUpdateTurn[i] = 0;
         sentUpdateTime[i] = 0.0f;
+        sentUpdateTimedOut[i] = false;
     }
     averageRtt = 0.25f;
     deviationRtt = 0.0f;
@@ -7617,21 +7618,36 @@ void ReceivedUpdateAck(int player, unsigned int turn)
     }
     NetPlayer& netPlayer = netPlayers[player];
     unsigned int slot = 0;
-    while (slot < 2 && netPlayer.sentUpdateTurn[slot] != turn)
+    while (slot < NetPlayer::kUpdateWindowMax && netPlayer.sentUpdateTurn[slot] != turn)
     {
         ++slot;
     }
-    if (slot == 2)
+    if (slot == NetPlayer::kUpdateWindowMax)
     {
         return;
     }
+    // A late ack for an update already counted as dropped still measures the RTT. Retail
+    // cleared timed-out slots, so with a real RTT above its 0.25 s start the estimate never
+    // grew: every update timed out, the window stayed at 1 and ping read 250.
+    const bool bWasTimedOut = netPlayer.sentUpdateTimedOut[slot];
     netPlayer.sentUpdateTurn[slot] = 0;
+    netPlayer.sentUpdateTimedOut[slot] = false;
+    // The client acks only its newest update, so older ones still in flight were delivered or
+    // superseded, not lost; retail counted them as drops when they timed out.
+    for (unsigned int i = 0; i < NetPlayer::kUpdateWindowMax; ++i)
+    {
+        if (netPlayer.sentUpdateTurn[i] && netPlayer.sentUpdateTurn[i] < turn)
+        {
+            netPlayer.sentUpdateTurn[i] = 0;
+            netPlayer.sentUpdateTimedOut[i] = false;
+        }
+    }
     float sample = NetComm::GetTime() - netPlayer.sentUpdateTime[slot] - netPlayer.averageRtt;
     netPlayer.averageRtt += sample * 0.125f;
     if (sample < 0.0f)
     {
         sample = -sample;
-        if (netPlayer.updateWindowSize < 2)
+        if (!bWasTimedOut && netPlayer.updateWindowSize < NetPlayer::kUpdateWindowMax)
         {
             ++netPlayer.updateWindowSize;
         }
@@ -13588,18 +13604,43 @@ bool IsMissingMoves(int iPlayer)
 void SentUpdate(int iPlayer)
 {
     NetPlayer& player = netPlayers[iPlayer];
-    unsigned int iSlot = 0;
-    while (iSlot < 2 && player.sentUpdateTurn[iSlot])
+    // A free slot, else the oldest timed-out one (retail wrote past its two slots if both were
+    // busy).
+    unsigned int iSlot = NetPlayer::kUpdateWindowMax;
+    for (unsigned int i = 0; i < NetPlayer::kUpdateWindowMax; ++i)
     {
-        ++iSlot;
+        if (!player.sentUpdateTurn[i])
+        {
+            iSlot = i;
+            break;
+        }
+        if (player.sentUpdateTimedOut[i] &&
+            (iSlot == NetPlayer::kUpdateWindowMax || player.sentUpdateTime[i] < player.sentUpdateTime[iSlot]))
+        {
+            iSlot = i;
+        }
+    }
+    if (iSlot == NetPlayer::kUpdateWindowMax)
+    {
+        iSlot = 0;
+        for (unsigned int i = 1; i < NetPlayer::kUpdateWindowMax; ++i)
+        {
+            if (player.sentUpdateTime[i] < player.sentUpdateTime[iSlot])
+            {
+                iSlot = i;
+            }
+        }
     }
     player.sentUpdateTurn[iSlot] = hostTurnNumber;
     player.sentUpdateTime[iSlot] = NetComm::GetTime();
+    player.sentUpdateTimedOut[iSlot] = false;
     float fWindow = (player.averageRtt + player.deviationRtt) /
                     (float)player.updateWindowSize;
-    if (fWindow < 0.1f)
+    // Retail floored the gap at 0.1 s, so 10 updates a second at most even on a LAN; one turn
+    // lets updates follow the tick rate.
+    if (fWindow < netSecondsPerTurn)
     {
-        fWindow = 0.1f;
+        fWindow = netSecondsPerTurn;
     }
     int iTurns = (int)((float)netTurnsPerSecond * fWindow + 0.5f);
     player.ackedUpdateTurn = iTurns + hostTurnNumber;
@@ -13611,14 +13652,16 @@ bool IsSendWindowOpen(int iPlayer)
     NetPlayer& player = netPlayers[iPlayer];
     float fNow = NetComm::GetTime();
     int iActive = 0;
-    for (unsigned int i = 0; i < 2; ++i)
+    // TCP-style timeout (RTT plus four deviations); retail used one deviation, which called
+    // ordinary jitter a drop and shrank the window.
+    const float fTimeout = player.averageRtt + 4.0f * player.deviationRtt;
+    for (unsigned int i = 0; i < NetPlayer::kUpdateWindowMax; ++i)
     {
-        if (!player.sentUpdateTurn[i])
+        if (!player.sentUpdateTurn[i] || player.sentUpdateTimedOut[i])
         {
             continue;
         }
-        if (fNow - player.sentUpdateTime[i] <=
-            player.averageRtt + player.deviationRtt)
+        if (fNow - player.sentUpdateTime[i] <= fTimeout)
         {
             ++iActive;
         }
@@ -13630,7 +13673,7 @@ bool IsSendWindowOpen(int iPlayer)
             }
             --player.updateCount;
             ++player.dropCount;
-            player.sentUpdateTurn[i] = 0;
+            player.sentUpdateTimedOut[i] = true;
             if (player.updateWindowSize > 1)
             {
                 --player.updateWindowSize;
