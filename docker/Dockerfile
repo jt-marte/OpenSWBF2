@@ -1,7 +1,9 @@
 # OpenSWBF2 dedicated server: OpenSWBF2's own release package (the x64 game, LuaCompiler and the
 # scripts) under Wine. No game data is in the image: it downloads the game from the player's own
 # Steam account on first start, or uses a copy they mount (see README.md).
-FROM debian:bookworm-slim
+# Debian 13 for Wine 10: the game's FFmpeg DLLs import bcryptprimitives.dll, which Wine 8 (Debian 12)
+# doesn't have, so the game couldn't load there
+FROM debian:trixie-slim
 
 ARG OPENSWBF2_VERSION=0.2.4
 ARG OPENSWBF2_REPO=jt-marte/OpenSWBF2
