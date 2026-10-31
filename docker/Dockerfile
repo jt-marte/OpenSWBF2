@@ -35,17 +35,19 @@ RUN set -eu; \
     unzip -q "$name" -d /opt/openswbf2; \
     rm -f "$name" "$name.sha256"
 
-COPY entrypoint.sh /opt/docker/entrypoint.sh
-COPY rcon.py /usr/local/bin/rcon
-RUN sed -i 's/\r$//' /opt/docker/entrypoint.sh /usr/local/bin/rcon \
- && chmod 755 /opt/docker/entrypoint.sh /usr/local/bin/rcon
+# The entrypoint, the mod download service and the rcon tool (also a module the service uses)
+COPY entrypoint.sh modserver.py rcon.py /opt/docker/
+RUN sed -i 's/\r$//' /opt/docker/entrypoint.sh /opt/docker/modserver.py /opt/docker/rcon.py \
+ && chmod 755 /opt/docker/entrypoint.sh /opt/docker/modserver.py /opt/docker/rcon.py \
+ && ln -s /opt/docker/rcon.py /usr/local/bin/rcon
 
 # The Wine prefix, made once here so the server starts quickly
 USER swbf2
 RUN xvfb-run -a wineboot -i && wineserver -w
 
 WORKDIR /srv/game
-EXPOSE 3658/udp
+# UDP: the game and admin; TCP: mod downloads
+EXPOSE 3658/udp 3658/tcp
 VOLUME ["/config"]
 # A first start builds the core lvls, which takes a minute or two
 HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=3 CMD ["rcon", "--ping"]

@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # OpenSWBF2 dedicated server in a container. Builds the core lvls from the player's own game data
 # (once per OpenSWBF2 version), assembles a game folder of links, writes the server settings from
-# the environment and runs BattlefrontII.exe -dedicated under Wine. See README.md.
+# the environment and runs BattlefrontII.exe -dedicated under Wine, next to the mod download
+# service (modserver.py). See README.md.
 set -euo pipefail
 
 APP=/opt/openswbf2
@@ -9,6 +10,7 @@ GAME=/srv/game
 GAMEDATA=/gamedata
 ADDONS=/addons
 CONFIG=/config
+UPLOADS=/config/addons
 VERSION=$(python3 -c 'import json; print(json.load(open("/opt/openswbf2/manifest.json"))["version"])')
 
 log() { echo "[openswbf2] $*"; }
@@ -58,7 +60,7 @@ for lvl in core shell common ingame mission; do
 done
 touch "$CONFIG/.write-test" 2>/dev/null && rm -f "$CONFIG/.write-test" ||
     die "$CONFIG is not writable by uid $(id -u): run 'sudo chown -R $(id -u):$(id -g)' on the host folder you mounted there"
-mkdir -p "$CONFIG/settings" "$CONFIG/logs" "$CONFIG/lvl"
+mkdir -p "$CONFIG/settings" "$CONFIG/logs" "$CONFIG/lvl" "$UPLOADS"
 
 # --- Settings ----------------------------------------------------------------------------------
 PORT=$(int_env PORT 3658 1024 65534)
@@ -93,6 +95,12 @@ TICK_RATE=$(int_env TICK_RATE 60 30 120)
 case $TICK_RATE in 30 | 60 | 120) ;; *) log "TICK_RATE is 30, 60 or 120; using 60"; TICK_RATE=60 ;; esac
 LOBBY=$(bool_env LOBBY 0)
 SCRIPT_MODS=$(bool_env SCRIPT_MODS 0)
+
+# Mod downloads: TCP on the game's port number by default (the game itself only uses UDP)
+MOD_SHARING=$(bool_env MOD_SHARING 1)
+MOD_PORT=$(int_env MOD_PORT "$PORT" 1024 65535)
+MOD_RATE=$(int_env MOD_RATE 50 0 100000)
+MOD_UPLOADS=$(bool_env MOD_UPLOADS 1)
 
 BOTS=$(int_env BOTS_PER_TEAM 16 0 32)
 HERO_UNLOCK=$(int_env HERO_UNLOCK 3 3 5)
@@ -140,38 +148,67 @@ log "Core game files for OpenSWBF2 $VERSION (built once, then cached in /config/
 (cd "$APP" && wine LuaCompiler.exe lvl --index 'data\scripts\index.json' --gamedata 'Z:\gamedata' --out-dir "Z:\\config\\lvl\\$VERSION") ||
     die "building the core game files failed: are $GAMEDATA/data/_lvl_pc's shell, common, ingame and mission.lvl the original Steam/GOG ones?"
 
-# --- The game folder: links to the package, the player's data and the rebuilt lvls ------------
-rm -rf "${GAME:?}"/*
-mkdir -p "$GAME/data/_lvl_pc" "$GAME/SaveGames"
-for file in "$APP"/*.exe "$APP"/*.dll; do
-    ln -s "$file" "$GAME/"
-done
-for entry in "$GAMEDATA"/data/*; do
-    name=${entry##*/}
-    [[ ${name,,} == _lvl_pc ]] || ln -s "$entry" "$GAME/data/$name"
-done
-skipped=0
-for entry in "$GAMEDATA"/data/_lvl_pc/*; do
-    name=${entry##*/}
-    case ${name,,} in
-        shell.lvl | common.lvl | ingame.lvl | mission.lvl | *.orig | *.cache) continue ;;
-        user_script_* | custom_gc_* | v1.3patch*)
-            if [[ $SCRIPT_MODS == 0 ]]; then
-                skipped=$((skipped + 1))
+# --- The game folder: links to the package, the player's data, the rebuilt lvls and the mods ---
+# Made again before each game start, so mods uploaded since then are in it
+assemble() {
+    rm -rf "${GAME:?}"/*
+    mkdir -p "$GAME/data/_lvl_pc" "$GAME/SaveGames" "$GAME/AddOn"
+    local file entry name skipped=0
+    for file in "$APP"/*.exe "$APP"/*.dll; do
+        ln -s "$file" "$GAME/"
+    done
+    for entry in "$GAMEDATA"/data/*; do
+        name=${entry##*/}
+        [[ ${name,,} == _lvl_pc ]] || ln -s "$entry" "$GAME/data/$name"
+    done
+    for entry in "$GAMEDATA"/data/_lvl_pc/*; do
+        name=${entry##*/}
+        case ${name,,} in
+            shell.lvl | common.lvl | ingame.lvl | mission.lvl | *.orig | *.cache) continue ;;
+            user_script_* | custom_gc_* | v1.3patch*)
+                if [[ $SCRIPT_MODS == 0 ]]; then
+                    skipped=$((skipped + 1))
+                    continue
+                fi
+                ;;
+        esac
+        ln -s "$entry" "$GAME/data/_lvl_pc/$name"
+    done
+    for lvl in shell common ingame mission; do
+        ln -s "$LVL/$lvl.lvl" "$GAME/data/_lvl_pc/$lvl.lvl"
+    done
+    ((skipped > 0)) && log "Left out $skipped script mod files (SCRIPT_MODS=1 loads them)"
+
+    # Mod folders: the read-only addons first, then the ones admins uploaded; the first of a name wins
+    local root dir mods=()
+    local -A taken=()
+    for root in "$ADDONS" "$UPLOADS"; do
+        for dir in "$root"/*/; do
+            [[ -d $dir ]] || continue
+            dir=${dir%/}
+            name=${dir##*/}
+            if [[ -n ${taken[${name,,}]:-} ]]; then
+                log "Uploaded mod $name is left out: the addons folder has one with that name"
                 continue
             fi
-            ;;
-    esac
-    ln -s "$entry" "$GAME/data/_lvl_pc/$name"
-done
-for lvl in shell common ingame mission; do
-    ln -s "$LVL/$lvl.lvl" "$GAME/data/_lvl_pc/$lvl.lvl"
-done
-((skipped > 0)) && log "Left out $skipped script mod files (SCRIPT_MODS=1 loads them)"
-if [[ -d $ADDONS ]] && [[ -n $(ls -A "$ADDONS" 2>/dev/null) ]]; then
-    ln -s "$ADDONS" "$GAME/AddOn"
-    log "Mods: $(ls "$ADDONS" | tr '\n' ' ')"
-fi
+            taken[${name,,}]=1
+            ln -s "$dir" "$GAME/AddOn/$name"
+            mods+=("$name")
+        done
+    done
+    ((${#mods[@]} > 0)) && log "Mods: ${mods[*]}"
+    return 0
+}
+
+# --- Mod downloads -----------------------------------------------------------------------------
+modserver=
+start_modserver() {
+    ((MOD_SHARING == 1)) || return 0
+    ENTRYPOINT_PID=$$ PORT=$PORT MOD_PORT=$MOD_PORT MOD_RATE=$MOD_RATE MOD_UPLOADS=$MOD_UPLOADS \
+        ADMIN_PASSWORD=$ADMIN_PASSWORD JOIN_PASSWORD=$JOIN_PASSWORD SERVER_NAME=$SERVER_NAME OPENSWBF2_VERSION=$VERSION \
+        python3 /opt/docker/modserver.py serve --addons "$ADDONS" --config "$CONFIG" &
+    modserver=$!
+}
 
 # --- Run ---------------------------------------------------------------------------------------
 args=(-dedicated "${MAP_LIST[@]}")
@@ -185,28 +222,68 @@ if [[ -n ${EXTRA_ARGS:-} ]]; then
     args+=("${extra[@]}")
 fi
 
-log "Starting \"$SERVER_NAME\" on UDP $PORT: ${#MAP_LIST[@]} maps, up to $MAX_PLAYERS players, $TICK_RATE turns a second"
-cd "$GAME"
-xvfb-run -a -s '-screen 0 640x480x24' wine BattlefrontII.exe "${args[@]}" &
-child=$!
+child=
+restart=0
 
-# docker stop: WM_CLOSE first, the server's own clean stop (as the launcher's ServerHost does)
-stop() {
-    log "Stopping the server"
+# WM_CLOSE first, the server's own clean stop (as the launcher's ServerHost does)
+stop_game() {
+    [[ -n $child ]] || return 0
     wine taskkill /IM BattlefrontII.exe >/dev/null 2>&1 || true
     for _ in $(seq 15); do
-        kill -0 "$child" 2>/dev/null || exit 0
+        kill -0 "$child" 2>/dev/null || return 0
         sleep 1
     done
     wineserver -k >/dev/null 2>&1 || true
     kill "$child" 2>/dev/null || true
+    return 0
+}
+
+# docker stop
+stop() {
+    log "Stopping the server"
+    stop_game
+    [[ -n $modserver ]] && kill "$modserver" 2>/dev/null
     exit 0
 }
+
+# The mod service asks for this to load mods an admin uploaded (or to unload removed ones)
+restart_game() {
+    restart=1
+    log "Restarting the game for the mod changes"
+    stop_game
+}
 trap stop TERM INT
+trap restart_game USR1
 
 set +e
-wait "$child"
-status=$?
-wineserver -k >/dev/null 2>&1
+cd "$GAME"
+start_modserver
+while true; do
+    python3 /opt/docker/modserver.py apply-pending --config "$CONFIG" || log "Couldn't put the uploaded mods in place"
+    assemble
+    if ((MOD_SHARING == 1)); then
+        kill -0 "$modserver" 2>/dev/null || start_modserver
+        log "Mod downloads on TCP $MOD_PORT ($( ((MOD_RATE > 0)) && echo "up to $MOD_RATE Mbit/s" || echo "no speed cap"))"
+    fi
+    log "Starting \"$SERVER_NAME\" on UDP $PORT: ${#MAP_LIST[@]} maps, up to $MAX_PLAYERS players, $TICK_RATE turns a second"
+    restart=0
+    xvfb-run -a -s '-screen 0 640x480x24' wine BattlefrontII.exe "${args[@]}" &
+    child=$!
+    wait "$child"
+    status=$?
+    # A trapped signal cuts the wait short: wait until the game has really gone
+    while kill -0 "$child" 2>/dev/null; do
+        wait "$child"
+        status=$?
+    done
+    child=
+    wineserver -k >/dev/null 2>&1
+    if ((restart == 1)); then
+        restart=0
+        continue
+    fi
+    break
+done
+[[ -n $modserver ]] && kill "$modserver" 2>/dev/null
 log "The server exited ($status)"
 exit "$status"
