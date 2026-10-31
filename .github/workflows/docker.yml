@@ -28,6 +28,10 @@ jobs:
           v="${{ github.event.inputs.version || github.event.release.tag_name }}"
           echo "version=${v#v}" >> "$GITHUB_OUTPUT"
 
+      # The mod download service, with made-up mods (no game data)
+      - name: Mod service tests
+        run: python3 docker/test_modserver.py
+
       - uses: docker/setup-buildx-action@v3
 
       - name: Build

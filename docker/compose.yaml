@@ -6,7 +6,8 @@ services:
     container_name: openswbf2
     restart: unless-stopped
     ports:
-      - "3658:3658/udp"          # keep in step with PORT below
+      - "3658:3658/udp"          # the game and admin; keep in step with PORT below
+      - "3658:3658/tcp"          # mod downloads; keep in step with MOD_PORT (PORT unless set)
     environment:
       PORT: "3658"
       SERVER_NAME: "OpenSWBF2 Server"
@@ -19,11 +20,14 @@ services:
       DIFFICULTY: "3"            # 2 Medium, 3 Hard, 4 Overhaul
       HEROES: "1"
       AI_HEROES: "1"
-      LOBBY: "0"                 # 1 = each map waits for an admin's /start
+      LOBBY: "0"                 # 1 = each map waits for Start; launcher players wait in its lobby
+      MOD_SHARING: "1"           # players' launchers download the server's mods from it
+      MOD_RATE: "50"             # download cap in Mbit/s for everyone together; 0 = none
+      MOD_UPLOADS: "1"           # admins can upload mods from the launcher (admin password)
     volumes:
       - ./gamedata:/gamedata:ro  # your GameData folder (holds data/_lvl_pc)
       - ./addons:/addons:ro      # optional: mod folders such as BF1 and DLC_XBOX
-      - ./config:/config         # settings, logs, built core files, admin password
+      - ./config:/config         # settings, logs, built core files, admin password, uploaded mods
     user: "1000:1000"
     cap_drop: [ALL]
     security_opt: ["no-new-privileges:true"]

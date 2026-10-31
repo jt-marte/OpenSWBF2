@@ -788,8 +788,9 @@ TEST_CASE("multiplayer: Modern first and by default with a Direct Connect tab an
 
     CHECK(!Has(sList, "_joinip"));
     CHECK(!Has(sList, "bJoinIPMode"));
-    // the command-line /connect join still goes through the Join screen
-    CHECK(Has(sList, "ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString)"));
+    // the command-line /connect join still goes through the Join screen, with /password if given
+    CHECK(Has(sList, "ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString, CmdlinePending and CmdlinePass)"));
+    CHECK(Has(sList, "ScriptCB_BeginJoinIP(AddrStr, PassStr or \"\")"));
 }
 
 TEST_CASE("multiplayer opens on Direct Connect with no sign-in screen" * doctest::test_suite("regression"))
