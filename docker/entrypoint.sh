@@ -102,10 +102,11 @@ if [[ ${1:-} == selftest ]]; then
     exit 0
 fi
 
-# DepotDownloader with its login store in STEAM_DIR, run from a folder of its own
+# DepotDownloader with its login store in STEAM_DIR, run from a folder of its own. It aborts when
+# a login can't go ahead; no core dump of that lands in the volume.
 depot() {
     mkdir -p "$STEAM_DIR/work"
-    (cd "$STEAM_DIR/work" && XDG_DATA_HOME=$STEAM_DIR "$DEPOT" "$@")
+    (ulimit -c 0 && cd "$STEAM_DIR/work" && XDG_DATA_HOME=$STEAM_DIR "$DEPOT" "$@")
 }
 
 check_config() {
