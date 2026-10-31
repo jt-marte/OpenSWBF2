@@ -130,6 +130,9 @@ static const OpenText sOpenText[] = {
     { 0xf97df20d, L"DirectX 9" },                      // ifs.videoopt.directx9
     { 0x5357afdf, L"Restart the game to use the new renderer." }, // ifs.videoopt.rendererrestart
     { 0x74e7a80c, L"Console" },                        // game.pause.console
+    { 0xd3766076, L"AI heroes" },                      // ifs.gameopt.aiheroes
+    { 0x1d8946ea, L"Award weapons" },                  // ifs.gameopt.awardweapons
+    { 0x7ff56831, L"Award effects" },                  // ifs.gameopt.awardeffects
 };
 
 // FUNCTION: SWBF2 0x006c5b30

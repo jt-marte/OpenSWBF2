@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "GameMovie.h"
+#include "GameplayCfg.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
 #include "pcCrash.h"
 #include "RedEngineFL/Util/RedLog.h"
@@ -442,6 +443,20 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         {
             gLogStdout = true;
             gLogConsole = true;
+            continue;
+        }
+
+        // OpenSWBF2: a gameplay option for this run only, over display.ini (-aiheroes 0|1).
+        if (GameplayCfg::Find(pcArg + 1) >= 0)
+        {
+            if (GameplayCfg::ParseCommandLineSwitch(pcArg + 1, i + 1 < iArgc ? apcArgv[i + 1] : 0))
+            {
+                ++i;
+            }
+            else
+            {
+                LOG(LogCore, Warning, "-%s needs 0 or 1, ignored", pcArg + 1);
+            }
             continue;
         }
 

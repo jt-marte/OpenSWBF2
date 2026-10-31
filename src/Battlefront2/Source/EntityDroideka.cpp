@@ -15,6 +15,7 @@
 #include "FLEffect.h"
 #include "GameModel.h"
 #include "NetGame.h"
+#include "GameplayCfg.h"
 #include "PlayerController.h"
 #include "RedEngineFL/Application/pc/pcFLRender.h"
 #include "RedEngineFL/Graphics/RedModel.h"
@@ -2409,7 +2410,7 @@ void EntityDroideka::TriggerBuffHealthEffect()
 // FUNCTION: SWBF2 0x004a6b20
 void EntityDroideka::TriggerBuffOffenseEffect()
 {
-    if (mBuffOffenseTimer > 0.0f)
+    if (GameplayCfg::ShowBuffEffect(mBuffOffenseTimer))
     {
         if (mClass->mBuffOffenseEffect && mBuffOffenseEffectHandle == 0)
         {
@@ -2433,7 +2434,7 @@ void EntityDroideka::TriggerBuffOffenseEffect()
 // FUNCTION: SWBF2 0x004a6c20
 void EntityDroideka::TriggerBuffDefenseEffect()
 {
-    if (mBuffDefenseTimer > 0.0f)
+    if (GameplayCfg::ShowBuffEffect(mBuffDefenseTimer))
     {
         if (mClass->mBuffDefenseEffect && mBuffDefenseEffectHandle == 0)
         {

@@ -287,6 +287,12 @@ bool SoundStream::Properties::SetupStream(Stream* pStream, unsigned int uiSegmen
     }
 
     const StreamBase::Segment* pSegment = pStream->FindSegment(uiSegmentID);
+    // OpenSWBF2: a weighted list can name a segment the stream doesn't have (Tatooine's music
+    // lists one nothing defines), and the music then stayed silent; pick again.
+    for (int iTry = 0; !pSegment && iTry < 8; ++iTry)
+    {
+        pSegment = pStream->FindSegment((unsigned int)(uintptr_t)mSelObjectWeightList->GetObjectA());
+    }
     if (!pSegment)
     {
         return false;

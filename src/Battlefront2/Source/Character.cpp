@@ -30,6 +30,7 @@
 #include "MedalsMgr.h"
 #include "NetComm.h"
 #include "NetGame.h"
+#include "GameplayCfg.h"
 #include "PauseMenu.h"
 #include "PassengerSlot.h"
 #include "PlayerProfile.h"
@@ -835,7 +836,8 @@ void Character::ChangeClass(int iClassIndex)
     SetRemote(0);
 
     PblMatrix mMatrix = mUnit->GetMatrix();
-    MedalsMgr* pMedals = mMedalsMgr;
+    // OpenSWBF2: with award weapons off, weapons count as if nobody had awards.
+    MedalsMgr* pMedals = GameplayCfg::AwardWeaponsOn(NetGame::IsEnabled()) ? mMedalsMgr : 0;
     float fHealth = 1.0f;
     float fAmmo[2] = { 1.0f, 1.0f };
     int iAmmoCount[2] = { 0, 0 };

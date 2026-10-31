@@ -127,6 +127,7 @@
     <ClCompile Include="..\src\Battlefront2\Source\NetWire.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\AITuning.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\RecentServers.cpp" />
+    <ClCompile Include="..\src\Battlefront2\Source\GameplayCfg.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\MemFailLog.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\OdfValue.cpp" />
     <ClCompile Include="..\src\LuaFL\src\lapi.cpp" />

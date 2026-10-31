@@ -98,6 +98,7 @@
 #include "CommandWalker.h"
 #include "EntityWalker.h"
 #include "LuaCallbacks_Options.h"
+#include "GameplayCfg.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
 #include "RedEngineFL/Interface/RedInterfaceElement.h"
 #include "GameSoundEngine.h"
@@ -3834,6 +3835,36 @@ const int Max(int iA, int iB);
 
 extern int netHeroRulePlayer;
 
+// OpenSWBF2: AI heroes (Options -> General) are for Instant Action, including a mission started
+// from the command line; the campaign and Galactic Conquest script their heroes.
+static bool AiHeroesOn()
+{
+    return !NetGame::IsEnabled() && Lua_Callbacks::gCurRules != Lua_Callbacks::eGAMERULES_CAMPAIGN &&
+           Lua_Callbacks::gCurRules != Lua_Callbacks::eGAMERULES_METAGAME &&
+           GameplayCfg::Get(GameplayCfg::kAiHeroes);
+}
+
+// Nobody took the hero: wait for the respawn time again (or the next unlock) and ask afresh.
+static void PassHeroTurn(int iTeam)
+{
+    netHeroPlayerID[iTeam] = -1;
+    netHeroNextPlayerID[iTeam] = -1;
+    netHeroAIID[iTeam] = -1;
+    netHeroDiedTurn[iTeam] = NetGame::GetTurnNumber();
+    spHeroDiedTime[iTeam] = NetGame::GetLocalTime();
+    netHeroSpawnedTurn[iTeam] = 0;
+    if (netHeroRuleRespawn == 1)
+    {
+        netHeroUnlocked[iTeam] = false;
+        netHeroFirstUnlocked[iTeam] = false;
+    }
+    else
+    {
+        netHeroFirstUnlocked[iTeam] = false;
+    }
+    ClearTeamDeclinedHero(iTeam);
+}
+
 // FUNCTION: SWBF2 0x005cedc0
 void NetGame::HeroRulesUpdate(int iTeam)
 {
@@ -3899,24 +3930,11 @@ void NetGame::HeroRulesUpdate(int iTeam)
                         }
                     }
 
-                    if (bAllDeclined)
+                    // OpenSWBF2: with AI heroes on, a team none of whose humans takes the hero
+                    // (a team of bots, or every human declined) gives it to one of its bots.
+                    if (bAllDeclined && !AiHeroesOn())
                     {
-                        netHeroPlayerID[iTeam] = -1;
-                        netHeroNextPlayerID[iTeam] = -1;
-                        netHeroAIID[iTeam] = -1;
-                        netHeroDiedTurn[iTeam] = NetGame::GetTurnNumber();
-                        spHeroDiedTime[iTeam] = GetLocalTime();
-                        netHeroSpawnedTurn[iTeam] = 0;
-                        if (netHeroRuleRespawn == 1)
-                        {
-                            netHeroUnlocked[iTeam] = false;
-                            netHeroFirstUnlocked[iTeam] = false;
-                        }
-                        else
-                        {
-                            netHeroFirstUnlocked[iTeam] = false;
-                        }
-                        ClearTeamDeclinedHero(iTeam);
+                        PassHeroTurn(iTeam);
                         return;
                     }
 
@@ -4023,7 +4041,17 @@ void NetGame::HeroRulesUpdate(int iTeam)
                         {
                             netHeroAIID[iTeam] = aaiCandidates[0][PblRandom::GetGlobalInt() % aiCount[0]];
                         }
+                        if (bAllDeclined)
+                        {
+                            LOG(LogSim, Inform, "OPENSWBF2 HERO team %d: bot %d takes the hero", iTeam,
+                                netHeroAIID[iTeam]);
+                        }
                         HeroSelected(iTeam);
+                    }
+                    else if (bAllDeclined)
+                    {
+                        PassHeroTurn(iTeam); // no bot to take it either
+                        return;
                     }
                 }
             }
@@ -6305,7 +6333,12 @@ void NetGame::DeclineHero(int iTeam, int iPlayer)
         netHeroKillerID[3 - iTeam] = -1;
     }
     netHeroSelectedTurn[iTeam] = 0;
-    netPlayers[iPlayer].mDeclinedHero = true;
+    // OpenSWBF2: a bot chosen as the hero that doesn't respawn within 30 seconds comes here as
+    // player -1 (HeroRulesUpdate), which wrote just before netPlayers.
+    if (iPlayer >= 0)
+    {
+        netPlayers[iPlayer].mDeclinedHero = true;
+    }
 }
 
 // FUNCTION: SWBF2 0x005d3480

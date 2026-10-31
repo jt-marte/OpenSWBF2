@@ -18,7 +18,9 @@
 #include "Explosion.h"
 #include "GameLoop.h"
 #include "GameObject.h"
+#include "GameplayCfg.h"
 #include "MedalsMgr.h"
+#include "NetGame.h"
 #include "MountedTurret.h"
 #include "Ordnance.h"
 #include "OrdnanceMissile.h"
@@ -772,7 +774,9 @@ bool CombatUtil::sIsWeaponUnlocked(const Controllable* pMe, const WeaponClass* p
 {
     if (pMe && pMe->mCharacter)
     {
-        const MedalsMgr* pMedals = pMe->mCharacter->mMedalsMgr;
+        // OpenSWBF2: with award weapons off, weapons count as if nobody had awards.
+        const MedalsMgr* pMedals =
+            GameplayCfg::AwardWeaponsOn(NetGame::IsEnabled()) ? pMe->mCharacter->mMedalsMgr : 0;
         if (pMedals && pClass->mMedalsTypeToUnlock != -1)
         {
             bool bUnlocked = pMedals->IsAwardAvailable(pClass->mMedalsTypeToUnlock);

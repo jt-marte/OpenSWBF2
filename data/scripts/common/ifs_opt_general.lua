@@ -114,8 +114,22 @@ function ifs_opt_general_fnBoolToSelValue(bValue)
 	end
 end
 
+-- OpenSWBF2: gameplay options (row tag = display.ini key). They live in display.ini, not the
+-- profile, apply at once and all default to on.
+ifs_opt_general_gameplay = {
+	aiheroes = "AiHeroes",
+	awardweapons = "AwardWeapons",
+	awardeffects = "AwardEffects",
+}
+
 function ifs_opt_general_fnApplySettings(this)
 	local generalForm = this.formcontainergeneral.form
+	if ( ScriptCB_GetGameplayOption ) then
+		local tag, key
+		for tag, key in pairs(ifs_opt_general_gameplay) do
+			generalForm.elements[tag].selValue = ifs_opt_general_fnBoolToSelValue(ScriptCB_GetGameplayOption(key))
+		end
+	end
 	this.GeneralOpts = ScriptCB_GetGeneralOptions()
 	
 	this.GeneralOpts = ScriptCB_GetGeneralOptions()
@@ -221,6 +235,11 @@ ifs_opt_general = NewIFShellScreen {
 		generalForm.elements["aimassist"].hidden = (gPlatformStr == "PC")
 		generalForm.elements["autoaim"].hidden = ScriptCB_IsNetworkOn() or (gPlatformStr == "PC")
 		generalForm.elements["stickyreticule"].hidden = (gPlatformStr == "PC")
+		-- OpenSWBF2: AI heroes and award weapons only change single player
+		local bNoGameplay = not ScriptCB_GetGameplayOption
+		generalForm.elements["aiheroes"].hidden = bNoGameplay or ScriptCB_IsNetworkOn()
+		generalForm.elements["awardweapons"].hidden = bNoGameplay or ScriptCB_IsNetworkOn()
+		generalForm.elements["awardeffects"].hidden = bNoGameplay
 		--generalForm.elements["ttreset"].hidden = (gPlatformStr == "PC")
 		
 		SetCurButton(this.CurButton)
@@ -322,6 +341,12 @@ ifs_opt_general = NewIFShellScreen {
 		elseif (this.CurButton == "reset") then
 			ifelm_shellscreen_fnPlaySound(this.acceptSound)
 			ScriptCB_ResetGameOptionsToDefault()
+			if ( ScriptCB_SetGameplayOption ) then
+				local tag, key
+				for tag, key in pairs(ifs_opt_general_gameplay) do
+					ScriptCB_SetGameplayOption(key, true)
+				end
+			end
 			ifs_opt_general_fnUpdateStrings(this)
 			--this:ApplySettings()
 			ifs_opt_general_fnApplySettings(this)
@@ -358,6 +383,8 @@ ifs_opt_general = NewIFShellScreen {
 			this.GeneralOpts.iDifficulty = btnNum + 1
 		elseif ( buttongroup.tag == "ttstate" ) then
 			ScriptCB_SetToolTipState(btnNum)
+		elseif ( ifs_opt_general_gameplay[buttongroup.tag] ) then
+			ScriptCB_SetGameplayOption(ifs_opt_general_gameplay[buttongroup.tag], btnNum == 2)
 		end
 
 		generalForm.elements[buttongroup.tag].selValue = btnNum
@@ -499,6 +526,9 @@ ifs_opt_general_layout = {
 		{ tag = "ttstate", title = "ifs.gameopt.ttstate", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"ifs.GameOpt.tt_off", "ifs.GameOpt.tt_auto", "ifs.GameOpt.tt_on"}},
         --{ tag = "lightingquality", title = "ifs.videoopt.lightingquality", selValue = 1, control = "dropdown", values = {"ifs.VideoOpt.low", "ifs.VideoOpt.med", "ifs.VideoOpt.high"} },
         { tag = "subtitles", title = "ifs.gameopt.moviesubtitles", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.off", "common.on"}, },
+		{ tag = "aiheroes", title = "ifs.gameopt.aiheroes", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"}},
+		{ tag = "awardweapons", title = "ifs.gameopt.awardweapons", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"}},
+		{ tag = "awardeffects", title = "ifs.gameopt.awardeffects", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"}},
 		--{ tag = "ttreset", title = "", fnChanged = ifs_opt_general.OnRadioChanged, selValue = 1, control = "radio", values = {"common.select", "common.change"}},
         --{ tag = "viewdistance", title = "ifs.VideoOpt.viewdistance", selValue = 0.5, control = "slider", minValue = 0.0, maxValue = 1.0 },
 		{ tag = "reticulealpha", title = "ifs.gameopt.reticulealpha", fnChanged = ifs_opt_general.OnElementChanged, selValue = 1.0, control = "slider", minValue = 0.0, maxValue = 1.0},

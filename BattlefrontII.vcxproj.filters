@@ -249,6 +249,9 @@
     <ClCompile Include="src\Battlefront2\Source\RecentServers.cpp">
       <Filter>src\Battlefront2\Source</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battlefront2\Source\GameplayCfg.cpp">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battlefront2\Source\AIGoal.cpp">
       <Filter>src\Battlefront2\Source</Filter>
     </ClCompile>
@@ -2445,6 +2448,9 @@
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\GameplayCfg.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h">

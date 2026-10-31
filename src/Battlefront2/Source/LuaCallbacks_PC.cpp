@@ -8,6 +8,7 @@
 #include "LuaVideoArgs.h"
 #include "FLGuiManager.h"
 #include "FLInputManager.h"
+#include "GameplayCfg.h"
 #include "PlayerProfile.h"
 #include "RecentServers.h"
 #include "ColorControl.h"
@@ -559,6 +560,38 @@ static int ScriptCB_IsLvlUsable(lua_State*)
     return 1;
 }
 
+static int GameplayOptionArg()
+{
+    return lua_isstring(LuaHelper::mState, 1) ? GameplayCfg::Find(lua_tostring(LuaHelper::mState, 1)) : -1;
+}
+
+// A gameplay option for Options -> General by its display.ini key ("AiHeroes", "AwardWeapons",
+// "AwardEffects"); nil for an unknown key.
+static int ScriptCB_GetGameplayOption(lua_State*)
+{
+    const int iOption = GameplayOptionArg();
+    if (iOption < 0)
+    {
+        lua_pushnil(LuaHelper::mState);
+    }
+    else
+    {
+        lua_pushboolean(LuaHelper::mState, GameplayCfg::Get(iOption));
+    }
+    return 1;
+}
+
+// Applies at once and saves to display.ini.
+static int ScriptCB_SetGameplayOption(lua_State*)
+{
+    const int iOption = GameplayOptionArg();
+    if (iOption >= 0 && !GameplayCfg::Set(iOption, lua_toboolean(LuaHelper::mState, 2) != 0))
+    {
+        LOG(LogCore, Warning, "OPENSWBF2 GAMEPLAY %s not saved", GameplayCfg::KeyName(iOption));
+    }
+    return 0;
+}
+
 // Screen position of an element's hotspot centre (nothing if it has none), so
 // a pad can hop between the mouse-only PC widgets.
 static int ScriptCB_IFObj_GetHotSpotCenter(lua_State*)
@@ -753,6 +786,8 @@ static const CallbackEntryT sPCCallbacks[] =
     { "ScriptCB_IsStickCursor", ScriptCB_IsStickCursor },
     { "ScriptCB_IsPadBumperDown", ScriptCB_IsPadBumperDown },
     { "ScriptCB_IsLvlUsable", ScriptCB_IsLvlUsable },
+    { "ScriptCB_GetGameplayOption", ScriptCB_GetGameplayOption },
+    { "ScriptCB_SetGameplayOption", ScriptCB_SetGameplayOption },
     { "ScriptCB_IFObj_GetHotSpotCenter", ScriptCB_IFObj_GetHotSpotCenter },
     { "ScriptCB_GetPadLayout", ScriptCB_GetPadLayout },
     { "ScriptCB_SetPadLayout", ScriptCB_SetPadLayout },

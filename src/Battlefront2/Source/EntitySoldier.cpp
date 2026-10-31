@@ -33,6 +33,7 @@
 #include "CollisionBody.h"
 #include "CollisionPrimitive.h"
 #include "NetGame.h"
+#include "GameplayCfg.h"
 #include "PebbleFL/Common/PblBitVector.h"
 #include "Character.h"
 #include "EntityCarrier.h"
@@ -5901,7 +5902,7 @@ void EntitySoldier::TriggerBuffHealthEffect()
 // FUNCTION: SWBF2 0x004e01d0
 void EntitySoldier::TriggerBuffOffenseEffect()
 {
-    if (mBuffOffenseTimer > 0.0f && GetInvisibilityFactor() == 0.0f &&
+    if (GameplayCfg::ShowBuffEffect(mBuffOffenseTimer) && GetInvisibilityFactor() == 0.0f &&
         (IsThreadActive() || GetObjectData(0) == COLL_ATTACHED))
     {
         if (mClass->mBuffOffenseEffect && mBuffOffenseEffectHandle == 0)
@@ -5926,7 +5927,7 @@ void EntitySoldier::TriggerBuffOffenseEffect()
 // FUNCTION: SWBF2 0x004e0310
 void EntitySoldier::TriggerBuffDefenseEffect()
 {
-    if (mBuffDefenseTimer > 0.0f && GetInvisibilityFactor() == 0.0f &&
+    if (GameplayCfg::ShowBuffEffect(mBuffDefenseTimer) && GetInvisibilityFactor() == 0.0f &&
         (IsThreadActive() || GetObjectData(0) == COLL_ATTACHED))
     {
         if (mClass->mBuffDefenseEffect && mBuffDefenseEffectHandle == 0)
@@ -7646,7 +7647,8 @@ bool EntitySoldier::Update(float fDeltaTime)
         for (int iSwitch = 0; iSwitch < 2; ++iSwitch)
         {
             MedalsMgr* pMedals = 0;
-            if (mCharacter)
+            // OpenSWBF2: with award weapons off, weapons count as if nobody had awards.
+            if (mCharacter && GameplayCfg::AwardWeaponsOn(NetGame::IsEnabled()))
             {
                 pMedals = mCharacter->mMedalsMgr;
             }

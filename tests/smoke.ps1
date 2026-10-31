@@ -500,7 +500,7 @@ function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $fals
     if ($script:SmokePlatform -eq 'x64') { $fatalSig = 'FATAL: exception 0xC0000005 at 0x[0-9A-F]+ \(d3dx9_43\.dll\+0x[0-9A-F]+\)' }
     $render = '-norender'
     if ($movies) { $render = '' }
-    $tail = (("$render -nosound -fixedrate 30 -nowait -logfinalscore -DecompCONMinutes 5 -seed 1 -exitongameover -nofocuspause -log ""{CASEDIR}\run.log""") -replace '^\s+', '')
+    $tail = (("$render -nosound -fixedrate 30 -nowait -logfinalscore -DecompCONMinutes 5 -seed 1 -exitongameover -nofocuspause -aiheroes 0 -log ""{CASEDIR}\run.log""") -replace '^\s+', '')
     $htail = $tail
     $pass = @{ Class = 'Pass' }
     $hrx = @()

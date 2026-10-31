@@ -26,6 +26,7 @@
 #include "Battlefront2/Source/HUDElementMap.h"
 #include "Battlefront2/Source/MedalsMgr.h"
 #include "Battlefront2/Source/NetGame.h"
+#include "Battlefront2/Source/GameplayCfg.h"
 #include "Battlefront2/Source/PauseMenu.h"
 #include "Battlefront2/Source/PlayerController.h"
 #include "Battlefront2/Source/PlayerStats.h"
@@ -412,7 +413,8 @@ void SpawnDisplay::UpdateObjectText(GameObjectClass* pClass, int iSlot)
     memset(text, 0, sizeof(text));
 
     MedalsMgr* pMedals = 0;
-    if (mOwner)
+    // OpenSWBF2: with award weapons off, weapons count as if nobody had awards.
+    if (mOwner && GameplayCfg::AwardWeaponsOn(NetGame::IsEnabled()))
     {
         pMedals = mOwner->mMedalsMgr;
     }

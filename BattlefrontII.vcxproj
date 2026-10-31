@@ -155,6 +155,7 @@
     <ClCompile Include="src\Battlefront2\Source\AIStats.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AITuning.cpp" />
     <ClCompile Include="src\Battlefront2\Source\RecentServers.cpp" />
+    <ClCompile Include="src\Battlefront2\Source\GameplayCfg.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIGoal.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AIGoalManager.cpp" />
     <ClCompile Include="src\Battlefront2\Source\AILowLevel.cpp" />
@@ -975,6 +976,7 @@
     <ClInclude Include="src\Battlefront2\Source\AIStats.h" />
     <ClInclude Include="src\Battlefront2\Source\AITuning.h" />
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h" />
+    <ClInclude Include="src\Battlefront2\Source\GameplayCfg.h" />
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />
