@@ -111,6 +111,9 @@ bool ValidateMenu(const MenuFields& kFields);
 SaveResult SaveMenu(const DisplaySettings& kMark, const DisplaySettings& kNow, const char* pcPath, bool bGoodFrame, unsigned int& uiWritten);
 // bCliWindowed: the command line asked for a window (-win)
 void Init(bool bCliWindowed = false);
+// Who chose the start's borderless setting, for the log: "command line",
+// "display.ini", "-win" (a window) or "default" (borderless).
+const char* BorderlessSource(bool bCliWindowed);
 
 extern DisplaySettings gCliDisplay;
 extern DisplaySettings gIniDisplay;

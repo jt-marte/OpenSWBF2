@@ -640,6 +640,12 @@ int ReadDataFile(lua_State* L)
                 lua_pushboolean(LuaHelper::mState, true);
                 LuaHelper::SetGlobal("gFinalBuild");
             }
+            // OpenSWBF2: the menus are built here, in UI pixels; a resolution changed
+            // in the match scales them from this size (RedInterfaceScreen::LockUiLayout)
+            RedInterfaceScreen::LockUiLayout();
+            LOG(LogRender, Inform, "OPENSWBF2 DISPLAY ui layout %ux%u screen=%ux%u",
+                RedInterfaceScreen::GetUiWidth(), RedInterfaceScreen::GetUiHeight(),
+                RedInterfaceScreen::GetScreenWidth(), RedInterfaceScreen::GetScreenHeight());
             LuaScript::LoadScript("game_interface");
             MissionPlayList::PushToLua();
             LuaScriptFactory::PurgeUnused();

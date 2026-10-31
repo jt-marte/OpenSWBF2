@@ -466,6 +466,17 @@ float UiScale(unsigned int uiScreenH);
 // rounded (1920x1080 at 3840x2160 and at 2560x1440).
 void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, unsigned int& uiH);
 
+// The in-game Lua menus are laid out once, at the UI height the map loaded at
+// (uiLayoutH, UiSize's height then). A resolution changed in the match keeps
+// that layout and scales it to fill the new height: the screen height over
+// uiLayoutH. 0 (nothing laid out yet) or a nonsense size is UiScale.
+float LayoutUiScale(unsigned int uiScreenH, unsigned int uiLayoutH);
+
+// The UI size that goes with LayoutUiScale: uiLayoutH high, and as wide as the
+// screen's aspect makes it. UiSize when uiLayoutH is 0.
+void LayoutUiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int uiLayoutH,
+                  unsigned int& uiW, unsigned int& uiH);
+
 // OpenSWBF2: the HUD scale option (percent, Options -> Video). Each top-level
 // HUD element scales about the screen edge, corner or centre line it sits
 // nearest: HudAnchor gives that line along one axis (0, half or the full
@@ -480,8 +491,9 @@ bool HudIsCentral(float fX, float fY, float fW, float fH);
 
 // The scale for in-game C++ displays (chat input, capture bar, squad menu,
 // names, timers, end screen): grown with the screen like .hud text (UiScale)
-// and by the HUD scale percent (100 when unset, clamped to its range).
-float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent);
+// and by the HUD scale percent (100 when unset, clamped to its range). With a
+// uiLayoutH the screen part is LayoutUiScale, as for the Lua menus.
+float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent, unsigned int uiLayoutH = 0);
 
 // OpenSWBF2: the field of view option, in degrees across a 16:9 screen for the
 // default camera (the stock 48 degrees at 4:3 widened for 16:9 is ~61). The

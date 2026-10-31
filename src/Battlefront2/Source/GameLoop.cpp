@@ -731,10 +731,11 @@ static void SyncDisplayLayout()
     }
     LOG(LogRender, Inform,
         "OPENSWBF2 DISPLAY relayout generation=%u screen=%ux%u view=%ux%u hud=%dx%d aspect=%.4f "
-        "camera=%.4f",
+        "camera=%.4f ui=%ux%u",
         uiGeneration, RedInterfaceScreen::GetScreenWidth(), RedInterfaceScreen::GetScreenHeight(),
         uiViewW, uiViewH, (int)HUD::Element::GetViewportWidth(),
-        (int)HUD::Element::GetViewportHeight(), RedRenderer::GetScreenAspectRatio(), fCamera);
+        (int)HUD::Element::GetViewportHeight(), RedRenderer::GetScreenAspectRatio(), fCamera,
+        RedInterfaceScreen::GetUiWidth(), RedInterfaceScreen::GetUiHeight());
 }
 
 namespace GameLoop

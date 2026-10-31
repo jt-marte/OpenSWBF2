@@ -390,6 +390,52 @@ TEST_CASE("display settings init merges defaults ini and command line" * doctest
     SetDefaults(gCliDisplay);
 }
 
+TEST_CASE("display settings a normal start is borderless" * doctest::test_suite("regression"))
+{
+    // "its starting in windowed and not borderless": every normal start below opens
+    // borderless, and the log line names who chose it
+    Cleanup();
+    SetDefaults(gCliDisplay);
+    SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
+
+    // no display.ini at all
+    Init();
+    CHECK(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(false), "default") == 0);
+
+    // a display.ini from an older build has no Borderless key (the launcher's own
+    // has just Vsync and Fps), and a broken value counts as none
+    WriteText("[Display]\r\nVsync=0\r\nFps=0\r\n");
+    Init();
+    CHECK(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(false), "default") == 0);
+    WriteText("[Display]\r\nBorderless=2\r\nRefresh=60\r\n");
+    Init();
+    CHECK(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(false), "default") == 0);
+
+    // the launcher's -borderless -nointro -name "<name>" wins over an ini that chose a window
+    SetFlag(gCliDisplay, kBorderless);
+    WriteText("[Display]\r\nBorderless=0\r\n");
+    Init();
+    CHECK(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(false), "command line") == 0);
+    Init(true);
+    CHECK(gDisplay.bBorderless);
+
+    // only a Fullscreen or Windowed pick in the options (Borderless=0) or -win leave it
+    SetDefaults(gCliDisplay);
+    SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
+    Init();
+    CHECK_FALSE(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(false), "display.ini") == 0);
+    Cleanup();
+    Init(true);
+    CHECK_FALSE(gDisplay.bBorderless);
+    CHECK(strcmp(BorderlessSource(true), "-win") == 0);
+    SetDefaults(gCliDisplay);
+}
+
 TEST_CASE("display settings save adapter round trips" * doctest::test_suite("unit"))
 {
     Cleanup();

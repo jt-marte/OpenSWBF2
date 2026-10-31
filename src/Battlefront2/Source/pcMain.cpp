@@ -675,6 +675,10 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
     {
         LOG(LogCore, Inform, "OPENSWBF2 DPI awareness=%s dpi=%u",
             DisplayLogic::DpiLevelName(PcWindow::GetDpiLevel()), PcWindow::QueryDpi(hGlobalWnd));
+        // OpenSWBF2: says why a start is borderless or not (a window comes from the
+        // profile only when it isn't)
+        LOG(LogCore, Inform, "OPENSWBF2 DISPLAY start borderless=%d from=%s",
+            DisplayCfg::gDisplay.bBorderless ? 1 : 0, DisplayCfg::BorderlessSource(pcWindowed));
     }
 
     if (pcPostInstall)

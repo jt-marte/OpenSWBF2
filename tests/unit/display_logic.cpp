@@ -1867,6 +1867,62 @@ TEST_CASE("display logic hud group scale" * doctest::test_suite("unit"))
     CHECK(HudGroupScale(1080, 10) == doctest::Approx(0.5f));
     CHECK(HudGroupScale(1080, 400) == doctest::Approx(1.5f));
     CHECK(HudGroupScale(720, 100) == 1.0f);
+    // with a locked layout the screen part follows it, as for the Lua menus
+    CHECK(HudGroupScale(720, 100, 1080) == doctest::Approx(720.0f / 1080.0f));
+    CHECK(HudGroupScale(2160, 50, 1080) == doctest::Approx(1.0f));
+    CHECK(HudGroupScale(1440, 100, 0) == doctest::Approx(1440.0f / 1080.0f));
+}
+
+TEST_CASE("display logic layout ui scale" * doctest::test_suite("unit"))
+{
+    // nothing locked: the plain UI scale
+    CHECK(LayoutUiScale(2160, 0) == UiScale(2160));
+    CHECK(LayoutUiScale(720, 0) == 1.0f);
+    // locked at the size the map loaded at: the same scale while the screen stays
+    CHECK(LayoutUiScale(2160, 1080) == doctest::Approx(UiScale(2160)));
+    CHECK(LayoutUiScale(1440, 1080) == doctest::Approx(UiScale(1440)));
+    CHECK(LayoutUiScale(900, 900) == 1.0f);
+    // a resolution changed in the match scales that layout to the new height
+    CHECK(LayoutUiScale(720, 1080) == doctest::Approx(720.0f / 1080.0f));
+    CHECK(LayoutUiScale(1080, 720) == doctest::Approx(1.5f));
+    CHECK(LayoutUiScale(2160, 720) == doctest::Approx(3.0f));
+    // nonsense sizes fall back to the plain scale
+    CHECK(LayoutUiScale(0, 1080) == UiScale(0));
+    CHECK(LayoutUiScale(720, kMaxDim + 1) == UiScale(720));
+    CHECK(LayoutUiScale(kMaxDim + 1, 1080) == UiScale(kMaxDim + 1));
+}
+
+TEST_CASE("display logic layout ui size" * doctest::test_suite("unit"))
+{
+    unsigned int w = 0;
+    unsigned int h = 0;
+    // nothing locked: UiSize
+    LayoutUiSize(3840, 2160, 0, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    // locked at the load size: what UiSize gave then
+    LayoutUiSize(3840, 2160, 1080, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    LayoutUiSize(1600, 900, 900, w, h);
+    CHECK(w == 1600);
+    CHECK(h == 900);
+    // 4K to 720p in the match: Lua still sees the 1920x1080 it laid out in
+    LayoutUiSize(1280, 720, 1080, w, h);
+    CHECK(w == 1920);
+    CHECK(h == 1080);
+    // 720p to 4K: the 720p layout, magnified
+    LayoutUiSize(3840, 2160, 720, w, h);
+    CHECK(w == 1280);
+    CHECK(h == 720);
+    // another aspect keeps the height, the width follows the new screen
+    LayoutUiSize(1024, 768, 1080, w, h);
+    CHECK(w == 1440);
+    CHECK(h == 1080);
+    // nonsense sizes fall back to UiSize
+    LayoutUiSize(1280, 720, kMaxDim + 1, w, h);
+    CHECK(w == 1280);
+    CHECK(h == 720);
 }
 
 TEST_CASE("display logic crisp font factor and placement" * doctest::test_suite("unit"))

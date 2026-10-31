@@ -829,6 +829,10 @@ void GameState::PreStateInit(bool bMission)
     GameState::sNumFontsLoaded = 0;
     RedSetCurrentHeap(GameMemory::RunTimeHeap);
 
+    // OpenSWBF2: the menus follow the screen again until ingame.lvl builds them
+    // (RedInterfaceScreen::LockUiLayout)
+    RedInterfaceScreen::ClearUiLayout();
+
     PlayerProfile::tProfile* pProfile = PlayerProfile::GetCurProfile();
     if (pProfile)
     {

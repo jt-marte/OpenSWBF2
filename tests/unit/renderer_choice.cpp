@@ -436,10 +436,11 @@ TEST_CASE("renderer source pins" * doctest::test_suite("unit"))
     CHECK(Has(sSetup, "https://github.com/doitsujin/dxvk/releases/download/v$dxvkVersion/dxvk-$dxvkVersion.tar.gz"));
     CHECK(Has(sSetup, "Get-Download $dxvkUrl $dxvkSha"));
 
-    // Options -> Video: the row, its text, the restart note, hidden in game
+    // Options -> Video: the row, its text, the restart note, shown in a match too
+    // (it only saves the next start's renderer)
     CHECK(Has(sVideo, "{ tag = \"renderer\", title = \"ifs.videoopt.renderer\""));
     CHECK(Has(sVideo, "values = {\"ifs.videoopt.vulkan\", \"ifs.videoopt.directx9\"}"));
-    CHECK(Has(sVideo, "generalForm.elements[\"renderer\"].hidden = 1"));
+    CHECK(!Has(sVideo, "generalForm.elements[\"renderer\"].hidden = 1"));
     CHECK(Has(sVideo, "ScriptCB_SetRenderer(element.selValue - 1)"));
     CHECK(Has(sVideo, "gPopup_fnSetTitleStr(Popup_Ok, \"ifs.videoopt.rendererrestart\")"));
     CHECK(Has(sVideo, "generalForm.elements[\"renderer\"].selValue = ScriptCB_GetRenderer() + 1"));

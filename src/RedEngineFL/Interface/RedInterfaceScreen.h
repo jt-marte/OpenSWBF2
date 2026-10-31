@@ -111,6 +111,15 @@ public:
     static unsigned int GetUiWidth();
     static unsigned int GetUiHeight();
 
+    // OpenSWBF2: the in-game Lua menus are built once, when ingame.lvl loads, so
+    // that UI height is kept for the match: a resolution changed in Options ->
+    // Video scales the built layout to the new screen (DisplayLogic::LayoutUiScale).
+    static void LockUiLayout();
+    // Back to following the screen while the next state loads.
+    static void ClearUiLayout();
+    // The locked height, or 0 in the shell (its menus stay 800x600).
+    static unsigned int GetUiLayoutHeight();
+
     static float GetScreenBottomV() { return s_fScreenBottomV; }
 
     unsigned int m_uiWidthInPixels;
