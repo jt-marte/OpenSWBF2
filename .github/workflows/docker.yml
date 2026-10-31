@@ -1,0 +1,66 @@
+name: Docker server image
+
+# Builds the dedicated server image (docker/) from a published OpenSWBF2 release and pushes it to
+# ghcr.io/<owner>/openswbf2-server as :<version> and :latest.
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: OpenSWBF2 release to package, such as 0.2.2
+        required: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Version
+        id: version
+        run: |
+          v="${{ github.event.inputs.version || github.event.release.tag_name }}"
+          echo "version=${v#v}" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: docker
+          build-args: |
+            OPENSWBF2_VERSION=${{ steps.version.outputs.version }}
+            OPENSWBF2_REPO=${{ github.repository }}
+          load: true
+          tags: openswbf2-server:test
+
+      # Wine runs both shipped tools; the game itself needs your game data, so it isn't started here
+      - name: Self-test
+        run: docker run --rm openswbf2-server:test selftest
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push
+        uses: docker/build-push-action@v6
+        with:
+          context: docker
+          build-args: |
+            OPENSWBF2_VERSION=${{ steps.version.outputs.version }}
+            OPENSWBF2_REPO=${{ github.repository }}
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/openswbf2-server:${{ steps.version.outputs.version }}
+            ghcr.io/${{ github.repository_owner }}/openswbf2-server:latest
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.description=OpenSWBF2 dedicated server (bring your own game data)
+            org.opencontainers.image.version=${{ steps.version.outputs.version }}

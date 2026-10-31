@@ -1,0 +1,33 @@
+# OpenSWBF2 dedicated server. Copy your game data next to this file first (see README.md), then:
+#   docker compose up -d && docker compose logs -f
+services:
+  openswbf2:
+    image: ghcr.io/jt-marte/openswbf2-server:latest
+    container_name: openswbf2
+    restart: unless-stopped
+    ports:
+      - "3658:3658/udp"          # keep in step with PORT below
+    environment:
+      PORT: "3658"
+      SERVER_NAME: "OpenSWBF2 Server"
+      ADMIN_PASSWORD: ""         # 6-31 letters/digits; empty = generated into config/admin-password
+      JOIN_PASSWORD: ""          # empty = anyone can join; admins can change it live with /password
+      MAPS: "geo1c_con kas2g_con nab2c_con hot1g_con tat2g_con cor1c_con myg1g_con uta1c_con"
+      MAX_PLAYERS: "32"
+      TICK_RATE: "60"            # 30, 60 or 120
+      BOTS_PER_TEAM: "16"
+      DIFFICULTY: "3"            # 2 Medium, 3 Hard, 4 Overhaul
+      HEROES: "1"
+      AI_HEROES: "1"
+      LOBBY: "0"                 # 1 = each map waits for an admin's /start
+    volumes:
+      - ./gamedata:/gamedata:ro  # your GameData folder (holds data/_lvl_pc)
+      - ./addons:/addons:ro      # optional: mod folders such as BF1 and DLC_XBOX
+      - ./config:/config         # settings, logs, built core files, admin password
+    user: "1000:1000"
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 256
+    mem_limit: 2g
+    cpus: 2
+    stop_grace_period: 30s
