@@ -190,9 +190,9 @@ const SoldierAnimation* SoldierAnimatorClass::GetUpperBodyAnimation(SoldierAnima
     int i = uiAnimIndex * SoldierAnimType::NUM_SCOPES + SoldierAnimType::UPPER;
     if (i < NUM_ACTION_ANIMATIONS_TOTAL + NUM_MOVEMENT_ANIMATIONS_TOTAL + NUM_WEAPON_ANIMATIONS_TOTAL)
     {
-        return mMap[eMap].mAnimation[i];
+        return AnimationSlot(eMap, i);
     }
-    return mMap[eMap].mAnimation[i - NUM_WEAPON_ANIMATIONS_TOTAL];
+    return AnimationSlot(eMap, i - NUM_WEAPON_ANIMATIONS_TOTAL);
 }
 
 // FUNCTION: SWBF2 0x00643a10
@@ -202,9 +202,30 @@ const SoldierAnimation* SoldierAnimatorClass::GetLowerBodyAnimation(SoldierAnima
     int i = uiAnimIndex * SoldierAnimType::NUM_SCOPES + SoldierAnimType::LOWER;
     if (i < NUM_ACTION_ANIMATIONS_TOTAL + NUM_MOVEMENT_ANIMATIONS_TOTAL + NUM_WEAPON_ANIMATIONS_TOTAL)
     {
-        return mMap[eMap].mAnimation[i];
+        return AnimationSlot(eMap, i);
     }
-    return mMap[eMap].mAnimation[i - NUM_WEAPON_ANIMATIONS_TOTAL];
+    return AnimationSlot(eMap, i - NUM_WEAPON_ANIMATIONS_TOTAL);
+}
+
+// OpenSWBF2: a melee weapon with no animation running asks for index 255, past its map's table.
+// Retail's Win32 maps are ANIMATION_MAP_SIZE 4-byte entries back to back, so that read landed in a
+// later map: keep that answer. Where it landed on a map's custom-animation CRCs or past the last map
+// it read garbage; that is no animation. x64's larger entries read garbage every time, and crashed
+// server and clients in BF1 pack Bespin: Platforms Hero Assault.
+const SoldierAnimation* SoldierAnimatorClass::AnimationSlot(int iMap, int iSlot) const
+{
+    if (iSlot < NUM_SOLDIER_ANIMATIONS_TOTAL)
+    {
+        return mMap[iMap].mAnimation[iSlot];
+    }
+    const int iFlat = iMap * ANIMATION_MAP_SIZE + iSlot;
+    iMap = iFlat / ANIMATION_MAP_SIZE;
+    iSlot = iFlat % ANIMATION_MAP_SIZE;
+    if (iMap < SoldierAnimationBank::MAX_MAPS && iSlot < NUM_SOLDIER_ANIMATIONS_TOTAL)
+    {
+        return mMap[iMap].mAnimation[iSlot];
+    }
+    return 0;
 }
 
 // FUNCTION: SWBF2 0x00643a50

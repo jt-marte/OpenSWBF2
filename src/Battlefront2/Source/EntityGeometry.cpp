@@ -577,6 +577,11 @@ void EntityGeometryClass::SetProperty(unsigned int uProperty, const char* pszVal
         }
     }
 
+    // OpenSWBF2: sCurrentChunk is shared by every class, so a chunk property with no
+    // ChunkGeometryName of its own before it lands on another class's chunk. Retail followed the
+    // null descriptor; it crashed loading BF1 pack Bespin: Cloud City Hero Assault.
+    ChunkDescriptor* pChunk = (unsigned int)sCurrentChunk <= 9 ? mChunkDescriptors[sCurrentChunk] : 0;
+
     switch (uProperty)
     {
     case 0x47c86b4a:
@@ -841,98 +846,99 @@ void EntityGeometryClass::SetProperty(unsigned int uProperty, const char* pszVal
     }
 
     case 0x0a157be2:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
             unsigned short usCount;
             sscanf(pszValue, "%hu", &usCount);
-            mChunkDescriptors[sCurrentChunk]->mMaxTerrainCollisions = (unsigned char)usCount;
+            pChunk->mMaxTerrainCollisions = (unsigned char)usCount;
         }
         break;
     case 0x048f1226:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            mChunkDescriptors[sCurrentChunk]->mTerrainImpactEffect = PblHash(pszValue);
+            pChunk->mTerrainImpactEffect = PblHash(pszValue);
         }
         break;
     case 0xc8e32dc3:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
             switch (PblHash(pszValue))
             {
-            case 0xff79b33c: mChunkDescriptors[sCurrentChunk]->mPhysicsType = 0; break;
-            case 0xd290c23b: mChunkDescriptors[sCurrentChunk]->mPhysicsType = 2; break;
-            case 0x2648cd55: mChunkDescriptors[sCurrentChunk]->mPhysicsType = 3; break;
-            case 0x493ea232: mChunkDescriptors[sCurrentChunk]->mPhysicsType = 4; break;
-            default: mChunkDescriptors[sCurrentChunk]->mPhysicsType = 1; break;
+            case 0xff79b33c: pChunk->mPhysicsType = 0; break;
+            case 0xd290c23b: pChunk->mPhysicsType = 2; break;
+            case 0x2648cd55: pChunk->mPhysicsType = 3; break;
+            case 0x493ea232: pChunk->mPhysicsType = 4; break;
+            default: pChunk->mPhysicsType = 1; break;
             }
         }
         break;
     case 0x166f6939:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
             float x, y, z;
             sscanf(pszValue, "%f %f %f", &x, &y, &z);
-            ChunkDescriptor* pDesc = mChunkDescriptors[sCurrentChunk];
-            pDesc->mOmega.x = x;
-            pDesc->mOmega.y = y;
-            pDesc->mOmega.z = z;
+            pChunk->mOmega.x = x;
+            pChunk->mOmega.y = y;
+            pChunk->mOmega.z = z;
         }
         break;
     case 0xd0259d88:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
             float x, y, z;
             sscanf(pszValue, "%f %f %f", &x, &y, &z);
-            ChunkDescriptor* pDesc = mChunkDescriptors[sCurrentChunk];
-            pDesc->mGravity.x = x;
-            pDesc->mGravity.y = y;
-            pDesc->mGravity.z = z;
+            pChunk->mGravity.x = x;
+            pChunk->mGravity.y = y;
+            pChunk->mGravity.z = z;
         }
         break;
     case 0xc2f5ffd5:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mCoefficientOfRestitution);
+            sscanf(pszValue, "%f", &pChunk->mCoefficientOfRestitution);
         }
         break;
     case 0xb94ae34e:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mCoefficientOfFriction);
+            sscanf(pszValue, "%f", &pChunk->mCoefficientOfFriction);
         }
         break;
     case 0x1cdaebc2:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mSimpleFrictionConstant);
+            sscanf(pszValue, "%f", &pChunk->mSimpleFrictionConstant);
         }
         break;
     case 0xed35b79b:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mMinDeathCollisionSpeed);
+            sscanf(pszValue, "%f", &pChunk->mMinDeathCollisionSpeed);
         }
         break;
     case 0x4f17fc11:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mMaxStaticLifetime);
+            sscanf(pszValue, "%f", &pChunk->mMaxStaticLifetime);
         }
         break;
     case 0xfeb5ed07:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mLinearDamping);
+            sscanf(pszValue, "%f", &pChunk->mLinearDamping);
         }
         break;
     case 0x0e3bec8e:
-        if ((unsigned int)sCurrentChunk <= 9)
+        if (pChunk)
         {
-            sscanf(pszValue, "%f", &mChunkDescriptors[sCurrentChunk]->mAngularDamping);
+            sscanf(pszValue, "%f", &pChunk->mAngularDamping);
         }
         break;
     case 0xc74f3df1:
-        mChunkDescriptors[sCurrentChunk]->mKeepSoldierCollisions = atoi(pszValue) != 0;
+        if (pChunk)
+        {
+            pChunk->mKeepSoldierCollisions = atoi(pszValue) != 0;
+        }
         break;
     case 0x945d1d15:
         if ((unsigned int)sCurrentChunk <= 9)
@@ -960,29 +966,29 @@ void EntityGeometryClass::SetProperty(unsigned int uProperty, const char* pszVal
         break;
 
     case 0x94f0544b:
-        if ((unsigned int)sCurrentChunk <= 9 && (unsigned int)sCurrentTrail <= 2)
+        if (pChunk && (unsigned int)sCurrentTrail <= 2)
         {
-            mChunkDescriptors[sCurrentChunk]->mTrailEffect[sCurrentTrail] = PblHash(pszValue);
+            pChunk->mTrailEffect[sCurrentTrail] = PblHash(pszValue);
             ++sCurrentTrail;
         }
         break;
     case 0xa8fb54e9:
-        if ((unsigned int)sCurrentChunk <= 9 && (unsigned int)(sCurrentTrail - 1) <= 2)
+        if (pChunk && (unsigned int)(sCurrentTrail - 1) <= 2)
         {
-            mChunkDescriptors[sCurrentChunk]->mTrailAttachPoints[sCurrentTrail - 1] = PblTEMPHash(pszValue);
+            pChunk->mTrailAttachPoints[sCurrentTrail - 1] = PblTEMPHash(pszValue);
         }
         break;
     case 0xd350c3de:
-        if ((unsigned int)sCurrentChunk <= 9 && (unsigned int)sCurrentSmoke <= 2)
+        if (pChunk && (unsigned int)sCurrentSmoke <= 2)
         {
-            mChunkDescriptors[sCurrentChunk]->mSmokeEffect[sCurrentSmoke] = PblHash(pszValue);
+            pChunk->mSmokeEffect[sCurrentSmoke] = PblHash(pszValue);
             ++sCurrentSmoke;
         }
         break;
     case 0x472e0410:
-        if ((unsigned int)sCurrentChunk <= 9 && (unsigned int)(sCurrentSmoke - 1) <= 2)
+        if (pChunk && (unsigned int)(sCurrentSmoke - 1) <= 2)
         {
-            mChunkDescriptors[sCurrentChunk]->mSmokeAttachPoints[sCurrentSmoke - 1] = PblTEMPHash(pszValue);
+            pChunk->mSmokeAttachPoints[sCurrentSmoke - 1] = PblTEMPHash(pszValue);
         }
         break;
 

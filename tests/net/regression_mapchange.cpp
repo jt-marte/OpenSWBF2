@@ -149,3 +149,26 @@ TEST_CASE("a soldier addon without a loaded model is not drawn" * doctest::test_
     const std::string sSide = ReadSource("../data/scripts/ingame/ifs_sideselect.lua");
     CHECK(sSide.find("IFFlashyText_fnSetTextColor(button.label, 150, 150, 150)") != std::string::npos);
 }
+
+TEST_CASE("BF1 pack Bespin maps load and play on server and client" * doctest::test_suite("regression"))
+{
+    // Cloud City Hero Assault crashed loading: a chunk property found no chunk of its own class
+    const std::string sGeo = ReadSource("../src/Battlefront2/Source/EntityGeometry.cpp");
+    CHECK(sGeo.find("ChunkDescriptor* pChunk = (unsigned int)sCurrentChunk <= 9 ? mChunkDescriptors[sCurrentChunk] : 0;") !=
+          std::string::npos);
+    CHECK(sGeo.find("mChunkDescriptors[sCurrentChunk]->mSmokeEffect") == std::string::npos);
+    CHECK(sGeo.find("mChunkDescriptors[sCurrentChunk]->mKeepSoldierCollisions") == std::string::npos);
+
+    // A client crashed on a door update for a door it doesn't have (Platforms Classic Conquest)
+    const std::string sNet = ReadSource("../src/Battlefront2/Source/NetGame.cpp");
+    CHECK(sNet.find("EntityDoor* door = EntityDoor::Find(event.u.updateDoorState.mHashID);\n    if (door)") !=
+          std::string::npos);
+
+    // A melee weapon's "no animation" index 255 reads as retail's flat Win32 table did, and as
+    // nothing past it (Platforms Hero Assault crashed server and clients)
+    const std::string sAnim = ReadSource("../src/Battlefront2/Source/SoldierAnimatorClass.cpp");
+    CHECK(sAnim.find("const SoldierAnimation* SoldierAnimatorClass::AnimationSlot(int iMap, int iSlot) const") !=
+          std::string::npos);
+    CHECK(sAnim.find("return mMap[eMap].mAnimation[i - NUM_WEAPON_ANIMATIONS_TOTAL];") == std::string::npos);
+    CHECK(sAnim.find("const int iFlat = iMap * ANIMATION_MAP_SIZE + iSlot;") != std::string::npos);
+}

@@ -8,16 +8,21 @@ Each request is one datagram: type 28, group (u16), index 0, count 1, then the c
 and the session key; 'J' lines add a length byte and up to 63 ASCII characters. Replies are type
 29: the key, then [1, length, text] per line, then 0, possibly over several datagrams of one group.
 Prints each reply line; exits 1 when the server doesn't answer.
+
+A server keeps 3 admin sessions, one per sender address, for 60 s after it last heard from each
+(a map change counts as hearing from it). Scripts that call this often pass the same -LocalPort
+every time, so they keep reusing one session instead of filling the slots.
 #>
 param(
     [string]$Server = '127.0.0.1',
     [int]$Port = 3658,
     [Parameter(Mandatory = $true)][string[]]$Lines,
-    [int]$TimeoutMs = 3000
+    [int]$TimeoutMs = 3000,
+    [int]$LocalPort = 0
 )
 $ErrorActionPreference = 'Stop'
 
-$udp = New-Object System.Net.Sockets.UdpClient
+$udp = New-Object System.Net.Sockets.UdpClient $LocalPort
 $udp.Client.ReceiveTimeout = $TimeoutMs
 $udp.Connect($Server, $Port)
 $script:group = Get-Random -Minimum 1 -Maximum 60000

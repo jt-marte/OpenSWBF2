@@ -69,6 +69,8 @@ public:
                                                         SoldierAnimType::WeaponAnimation eAnim) const;
     const SoldierAnimation* GetUpperBodyAnimation(SoldierAnimationBank::MAP eMap, unsigned char uiAnimIndex) const;
     const SoldierAnimation* GetLowerBodyAnimation(SoldierAnimationBank::MAP eMap, unsigned char uiAnimIndex) const;
+    // OpenSWBF2: slot iSlot of map iMap the way retail's flat Win32 table read it (see the .cpp)
+    const SoldierAnimation* AnimationSlot(int iMap, int iSlot) const;
     unsigned int GetCustomAnimation(SoldierAnimationBank::MAP eMap, SoldierAnimationBank::ANIMATION eAnim) const;
     const ZephyrAnim* GetAnimation(unsigned int uiNameHash, const char* pcName) const;
     bool GetAnimationBoneMatrix(SoldierAnimationBank::MAP eMap, SoldierAnimType::Posture ePosture,

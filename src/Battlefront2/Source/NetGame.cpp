@@ -7317,8 +7317,13 @@ void HandleEvent_GameOver(ReliableNetEvent& event)
 // FUNCTION: SWBF2 0x005c2230
 void HandleEvent_UpdateDoorState(const ReliableNetEvent& event)
 {
+    // OpenSWBF2: a door this client doesn't have (retail followed the null; a client crashed on
+    // BF1 pack Bespin: Platforms)
     EntityDoor* door = EntityDoor::Find(event.u.updateDoorState.mHashID);
-    door->mIsLocked = event.u.updateDoorState.mIsLocked;
+    if (door)
+    {
+        door->mIsLocked = event.u.updateDoorState.mIsLocked;
+    }
 }
 
 // FUNCTION: SWBF2 0x005c36e0
