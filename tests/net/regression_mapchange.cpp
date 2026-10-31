@@ -122,3 +122,17 @@ TEST_CASE("nobody keeps a deleted vehicle and bots made from players get the rig
     CHECK(sSoldier.find("if (pLowRes)\n        {\n            mModelLowRes = pLowRes;") != std::string::npos);
     CHECK(sSoldier.find("mModelLowRes ? mModelLowRes->GetRedModel(0) : 0") != std::string::npos);
 }
+
+TEST_CASE("a soldier addon without a loaded model is not drawn" * doctest::test_suite("regression"))
+{
+    // A client crashed drawing a soldier on geo1c_con: the user's skin changer had pointed an
+    // animated addon at a model the map didn't load
+    const std::string sAddon = ReadSource("../src/Battlefront2/Source/AnimatedAddon.cpp");
+    CHECK(sAddon.find("if (pModel)\n        {\n            mModel = pModel;") != std::string::npos);
+    CHECK(sAddon.find("if (!pJoint || !mModel || !mModel->GetRedModel(0))") != std::string::npos);
+    CHECK(sAddon.find("if (mModel && mModel->GetRedModel(0))") != std::string::npos);
+
+    // With auto-assign on, both team rows on team select stay readable (one looked blank)
+    const std::string sSide = ReadSource("../data/scripts/ingame/ifs_sideselect.lua");
+    CHECK(sSide.find("IFFlashyText_fnSetTextColor(button.label, 150, 150, 150)") != std::string::npos);
+}

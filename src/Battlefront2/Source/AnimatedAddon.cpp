@@ -36,8 +36,16 @@ void AnimatedAddon::SetProperty(unsigned int uProperty, const char* pszValue)
     switch (uProperty)
     {
     case 0x94272331:
-        mModel = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+    {
+        // OpenSWBF2: a script mod's skin can name an addon model the map didn't load; keep the
+        // old one (a null model crashed every client drawing that soldier)
+        GameModel* pModel = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+        if (pModel)
+        {
+            mModel = pModel;
+        }
         break;
+    }
     case 0xA423E008:
         mAttachJoint = PblTEMPHash(pszValue);
         break;
@@ -58,7 +66,10 @@ void AnimatedAddon::PostReadSetup()
         mZephyrSkeleton.Open(*mAnimation->GetZephyrSkeletonShared());
         mPose.ConvertFromZephyrPose(mZephyrSkeleton);
     }
-    mModel->GetRedModel(0)->SetupPose(mPose);
+    if (mModel && mModel->GetRedModel(0)) // OpenSWBF2: an addon without a loaded model
+    {
+        mModel->GetRedModel(0)->SetupPose(mPose);
+    }
 }
 
 // FUNCTION: SWBF2 0x00443ca0
@@ -66,7 +77,7 @@ void AnimatedAddon::Render(TentacleSimulator* pTentacles, const PblVector3& vVel
                            const PblMatrix& mMatrix, const RedColor& color, unsigned int uiFlags) const
 {
     const PblMatrix* pJoint = pPose->Find(mAttachJoint);
-    if (!pJoint)
+    if (!pJoint || !mModel || !mModel->GetRedModel(0)) // OpenSWBF2: nothing loaded to draw
     {
         return;
     }

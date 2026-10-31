@@ -136,6 +136,17 @@ function ifs_sideselect_fnEnter(this, bFwd)
 	else
 		SetCurButton(this.CurButton)
 	end
+
+	-- OpenSWBF2: with auto-assign on, the team rows can't be picked and were drawn so dark (110)
+	-- that the one not highlighted looked blank, as if that team were missing. A middle grey
+	-- reads on the plain row and on the highlighted one, still dimmer than the live rows.
+	local aTeamTags = { "team1", "team2" }
+	for i = 1, 2 do
+		local button = this.buttons[aTeamTags[i]]
+		if(button and button.bDimmed and not button.hidden) then
+			IFFlashyText_fnSetTextColor(button.label, 150, 150, 150)
+		end
+	end
 end
 
 ifs_sideselect1 = NewIFShellScreen {
