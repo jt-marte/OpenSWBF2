@@ -951,7 +951,7 @@ CNetHostGame::CNetHostGame()
         {
             for (j = 0; j < 1; j++)
             {
-                bool bActive = ((unsigned char*)pInput)[0x2e6c + j] != 0;
+                bool bActive = pInput->IsControllerBound(j);
                 if (bActive)
                 {
                     aiJoystick[uiCount++] = j;
@@ -3690,12 +3690,14 @@ void WriteJoin(NetPktGroup& group, unsigned int guestCount)
     unsigned int connectionType = netScript == NS_CLIENT && g_bNoRender ? 3 : 1;
     group.WriteBits(connectionType, 2);
 
-    const unsigned char* input = (const unsigned char*)FLInputManager::Instance();
+    // Retail read the byte at +0x2e6c (mActiveControllers on Win32); on x64 that offset lands
+    // elsewhere, no port looked bound and the JOIN carried an empty player name
+    const FLInputManager* input = FLInputManager::Instance();
     int playerIndexes[2];
     int count = 0;
     for (int i = 0; i < 1; ++i)
     {
-        if (input[0x2e6c + i])
+        if (input->IsControllerBound(i))
         {
             playerIndexes[count++] = i;
         }
