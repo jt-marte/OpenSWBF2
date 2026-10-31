@@ -99,6 +99,13 @@ TEST_CASE("an admin keeps its session and pushes across a map change" * doctest:
 
     // Score pushes name the teams for maps from the command line or rcon too
     CHECK(sAdmin.find("pusTeam1 = Team::sTeams[1]->GetName();") != std::string::npos);
+
+    // A wrong password logs the session out: retail kept an earlier login, and the commands after
+    // a failed /login still ran
+    const size_t uFailed = sAdmin.find("PutMsg(\"login failed\");");
+    REQUIRE(uFailed != std::string::npos);
+    CHECK(sAdmin.find("admins[iPlayer] = false;", uFailed) < sAdmin.find("continue;", uFailed));
+    CHECK(sAdmin.find("remoteLoggedIn = false;", uFailed) < sAdmin.find("continue;", uFailed));
 }
 
 TEST_CASE("nobody keeps a deleted vehicle and bots made from players get the right team" *

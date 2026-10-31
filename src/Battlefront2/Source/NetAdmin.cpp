@@ -1202,6 +1202,19 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                 // OpenSWBF2: say so (retail stayed silent) and log where it came from
                 LOG(LogNet, Warning, "OPENSWBF2 ADMIN login failed player=%d source=%08x", iPlayer, sLoginKey);
                 PutMsg("login failed");
+                // OpenSWBF2: and log the session out: retail let a wrong password keep an earlier
+                // login from the same address, and the commands after it still ran
+                if (iPlayer >= 0)
+                {
+                    if (iPlayer < 64)
+                    {
+                        admins[iPlayer] = false;
+                    }
+                }
+                else
+                {
+                    remoteLoggedIn = false;
+                }
                 continue;
             }
             if (iPlayer >= 0)
