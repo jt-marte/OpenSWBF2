@@ -473,6 +473,39 @@ gEraFallbackNames = {
 	k = "KotOR",
 }
 
+-- Icons for modes and eras that bring none, from the game's own: a mode or era row without one
+-- looked broken next to the stock rows. Mode ids not listed get one by the shape of their name.
+gModeFallbackIcons = {
+	bf1 = "mode_icon_con", uber = "mode_icon_con", obj = "mode_icon_con", koh = "mode_icon_con",
+	ctrl = "mode_icon_con", siege = "mode_icon_con", seige = "mode_icon_con", rpg = "mode_icon_con",
+	race = "mode_icon_con", vh = "mode_icon_con", vhcon = "mode_icon_con",
+	c1 = "mode_icon_con", c2 = "mode_icon_con", c3 = "mode_icon_con", c4 = "mode_icon_con",
+	hctf = "mode_icon_2ctf", vhctf = "mode_icon_2ctf",
+	holo = "mode_icon_ctf",
+	ord66 = "mode_icon_hunt", surv = "mode_icon_hunt", wav = "mode_icon_hunt",
+	dm = "mode_icon_tdm", lms = "mode_icon_tdm", tdf = "mode_icon_tdm", vhtdm = "mode_icon_tdm",
+	space = "mode_icon_ass",
+}
+
+-- An era's row and its playlist rows show its icon2, the side Clone Wars and Galactic Civil War
+-- show (the Republic, the Alliance). KotOR's Republic has the Republic's.
+gEraFallbackIcons = {
+	k = "rep_icon",
+}
+
+function missionlist_ModeFallbackIcon(Id)
+	if(gModeFallbackIcons[Id]) then
+		return gModeFallbackIcons[Id]
+	elseif(string.find(Id, "ctf")) then
+		return "mode_icon_2ctf"
+	elseif(string.find(Id, "dm")) then
+		return "mode_icon_tdm"
+	elseif(string.find(Id, "hunt")) then
+		return "mode_icon_hunt"
+	end
+	return "mode_icon_con"
+end
+
 function missionlist_FindEra(Subst)
 	local i
 	for i = 1, table.getn(gMapEras) do
@@ -503,6 +536,7 @@ function missionlist_MakeEra(Rec)
 	Rec.showstr = Rec.showstr or ("common.era." .. Id)
 	Rec.Team1Name = Rec.Team1Name or ("common.sides." .. Id .. ".name")
 	Rec.Team2Name = Rec.Team2Name or ("common.sides." .. Id .. ".name")
+	Rec.icon2 = Rec.icon2 or gEraFallbackIcons[Id]
 	return Rec
 end
 
@@ -514,6 +548,7 @@ function missionlist_MakeMode(Rec)
 	Rec.subst = Rec.subst or Id
 	Rec.showstr = Rec.showstr or ("modename.name." .. Id)
 	Rec.descstr = Rec.descstr or ("modename.description." .. Id)
+	Rec.icon = Rec.icon or missionlist_ModeFallbackIcon(Id)
 	return Rec
 end
 

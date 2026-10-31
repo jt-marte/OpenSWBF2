@@ -2802,8 +2802,10 @@ function ifs_mspc_PlayList_PopulateItem(Dest, Data, bSelected)
 			bShowIcon = nil
 		end
 
+		-- OpenSWBF2: the icon shown is icon2; retail asked for icon1, so an era with only the row
+		-- icon (KotOR) showed none
 		local MapEra = missionlist_GetMapEra(Data.Map)
-		if((MapEra) and (MapEra.icon1)) then
+		if((MapEra) and (MapEra.icon2)) then
 			--IFImage_fnSetTexture(Dest.icon1, MapEra.icon1)
 			IFImage_fnSetTexture(Dest.icon2, MapEra.icon2)
 		else

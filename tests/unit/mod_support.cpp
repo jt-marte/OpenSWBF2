@@ -170,6 +170,46 @@ TEST_CASE("mod registry finds eras and modes from mission list entries" * doctes
     CHECK(lua.Global("mission") == "bf1k_bf1");
 }
 
+TEST_CASE("modes and eras a mod brings get icons in Instant Action" * doctest::test_suite("unit"))
+{
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(RegistryCode()));
+    REQUIRE(lua.Run(
+        "missionlist_DiscoverErasAndModes({\n"
+        "  { mapluafile = 'bs1%s_%s', mode_bf1_k = 1, mode_hctf_g = 1, mode_ord66_c = 1, mode_xyzctf_c = 1,\n"
+        "    mode_odd_c = 1, mode_con_k = 1 },\n"
+        "})\n"
+        "table.insert(custom_gEras, { id = 'z', icon1 = 'zz_icon', icon2 = 'yy_icon' })\n"
+        "missionlist_BuildRegistry()\n"
+        "bf1 = missionlist_FindMode('bf1').icon\n"
+        "hctf = missionlist_FindMode('hctf').icon\n"
+        "ord66 = missionlist_FindMode('ord66').icon\n"
+        "xyzctf = missionlist_FindMode('xyzctf').icon\n"
+        "odd = missionlist_FindMode('odd').icon\n"
+        "con = missionlist_FindMode('con').icon\n"
+        "k_row = missionlist_FindEra('k').icon2\n"
+        "z_row = missionlist_FindEra('z').icon2\n"
+        "q_row = tostring((missionlist_FindEra('q')))\n"));
+
+    CHECK(lua.Global("bf1") == "mode_icon_con");
+    CHECK(lua.Global("hctf") == "mode_icon_2ctf");
+    CHECK(lua.Global("ord66") == "mode_icon_hunt");
+    CHECK(lua.Global("xyzctf") == "mode_icon_2ctf"); // by the shape of the name
+    CHECK(lua.Global("odd") == "mode_icon_con");
+    CHECK(lua.Global("con") == "mode_icon_con"); // the stock record keeps its own
+    CHECK(lua.Global("k_row") == "rep_icon"); // KotOR's Republic
+    CHECK(lua.Global("z_row") == "yy_icon");  // a mod era keeps its own
+    CHECK(lua.Global("q_row") == "nil");      // an era nobody registered
+
+    // The playlist shows an era's icon2, which is what KotOR has (retail asked for icon1)
+    const std::string sPc = ReadScript("../data/scripts/shell/ifs_missionselect_pcmulti.lua");
+    const std::string sRow = Between(sPc, "function ifs_mspc_PlayList_PopulateItem(", "ifs_mspc_PlayList_layout = {");
+    REQUIRE(!sRow.empty());
+    CHECK(sRow.find("if((MapEra) and (MapEra.icon2)) then") != std::string::npos);
+    CHECK(sRow.find("(MapEra.icon1)) then") == std::string::npos);
+}
+
 TEST_CASE("the Conversion Pack's maps win over the Xbox DLC's copies" * doctest::test_suite("unit"))
 {
     Lua lua;
