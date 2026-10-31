@@ -50,7 +50,7 @@ docker compose logs -f
 
 The first start builds the core files (a minute or two, cached in `config/lvl` after that), then
 logs `OPENSWBF2 NET mission start ... map=...`. Players join from the OpenBattlefront launcher's
-**Play > Join a server**, or in the game from **Multiplayer > Direct Connect**, with `your-address:3658`.
+**Multiplayer > Direct Connect**, or in the game from **Multiplayer > Direct Connect**, with `your-address:3658`.
 
 ## Settings
 
@@ -71,7 +71,7 @@ logs `OPENSWBF2 NET mission start ... map=...`. Players join from the OpenBattle
 | `CONQUEST_REINFORCEMENTS` | `100` | Percent, 10-500. |
 | `CONQUEST_TIME_LIMIT`, `CTF_TIME_LIMIT`, `HUNT_TIME_LIMIT` | `0` | Minutes, 0 = none. |
 | `CTF_CAPTURES`, `HUNT_SCORE`, `ASSAULT_SCORE` | `5`, `50`, `180` | |
-| `LOBBY` | `0` | 1 = each map waits in a lobby until an admin sends `/start`. |
+| `LOBBY` | `0` | 1 = each map waits in a lobby until an admin starts it; launcher players wait in the launcher's lobby. |
 | `SCRIPT_MODS` | `0` | 1 = also load the `user_script_*` / `custom_gc_*` mods from your data. |
 | `MOD_SHARING` | `1` | Players' launchers download the server's mods from it. 0 = off. |
 | `MOD_PORT` | `PORT` | TCP port for mod downloads. Map the same number in `ports`, as `/tcp`. |
@@ -98,8 +98,8 @@ environment settings apply again then.
 
 ## Mod downloads
 
-Players who join with the OpenBattlefront launcher (**Play > Join a server**) get the server's
-mods from the server itself, like Source's FastDL. The launcher shows what they lack and its size,
+Players who join with the OpenBattlefront launcher (**Multiplayer > Direct Connect**) get the
+server's mods from the server itself, like Source's FastDL. The launcher shows what they lack and its size,
 asks once, downloads it (picking up where it stopped if the connection drops), checks every file's
 SHA-256, installs it and starts the game straight into the server. Their routers need nothing.
 
@@ -130,6 +130,17 @@ An upload is a mod folder with an `addme.script`, up to 2 GB a file and 8 GB in 
 programs, and never the 1.3 patch. A new mod's maps still have to be in the rotation: add them to
 `MAPS`, or over rcon with `/appendmap`. `MOD_UPLOADS=0` turns uploads off and `MOD_SHARING=0` the
 whole service.
+
+### The launcher's lobby
+
+With `LOBBY=1`, players who connect from the launcher wait in its lobby with their game closed,
+after their mods are in place. They see the map and everyone else waiting or still downloading.
+**Start match** on the admin screen (or `/admin /start` in the game, or `docker exec openswbf2 rcon
+/start`) opens every waiting player's game into the server's held lobby. The match begins once they
+are all in, or after 60 seconds at most, with a 5-second countdown. Anyone still downloading joins
+when their download finishes, and players who connect mid-match go straight in. **Back to lobby**
+holds the next map again. The service reads the game's state over rcon on the loopback, with the
+admin password.
 
 ## Updating
 

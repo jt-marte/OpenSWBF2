@@ -20,7 +20,7 @@ services:
       DIFFICULTY: "3"            # 2 Medium, 3 Hard, 4 Overhaul
       HEROES: "1"
       AI_HEROES: "1"
-      LOBBY: "0"                 # 1 = each map waits for an admin's /start
+      LOBBY: "0"                 # 1 = each map waits for Start; launcher players wait in its lobby
       MOD_SHARING: "1"           # players' launchers download the server's mods from it
       MOD_RATE: "50"             # download cap in Mbit/s for everyone together; 0 = none
       MOD_UPLOADS: "1"           # admins can upload mods from the launcher (admin password)

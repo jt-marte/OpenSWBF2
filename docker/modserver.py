@@ -9,6 +9,10 @@ what they lack from GET /mods/<folder>/<path>, which takes ranges, so downloads 
 the join password when the server has one (or the admin password). Admins upload mods the server
 lacks: they wait in /config/addons/.pending and load when the game restarts, at once or when nobody
 is on. Programs are never listed, served or taken, and neither is the unofficial 1.3 patch.
+
+It also runs the launchers' lobby: players who connect from the launcher's Multiplayer page wait in
+it (POST /lobby/join, GET /status) with their game closed, and Start (POST /admin/match?do=start)
+opens all their games into the server's held lobby (LOBBY=1), then starts the match once they're in.
 """
 import argparse
 import hashlib
@@ -392,30 +396,338 @@ class Restarter:
                 return
 
 
-def rcon_players(port, password):
-    """Everyone connected to the game, from rcon /state, or None when it doesn't answer."""
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    import rcon as rconlib
+def reply_lines(payload):
+    """The text lines of an rcon reply payload: the key, then [1, length, text] per line."""
+    lines, i = [], 1
+    while i + 1 < len(payload) and payload[i] == 1:
+        length = payload[i + 1]
+        lines.append(payload[i + 2 : i + 2 + length].decode("ascii", "replace"))
+        i += 2 + length
+    return lines
 
-    local = port + 10001 if port + 10001 <= 65535 else 0
-    client = rconlib.Rcon("127.0.0.1", port, 3.0, local)
-    try:
-        client.hello()
-        client.join()
-        client.line("/admin /login " + password)
-        lines = client.line("/admin /state")
-    except OSError:
-        return None
-    finally:
-        client.sock.close()
+
+def parse_state(lines):
+    """rcon /state: {phase, map, next, players (everyone connected)}."""
+    values = {}
     for line in lines:
         for token in line.split():
-            if token.startswith("players="):
+            key, eq, value = token.partition("=")
+            if eq:
+                values[key] = value
+    try:
+        players = int(values.get("players", "").split("/")[-1])
+    except ValueError:
+        players = 0
+    phase = values.get("state", "")
+    return {
+        "phase": phase if phase in ("shell", "lobby", "warmup", "playing", "ended") else "offline",
+        "map": values.get("map", ""),
+        "next": values.get("next", ""),
+        "players": players,
+    }
+
+
+def parse_playerinfo(lines):
+    """rcon /playerinfo: (names, the slot of the next page or None). Rows are
+    "p <slot> <team> <alive> <score> <kills> <deaths> <ping> <name>"; a headless client has no name."""
+    names, more = [], None
+    for line in lines:
+        parts = line.split(" ", 8)
+        if parts[0] == "p" and len(parts) >= 8:
+            name = parts[8].strip() if len(parts) > 8 else ""
+            names.append(name or f"Player {parts[1]}")
+        elif parts[0] == "more" and len(parts) > 1 and parts[1].isdigit():
+            more = int(parts[1])
+    return names, more
+
+
+class RconGame:
+    """The game over rcon, through one admin session kept open: the server takes 5 logins in 10 s
+    and keeps 3 sessions, and forgets one after 60 s of silence. Replies are told from the lines the
+    server pushes on its own by their "#<command>" first line."""
+
+    def __init__(self, port, password, timeout=3.0):
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        import rcon as rconlib
+
+        self.rconlib = rconlib
+        self.port = port
+        self.password = password
+        self.timeout = timeout
+        self.local = port + 10001 if port + 10001 <= 65535 else 0
+        self.client = None
+        self.lock = threading.Lock()
+
+    def close(self):
+        if self.client is not None:
+            self.client.sock.close()
+            self.client = None
+
+    def send(self, text, done):
+        """Sends one admin line and returns the first reply whose lines satisfy done(lines)."""
+        client = self.client
+        raw = ("/admin " + text).encode("ascii", "replace")[:63]
+        client.send("J", bytes([len(raw)]) + raw)
+        deadline = time.monotonic() + self.timeout
+        while time.monotonic() < deadline:
+            payload = client.receive()
+            if payload:
+                client.key = payload[0]
+            lines = reply_lines(payload)
+            if any(line.strip() == "not logged in" for line in lines):
+                raise PermissionError("not logged in")
+            if done(lines):
+                return lines
+        raise TimeoutError(f"no reply to {text}")
+
+    def login(self):
+        lines = self.send("/login " + self.password,
+                          lambda ls: any(l.strip() in ("logged in", "login failed", "login rate limited") for l in ls))
+        if not any(line.strip() == "logged in" for line in lines):
+            raise PermissionError(" ".join(lines))
+
+    def open(self):
+        self.client = self.rconlib.Rcon("127.0.0.1", self.port, self.timeout, self.local)
+        self.client.hello()
+        self.client.join()
+        self.login()
+
+    def ask(self, text):
+        """An admin command's reply lines, after its "#<command>" line."""
+        header = "#" + text.split()[0].lstrip("/").lower()
+
+        def done(lines):
+            return any(line.strip().lower() == header for line in lines)
+
+        with self.lock:
+            for _ in range(2):
                 try:
-                    return int(token[len("players="):].split("/")[-1])
-                except ValueError:
-                    return None
-    return None
+                    if self.client is None:
+                        self.open()
+                    try:
+                        lines = self.send(text, done)
+                    except PermissionError:
+                        self.login()
+                        lines = self.send(text, done)
+                    return lines[[l.strip().lower() for l in lines].index(header) + 1:]
+                except OSError:
+                    self.close()
+            raise OSError("the game doesn't answer rcon")
+
+    def state(self):
+        return parse_state(self.ask("/state"))
+
+    def names(self):
+        names, first = [], None
+        for _ in range(6):
+            page, first = parse_playerinfo(self.ask("/playerinfo" + (f" {first}" if first else "")))
+            names += page
+            if first is None:
+                break
+        return names
+
+    def command(self, text):
+        return self.ask(text)
+
+
+NAME = re.compile(r'^[ !#-\[\]-~]{1,15}$')
+
+
+def valid_name(name):
+    """A player name as the launcher's PlayerProfiles.IsValid takes it."""
+    return isinstance(name, str) and bool(NAME.match(name)) and name.strip() == name and not name.startswith("[")
+
+
+class Lobby:
+    """Players waiting in their launchers (their game isn't running yet) for the match to start.
+    An entry goes 20 s after its launcher last asked for /status."""
+
+    MAX, MAX_PER_ADDRESS, EXPIRE = 64, 16, 20.0
+
+    def __init__(self, clock=time.monotonic):
+        self.clock = clock
+        self.entries = {}
+        self.lock = threading.Lock()
+
+    def prune(self):
+        now = self.clock()
+        for token in [t for t, e in self.entries.items() if now - e["seen"] > self.EXPIRE]:
+            del self.entries[token]
+
+    def join(self, name, address):
+        if not valid_name(name):
+            raise Refused(400, "a player name is 1 to 15 plain characters")
+        with self.lock:
+            self.prune()
+            if len(self.entries) >= self.MAX:
+                raise Refused(503, "the lobby is full")
+            if sum(1 for e in self.entries.values() if e["address"] == address) >= self.MAX_PER_ADDRESS:
+                raise Refused(429, "too many players from one address")
+            token = uuid.uuid4().hex
+            self.entries[token] = {"name": name, "state": "downloading", "progress": 0, "address": address, "seen": self.clock()}
+        return token
+
+    def entry(self, token):
+        entry = self.entries.get(token) if isinstance(token, str) else None
+        if entry is None:
+            raise Refused(404, "not in the lobby; join again")
+        return entry
+
+    def update(self, token, state, progress):
+        if state not in ("downloading", "waiting"):
+            raise Refused(400, "state is downloading or waiting")
+        with self.lock:
+            entry = self.entry(token)
+            entry["state"] = state
+            entry["progress"] = max(0, min(100, int(progress))) if isinstance(progress, (int, float)) and not isinstance(progress, bool) else 0
+            entry["seen"] = self.clock()
+
+    def touch(self, token):
+        with self.lock:
+            self.prune()
+            if token in self.entries:
+                self.entries[token]["seen"] = self.clock()
+                return True
+        return False
+
+    def leave(self, token):
+        with self.lock:
+            self.entries.pop(token, None)
+
+    def describe(self):
+        with self.lock:
+            self.prune()
+            return [{"name": e["name"], "state": e["state"], "progress": e["progress"]} for e in self.entries.values()]
+
+    def count(self, state=None):
+        with self.lock:
+            self.prune()
+            return sum(1 for e in self.entries.values() if state is None or e["state"] == state)
+
+
+class GameWatch:
+    """What the game is doing, polled over rcon (every 2 s while a launcher waits, else every 15 s),
+    and the lobby start: Start opens every waiting player's game into the server's held lobby, and
+    the match begins once that many players are connected, or after 60 s. Players still downloading
+    don't hold it up; they join when their download is done."""
+
+    BUSY, IDLE, NAMES, DEADLINE, COUNTDOWN = 2.0, 15.0, 4.0, 60.0, 5
+
+    def __init__(self, game, lobby, clock=time.monotonic):
+        self.game = game
+        self.lobby = lobby
+        self.clock = clock
+        self.lock = threading.Lock()
+        self.wake = threading.Event()
+        self.state = {"phase": "offline", "map": "", "next": "", "players": 0}
+        self.names = []
+        self.polled = None
+        self.named = None
+        self.loading = False
+        self.deadline = None
+        self.expected = 0
+
+    @property
+    def busy(self):
+        return self.loading or self.lobby.count() > 0
+
+    def refresh(self):
+        try:
+            state = self.game.state() if self.game else None
+        except OSError:
+            state = None
+        now = self.clock()
+        with self.lock:
+            self.state = state or {"phase": "offline", "map": "", "next": "", "players": 0}
+            self.polled = now
+        if state and self.busy and (self.named is None or now - self.named >= self.NAMES):
+            try:
+                names = self.game.names()
+            except OSError:
+                names = None
+            with self.lock:
+                if names is not None:
+                    self.names = names
+                self.named = now
+
+    def step(self):
+        """One look at the game, then the start once everyone is in (the loop calls it; tests too)."""
+        self.refresh()
+        with self.lock:
+            if not self.loading:
+                return
+            phase, players = self.state["phase"], self.state["players"]
+            if phase != "lobby":
+                self.loading = False  # started some other way, or the server changed map
+                return
+            if players < self.expected and self.clock() < self.deadline:
+                return
+            self.loading = False
+        self.send_start()
+
+    def send_start(self):
+        try:
+            self.game.command(f"/start {self.COUNTDOWN}")
+            log(f"match starting: {self.state['players']} of {self.expected} players in")
+        except OSError as error:
+            log(f"couldn't start the match: {error}")
+        self.refresh()
+
+    def run(self):
+        while True:
+            self.step()
+            self.wake.wait(self.BUSY if self.busy else self.IDLE)
+            self.wake.clear()
+
+    def start_thread(self):
+        threading.Thread(target=self.run, daemon=True).start()
+
+    def players(self):
+        """Everyone connected, or None while the game doesn't answer (for restart when empty)."""
+        if self.polled is None or self.clock() - self.polled > 5:
+            self.refresh()
+        with self.lock:
+            return None if self.state["phase"] == "offline" else self.state["players"]
+
+    def start(self):
+        self.refresh()
+        with self.lock:
+            if self.state["phase"] != "lobby":
+                raise Refused(409, "the match isn't waiting in the lobby" if self.state["phase"] != "offline"
+                              else "the game doesn't answer")
+            if self.loading:
+                raise Refused(409, "the start is already loading everyone's game")
+            waiting = self.lobby.count("waiting")
+            self.expected = self.state["players"] + waiting
+            if waiting == 0:
+                now_start = True
+            else:
+                now_start = False
+                self.loading = True
+                self.deadline = self.clock() + self.DEADLINE
+        log(f"start: loading {waiting} waiting players' games" if not now_start else "start: nobody waits in a launcher")
+        if now_start:
+            self.send_start()
+        self.wake.set()
+        return self.describe()
+
+    def cancel(self):
+        with self.lock:
+            self.loading = False
+        return self.describe()
+
+    def back_to_lobby(self):
+        try:
+            lines = self.game.command("/lobby now")
+        except OSError:
+            raise Refused(503, "the game doesn't answer")
+        self.wake.set()
+        return {"reply": lines}
+
+    def describe(self):
+        with self.lock:
+            left = max(0, int(self.deadline - self.clock())) if self.loading else None
+            return {**self.state, "inGame": list(self.names), "start": "loading" if self.loading else "none", "startIn": left}
 
 
 class Uploads:
@@ -646,14 +958,16 @@ def apply_pending(root):
 
 class ModService:
     def __init__(self, addons, config, join_password="", admin_password="", server_name="", version="",
-                 uploads=True, rate=0, restart=None, players=None):
+                 uploads=True, rate=0, restart=None, players=None, game=None, clock=time.monotonic):
         self.uploads_root = os.path.join(config, "addons")
         os.makedirs(self.uploads_root, exist_ok=True)
         self.library = Library([(addons, "server"), (self.uploads_root, "uploaded")],
                                os.path.join(config, "mod-hashes.json"))
         self.gate = Gate(join_password, admin_password)
         self.bucket = Bucket(rate)
-        self.restarter = Restarter(restart or (lambda: None), players or (lambda: None))
+        self.lobby = Lobby(clock)
+        self.watch = GameWatch(game, self.lobby, clock)
+        self.restarter = Restarter(restart or (lambda: None), players or self.watch.players)
         self.uploads = Uploads(self.uploads_root, addons)
         self.server_name = server_name
         self.version = version
@@ -672,11 +986,18 @@ class ModService:
             reply["pending"] = self.uploads.describe_pending()
         return reply
 
+    def status(self, token=None):
+        """The game and the lobby, for launchers waiting to play and for the admin screen."""
+        mine = token is not None and self.lobby.touch(token)
+        return {"schema": 1, "server": self.server_name, **self.watch.describe(),
+                "lobby": self.lobby.describe(), "inLobby": mine}
+
 
 class Server(http.server.ThreadingHTTPServer):
     daemon_threads = True
     request_queue_size = 64
-    MAX_CONNECTIONS, MAX_PER_ADDRESS = 32, 4
+    # Each launcher in the lobby keeps a connection, and players at one LAN party share an address
+    MAX_CONNECTIONS, MAX_PER_ADDRESS = 96, 16
 
     def __init__(self, address, service):
         self.service = service
@@ -752,6 +1073,15 @@ class Handler(http.server.BaseHTTPRequestHandler):
             elif parts == ["admin", "restart"] and method in ("POST", "DELETE"):
                 self.who(admin=True)
                 self.restart(method)
+            elif parts == ["status"] and method in ("GET", "HEAD"):
+                self.who()
+                self.send_json(200, self.service.status(query(self.path).get("token", [None])[0]), head=method == "HEAD")
+            elif len(parts) == 2 and parts[0] == "lobby" and method == "POST":
+                self.who()
+                self.lobby(parts[1])
+            elif parts == ["admin", "match"] and method in ("POST", "DELETE"):
+                self.who(admin=True)
+                self.match(method)
             else:
                 raise Refused(404, "not found")
         except Refused as refused:
@@ -826,6 +1156,39 @@ class Handler(http.server.BaseHTTPRequestHandler):
             else:
                 raise Refused(400, "when is now or empty")
         self.send_json(200, {"restart": restarter.state})
+
+    def lobby(self, action):
+        lobby = self.service.lobby
+        body = self.read_json()
+        if not isinstance(body, dict):
+            raise Refused(400, "the body is an object")
+        if action == "join":
+            reply = {"token": lobby.join(body.get("name"), self.client_address[0])}
+            log(f"{body.get('name')} is in the lobby")
+        elif action == "update":
+            lobby.update(body.get("token"), body.get("state"), body.get("progress", 0))
+            reply = {"ok": True}
+        elif action == "leave":
+            lobby.leave(body.get("token"))
+            reply = {"ok": True}
+        else:
+            raise Refused(404, "not found")
+        self.service.watch.wake.set()
+        self.send_json(200, reply)
+
+    def match(self, method):
+        watch = self.service.watch
+        if method == "DELETE":
+            reply = watch.cancel()
+        else:
+            what = query(self.path).get("do", [""])[0]
+            if what == "start":
+                reply = watch.start()
+            elif what == "lobby":
+                reply = watch.back_to_lobby()
+            else:
+                raise Refused(400, "do is start or lobby")
+        self.send_json(200, reply)
 
     def send_json(self, status, body, head=False):
         data = json.dumps(body).encode("utf-8")
@@ -968,10 +1331,11 @@ def main():
         uploads=os.environ.get("MOD_UPLOADS", "1") == "1",
         rate=env_int("MOD_RATE", 50) * 125000,
         restart=restart,
-        players=lambda: rcon_players(game_port, admin_password),
+        game=RconGame(game_port, admin_password),
     )
     server = Server((args.host, args.port), service)
     signal.signal(signal.SIGTERM, lambda *_: sys.exit(0))
+    service.watch.start_thread()
     folders = service.library.scan()
     log(f"sharing {len(folders)} mods on TCP {args.port}: {' '.join(f.name for f in folders) or 'none yet'}")
     try:

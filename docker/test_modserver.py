@@ -461,5 +461,199 @@ class RestartTests(ServiceCase):
         self.assertEqual(self.request("POST", "/admin/restart?when=later", password=ADMIN)[0], 400)
 
 
+class FakeClock:
+    def __init__(self):
+        self.now = 1000.0
+
+    def __call__(self):
+        return self.now
+
+
+class FakeGame:
+    """The game as rcon reports it; /start and /lobby change its phase as the server does."""
+
+    def __init__(self):
+        self.status = {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 0}
+        self.players = []
+        self.commands = []
+        self.up = True
+
+    def state(self):
+        if not self.up:
+            raise OSError("no answer")
+        return dict(self.status)
+
+    def names(self):
+        return list(self.players)
+
+    def command(self, text):
+        self.commands.append(text)
+        if text.startswith("/start"):
+            self.status["phase"] = "warmup"
+        elif text.startswith("/lobby"):
+            self.status["phase"] = "lobby"
+        return ["ok"]
+
+
+class LobbyTests(ServiceCase):
+    def start(self, **settings):
+        self.clock = FakeClock()
+        self.game = FakeGame()
+        super().start(game=self.game, clock=self.clock, **settings)
+
+    def join(self, name, password=JOIN):
+        status, _, data = self.request("POST", "/lobby/join", {"name": name}, password=password)
+        self.assertEqual(status, 200, data)
+        return json.loads(data)["token"]
+
+    def update(self, token, state, progress=0):
+        status, _, data = self.request("POST", "/lobby/update", {"token": token, "state": state, "progress": progress})
+        self.assertEqual(status, 200, data)
+
+    def status(self, token=None, password=JOIN):
+        path = "/status" + (f"?token={token}" if token else "")
+        status, _, data = self.request("GET", path, password=password)
+        self.assertEqual(status, 200, data)
+        return json.loads(data)
+
+    def match(self, what, method="POST", password=ADMIN):
+        path = "/admin/match" + (f"?do={what}" if what else "")
+        status, _, data = self.request(method, path, password=password)
+        return status, json.loads(data)
+
+    def test_join_update_leave_and_expiry(self):
+        token = self.join("Pat")
+        reply = self.status(token)
+        self.assertEqual(reply["lobby"], [{"name": "Pat", "state": "downloading", "progress": 0}])
+        self.assertTrue(reply["inLobby"])
+        self.assertEqual(reply["server"], "Test server")
+        self.update(token, "downloading", 45)
+        self.assertEqual(self.status(token)["lobby"][0]["progress"], 45)
+        self.update(token, "waiting", 100)
+        self.assertEqual(self.status(token)["lobby"][0]["state"], "waiting")
+        self.request("POST", "/lobby/leave", {"token": token})
+        self.assertEqual(self.status()["lobby"], [])
+        self.assertFalse(self.status(token)["inLobby"])
+
+        self.join("Rex")
+        self.clock.now += modserver.Lobby.EXPIRE + 1
+        self.assertEqual(self.status()["lobby"], [])
+        self.assertEqual(self.request("POST", "/lobby/update", {"token": "nope", "state": "waiting"})[0], 404)
+
+    def test_names_and_passwords_are_checked(self):
+        for name in ["", "x" * 16, 'a"b', "a\\b", " pad", "pad ", "[NULL]", 7, None]:
+            with self.subTest(name=name):
+                self.assertEqual(self.request("POST", "/lobby/join", {"name": name})[0], 400)
+        self.assertEqual(self.request("POST", "/lobby/join", {"name": "Pat"}, password=None)[0], 401)
+        self.assertEqual(self.request("GET", "/status", password=None)[0], 401)
+        self.assertEqual(self.request("POST", "/lobby/update", {"token": "x", "state": "playing"})[0], 400)
+
+    def test_start_loads_everyones_game_then_starts(self):
+        self.update(self.join("Pat"), "waiting", 100)
+        self.update(self.join("Rex"), "waiting", 100)
+        self.join("Slow")  # still downloading: doesn't hold the start
+        status, reply = self.match("start")
+        self.assertEqual((status, reply["start"]), (200, "loading"))
+        self.assertEqual(reply["startIn"], modserver.GameWatch.DEADLINE)
+        self.assertEqual(self.status()["start"], "loading")
+
+        self.game.status["players"] = 1
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, [])
+        self.game.status["players"] = 2
+        self.game.players = ["Pat", "Player 2"]
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, ["/start 5"])
+        reply = self.status()
+        self.assertEqual((reply["start"], reply["phase"]), ("none", "warmup"))
+
+    def test_start_waits_sixty_seconds_at_most(self):
+        self.update(self.join("Pat"), "waiting")
+        self.update(self.join("Rex"), "waiting")
+        self.match("start")
+        self.game.status["players"] = 1
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, [])
+        self.clock.now += modserver.GameWatch.DEADLINE + 1
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, ["/start 5"])
+
+    def test_start_with_nobody_waiting_is_at_once(self):
+        self.join("Slow")
+        status, reply = self.match("start")
+        self.assertEqual((status, reply["start"]), (200, "none"))
+        self.assertEqual(self.game.commands, ["/start 5"])
+
+    def test_start_only_from_the_lobby(self):
+        self.game.status["phase"] = "playing"
+        status, reply = self.match("start")
+        self.assertEqual(status, 409)
+        self.game.up = False
+        status, reply = self.match("start")
+        self.assertEqual((status, reply["error"]), (409, "the game doesn't answer"))
+        self.assertEqual(self.status()["phase"], "offline")
+
+    def test_a_start_from_elsewhere_ends_the_loading(self):
+        self.update(self.join("Pat"), "waiting")
+        self.match("start")
+        self.game.status["phase"] = "warmup"  # an admin typed /admin /start in the game
+        self.service.watch.step()
+        self.assertEqual(self.status()["start"], "none")
+        self.assertEqual(self.game.commands, [])
+
+    def test_cancel_and_back_to_lobby(self):
+        self.update(self.join("Pat"), "waiting")
+        self.match("start")
+        status, reply = self.match(None, method="DELETE")
+        self.assertEqual((status, reply["start"]), (200, "none"))
+        self.game.status["players"] = 5
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, [])
+
+        self.game.status["phase"] = "playing"
+        self.assertEqual(self.match("lobby")[0], 200)
+        self.assertEqual(self.game.commands, ["/lobby now"])
+        self.assertEqual(self.match("later")[0], 400)
+
+    def test_match_control_needs_the_admin_password(self):
+        self.assertEqual(self.match("start", password=JOIN)[0], 403)
+        self.assertEqual(self.match("lobby", password=None)[0], 401)
+        self.assertEqual(self.game.commands, [])
+
+    def test_status_names_whos_in_the_game_while_anyone_waits(self):
+        self.game.players = ["Rex", "Player 2"]
+        self.service.watch.step()
+        self.assertEqual(self.status()["inGame"], [])  # nobody waits: names aren't asked for
+        self.join("Pat")
+        self.service.watch.step()
+        reply = self.status()
+        self.assertEqual(reply["inGame"], ["Rex", "Player 2"])
+        self.assertEqual(reply["map"], "BS1g_con")
+
+    def test_restart_when_empty_reads_the_watch(self):
+        self.game.status["players"] = 2
+        self.assertEqual(self.service.watch.players(), 2)
+        self.game.up = False
+        self.clock.now += 10
+        self.assertIsNone(self.service.watch.players())
+
+
+class RconParsingTests(unittest.TestCase):
+    def test_state(self):
+        line = "state=lobby hold=1 players=1/2/4 time=-1 tickets=0/0 scores=0/0 map=BS1g_con next=geo1c_con"
+        self.assertEqual(modserver.parse_state([line]),
+                         {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 4})
+        self.assertEqual(modserver.parse_state(["state=weird"])["phase"], "offline")
+
+    def test_playerinfo(self):
+        names, more = modserver.parse_playerinfo(["p 1 2 0 0 0 0 16 ", "p 3 1 1 10 2 1 40 Rex CT 7567", "more 13"])
+        self.assertEqual((names, more), (["Player 1", "Rex CT 7567"], 13))
+        self.assertEqual(modserver.parse_playerinfo(["end 2"]), ([], None))
+
+    def test_reply_lines(self):
+        payload = bytes([9, 1, 6]) + b"#state" + bytes([1, 2]) + b"ok" + bytes([0])
+        self.assertEqual(modserver.reply_lines(payload), ["#state", "ok"])
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=2)
