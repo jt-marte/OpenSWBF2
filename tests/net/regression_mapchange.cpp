@@ -193,6 +193,13 @@ TEST_CASE("BF1 pack Rhen Var and AT4 load and play on server and client" * docte
     CHECK(sWalker.find("if (!m_pZephyrSkeletonShared)", uBuild) < sWalker.find("new EntityWalker(this, desc)", uBuild));
     CHECK(sWalker.find("RedAnimation::Find(PblHash(pszValue))->GetZephyrSkeletonShared()") == std::string::npos);
 
+    // A server crashed on Naboo Holocron: a point off the terrain read outside its patch table
+    const std::string sTerrain = ReadSource("../src/RedEngineFL/Application/RedTerrain.cpp");
+    const size_t uHole = sTerrain.find("bool RedTerrain::PointInHole(const PblVector3& vPos)");
+    REQUIRE(uHole != std::string::npos);
+    CHECK(sTerrain.find("if (iX < 0 || iZ < 0 || iX >= _iPointsPerDimension || iZ >= _iPointsPerDimension)", uHole) <
+          sTerrain.find("_pHeightExpand[iPatch].uiFlags", uHole));
+
     // Utapau Hunt in the Galactic Civil War is listed by the pack but doesn't exist
     const std::string sList = ReadSource("../data/scripts/shell/missionlist.lua");
     CHECK(sList.find("{ map = \"uta1\", key = \"mode_hunt_g\" }") != std::string::npos);

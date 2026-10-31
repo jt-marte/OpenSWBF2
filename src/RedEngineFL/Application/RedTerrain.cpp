@@ -363,6 +363,12 @@ bool RedTerrain::PointInHole(const PblVector3& vPos)
 
     const int iX = (int)((vPos.x + _fTerrainCenterX) * _fPointsPerMeter);
     const int iZ = (int)((vPos.z + _fTerrainCenterZ) * _fPointsPerMeter);
+    // OpenSWBF2: a point off the terrain (or a NaN one, which the casts make INT_MIN) read far
+    // outside the patch table; retail did the same. It crashed a server on BF1 pack Naboo Holocron.
+    if (iX < 0 || iZ < 0 || iX >= _iPointsPerDimension || iZ >= _iPointsPerDimension)
+    {
+        return false;
+    }
     const int iPatch = (iX >> _iHeightPatchPointsPerDimensionLog2) +
                        ((iZ >> _iHeightPatchPointsPerDimensionLog2) << _iHeightPatchesPerDimensionLog2);
     const unsigned char uiHoles = _pHeightExpand[iPatch].uiFlags & 0xf;
