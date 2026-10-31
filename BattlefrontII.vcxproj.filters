@@ -2465,6 +2465,9 @@
     <ClInclude Include="src\Battlefront2\Source\HudMeshFit.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\NetHeroAi.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>

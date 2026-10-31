@@ -1719,6 +1719,7 @@ void RemoveCharacterPilots(Character* pCharacter)
 // FUNCTION: SWBF2 0x00452dd0
 void Character::MakePlayer(int iTeam, const unsigned short* pName, int iPlayerId)
 {
+    NetGame::ReleaseAiHero(this); // OpenSWBF2: or its team's hero would wait on it for good
     RemoveCharacterPilots(this);
     SetName(pName);
     PblUnicode::ustrlcpy(mRegularName, pName, 64);

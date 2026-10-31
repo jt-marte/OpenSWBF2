@@ -804,6 +804,20 @@ int Team::PickRandomClassIndex(Character* pCharacter) const
         aiOrder[n - 1] = iTemp;
     }
 
+    // OpenSWBF2: the team's AI hero comes back as its hero. Below, any class still short of its
+    // minimum came first in the shuffled order, so at the start of a map the chosen bot kept
+    // spawning as a trooper and the hero only turned up after it had died a few times.
+    if (netHeroAIID[mTeamNumber] >= 0 && pCharacter == Character::GetPtr(netHeroAIID[mTeamNumber]))
+    {
+        for (int i = 0; i < mClassCount; ++i)
+        {
+            if (mClassArray[aiOrder[i]]->mHeroFlag)
+            {
+                return aiOrder[i];
+            }
+        }
+    }
+
     for (int i = 0; i < mClassCount; ++i)
     {
         int iIndex = aiOrder[i];

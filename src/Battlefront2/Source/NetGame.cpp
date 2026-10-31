@@ -31,6 +31,7 @@
 #include "NetPacket.h"
 #include "NetWire.h"
 #include "NetLobby.h"
+#include "NetHeroAi.h"
 #include "LocalLimits.h"
 #include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Util/RedWarning.h"
@@ -1021,6 +1022,9 @@ int netHeroPlayerID[3];
 int gDebugCount;
 // GLOBAL: SWBF2 0x01e62f00
 int netHeroAIID[3];
+// OpenSWBF2: the turn a team's hero became free to take with nobody taking it (0: not waiting).
+// Multiplayer gives it to a bot once that has lasted NetHeroAi::kAiHeroWaitSeconds.
+static unsigned int snHeroOpenTurn[3];
 
 // GLOBAL: SWBF2 0x01e62ee4
 unsigned int netHeroSelectedTurn[3];
@@ -1983,6 +1987,7 @@ void NetGame::Create(bool bMission)
         netHeroKillerID[i] = -1;
         netHeroAIID[i] = -1;
         netHeroDiedTurn[i] = 0;
+        snHeroOpenTurn[i] = 0;
     }
 
     netGameOver = false;
@@ -3275,6 +3280,7 @@ void NetGame::HeroKilled(int iTeam)
     netHeroDiedTurn[iTeam] = NetGame::GetTurnNumber();
     spHeroDiedTime[iTeam] = NetGame::GetLocalTime();
     netHeroSpawnedTurn[iTeam] = 0;
+    snHeroOpenTurn[iTeam] = 0;
 }
 
 enum ReliableEventType
@@ -3894,18 +3900,47 @@ const int Max(int iA, int iB);
 
 extern int netHeroRulePlayer;
 
-// OpenSWBF2: AI heroes (Options -> General) are for Instant Action, including a mission started
-// from the command line; the campaign and Galactic Conquest script their heroes.
-static bool AiHeroesOn()
+// OpenSWBF2: a host's AI heroes set over rcon (/aiheroes), for this run only; -1 follows the
+// option (display.ini, or -aiheroes for the run).
+static int siAiHeroesOverride = -1;
+
+void NetGame::SetAiHeroes(bool bOn)
 {
-    return !NetGame::IsEnabled() && Lua_Callbacks::gCurRules != Lua_Callbacks::eGAMERULES_CAMPAIGN &&
-           Lua_Callbacks::gCurRules != Lua_Callbacks::eGAMERULES_METAGAME &&
-           GameplayCfg::Get(GameplayCfg::kAiHeroes);
+    siAiHeroesOverride = bOn ? 1 : 0;
+}
+
+void NetGame::ReleaseAiHero(const Character* pCharacter)
+{
+    for (int iTeam = 0; iTeam < 3; ++iTeam)
+    {
+        if (netHeroAIID[iTeam] >= 0 && Character::GetPtr(netHeroAIID[iTeam]) == pCharacter)
+        {
+            HeroKilled(iTeam);
+        }
+    }
+}
+
+// OpenSWBF2: AI heroes (Options -> General, -aiheroes, rcon /aiheroes) are for Instant Action,
+// including a mission started from the command line, and for multiplayer hosts (NetHeroAi.h);
+// the campaign and Galactic Conquest script their heroes.
+bool NetGame::AiHeroesOn()
+{
+    if (Lua_Callbacks::gCurRules == Lua_Callbacks::eGAMERULES_CAMPAIGN ||
+        Lua_Callbacks::gCurRules == Lua_Callbacks::eGAMERULES_METAGAME)
+    {
+        return false;
+    }
+    if (NetGame::IsEnabled() && siAiHeroesOverride >= 0)
+    {
+        return siAiHeroesOverride != 0;
+    }
+    return GameplayCfg::Get(GameplayCfg::kAiHeroes);
 }
 
 // Nobody took the hero: wait for the respawn time again (or the next unlock) and ask afresh.
 static void PassHeroTurn(int iTeam)
 {
+    snHeroOpenTurn[iTeam] = 0;
     netHeroPlayerID[iTeam] = -1;
     netHeroNextPlayerID[iTeam] = -1;
     netHeroAIID[iTeam] = -1;
@@ -3977,15 +4012,22 @@ void NetGame::HeroRulesUpdate(int iTeam)
                     int iMaxPlayers = IsEnabled() ? netCurMaxPlayers : GameLoop::GetNumCameras();
 
                     bool bAllDeclined = true;
+                    bool bAnyHuman = false;
                     int i = 0;
                     for (i = 0; i < iMaxPlayers; i++)
                     {
                         Character* pCharacter = Character::GetPtr(i);
-                        if (pCharacter && pCharacter->GetTeamNumber() == iTeam &&
-                            !netPlayers[i].mDeclinedHero)
+                        // OpenSWBF2: online, only a connected human counts; the bot standing in
+                        // an empty player slot never declines, which kept the hero from the team
+                        // for the rest of the match once its humans had all said no
+                        if (pCharacter && pCharacter->GetTeamNumber() == iTeam && (!IsEnabled() || IsPlaying(i, false)))
                         {
-                            bAllDeclined = false;
-                            break;
+                            bAnyHuman = true;
+                            if (!netPlayers[i].mDeclinedHero)
+                            {
+                                bAllDeclined = false;
+                                break;
+                            }
                         }
                     }
 
@@ -3995,6 +4037,23 @@ void NetGame::HeroRulesUpdate(int iTeam)
                     {
                         PassHeroTurn(iTeam);
                         return;
+                    }
+
+                    // OpenSWBF2: online, a bot takes it once every human on the team said no, or
+                    // it has waited kAiHeroWaitSeconds with nobody taking it (NetHeroAi.h). A team
+                    // with no human yet waits too: its players may still be loading the map.
+                    bool bAiDue = false;
+                    bool bAiWaiting = false;
+                    if (IsEnabled() && AiHeroesOn())
+                    {
+                        const unsigned int uNow = GetTurnNumber();
+                        if (!snHeroOpenTurn[iTeam])
+                        {
+                            snHeroOpenTurn[iTeam] = uNow ? uNow : 1;
+                        }
+                        const float fWaited = (float)(int)(uNow - snHeroOpenTurn[iTeam]) * netSecondsPerTurn;
+                        bAiDue = NetHeroAi::AiHeroDue(bAllDeclined && bAnyHuman, fWaited);
+                        bAiWaiting = !bAiDue;
                     }
 
                     int aiBest[2];
@@ -4027,7 +4086,7 @@ void NetGame::HeroRulesUpdate(int iTeam)
                                 continue;
                             }
                         }
-                        else if (IsEnabled())
+                        else if (IsEnabled() && !bAiDue)
                         {
                             continue;
                         }
@@ -4069,7 +4128,8 @@ void NetGame::HeroRulesUpdate(int iTeam)
                         }
                     }
 
-                    if (aiCount[1] > 0)
+                    const int iBucket = NetHeroAi::PickBucket(bAiDue, aiCount[1], aiCount[0]);
+                    if (iBucket == 1)
                     {
                         if (aiCount[1] == 1)
                         {
@@ -4090,7 +4150,7 @@ void NetGame::HeroRulesUpdate(int iTeam)
                             netHeroNextPlayerID[iTeam] = -1;
                         }
                     }
-                    else if (aiCount[0] > 0)
+                    else if (iBucket == 0)
                     {
                         if (aiCount[0] == 1)
                         {
@@ -4100,14 +4160,20 @@ void NetGame::HeroRulesUpdate(int iTeam)
                         {
                             netHeroAIID[iTeam] = aaiCandidates[0][PblRandom::GetGlobalInt() % aiCount[0]];
                         }
-                        if (bAllDeclined)
+                        if (IsEnabled())
+                        {
+                            LOG(LogNet, Inform, "OPENSWBF2 NET hero ai team=%d char=%d declined=%d", iTeam,
+                                netHeroAIID[iTeam], bAllDeclined ? 1 : 0);
+                        }
+                        else if (bAllDeclined)
                         {
                             LOG(LogSim, Inform, "OPENSWBF2 HERO team %d: bot %d takes the hero", iTeam,
                                 netHeroAIID[iTeam]);
                         }
+                        snHeroOpenTurn[iTeam] = 0;
                         HeroSelected(iTeam);
                     }
-                    else if (bAllDeclined)
+                    else if (bAllDeclined && !bAiWaiting)
                     {
                         PassHeroTurn(iTeam); // no bot to take it either
                         return;
@@ -6420,6 +6486,14 @@ void NetGame::DeclineHero(int iTeam, int iPlayer)
     if (iPlayer >= 0)
     {
         netPlayers[iPlayer].mDeclinedHero = true;
+    }
+    // OpenSWBF2: online, that bot is let go so another one is picked: one that never came back
+    // (no spawn point for it, say) would otherwise hold the team's hero for the rest of the match
+    else if (NetGame::IsEnabled() && netHeroAIID[iTeam] != -1)
+    {
+        LOG(LogNet, Inform, "OPENSWBF2 NET hero ai team=%d char=%d did not spawn, picking again", iTeam,
+            netHeroAIID[iTeam]);
+        netHeroAIID[iTeam] = -1;
     }
 }
 
@@ -12305,7 +12379,9 @@ void NetGame::HeroSelected(int team)
     }
     netHeroSelectedTurn[team] = NetGame::GetTurnNumber();
     spHeroSelectedTime[team] = GetLocalTime();
-    if (IsEnabled() || netHeroNextPlayerID[team] != -1 || netHeroAIID[team] == -1)
+    // OpenSWBF2: a multiplayer host's AI hero (NetHeroAi.h) vanishes and respawns as the hero
+    // too; retail returned here online, where no bot was ever picked
+    if ((IsEnabled() && !AiHeroesOn()) || netHeroNextPlayerID[team] != -1 || netHeroAIID[team] == -1)
     {
         return;
     }
@@ -12338,6 +12414,11 @@ void NetGame::HeroSpawned(int team)
     netHeroDiedTurn[team] = 0;
     netHeroSelectedTurn[team] = 0;
     netHeroSpawnedTurn[team] = NetGame::GetTurnNumber();
+    if (NetGame::IsEnabled())
+    {
+        LOG(LogNet, Inform, "OPENSWBF2 NET hero spawn team=%d player=%d ai=%d", team, netHeroPlayerID[team],
+            netHeroAIID[team]);
+    }
     if (netHeroPlayerID[team] >= 0)
     {
         if (NetGame::IsEnabled())
@@ -12368,9 +12449,10 @@ void NetGame::AcceptHero(int team, int player)
         netHeroPlayerID[team] = netHeroNextPlayerID[team];
         netHeroSelectedTurn[team] = 0;
         netHeroFirstUnlocked[team] = false;
+        snHeroOpenTurn[team] = 0;
         ClearTeamDeclinedHero(team);
     }
-    else if (!NetGame::IsEnabled() && netHeroAIID[team] == player)
+    else if ((!NetGame::IsEnabled() || AiHeroesOn()) && netHeroAIID[team] == player)
     {
         netHeroSelectedTurn[team] = 0;
         netHeroFirstUnlocked[team] = false;

@@ -981,6 +981,7 @@
     <ClInclude Include="src\Battlefront2\Source\NetAdminText.h" />
     <ClInclude Include="src\Battlefront2\Source\MissionPlayListOps.h" />
     <ClInclude Include="src\Battlefront2\Source\HudMeshFit.h" />
+    <ClInclude Include="src\Battlefront2\Source\NetHeroAi.h" />
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />

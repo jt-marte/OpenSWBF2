@@ -161,11 +161,11 @@ TEST_CASE("gameplay options are wired into the game" * doctest::test_suite("regr
     const std::string sSmoke = ReadScript("smoke.ps1");
 
     // AI heroes: a team whose humans all declined (or that has none) hands the hero to a bot,
-    // in single player outside the campaign and Galactic Conquest
+    // outside the campaign and Galactic Conquest (multiplayer hosts too: mp_ai_heroes.cpp)
     CHECK(Has(sNet, "if (bAllDeclined && !AiHeroesOn())"));
     CHECK(Has(sNet, "PassHeroTurn(iTeam); // no bot to take it either"));
-    CHECK(Has(sNet, "return !NetGame::IsEnabled() && Lua_Callbacks::gCurRules != Lua_Callbacks::eGAMERULES_CAMPAIGN &&"));
-    CHECK(Has(sNet, "GameplayCfg::Get(GameplayCfg::kAiHeroes);"));
+    CHECK(Has(sNet, "if (Lua_Callbacks::gCurRules == Lua_Callbacks::eGAMERULES_CAMPAIGN ||"));
+    CHECK(Has(sNet, "return GameplayCfg::Get(GameplayCfg::kAiHeroes);"));
     // a bot hero that never respawned declined as player -1, writing before netPlayers
     CHECK(Has(sNet, "    if (iPlayer >= 0)\n    {\n        netPlayers[iPlayer].mDeclinedHero = true;"));
 

@@ -678,7 +678,7 @@ AdminCommandEntry adminCommands[] = {
     { AC(95), "state" },                  { AC(96), "playerinfo" },
     { AC(97), "maplist" },                { AC(98), "clearmaps" },
     { AC(99), "appendmap" },              { AC(100), "movemap" },
-    { AC(101), "removemap" },
+    { AC(101), "removemap" },             { AC(102), "aiheroes" },
 };
 
 #undef AC
@@ -2309,6 +2309,8 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             _snprintf(acMsg, 0x200, "Heroes      : %s", netHeroesEnabled ? "yes" : "no");
             PutMsg(acMsg);
             // OpenSWBF2: appended, so tools that read the retail lines still find them
+            _snprintf(acMsg, 0x200, "AI heroes   : %s", NetGame::AiHeroesOn() ? "yes" : "no");
+            PutMsg(acMsg);
             _snprintf(acMsg, 0x200, "State       : %s",
                       netInShell ? "shell" : NetGame::IsLobby() ? "lobby" : NetGame::IsPreGame() ? "warmup" : "playing");
             PutMsg(acMsg);
@@ -2765,6 +2767,17 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             PutMsg(bDone ? (bMove ? "map moved" : "map removed") : "bad entry");
             break;
         }
+
+        case 102: // aiheroes [0|1]: a bot takes the hero no player takes (NetHeroAi.h)
+            if (GetNextArg(pusLine, acToken, 32))
+            {
+                NetGame::SetAiHeroes(atoi(acToken) != 0);
+            }
+            else
+            {
+                PutAdminNumber(NetGame::AiHeroesOn() ? 1 : 0);
+            }
+            break;
 
         default:
             PutMsg("command not handled");

@@ -100,6 +100,12 @@ public:
     static bool GetLobbyHold();
     // Ends the lobby now (0) or after an N-second warm-up; false when not in the lobby.
     static bool RequestLobbyStart(int iSeconds);
+    // OpenSWBF2 AI heroes (NetHeroAi.h): whether a bot may take the hero no human takes, and a
+    // host's setting for this run (rcon /aiheroes), which display.ini never sees.
+    static bool AiHeroesOn();
+    static void SetAiHeroes(bool bOn);
+    // A bot taken over (by a joining player) gives up its team's hero turn, if it had it.
+    static void ReleaseAiHero(const Character* pCharacter);
     static const char* GetPlayerName(int iPlayer);
 
     static void CreateEvent_CreateOrdnance(const OrdnanceClass* pClass, const OrdnanceDesc& desc);
