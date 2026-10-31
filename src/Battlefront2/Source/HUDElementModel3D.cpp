@@ -1,5 +1,10 @@
+#include <string.h>
+
 #include "HUDElementModel3D.h"
+#include "HudMeshFit.h"
+#include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Graphics/RedModel.h"
+#include "RedEngineFL/Interface/RedInterfaceScreen.h"
 
 static const unsigned int kPositionHash         = 0x934f4e0a;
 static const unsigned int kRotationHash         = 0x21ac415f;
@@ -433,12 +438,143 @@ void HUD::ElementModel3D::SetMesh(const RedModel* const pModel)
     if (pModel)
     {
         MeshInfo* pMeshInfo = FindMeshInfoByHashID(pModel->GetName());
+        if (pMeshInfo == &mDefault && SetFallbackMesh(pModel))
+        {
+            return;
+        }
         if (pMeshInfo)
         {
             pElement->SetMatrix(pMeshInfo->GetMatrix());
             static_cast<Red3DModelElementLite*>(pElement)->SetDepth(pMeshInfo->GetDepth());
         }
     }
+}
+
+// OpenSWBF2: for each weapon HUD model the game has shown, the MeshInfo names that may stand in
+// for it (HUD::GameEvents::UpdateWeaponEvents sets them before the slot gets the model).
+namespace
+{
+const unsigned int kMaxFallbackModels = 64;
+
+struct MeshFallbacks
+{
+    unsigned int uModelHash;
+    unsigned int uCount;
+    unsigned int auHash[HUD::ElementModel3D::kMaxMeshFallbacks];
+};
+
+MeshFallbacks sMeshFallbacks[kMaxFallbackModels];
+unsigned int sNumMeshFallbacks;
+unsigned int sNextMeshFallbacks; // the entry to reuse once the table is full
+
+const MeshFallbacks* FindMeshFallbacks(unsigned int uModelHash)
+{
+    for (unsigned int i = 0; i < sNumMeshFallbacks; ++i)
+    {
+        if (sMeshFallbacks[i].uModelHash == uModelHash)
+        {
+            return &sMeshFallbacks[i];
+        }
+    }
+    return 0;
+}
+
+HudMeshFit::Box FitBox(const PblBox& box)
+{
+    HudMeshFit::Box out = {{box._vMin.x, box._vMin.y, box._vMin.z}, {box._vMax.x, box._vMax.y, box._vMax.z}};
+    return out;
+}
+}
+
+void HUD::ElementModel3D::SetMeshFallbacks(unsigned int uModelHash, const unsigned int* puHashes,
+                                           unsigned int uCount)
+{
+    if (!uModelHash)
+    {
+        return;
+    }
+    MeshFallbacks* pEntry = const_cast<MeshFallbacks*>(FindMeshFallbacks(uModelHash));
+    if (!pEntry)
+    {
+        if (sNumMeshFallbacks < kMaxFallbackModels)
+        {
+            pEntry = &sMeshFallbacks[sNumMeshFallbacks++];
+        }
+        else
+        {
+            pEntry = &sMeshFallbacks[sNextMeshFallbacks];
+            sNextMeshFallbacks = (sNextMeshFallbacks + 1) % kMaxFallbackModels;
+        }
+    }
+    pEntry->uModelHash = uModelHash;
+    pEntry->uCount = uCount < kMaxMeshFallbacks ? uCount : kMaxMeshFallbacks;
+    for (unsigned int i = 0; i < pEntry->uCount; ++i)
+    {
+        pEntry->auHash[i] = puHashes[i];
+    }
+}
+
+// OpenSWBF2: a weapon model this slot has no MeshInfo for (a mod weapon with its own HUDTag)
+// fell back to the slot's default matrix, which drew it huge in the middle of the screen. It
+// now takes the entry of its weapon class or the nearest ancestor the slot lists, preferring one
+// whose model is loaded so it can be refitted to the new model's size (HudMeshFit.h), and is
+// hidden when the slot lists none. Models that aren't weapons', and slots whose default is
+// already all zeros (a mod's overlay that hides what it doesn't list), keep the old behaviour.
+bool HUD::ElementModel3D::SetFallbackMesh(const RedModel* const pModel)
+{
+    const PblMatrix& mDefaultMatrix = mDefault.GetMatrix();
+    bool bDefaultHidden = true;
+    for (int i = 0; i < 3; ++i)
+    {
+        for (int j = 0; j < 3; ++j)
+        {
+            bDefaultHidden &= mDefaultMatrix.m[i][j] == 0.0f;
+        }
+    }
+    const MeshFallbacks* pFallbacks = FindMeshFallbacks(pModel->GetName());
+    if (!mNumMeshInfo || bDefaultHidden || !pFallbacks)
+    {
+        return false;
+    }
+
+    MeshInfo* pRef = 0;
+    const RedModel* pRefModel = 0;
+    for (unsigned int i = 0; i < pFallbacks->uCount && !pRefModel; ++i)
+    {
+        MeshInfo* pInfo = FindMeshInfoByHashID(pFallbacks->auHash[i]);
+        if (pInfo != &mDefault)
+        {
+            pRefModel = RedModel::_HashTable.Find(pInfo->GetMeshID());
+            if (!pRef || pRefModel)
+            {
+                pRef = pInfo;
+            }
+        }
+    }
+
+    Red3DModelElementLite* pElement = static_cast<Red3DModelElementLite*>(mElement);
+    PblMatrix matrix;
+    if (!pRef)
+    {
+        memset(&matrix, 0, sizeof(matrix));
+        matrix.m[3][3] = 1.0f;
+        pElement->SetMatrix(matrix);
+        return true;
+    }
+
+    matrix = pRef->GetMatrix();
+    const unsigned int uScreenWidth = RedInterfaceScreen::GetScreenWidth();
+    if (pRefModel && uScreenWidth)
+    {
+        // What Red3DModelElementLite::LocalToWorld scales the translation by in the HUD's
+        // perspective screen groups (RedInterfaceScreen::Render sets the multiplier to 640/width).
+        const float fTranslateScale = 640.0f / (float)uScreenWidth * pRef->GetDepth();
+        HudMeshFit::Fit(pRef->GetMatrix().m, FitBox(pRefModel->_TotalBoundingBox),
+                        FitBox(pModel->_TotalBoundingBox), fTranslateScale, matrix.m);
+    }
+    pElement->SetMatrix(matrix);
+    pElement->SetDepth(pRef->GetDepth());
+    return true;
 }
 
 // FUNCTION: SWBF2 0x00556be0

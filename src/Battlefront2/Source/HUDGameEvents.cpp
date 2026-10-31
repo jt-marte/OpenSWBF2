@@ -4,6 +4,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <d3dx9math.h>
 
@@ -41,6 +42,7 @@
 #include "EntityItem.h"
 #include "ToolTips.h"
 #include "Weapon.h"
+#include "HUDElementModel3D.h"
 
 // GLOBAL: SWBF2 0x00789c00
 char* HUD::GameEvents::gStatisticStrings[5] =
@@ -1200,6 +1202,54 @@ void HUD::GameEvents::UpdateLockOn(unsigned int uIndex, const GameObject* const 
     }
 }
 
+// OpenSWBF2: the MeshInfo names a HUD weapon slot may use for this weapon's model when it doesn't
+// list the model itself (HUD::ElementModel3D::SetMesh): the weapon's class and its ancestors,
+// nearest first. A mod weapon ("rep_weap_inf_rifle" with its own HUDTag) then sits where the
+// stock one does. A common base ("com_weap_inf_rifle") stands for any stock side's version.
+static void SetWeaponMeshFallbacks(unsigned int uModelHash, const WeaponClass* pClass)
+{
+    unsigned int auHash[HUD::ElementModel3D::kMaxMeshFallbacks];
+    unsigned int uCount = 0;
+    for (int iPass = 0; iPass < 2; ++iPass)
+    {
+        for (const WeaponClass* p = pClass; p; p = p->mParent)
+        {
+            unsigned int auCandidate[4] = { 0, 0, 0, 0 };
+            if (iPass == 0)
+            {
+                auCandidate[0] = p->mId;
+                auCandidate[1] = p->mHUDNameHash;
+                auCandidate[2] = p->mNameHash;
+            }
+            else if (strncmp(p->mFilename, "com_", 4) == 0)
+            {
+                static const char* const kSides[] = { "rep_", "cis_", "imp_", "all_" };
+                for (int i = 0; i < 4; ++i)
+                {
+                    char acName[64];
+                    _snprintf(acName, sizeof(acName), "%s%s", kSides[i], p->mFilename + 4);
+                    acName[sizeof(acName) - 1] = 0;
+                    auCandidate[i] = PblHash(acName);
+                }
+            }
+            for (int i = 0; i < 4; ++i)
+            {
+                const unsigned int uHash = auCandidate[i];
+                bool bNew = uHash && uHash != uModelHash && uCount < HUD::ElementModel3D::kMaxMeshFallbacks;
+                for (unsigned int j = 0; j < uCount && bNew; ++j)
+                {
+                    bNew = auHash[j] != uHash;
+                }
+                if (bNew)
+                {
+                    auHash[uCount++] = uHash;
+                }
+            }
+        }
+    }
+    HUD::ElementModel3D::SetMeshFallbacks(uModelHash, auHash, uCount);
+}
+
 // FUNCTION: SWBF2 0x00560ab0
 void HUD::GameEvents::UpdateWeaponEvents(const RedCamera* const pCamera, const Character* const pCharacter,
                                          const GameObject* const pObject, const Controllable* const pControllable,
@@ -1227,6 +1277,7 @@ void HUD::GameEvents::UpdateWeaponEvents(const RedCamera* const pCamera, const C
             HUD::Event change;
             HUD::Event::Data payload;
             payload.uintValue = uWeaponHash;
+            SetWeaponMeshFallbacks(uWeaponHash, pWeaponClass);
             InitializeEventWithData(&change, weaponEvents.change, payload)->Send();
 
             unsigned short acFilename[256];

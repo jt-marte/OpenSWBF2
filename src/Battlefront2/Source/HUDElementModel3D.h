@@ -87,12 +87,19 @@ public:
 
     static ElementModel3D* FindByHashID(unsigned int uHashID);
 
+    // OpenSWBF2: the MeshInfo names that may stand in for a weapon's HUD model in a slot that
+    // doesn't list it, nearest first (see SetMesh).
+    static const unsigned int kMaxMeshFallbacks = 16;
+    static void SetMeshFallbacks(unsigned int uModelHash, const unsigned int* puHashes,
+                                 unsigned int uCount);
+
 protected:
     virtual bool ReadData(PblConfig& config, PblConfig::Data& data);
     virtual void PostReadSetup();
     virtual void WriteData(HUD::File& file, unsigned int uTabs);
 
     void SetMesh(const RedModel* const pModel);
+    bool SetFallbackMesh(const RedModel* const pModel);
     void SetMeshName(const char* const pName);
     MeshInfo* FindMeshInfoByHashID(unsigned int uHashID);
 
