@@ -273,6 +273,10 @@ void Controllable::Initialize()
 Controllable::~Controllable()
 {
     ReleaseController();
+    // OpenSWBF2: a character still holding this as its vehicle or remote read freed memory on its
+    // next update (a bot gunner whose vehicle was deleted under it crashed a dedicated server
+    // after a map change). Let go of it here.
+    Character::ForgetControllable(this);
 }
 
 // FUNCTION: SWBF2 0x00483ba0

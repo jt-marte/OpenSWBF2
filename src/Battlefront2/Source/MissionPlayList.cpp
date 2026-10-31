@@ -462,7 +462,13 @@ int MissionPlayList::GetCurrentListedIndex()
 // FUNCTION: SWBF2 0x005a4ce0
 void MissionPlayListStepBack()
 {
-    if (sPlaylistPosn > 0)
+    // OpenSWBF2: restart the running map's own entry when it is known; after a rotation edit the
+    // entry before "next" can be a different map.
+    if (siCurrentEntry >= 0 && siCurrentEntry < sPlaylistCount)
+    {
+        sPlaylistPosn = siCurrentEntry;
+    }
+    else if (sPlaylistPosn > 0)
     {
         --sPlaylistPosn;
     }

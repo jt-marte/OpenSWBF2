@@ -29,6 +29,7 @@ static HANDLE ghFaultEvent;
 static HANDLE ghDoneEvent;
 static MINIDUMP_EXCEPTION_INFORMATION gDumpInfo;
 static MiniDumpWriteDumpFn gpfnMiniDumpWriteDump;
+static bool gbFullMemoryDump;
 static wchar_t gDumpDir[MAX_PATH];
 static wchar_t gDefaultDumpDir[MAX_PATH];
 static wchar_t gDumpPath[MAX_PATH + 64];
@@ -116,6 +117,10 @@ static void WriteDump()
         return;
     }
     MINIDUMP_TYPE eFull = (MINIDUMP_TYPE)(MiniDumpNormal | MiniDumpWithDataSegs | MiniDumpWithThreadInfo);
+    if (gbFullMemoryDump)
+    {
+        eFull = (MINIDUMP_TYPE)(eFull | MiniDumpWithFullMemory);
+    }
     PMINIDUMP_EXCEPTION_INFORMATION pExc = gDumpInfo.ExceptionPointers ? &gDumpInfo : 0;
     BOOL bOk = gpfnMiniDumpWriteDump(GetCurrentProcess(), GetCurrentProcessId(), hFile, eFull, pExc,
         0, 0);
@@ -308,6 +313,9 @@ void pcCrash::Install()
         return;
     }
     gbInstalled = true;
+    // OpenSWBF2: OPENSWBF2_FULLDUMP=1 adds the whole heap to crash dumps, for crashes that need
+    // object state (dangling pointers). Read now: the crash path shouldn't touch the environment.
+    gbFullMemoryDump = GetEnvironmentVariableW(L"OPENSWBF2_FULLDUMP", 0, 0) != 0;
 
     wchar_t awcSys[MAX_PATH];
     UINT uiSysLen = GetSystemDirectoryW(awcSys, MAX_PATH - 16);

@@ -2037,6 +2037,12 @@ void NetGame::Create(bool bMission)
     NetQOS::Create(bMission);
     NetDrag::Create(bMission);
     NetComm::Create(bMission);
+    // OpenSWBF2: NetComm::Create just rebuilt the packet pool, so any late state still listed
+    // points at packets that now belong to someone else; forget it rather than free it.
+    for (unsigned int i = 0; i < kLateRing; i++)
+    {
+        lateState[i].Reset();
+    }
     NetSetup::Create(bMission);
     NetAdmin::Create(bMission);
 
@@ -2234,7 +2240,9 @@ void NetGame::Reset()
         delete hostJoysticks[i];
     }
 
-    for (int i = 0; i < 8; i++)
+    // OpenSWBF2: the whole late-state ring (retail's 8 was hard-coded here). Slots left holding
+    // packets outlived the pool rebuild at the next mission and crashed the host in PopFront.
+    for (unsigned int i = 0; i < kLateRing; i++)
     {
         lateState[i].Free();
     }
@@ -12724,7 +12732,7 @@ void NetWaitLate(bool bWait)
     netWaitLate = bWait;
     if (bWait)
     {
-        for (int i = 0; i < 8; ++i)
+        for (unsigned int i = 0; i < kLateRing; ++i)
         {
             lateState[i].Free();
         }

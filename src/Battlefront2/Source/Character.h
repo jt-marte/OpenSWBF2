@@ -222,6 +222,9 @@ public:
     void MakeAI();
 
     static void DestroyAll();
+    // OpenSWBF2: clears every character's unit, vehicle or remote that is pControllable
+    // (Controllable's destructor calls it, so nobody keeps a pointer to a deleted one)
+    static void ForgetControllable(const Controllable* pControllable);
 
     static int sCharacterLimit;
     static Character* sCharacters;

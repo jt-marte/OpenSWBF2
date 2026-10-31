@@ -1738,7 +1738,10 @@ void Character::MakeAI()
     RemoveCharacterPilots(this);
     Character* pBase = Character::sCharacters && Character::sCharacterLimit > 0
                      ? Character::sCharacters : 0;
-    const int iIndex = (reinterpret_cast<char*>(this) - reinterpret_cast<char*>(pBase)) / 432;
+    // OpenSWBF2: the index in elements, not retail's 432-byte stride (Win32's sizeof(Character);
+    // larger on x64, which put bots on the wrong team when a player left)
+    const int iIndex = pBase ? (int)(this - pBase)
+                             : (int)((reinterpret_cast<char*>(this) - reinterpret_cast<char*>(pBase)) / 432);
     mPlayerId = -1;
     ChangeTeam(2 - (iIndex & 1));
     mTeamPtr = Team::sTeams[mTeamNumber];
@@ -1806,6 +1809,36 @@ void Character::RegisterHit(int iTeam, float fMultiplier)
 
 // GLOBAL: SWBF2 0x01e3033c
 int Character::sCharacterCount;
+
+void Character::ForgetControllable(const Controllable* pControllable)
+{
+    if (!sCharacters)
+    {
+        return;
+    }
+    for (int i = 0; i < sCharacterCount; ++i)
+    {
+        Character& character = sCharacters[i];
+        if (character.mVehicle == pControllable || character.mRemote == pControllable ||
+            character.mUnit == pControllable)
+        {
+            LOG(LogSim, Warning, "OPENSWBF2 character %d let go of a deleted %s", i,
+                character.mUnit == pControllable ? "unit" : character.mVehicle == pControllable ? "vehicle" : "remote");
+            if (character.mVehicle == pControllable)
+            {
+                character.mVehicle = 0;
+            }
+            if (character.mRemote == pControllable)
+            {
+                character.mRemote = 0;
+            }
+            if (character.mUnit == pControllable)
+            {
+                character.mUnit = 0;
+            }
+        }
+    }
+}
 
 void Character::DestroyAll()
 {

@@ -5532,9 +5532,18 @@ void EntitySoldierClass::SetProperty(unsigned int uProperty, const char* pszValu
         break;
     }
     case 0xA490EBA1:
-        mModelLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
-        mLodData = SoldierLodData(mModel ? mModel->GetRedModel(0) : 0, mModelLowRes->GetRedModel(0));
+    {
+        // OpenSWBF2: a script mod's skin can name a low-res model the map didn't load (the user's
+        // skin changer on a dedicated server loading nab2c_con); that crashed here. Keep the old.
+        GameModel* pLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+        if (pLowRes)
+        {
+            mModelLowRes = pLowRes;
+        }
+        mLodData = SoldierLodData(mModel ? mModel->GetRedModel(0) : 0,
+                                  mModelLowRes ? mModelLowRes->GetRedModel(0) : 0);
         break;
+    }
     case 0x6363D774:
         mFirstPersonModelHandle = FirstPerson::AddGeometry(pszValue);
         break;

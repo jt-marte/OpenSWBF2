@@ -233,9 +233,24 @@ char adminKey[2] = { '4', 'z' };
 static NetSocketPeerRecord sAdminPeers[3];
 
 // FUNCTION: SWBF2 0x005b1530
+// OpenSWBF2: every mission restarts the network clock (NetComm::Create), so a session heard from
+// on the last map reads as heard "in the future". Retail dropped such sessions, so an admin
+// lost its pushes and its login at every map change; count them as heard from just now.
+static void RebaseAdminTimes(float fNow)
+{
+    for (int i = 0; i < 3; ++i)
+    {
+        if (adminDests[i].lastRecvTime > fNow)
+        {
+            adminDests[i].lastRecvTime = fNow;
+        }
+    }
+}
+
 void __fastcall HeartBeat(const unsigned __int64* pPeer)
 {
     const float fNow = NetComm::GetTime();
+    RebaseAdminTimes(fNow);
     if (adminKeyNextTime > fNow + 61.0f || fNow > adminKeyNextTime)
     {
         ++adminKeyCount;
@@ -359,16 +374,11 @@ void WriteString(NetPktGroup* pGroup, const char* pText, unsigned int uCapacity)
 void __fastcall SendAdminMessage(char* pcMessage)
 {
     const float fNow = NetComm::GetTime();
+    RebaseAdminTimes(fNow);
     for (int i = 0; i < 3; ++i)
     {
         Admin& admin = adminDests[i];
-        if (admin.lastRecvTime > fNow)
-        {
-            admin.addr = 0;
-            admin.port = 0;
-            admin.lastRecvTime = 0.0f;
-        }
-        else if ((admin.addr || admin.port) && admin.lastRecvTime >= fNow - 60.0f && admin.admin)
+        if ((admin.addr || admin.port) && admin.lastRecvTime >= fNow - 60.0f && admin.admin)
         {
             // OpenSWBF2: FindJoinSource reads a whole peer record. Retail passed just the 8-byte
             // key, so it read past it, and pushes went nowhere.

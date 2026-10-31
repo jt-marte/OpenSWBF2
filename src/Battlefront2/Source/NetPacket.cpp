@@ -928,6 +928,20 @@ NetPacket* NetPktGroup::PopFront()
     }
 
     NetPacket* pPkt = NetPacket::Get(firstPkt);
+    // OpenSWBF2: a count that runs past the end of the list means the group is corrupt (its
+    // packets were handed out again by a pool rebuild). Drop the list instead of crashing.
+    NetPacket* pNext = pPkt && pktCount > 1 ? NetPacket::Get(pPkt->mNextPkt) : 0;
+    if (!pPkt || (pktCount > 1 && !pNext))
+    {
+        static bool sLogged = false;
+        if (!sLogged)
+        {
+            sLogged = true;
+            LOG(LogNet, Error, "OPENSWBF2 NET packet group corrupt count=%d first=%d", pktCount, firstPkt);
+        }
+        Reset();
+        return 0;
+    }
     firstPkt = pPkt->mNextPkt;
     if (--pktCount == 0)
     {
@@ -935,7 +949,7 @@ NetPacket* NetPktGroup::PopFront()
     }
     else
     {
-        NetPacket::Get(firstPkt)->mPrevPkt = -1;
+        pNext->mPrevPkt = -1;
     }
     pPkt->mPrevPkt = -1;
     pPkt->mNextPkt = -1;

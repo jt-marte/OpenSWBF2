@@ -114,7 +114,7 @@ class NetPktGroup
 public:
 
     // FUNCTION: SWBF2 0x005aeca0
-    NetPktGroup() : isSmall(false), bad(false) {}
+    NetPktGroup() : isSmall(false), bad(false), firstPkt(-1), lastPkt(-1), pktCount(0) {}
 
     void Reset();
 
