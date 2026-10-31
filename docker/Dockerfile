@@ -2,7 +2,7 @@
 # scripts) under Wine. No game data is in the image: mount your own copy (see README.md).
 FROM debian:bookworm-slim
 
-ARG OPENSWBF2_VERSION=0.2.3
+ARG OPENSWBF2_VERSION=0.2.4
 ARG OPENSWBF2_REPO=jt-marte/OpenSWBF2
 
 ENV DEBIAN_FRONTEND=noninteractive \
