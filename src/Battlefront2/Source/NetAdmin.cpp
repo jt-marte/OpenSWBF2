@@ -701,6 +701,7 @@ bool GetCommand(char* pcToken, AdminCommand& cmd, bool& bNo)
 }
 
 void __fastcall SendAdminMessage(char* pcMessage);
+extern HWND hGlobalWnd;
 namespace GameLoop { extern bool sQuitRequested; }
 namespace GameLoop { extern unsigned int sQuitTurn; }
 
@@ -1514,7 +1515,18 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
 
         case AC_SHUTDOWN:
             PutMsg("quitting");
-            NetSetup::RequestQuit(0);
+            if (NetGame::IsDedicated() && hGlobalWnd)
+            {
+                // OpenSWBF2: a dedicated server stops the way Ctrl+Break stops it. Retail's quit
+                // only left the mission for the shell, where autonet hosts again, so the server
+                // never went away (one waiting in the lobby least of all).
+                LOG(LogNet, Inform, "OPENSWBF2 SERVER stop requested (rcon)");
+                PostMessageA(hGlobalWnd, WM_CLOSE, 0, 0);
+            }
+            else
+            {
+                NetSetup::RequestQuit(0);
+            }
             break;
 
         case AC_BANDWIDTH:

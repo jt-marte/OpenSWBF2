@@ -188,6 +188,10 @@ TEST_CASE("the server manager is wired into the game" * doctest::test_suite("reg
         CHECK(Has(sAdmin, pcCommand));
     }
     CHECK(Has(sAdmin, "PutMsg(\"#state\");"));
+    // /shutdown ends a dedicated server like Ctrl+Break (retail's quit went back to the shell,
+    // where autonet hosted again)
+    CHECK(Has(sAdmin, "if (NetGame::IsDedicated() && hGlobalWnd)"));
+    CHECK(Has(sAdmin, "PostMessageA(hGlobalWnd, WM_CLOSE, 0, 0);"));
     CHECK(Has(sAdmin, "\"state=%s hold=%d players=%d/%d/%d time=%d tickets=%d/%d scores=%d/%d map=%s next=%s\""));
 
     // the lobby: held from the start, never runs out, no human spawns, the jump button can't skip it
