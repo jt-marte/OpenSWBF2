@@ -1387,6 +1387,12 @@ void Update(float fDeltaTime, float fSystemDeltaTime)
             {
                 bGameOverNow = true;
                 sGameOver = true;
+                if (NetGame::IsEnabled() && NetGame::IsDedicated())
+                {
+                    // OpenSWBF2: for a launcher's server manager reading the server's output
+                    LOG(LogNet, Inform, "OPENSWBF2 SERVER match over map=%s winner=%d", GameLoop::mMissionScript,
+                        Team::sWinningTeams);
+                }
             }
             NetGame::SendHost();
             GameLoop::sDeltaTime = fSavedDelta;

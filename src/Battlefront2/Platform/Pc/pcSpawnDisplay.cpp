@@ -872,6 +872,16 @@ void SpawnDisplay::UpdateTimer()
 
     float fTime;
     bool bCountdown = false;
+    // OpenSWBF2: in a dedicated server's lobby (NetLobby.h) the spawn waits for the host, not a timer
+    if (NetGame::IsEnabled() && NetGame::IsClient() && NetGame::IsLobby())
+    {
+        if (mTextSpawnTimer.IsEnabled())
+        {
+            mTextSpawnTimer.SetText(RedLocalizeDB::Find(0xba3e6ee8, false), true); // openswbf2.lobby.waiting
+        }
+        mLastSpawnTime = -1.0f;
+        return;
+    }
     if (NetGame::IsEnabled() && NetGame::IsClient())
     {
         unsigned int uTurn = NetGame::GetTurnNumber();

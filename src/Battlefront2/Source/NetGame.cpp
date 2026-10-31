@@ -30,6 +30,7 @@
 #include "NetComm.h"
 #include "NetPacket.h"
 #include "NetWire.h"
+#include "NetLobby.h"
 #include "LocalLimits.h"
 #include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Util/RedWarning.h"
@@ -168,6 +169,13 @@ int journalMode;
 bool netIsSplit;
 bool netPreGameEnabled;
 float netPreGameStartTime;
+extern int netPreGameTime;
+
+// OpenSWBF2 lobby (NetLobby.h). The hold keeps each mission that becomes ready on a dedicated host
+// in the lobby; /start clears it, so the rotation then runs on, and /lobby sets it again. A start
+// request waits for UpdatePreGame: -1 none, 0 now, else a warm-up of that many seconds.
+static bool sbLobbyHold = false;
+static int siLobbyStart = -1;
 
 // GLOBAL: SWBF2 0x01e62f51
 bool netClientCreated;
@@ -1609,7 +1617,22 @@ bool NetGame::IsReadyToPlay()
         return false;
     }
 
-    if (!gNoPregame)
+    // OpenSWBF2: a dedicated server holding missions opens this one in the lobby (NetLobby.h), even
+    // under -nopregame, and keeps it there until an admin starts it
+    if (sbLobbyHold && IsDedicated())
+    {
+        // called every frame until the first turn: say it and forget old start requests once a map
+        static int siLobbyGame = -1;
+        SetPreGame(true);
+        netPreGameTime = NetLobby::kLobbyPreGameTime;
+        if (siLobbyGame != netGameCount)
+        {
+            siLobbyGame = netGameCount;
+            siLobbyStart = -1;
+            LOG(LogNet, Inform, "OPENSWBF2 SERVER lobby map=%s", GameLoop::mMissionScript);
+        }
+    }
+    else if (!gNoPregame)
     {
         SetPreGame(true);
     }
@@ -2064,8 +2087,9 @@ void NetGame::Create(bool bMission)
 
     if (netEnabledNext)
     {
-        LOG(LogNet, Inform, "OPENSWBF2 NET mission start host=%d dedicated=%d tps=%d game=%d",
-            NetComm::IsHost() ? 1 : 0, IsDedicated() ? 1 : 0, netTurnsPerSecond, netGameCount);
+        LOG(LogNet, Inform, "OPENSWBF2 NET mission start host=%d dedicated=%d tps=%d game=%d map=%s",
+            NetComm::IsHost() ? 1 : 0, IsDedicated() ? 1 : 0, netTurnsPerSecond, netGameCount,
+            GameLoop::mMissionScript);
         PblRandom::GetSim().SetSeed(0);
         netEntities = new NetEntityList;
         hostPlayingMask = 0;
@@ -3763,7 +3787,34 @@ int NetGame::GetMaxPreGameTime()
 // FUNCTION: SWBF2 0x005c4070
 void NetGame::SetMaxPreGameTime(int iSeconds)
 {
-    netPreGameTimeMax = iSeconds;
+    // OpenSWBF2: a countdown stays below NetLobby's lobby marker
+    netPreGameTimeMax = NetLobby::ClampPreGameTime(iSeconds);
+}
+
+bool NetGame::IsLobby()
+{
+    return NetLobby::IsLobby(netPreGameEnabled, netPreGameTime);
+}
+
+void NetGame::SetLobbyHold(bool bHold)
+{
+    sbLobbyHold = bHold;
+}
+
+bool NetGame::GetLobbyHold()
+{
+    return sbLobbyHold;
+}
+
+bool NetGame::RequestLobbyStart(int iSeconds)
+{
+    sbLobbyHold = false;
+    if (!IsLobby() || !IsHost() || IsClient())
+    {
+        return false;
+    }
+    siLobbyStart = iSeconds < 0 ? 0 : iSeconds;
+    return true;
 }
 
 extern bool netAwardsEnabled;
@@ -5480,6 +5531,28 @@ void NetGame::UpdatePreGame()
         return;
     }
 
+    // OpenSWBF2: the lobby never runs out; /start ends it at once or turns it into a warm-up
+    if (NetGame::IsLobby())
+    {
+        if (siLobbyStart < 0)
+        {
+            return;
+        }
+        const int iWarmup = siLobbyStart < netPreGameTimeMax ? siLobbyStart : netPreGameTimeMax;
+        siLobbyStart = -1;
+        LOG(LogNet, Inform, "OPENSWBF2 SERVER match start map=%s warmup=%d", GameLoop::mMissionScript, iWarmup);
+        if (iWarmup <= 0)
+        {
+            NetGame::VanishAllPlayer();
+            NetGame::SetPreGame(false);
+            sJustEndedPreGameTurn = hostTurnNumber;
+            return;
+        }
+        netPreGameStartTime = NetComm::GetTime() - (float)(netPreGameTimeMax - iWarmup);
+        netPreGameTime = iWarmup;
+        return;
+    }
+
     int iElapsed = (int)(NetComm::GetTime() - netPreGameStartTime);
     if (iElapsed > netPreGameTimeMax)
     {
@@ -5551,7 +5624,8 @@ void NetGame::HostChangePregame()
         pInputs = NetGame::GetJoystick(NetGame::GetLocalIndex(0));
     }
 
-    if (pInputs && pInputs->IsJumpButtonDown())
+    // OpenSWBF2: the lobby waits for an admin's /start, not the host's jump button
+    if (pInputs && pInputs->IsJumpButtonDown() && !NetGame::IsLobby())
     {
         netPreGameStartTime = (float)-netPreGameTimeMax - 1.0f;
     }

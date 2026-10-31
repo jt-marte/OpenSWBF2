@@ -122,6 +122,16 @@ else
 	}
 end
 
+-- OpenSWBF2: the stock multiplayer maps, before any mod's addme adds more (missionlist_DumpJSON
+-- calls the rest mods)
+gStockMPMaps = {}
+do
+	local i
+	for i = 1, table.getn(mp_missionselect_listbox_contents) do
+		gStockMPMaps[mp_missionselect_listbox_contents[i].mapluafile] = 1
+	end
+end
+
 -- Singleplayer campaigns. Each of these tables has a set of
 -- string.sub-tables, one string.sub-table per mission. These are run through in
 -- order. Note: there is a math.max of 255 missions in a campaign. Todo:
@@ -622,6 +632,97 @@ function missionlist_PreferMaps(List)
 			end
 		end
 	end
+end
+
+-- OpenSWBF2 -listmissions: the multiplayer mission list as JSON for a launcher's server manager,
+-- after the mods' addme scripts (and missionlist_ExpandMaplist's registry) have run. Returns the
+-- text and the number of maps. Names are as localized (-lang 0 gives English); a character past
+-- ASCII is written as \u00xx of its low byte.
+function missionlist_DumpJSON()
+	missionlist_ExpandMaplist(1)
+
+	local function Str(s)
+		local Out = {}
+		local i
+		s = s or ""
+		for i = 1, string.len(s) do
+			local b = string.byte(s, i)
+			if(b == 34) then
+				table.insert(Out, "\\\"")
+			elseif(b == 92) then
+				table.insert(Out, "\\\\")
+			elseif(b < 32 or b > 126) then
+				table.insert(Out, string.format("\\u%04x", b))
+			else
+				table.insert(Out, string.char(b))
+			end
+		end
+		return "\"" .. table.concat(Out) .. "\""
+	end
+	local function Name(UStr)
+		return Str(UStr and ScriptCB_ununicode(UStr) or "")
+	end
+
+	local Eras = {}
+	local Modes = {}
+	local i, j, k
+	for i = 1, table.getn(gMapEras) do
+		local Era = gMapEras[i]
+		table.insert(Eras, "{\"id\":" .. Str(Era.subst) .. ",\"key\":" .. Str(Era.key) ..
+			",\"name\":" .. Name(missionlist_EraUName(Era)) .. "}")
+	end
+	for i = 1, table.getn(gMapModes) do
+		local Mode = gMapModes[i]
+		table.insert(Modes, "{\"id\":" .. Str(Mode.subst) .. ",\"key\":" .. Str(string.sub(Mode.key or "", 6)) ..
+			",\"flag\":" .. Str(Mode.key) .. ",\"name\":" .. Name(missionlist_ModeUName(Mode)) .. "}")
+	end
+
+	local Maps = {}
+	local List = mp_missionselect_listbox_contents
+	for i = 1, table.getn(List) do
+		local Entry = List[i]
+		local File = Entry.mapluafile
+		local _, _, Code = string.find(File or "", "^(.-)%%s_%%s$")
+		if(Code) then
+			local MapEras = {}
+			local MapModes = {}
+			for j = 1, table.getn(gMapEras) do
+				local Era = gMapEras[j]
+				local bUsed = Entry[Era.key]
+				for k = 1, table.getn(gMapModes) do
+					bUsed = bUsed or Entry[gMapModes[k].key .. "_" .. Era.subst]
+				end
+				if(bUsed) then
+					table.insert(MapEras, "{\"id\":" .. Str(Era.subst) .. ",\"name\":" .. Name(missionlist_EraUName(Era)) .. "}")
+				end
+			end
+			for k = 1, table.getn(gMapModes) do
+				local Mode = gMapModes[k]
+				local ModeEras = {}
+				local Missions = {}
+				for j = 1, table.getn(gMapEras) do
+					local Era = gMapEras[j]
+					if(Entry[Mode.key .. "_" .. Era.subst]) then
+						table.insert(ModeEras, Str(Era.subst))
+						table.insert(Missions, Str(Era.subst) .. ":" .. Str(string.format(File, Era.subst, Mode.subst)))
+					end
+				end
+				if(table.getn(ModeEras) > 0) then
+					table.insert(MapModes, "{\"id\":" .. Str(Mode.subst) .. ",\"key\":" .. Str(string.sub(Mode.key or "", 6)) ..
+						",\"name\":" .. Name(missionlist_ModeUName(Mode)) .. ",\"eras\":[" .. table.concat(ModeEras, ",") ..
+						"],\"missions\":{" .. table.concat(Missions, ",") .. "}}")
+				end
+			end
+			local bMod = Entry.isModLevel or not gStockMPMaps[File]
+			table.insert(Maps, "{\"code\":" .. Str(Code) .. ",\"file\":" .. Str(File) ..
+				",\"name\":" .. Name(missionlist_GetLocalizedMapName(File)) ..
+				",\"mod\":" .. (bMod and "true" or "false") ..
+				",\"eras\":[" .. table.concat(MapEras, ",") .. "],\"modes\":[" .. table.concat(MapModes, ",") .. "]}")
+		end
+	end
+
+	return "{\"format\":1,\"eras\":[" .. table.concat(Eras, ",") .. "],\"modes\":[" .. table.concat(Modes, ",") ..
+		"],\"maps\":[\n" .. table.concat(Maps, ",\n") .. "\n]}\n", table.getn(Maps)
 end
 
 -- Display names as unicode: the localized key if there is one, else readable English

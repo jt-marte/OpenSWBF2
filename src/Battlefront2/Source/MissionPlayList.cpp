@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "MissionPlayList.h"
+#include "MissionPlayListOps.h"
 #include "GameLoop.h"
 #include "LuaHelper.h"
 #include "PlayerProfile.h"
@@ -33,6 +34,10 @@ unsigned int sTeam2Hash;
 // GLOBAL: SWBF2 0x007e7f98
 int sEras = -1;
 
+// OpenSWBF2: the running map's entry, kept apart from sPlaylistPosn (the next one) so edits can
+// report it; -1 when unknown or taken out of the list.
+static int siCurrentEntry = -1;
+
 namespace GameLoop { extern bool mbHistoricalRules; }
 
 // FUNCTION: SWBF2 0x005a4410
@@ -49,6 +54,7 @@ void MissionPlayList::ClearEntries()
     sPlaylistPosn = 0;
     sbRandomize = false;
     sEras = -1;
+    siCurrentEntry = -1;
 }
 
 // FUNCTION: SWBF2 0x005a4460
@@ -178,6 +184,7 @@ bool MissionPlayList::SelectNextEntry()
         }
     }
     GameLoop::SetNextMission(sPlaylist[sPlaylistPosn].mLuaFile);
+    siCurrentEntry = sPlaylistPosn < sPlaylistCount ? sPlaylistPosn : -1;
 
     const PlaylistEntry& entry = sPlaylist[sPlaylistPosn];
     if (GameLoop::mbHistoricalRules)
@@ -370,6 +377,86 @@ bool MissionPlayList::NextEntry(char const* pcLuaFile)
     }
     sPlaylistPosn = iFound;
     return true;
+}
+
+void MissionPlayList::ClearForRebuild()
+{
+    // The running map's entry stays in slot 0 with the count at 0: the first appended entry
+    // overwrites it, and with nothing appended SelectNextEntry wraps to it and replays it.
+    if (siCurrentEntry > 0 && siCurrentEntry < sPlaylistCount)
+    {
+        sPlaylist[0] = sPlaylist[siCurrentEntry];
+    }
+    sPlaylistCount = 0;
+    sPlaylistPosn = 0;
+    siCurrentEntry = -1;
+}
+
+int MissionPlayList::AppendEntry(char const* pcLuaFile, int iTickets1, int iTickets2)
+{
+    if (!AddEntry(pcLuaFile, 1, 0, 0, iTickets1, iTickets2))
+    {
+        return -1;
+    }
+    return sPlaylistCount - 1;
+}
+
+bool MissionPlayList::MoveEntry(int iFrom, int iTo)
+{
+    if (iFrom < 0 || iTo < 0 || iFrom >= sPlaylistCount || iTo >= sPlaylistCount)
+    {
+        return false;
+    }
+    const PlaylistEntry moved = sPlaylist[iFrom];
+    if (iFrom < iTo)
+    {
+        memmove(&sPlaylist[iFrom], &sPlaylist[iFrom + 1], (iTo - iFrom) * sizeof(PlaylistEntry));
+    }
+    else if (iTo < iFrom)
+    {
+        memmove(&sPlaylist[iTo + 1], &sPlaylist[iTo], (iFrom - iTo) * sizeof(PlaylistEntry));
+    }
+    sPlaylist[iTo] = moved;
+    sPlaylistPosn = MissionPlayListOps::PositionAfterMove(sPlaylistPosn, sPlaylistCount, iFrom, iTo);
+    if (siCurrentEntry >= 0)
+    {
+        // the rotation plays in list order: whatever now follows the running map is next
+        siCurrentEntry = MissionPlayListOps::MovedIndex(siCurrentEntry, iFrom, iTo);
+        sPlaylistPosn = siCurrentEntry + 1;
+    }
+    return true;
+}
+
+bool MissionPlayList::RemoveEntry(int iIndex)
+{
+    // like DropEntry, the last entry stays: an empty rotation has nothing to load next
+    if (iIndex < 0 || iIndex >= sPlaylistCount || sPlaylistCount <= 1)
+    {
+        return false;
+    }
+    memmove(&sPlaylist[iIndex], &sPlaylist[iIndex + 1], (sPlaylistCount - iIndex - 1) * sizeof(PlaylistEntry));
+    --sPlaylistCount;
+    sPlaylistPosn = MissionPlayListOps::PositionAfterRemove(sPlaylistPosn, iIndex);
+    if (siCurrentEntry == iIndex)
+    {
+        siCurrentEntry = -1;
+    }
+    else if (siCurrentEntry >= 0)
+    {
+        siCurrentEntry -= siCurrentEntry > iIndex ? 1 : 0;
+        sPlaylistPosn = siCurrentEntry + 1; // list order, as in MoveEntry
+    }
+    return true;
+}
+
+int MissionPlayList::GetNextEntryIndex()
+{
+    return MissionPlayListOps::NextIndex(sPlaylistPosn, sPlaylistCount);
+}
+
+int MissionPlayList::GetCurrentListedIndex()
+{
+    return siCurrentEntry;
 }
 
 // FUNCTION: SWBF2 0x005a4ce0

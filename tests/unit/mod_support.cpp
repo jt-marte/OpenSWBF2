@@ -222,6 +222,55 @@ TEST_CASE("the Conversion Pack's maps win over the Xbox DLC's copies" * doctest:
     CHECK(lua.Global("both_rh1") == "era_c,era_g,mode_con_c,mode_con_g,mode_xl_c");
 }
 
+TEST_CASE("the mission list dump writes what the launcher needs" * doctest::test_suite("unit"))
+{
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(RegistryCode()));
+    REQUIRE(lua.Run(
+        // the shell's own pieces the dump calls, stubbed: the list expansion runs the registry, and
+        // names come from the entries
+        "function missionlist_ExpandMaplist(bForMP)\n"
+        "  missionlist_BuildRegistry()\n"
+        "  missionlist_PreferMaps(mp_missionselect_listbox_contents)\n"
+        "  missionlist_DiscoverErasAndModes(mp_missionselect_listbox_contents)\n"
+        "end\n"
+        "function missionlist_GetLocalizedMapName(f)\n"
+        "  local names = { ['geo1%s_%s'] = 'Geonosis', ['BS2%s_%s'] = 'Bespin: \"Cloud\" City\\\\', ['xyz%s_%s'] = 'Caf\\233' }\n"
+        "  return names[f] or f, 0\n"
+        "end\n"
+        "function ScriptCB_ununicode(s) return s end\n"
+        "mp_missionselect_listbox_contents = {\n"
+        "  { mapluafile = 'geo1%s_%s', era_c = 1, mode_con_c = 1, mode_ctf_c = 1 },\n"
+        "  { mapluafile = 'bes2%s_%s', era_g = 1, mode_con_g = 1 },\n"
+        "  { mapluafile = 'BS2%s_%s', era_c = 1, era_k = 1, mode_con_c = 1, mode_con_k = 1, mode_bf1_c = 1 },\n"
+        "  { mapluafile = 'xyz%s_%s', isModLevel = 1, mode_assault_g = 1 },\n"
+        "  { mapluafile = '_all_maps_' },\n"
+        "}\n"
+        "gStockMPMaps = { ['geo1%s_%s'] = 1, ['xyz%s_%s'] = 1 }\n"
+        "json, maps = missionlist_DumpJSON()\n"));
+
+    const std::string sJson = lua.Global("json");
+    CAPTURE(sJson);
+    CHECK(lua.Global("maps") == "3"); // bes2 gave way to the Conversion Pack's BS2; no "all maps" row
+    CHECK(Has(sJson, "{\"format\":1,\"eras\":["));
+    CHECK(Has(sJson, "{\"id\":\"k\",\"key\":\"era_k\",\"name\":\"KotOR\"}"));
+    CHECK(Has(sJson, "{\"id\":\"ass\",\"key\":\"assault\",\"flag\":\"mode_assault\",\"name\":\"ASSAULT\"}")); // unlocalized here
+    CHECK(Has(sJson, "{\"code\":\"geo1\",\"file\":\"geo1%s_%s\",\"name\":\"Geonosis\",\"mod\":false,"
+                     "\"eras\":[{\"id\":\"c\",\"name\":\"Clone Wars\"}],"
+                     "\"modes\":[{\"id\":\"con\",\"key\":\"con\",\"name\":\"Conquest\",\"eras\":[\"c\"],\"missions\":{\"c\":\"geo1c_con\"}},"
+                     "{\"id\":\"ctf\",\"key\":\"ctf\",\"name\":\"CTF\",\"eras\":[\"c\"],\"missions\":{\"c\":\"geo1c_ctf\"}}]}"));
+    // a mod map, with quotes and backslashes escaped, a mod mode and the KotOR era
+    CHECK(Has(sJson, "\"code\":\"BS2\",\"file\":\"BS2%s_%s\",\"name\":\"Bespin: \\\"Cloud\\\" City\\\\\",\"mod\":true,"));
+    CHECK(Has(sJson, "\"missions\":{\"c\":\"BS2c_con\",\"k\":\"BS2k_con\"}"));
+    CHECK(Has(sJson, "\"id\":\"bf1\",\"key\":\"bf1\",\"name\":\"Battlefront 1\",\"eras\":[\"c\"],\"missions\":{\"c\":\"BS2c_bf1\"}"));
+    // isModLevel marks a mod even when its file matches a stock one; past-ASCII bytes are escaped
+    CHECK(Has(sJson, "\"code\":\"xyz\",\"file\":\"xyz%s_%s\",\"name\":\"Caf\\u00e9\",\"mod\":true,"));
+    CHECK(Has(sJson, "\"missions\":{\"g\":\"xyzg_ass\"}"));
+    CHECK(!Has(sJson, "bes2"));
+    CHECK(!Has(sJson, "_all_maps_"));
+}
+
 TEST_CASE("mod registry merges what custom_gc scripts add" * doctest::test_suite("unit"))
 {
     Lua lua;

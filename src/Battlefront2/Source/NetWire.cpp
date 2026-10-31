@@ -210,6 +210,50 @@ bool IsRconAuthorized(const char* pcData, int iAvail, char cKey0, char cKey1)
     return uCommand == 's' && pcData[6] == 0;
 }
 
+unsigned __int64 RconPeerKey(const void* pPeerRecord, bool bLAN)
+{
+    const unsigned char* pucRecord = (const unsigned char*)pPeerRecord;
+    if (!bLAN)
+    {
+        unsigned __int64 uGalaxyId;
+        memcpy(&uGalaxyId, pucRecord, sizeof(uGalaxyId));
+        return uGalaxyId;
+    }
+    // sockaddr_in after the Galaxy ID: family (2 bytes), port (2, network order), address (4)
+    const unsigned int uPort = ((unsigned int)pucRecord[10] << 8) | pucRecord[11];
+    unsigned int uAddress;
+    memcpy(&uAddress, pucRecord + 12, sizeof(uAddress));
+    return (unsigned __int64)uAddress | ((unsigned __int64)uPort << 32);
+}
+
+unsigned int RconLoginKey(const void* pPeerRecord, bool bLAN)
+{
+    const unsigned __int64 uPeer = RconPeerKey(pPeerRecord, bLAN);
+    const unsigned int uKey = bLAN ? (unsigned int)uPeer : (unsigned int)(uPeer ^ (uPeer >> 32));
+    return uKey ? uKey : 0xFFFFFFFFu;
+}
+
+int PickRconSlot(const float* pafLastRecv, const bool* pabLoggedIn, int iCount, float fNow)
+{
+    for (int i = 0; i < iCount; ++i)
+    {
+        const float fLast = pafLastRecv[i];
+        if (fLast == 0.0f || fLast > fNow || fNow - fLast > kRconSessionSeconds)
+        {
+            return i;
+        }
+    }
+    int iSlot = -1;
+    for (int i = 0; i < iCount; ++i)
+    {
+        if (!pabLoggedIn[i] && (iSlot < 0 || pafLastRecv[i] < pafLastRecv[iSlot]))
+        {
+            iSlot = i;
+        }
+    }
+    return iSlot;
+}
+
 LoginLimiter::LoginLimiter()
 {
     memset(maEntries, 0, sizeof(maEntries));

@@ -297,8 +297,20 @@ void SpectatorDisplay::UpdatePregame()
 {
     if (NetGame::IsPreGame())
     {
+        // OpenSWBF2: a dedicated server's lobby (NetLobby.h) waits for the host, so it shows that
+        // instead of a countdown
+        static bool sbLobbyShown = false;
+        const bool bLobby = NetGame::IsLobby();
+        if (bLobby != sbLobbyShown)
+        {
+            mPregamePrompt.SetText(RedLocalizeDB::Find(bLobby ? 0xba3e6ee8 : 0x2961292A, false), true); // openswbf2.lobby.waiting
+            sbLobbyShown = bLobby;
+        }
         unsigned short ausTime[20] = { 0 };
-        PblUnicode::usnprintf(ausTime, 10, "%d", NetGame::GetPreGameTime());
+        if (!bLobby)
+        {
+            PblUnicode::usnprintf(ausTime, 10, "%d", NetGame::GetPreGameTime());
+        }
         mPregameTime.SetText(ausTime, true);
         if (!mPregameGroup.IsEnabled())
         {

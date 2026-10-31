@@ -69,6 +69,7 @@ bool pcWindowed;
 static const UINT kWmDpiChanged = 0x02E0;
 HWND hGlobalWnd;
 bool pcPostInstall;
+int gExitCode = 0;
 
 // GLOBAL: SWBF2 0x01eaede5
 bool gIsQuitting;
@@ -279,7 +280,7 @@ LRESULT __stdcall WindowProc(HWND__* hWnd, UINT Msg, WPARAM wParam, LPARAM lPara
         hGlobalWnd = 0;
         RedLog::LogEnsureSummary();
         HwCursor::ReleaseClip();
-        pcCrash::Exit(0);
+        pcCrash::Exit(gExitCode);
 
     case WM_ACTIVATE:
         return 0;
@@ -469,6 +470,15 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         lpCmdLine = sacExpandedCmdLine;
         gDedicatedShorthand = true;
     }
+    // OpenSWBF2: "-listmissions <file>" runs headless (and so next to a running game) just long
+    // enough to load the shell and the mods, writes the mission list, and quits
+    const bool bListMissions = HasSwitchWord(lpCmdLine, "listmissions") && !strstr(lpCmdLine, "/autonet");
+    if (bListMissions)
+    {
+        _snprintf(sacExpandedCmdLine, sizeof(sacExpandedCmdLine) - 1,
+                  "-norender -nosound -nowait -nofocuspause -nolegal %s", lpCmdLine);
+        lpCmdLine = sacExpandedCmdLine;
+    }
 
     bool bDedicated = strstr(lpCmdLine, "/autonet") != 0 &&
                       strstr(lpCmdLine, "dedicated") != 0;
@@ -496,6 +506,10 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         {
             gAutoNetPlayers = NetWire::HostBandwidthSlots(12);
         }
+    }
+    if (bListMissions)
+    {
+        gLogStdout = true;
     }
     RedLog::SetStdout(gLogConsole ? RedLog::StdoutConsole
                                   : (gLogStdout ? (gDedicatedShorthand ? RedLog::StdoutAttach : RedLog::StdoutRedirectOnly)

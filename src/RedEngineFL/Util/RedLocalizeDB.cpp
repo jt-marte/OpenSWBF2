@@ -133,6 +133,7 @@ static const OpenText sOpenText[] = {
     { 0xd3766076, L"AI heroes" },                      // ifs.gameopt.aiheroes
     { 0x1d8946ea, L"Award weapons" },                  // ifs.gameopt.awardweapons
     { 0x7ff56831, L"Award effects" },                  // ifs.gameopt.awardeffects
+    { 0xba3e6ee8, L"Waiting for the host to start the match" }, // openswbf2.lobby.waiting
 };
 
 // FUNCTION: SWBF2 0x006c5b30

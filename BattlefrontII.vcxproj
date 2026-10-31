@@ -977,6 +977,9 @@
     <ClInclude Include="src\Battlefront2\Source\AITuning.h" />
     <ClInclude Include="src\Battlefront2\Source\RecentServers.h" />
     <ClInclude Include="src\Battlefront2\Source\GameplayCfg.h" />
+    <ClInclude Include="src\Battlefront2\Source\NetLobby.h" />
+    <ClInclude Include="src\Battlefront2\Source\NetAdminText.h" />
+    <ClInclude Include="src\Battlefront2\Source\MissionPlayListOps.h" />
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoal.h" />
     <ClInclude Include="src\Battlefront2\Source\AIGoalManager.h" />

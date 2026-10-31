@@ -17,6 +17,9 @@
 #include "NetSetup.h"
 #include "NetAdmin.h"
 #include "NetAdminIdText.h"
+#include "NetAdminText.h"
+#include "HUDGameEvents.h"
+#include "Timer.h"
 #include "NetWire.h"
 #include "SpawnManager.h"
 #include "Team.h"
@@ -25,6 +28,7 @@
 #include "PebbleFL/Common/PblUnicode.h"
 #include "PebbleFL/Common/PblRandom.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 class NetAdmin
 {
@@ -224,6 +228,10 @@ float adminKeyNextTime;
 // GLOBAL: SWBF2 0x007e8004
 char adminKey[2] = { '4', 'z' };
 
+// OpenSWBF2: each admin session's whole peer record, which pushed messages are sent back to.
+// adminDests keeps only its 8-byte key (NetWire::RconPeerKey).
+static NetSocketPeerRecord sAdminPeers[3];
+
 // FUNCTION: SWBF2 0x005b1530
 void __fastcall HeartBeat(const unsigned __int64* pPeer)
 {
@@ -236,39 +244,39 @@ void __fastcall HeartBeat(const unsigned __int64* pPeer)
         netRandom._uiSeed = seed * 1664525u + 1013904223u;
         adminKey[adminKeyCount & 1] = (char)(seed >> 16);
     }
+    // OpenSWBF2: sessions are keyed on the peer's address, not just its (LAN: always 0) Galaxy ID
+    const unsigned __int64 uPeer = NetWire::RconPeerKey(pPeer, NetComm::IsLAN());
     for (int i = 0; i < 3; ++i)
     {
-        if (*(const unsigned __int64*)&adminDests[i].addr == *pPeer)
+        if (*(const unsigned __int64*)&adminDests[i].addr == uPeer)
         {
             adminDests[i].lastRecvTime = fNow;
             return;
         }
     }
-    float fOldest = 1000000.0f;
-    int iSlot = 0;
+    float afLastRecv[3];
+    bool abLoggedIn[3];
     for (int i = 0; i < 3; ++i)
     {
-        if (adminDests[i].lastRecvTime > fNow)
-        {
-            iSlot = i;
-            break;
-        }
-        if (fOldest > adminDests[i].lastRecvTime)
-        {
-            fOldest = adminDests[i].lastRecvTime;
-            iSlot = i;
-        }
+        afLastRecv[i] = adminDests[i].lastRecvTime;
+        abLoggedIn[i] = adminDests[i].admin;
     }
-    adminDests[iSlot].addr = (unsigned int)*pPeer;
-    adminDests[iSlot].port = (unsigned int)(*pPeer >> 32);
+    const int iSlot = NetWire::PickRconSlot(afLastRecv, abLoggedIn, 3, fNow);
+    if (iSlot < 0)
+    {
+        return;
+    }
+    adminDests[iSlot].addr = (unsigned int)uPeer;
+    adminDests[iSlot].port = (unsigned int)(uPeer >> 32);
     adminDests[iSlot].lastRecvTime = fNow;
     adminDests[iSlot].admin = false;
+    memcpy(&sAdminPeers[iSlot], pPeer, sizeof(sAdminPeers[iSlot]));
 }
 
 // FUNCTION: SWBF2 0x005b1630
 int __fastcall FindAdminSource(int iDest)
 {
-    const unsigned __int64 peer = *NetCommP::GetAddr(iDest);
+    const unsigned __int64 peer = NetWire::RconPeerKey(NetCommP::GetAddr(iDest), NetComm::IsLAN());
     for (int i = 0; i < 3; ++i)
     {
         if (*(const unsigned __int64*)&adminDests[i].addr == peer)
@@ -362,8 +370,13 @@ void __fastcall SendAdminMessage(char* pcMessage)
         }
         else if ((admin.addr || admin.port) && admin.lastRecvTime >= fNow - 60.0f && admin.admin)
         {
-            unsigned int address[2] = { admin.addr, admin.port };
-            int iDest = NetCommP::FindJoinSource((const int*)address);
+            // OpenSWBF2: FindJoinSource reads a whole peer record. Retail passed just the 8-byte
+            // key, so it read past it, and pushes went nowhere.
+            int iDest = NetCommP::FindJoinSource((const int*)&sAdminPeers[i]);
+            if (iDest < 0)
+            {
+                continue;
+            }
             NetPktGroup group;
             group.BeginWrite();
             group.WriteBits((char)adminKey[adminKeyCount & 1], 8);
@@ -407,6 +420,26 @@ static void SendStateTransitions()
     {
         SendAdminMessage((char*)"game over");
         lastGameOver = true;
+    }
+
+    // OpenSWBF2: tell admins when the lobby opens and when the match starts, and remind the players
+    // waiting in it every 30 seconds (stock clients see no lobby text of their own)
+    static bool sbWasLobby = false;
+    static float sfNextLobbyNote = 0.0f;
+    const bool bLobby = NetGame::IsHost() && !NetGame::IsClient() && NetGame::IsLobby();
+    if (bLobby != sbWasLobby)
+    {
+        char acMessage[96];
+        _snprintf(acMessage, 95, bLobby ? "lobby: %s" : "match started: %s", GameLoop::mMissionScript);
+        acMessage[95] = 0;
+        SendAdminMessage(acMessage);
+        sbWasLobby = bLobby;
+        sfNextLobbyNote = 0.0f;
+    }
+    if (bLobby && NetComm::GetTime() >= sfNextLobbyNote)
+    {
+        sfNextLobbyNote = NetComm::GetTime() + 30.0f;
+        NetGame::AddChatMessageToQue(true, 64, ~(unsigned __int64)0, -1, RedLocalizeDB::Find(0xba3e6ee8, false), 0); // openswbf2.lobby.waiting
     }
 
     unsigned int uiTeam1, uiTeam2;
@@ -582,7 +615,7 @@ struct AdminCommandEntry
 #define AC(n) ((AdminCommand)(n))
 
 // GLOBAL: SWBF2 0x007e8910
-AdminCommandEntry adminCommands[94] = {
+AdminCommandEntry adminCommands[] = {
     { AC_WAITLATE, "waitlate" },          { AC_DROPMAP, "dropmap" },
     { AC_ADDMAP, "addmap" },              { AC_NEXTMAP, "nextmap" },
     { AC_SPLITUPDATE, "splitupdate" },    { AC_PLAYERS, "players" },
@@ -630,6 +663,12 @@ AdminCommandEntry adminCommands[94] = {
     { AC(87), "banip" },                  { AC(88), "unbanip" },
     { AC(89), "unbanall" },               { AC(90), "awards" },
     { AC(91), "restart" },                { AC(92), "changemap" },
+    // OpenSWBF2: the server manager's commands (lobby, state, paged lists, rotation edits)
+    { AC(93), "start" },                  { AC(94), "lobby" },
+    { AC(95), "state" },                  { AC(96), "playerinfo" },
+    { AC(97), "maplist" },                { AC(98), "clearmaps" },
+    { AC(99), "appendmap" },              { AC(100), "movemap" },
+    { AC(101), "removemap" },
 };
 
 #undef AC
@@ -650,7 +689,7 @@ bool GetCommand(char* pcToken, AdminCommand& cmd, bool& bNo)
         pcName += 2;
     }
 
-    for (int i = 0; i < 94; ++i)
+    for (int i = 0; i < (int)(sizeof(adminCommands) / sizeof(adminCommands[0])); ++i)
     {
         if (!_stricmp(adminCommands[i].token, pcName))
         {
@@ -1016,6 +1055,23 @@ bool IsNum(unsigned short c)
 }
 
 // FUNCTION: SWBF2 0x005b14a0
+// OpenSWBF2: whether the next argument is pcWord (letters, any case), without taking it
+static bool IsNextArgWord(const unsigned short* pusLine, const char* pcWord)
+{
+    while (*pusLine == ' ')
+    {
+        ++pusLine;
+    }
+    for (; *pcWord; ++pcWord, ++pusLine)
+    {
+        if ((*pusLine | 0x20) != (unsigned short)(*pcWord | 0x20))
+        {
+            return false;
+        }
+    }
+    return *pusLine == ' ' || *pusLine == 0;
+}
+
 static bool IsNextArgInt(unsigned short* pusLine)
 {
     while (*pusLine == ' ')
@@ -1119,29 +1175,37 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             }
             if (sLoginKey && !sLoginLimiter.Allow(sLoginKey, NetComm::GetTime()))
             {
+                PutMsg("login rate limited");
                 continue;
             }
-            if (Destination[0] && !_stricmp(acToken, Destination))
+            if (!Destination[0] || _stricmp(acToken, Destination))
             {
-                if (iPlayer >= 0)
-                {
-                    if (iPlayer < 64)
-                    {
-                        admins[iPlayer] = true;
-                    }
-                }
-                else
-                {
-                    remoteLoggedIn = true;
-                }
-                _snprintf(acMsg, 0x1FF, "logged in");
-                acMsg[511] = 0;
-                PutMsg(acMsg);
+                // OpenSWBF2: say so (retail stayed silent) and log where it came from
+                LOG(LogNet, Warning, "OPENSWBF2 ADMIN login failed player=%d source=%08x", iPlayer, sLoginKey);
+                PutMsg("login failed");
+                continue;
             }
+            if (iPlayer >= 0)
+            {
+                if (iPlayer < 64)
+                {
+                    admins[iPlayer] = true;
+                }
+            }
+            else
+            {
+                remoteLoggedIn = true;
+            }
+            _snprintf(acMsg, 0x1FF, "logged in");
+            acMsg[511] = 0;
+            PutMsg(acMsg);
             continue;
         }
 
-        if ((iPlayer < 0 || !admins[iPlayer]) && !remoteLoggedIn && !bConsole)
+        // OpenSWBF2: a player's own login for chat lines, the session's for rcon lines; retail let
+        // a leftover rcon login stand in for any player
+        const bool bAuthorized = bConsole || (iPlayer >= 0 ? iPlayer < 64 && admins[iPlayer] : remoteLoggedIn);
+        if (!bAuthorized)
         {
             PutMsg("not logged in");
             continue;
@@ -2222,6 +2286,13 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             PutMsg(acMsg);
             _snprintf(acMsg, 0x200, "Heroes      : %s", netHeroesEnabled ? "yes" : "no");
             PutMsg(acMsg);
+            // OpenSWBF2: appended, so tools that read the retail lines still find them
+            _snprintf(acMsg, 0x200, "State       : %s",
+                      netInShell ? "shell" : NetGame::IsLobby() ? "lobby" : NetGame::IsPreGame() ? "warmup" : "playing");
+            PutMsg(acMsg);
+            const Timer* pTimer = netInShell ? 0 : HUD::GameEvents::GetObjectiveTimer();
+            _snprintf(acMsg, 0x200, "Time left   : %d", pTimer ? (int)pTimer->GetTime() : -1);
+            PutMsg(acMsg);
             break;
         }
 
@@ -2391,6 +2462,287 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
                 Team::sWinningTeams = 6;
             }
             break;
+
+        // OpenSWBF2: the server manager's commands. Each reply starts with a "#<command>" line, so a
+        // launcher tells it from the messages pushed on the same channel.
+        case 93: // start [seconds of warm-up]
+        {
+            int iSeconds = 0;
+            if (IsNextArgInt(pusLine))
+            {
+                GetNextArg(pusLine, acArg, 64);
+                iSeconds = atoi(acArg);
+            }
+            PutMsg("#start");
+            if (!NetGame::RequestLobbyStart(iSeconds))
+            {
+                PutMsg("not in lobby");
+            }
+            else if (iSeconds > 0)
+            {
+                _snprintf(acMsg, 0x1FF, "match starts in %d", iSeconds);
+                acMsg[511] = 0;
+                PutMsg(acMsg);
+            }
+            else
+            {
+                PutMsg("match started");
+            }
+            break;
+        }
+
+        case 94: // lobby [now], nolobby
+        {
+            PutMsg("#lobby");
+            if (bNo)
+            {
+                NetGame::SetLobbyHold(false);
+                PutMsg("lobby cancelled");
+                break;
+            }
+            const bool bNow = IsNextArgWord(pusLine, "now");
+            if (bNow)
+            {
+                GetNextArg(pusLine, acArg, 64);
+            }
+            NetGame::SetLobbyHold(true);
+            if (NetGame::IsLobby())
+            {
+                PutMsg("already in lobby");
+            }
+            else if (bNow && !netInShell)
+            {
+                Team::sWinningTeams = 6; // a fresh load of the next map, held in the lobby
+                PutMsg("lobby now");
+            }
+            else
+            {
+                PutMsg("lobby after this match");
+            }
+            break;
+        }
+
+        case 95: // state
+        {
+            PutMsg("#state");
+            const char* pcState = netInShell             ? "shell"
+                                  : NetGame::IsLobby()   ? "lobby"
+                                  : GameLoop::IsGameOver() ? "ended"
+                                  : NetGame::IsPreGame() ? "warmup"
+                                                         : "playing";
+            const char* pcNext = "";
+            const int iNext = MissionPlayList::GetNextEntryIndex();
+            if (iNext >= 0)
+            {
+                int iTickets1;
+                int iTickets2;
+                MissionPlayList::GetEntry(iNext, pcNext, iTickets1, iTickets2);
+            }
+            int iTeam1;
+            int iTeam2;
+            int iWaiting;
+            CountConnectedTeams(&iTeam1, &iTeam2, &iWaiting);
+            int iScore1;
+            int iScore2;
+            GetAdminScorePair(&iScore1, &iScore2);
+            int iTickets1;
+            int iTickets2;
+            GetAdminTicketPair(&iTickets1, &iTickets2);
+            const Timer* pTimer = netInShell ? 0 : HUD::GameEvents::GetObjectiveTimer();
+            const int iTime = pTimer ? (int)pTimer->GetTime() : -1;
+            // the names go last: a long mod mission name only cuts its own field
+            _snprintf(acMsg, NetAdminText::kReplyLineMax,
+                      "state=%s hold=%d players=%d/%d/%d time=%d tickets=%d/%d scores=%d/%d map=%s next=%s",
+                      pcState, NetGame::GetLobbyHold() ? 1 : 0, iTeam1, iTeam2, iTeam1 + iTeam2 + iWaiting,
+                      iTime, iTickets1, iTickets2, iScore1, iScore2, netInShell ? "" : GameLoop::mMissionScript,
+                      pcNext);
+            acMsg[NetAdminText::kReplyLineMax] = 0;
+            PutMsg(acMsg);
+            break;
+        }
+
+        case 96: // playerinfo [first slot]: one line per player, 12 per reply
+        {
+            int iFirst = 0;
+            if (IsNextArgInt(pusLine))
+            {
+                GetNextArg(pusLine, acArg, 64);
+                iFirst = atoi(acArg) - 1;
+            }
+            PutMsg("#playerinfo");
+            int iLines = 0;
+            int iSlot = iFirst < 0 ? 0 : iFirst;
+            for (; iSlot < netCurMaxPlayers && iSlot < 64; ++iSlot)
+            {
+                if (!NetComm::IsConnected(iSlot))
+                {
+                    continue;
+                }
+                if (iLines == 12)
+                {
+                    break;
+                }
+                int iTeam = 0;
+                Character* pCharacter = 0;
+                if (NetGame::IsPlaying(iSlot, false))
+                {
+                    iTeam = NetGame::GetStartTeam(iSlot);
+                    pCharacter = Character::FindPlayer(iSlot);
+                }
+                int iPoints = 0;
+                int iKills = 0;
+                int iDeaths = 0;
+                if (pCharacter)
+                {
+                    PlayerStats& stats = pCharacter->GetPlayerStats();
+                    iPoints = stats.GetPoints();
+                    iKills = stats.GetKills(-1, -1);
+                    iDeaths = stats.GetDeaths(-1, -1);
+                }
+                char acName[64];
+                NetAdminText::CleanName(NetGame::GetPlayerName(iSlot), acName, sizeof(acName));
+                _snprintf(acMsg, NetAdminText::kReplyLineMax, "p %d %d %d %d %d %d %d %s", iSlot + 1, iTeam,
+                          pCharacter && pCharacter->GetUnit() ? 1 : 0, iPoints, iKills, iDeaths,
+                          NetComm::GetPing(iSlot), acName);
+                acMsg[NetAdminText::kReplyLineMax] = 0;
+                PutMsg(acMsg);
+                ++iLines;
+            }
+            int iConnected = 0;
+            for (int i = 0; i < netCurMaxPlayers && i < 64; ++i)
+            {
+                iConnected += NetComm::IsConnected(i) ? 1 : 0;
+            }
+            if (iSlot < netCurMaxPlayers && iSlot < 64 && iLines == 12)
+            {
+                _snprintf(acMsg, 0x1FF, "more %d", iSlot + 1);
+            }
+            else
+            {
+                _snprintf(acMsg, 0x1FF, "end %d", iConnected);
+            }
+            acMsg[511] = 0;
+            PutMsg(acMsg);
+            break;
+        }
+
+        case 97: // maplist [first entry]: the rotation with tickets, 16 entries per reply
+        {
+            int iFirst = 0;
+            if (IsNextArgInt(pusLine))
+            {
+                GetNextArg(pusLine, acArg, 64);
+                iFirst = atoi(acArg) - 1;
+            }
+            PutMsg("#maplist");
+            const int iCount = MissionPlayList::GetEntryCount();
+            const int iNext = MissionPlayList::GetNextEntryIndex();
+            const int iCurrent = MissionPlayList::GetCurrentListedIndex();
+            int iEntry = iFirst < 0 ? 0 : iFirst;
+            for (int iLines = 0; iEntry < iCount && iLines < 16; ++iEntry, ++iLines)
+            {
+                const char* pcName;
+                int iTickets1;
+                int iTickets2;
+                MissionPlayList::GetEntry(iEntry, pcName, iTickets1, iTickets2);
+                _snprintf(acMsg, NetAdminText::kReplyLineMax, "m %d %s %d %d %s", iEntry + 1, pcName, iTickets1,
+                          iTickets2, iEntry == iCurrent ? "cur" : (iEntry == iNext ? "next" : "-"));
+                acMsg[NetAdminText::kReplyLineMax] = 0;
+                PutMsg(acMsg);
+            }
+            if (iEntry < iCount)
+            {
+                _snprintf(acMsg, 0x1FF, "more %d", iEntry + 1);
+            }
+            else
+            {
+                _snprintf(acMsg, 0x1FF, "end %d next=%d", iCount, iNext + 1);
+            }
+            acMsg[511] = 0;
+            PutMsg(acMsg);
+            break;
+        }
+
+        case 98: // clearmaps: the running map plays on; appended maps follow it
+            PutMsg("#clearmaps");
+            if (netInShell)
+            {
+                PutMsg("not running");
+                break;
+            }
+            MissionPlayList::ClearForRebuild();
+            PutMsg("maps cleared");
+            break;
+
+        case 99: // appendmap <mission> [tickets1 [tickets2]]: at the end of the rotation
+        {
+            PutMsg("#appendmap");
+            if (!GetNextArg(pusLine, acToken, 32))
+            {
+                PutMsg("no map");
+                break;
+            }
+            int iTickets1 = 0;
+            int iTickets2 = 0;
+            if (IsNextArgInt(pusLine))
+            {
+                GetNextArg(pusLine, acArg, 64);
+                iTickets1 = atoi(acArg);
+                iTickets2 = iTickets1;
+                if (IsNextArgInt(pusLine))
+                {
+                    GetNextArg(pusLine, acArg, 64);
+                    iTickets2 = atoi(acArg);
+                }
+            }
+            if (!NetAdminText::IsMissionName(acToken))
+            {
+                _snprintf(acMsg, 0x1FF, "map '%s' not added", acToken);
+                acMsg[NetAdminText::kReplyLineMax] = 0;
+                PutMsg(acMsg);
+                break;
+            }
+            if (netInShell)
+            {
+                AddAutoNetMission(acToken, iTickets1, iTickets2);
+                PutMsg("map appended");
+                break;
+            }
+            const int iEntry = MissionPlayList::AppendEntry(acToken, iTickets1, iTickets2);
+            if (iEntry < 0)
+            {
+                PutMsg("rotation full");
+            }
+            else
+            {
+                _snprintf(acMsg, 0x1FF, "map appended %d", iEntry + 1);
+                acMsg[511] = 0;
+                PutMsg(acMsg);
+            }
+            break;
+        }
+
+        case 100: // movemap <from> <to>, 1-based
+        case 101: // removemap <entry>, 1-based
+        {
+            const bool bMove = cmd == 100;
+            PutMsg(bMove ? "#movemap" : "#removemap");
+            int aiArgs[2] = { 0, 0 };
+            int iArgs = 0;
+            while (iArgs < (bMove ? 2 : 1) && IsNextArgInt(pusLine))
+            {
+                GetNextArg(pusLine, acArg, 64);
+                aiArgs[iArgs++] = atoi(acArg) - 1;
+            }
+            bool bDone = false;
+            if (!netInShell && iArgs == (bMove ? 2 : 1))
+            {
+                bDone = bMove ? MissionPlayList::MoveEntry(aiArgs[0], aiArgs[1])
+                              : MissionPlayList::RemoveEntry(aiArgs[0]);
+            }
+            PutMsg(bDone ? (bMove ? "map moved" : "map removed") : "bad entry");
+            break;
+        }
 
         default:
             PutMsg("command not handled");
@@ -2565,10 +2917,14 @@ void NetAdmin::ReceiveConsole()
             }
             bool bAdmin = adminDests[iAdmin].admin;
             remoteLoggedIn = bAdmin;
-            sLoginKey = (unsigned int)*NetCommP::GetAddr(iDest);
+            // OpenSWBF2: rate-limit logins per sender IP (retail's key, the Galaxy ID, is 0 on LAN,
+            // which turned the limit off), and don't leave this session's login set afterwards,
+            // where a player's chat line would pass for an admin's.
+            sLoginKey = NetWire::RconLoginKey(NetCommP::GetAddr(iDest), NetComm::IsLAN());
             NetAdmin::ParseLineRemote(-1, ausLine, false, true);
             sLoginKey = 0;
             adminDests[iAdmin].admin = remoteLoggedIn;
+            remoteLoggedIn = false;
 
             NetPktGroup reply;
             reply.BeginWrite();

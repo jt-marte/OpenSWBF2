@@ -35,6 +35,20 @@ bool ReadUploadChunk(NetPktGroup& group, char* pDst, unsigned int uCap, unsigned
 void DiscardUpload(NetPktGroup& group, bool bHeader);
 int ReadRconLine(const char* pcData, int iAvail, unsigned int uLength, unsigned short* pusOut);
 bool IsRconAuthorized(const char* pcData, int iAvail, char cKey0, char cKey1);
+// OpenSWBF2: rcon sessions. A peer record (NetSocketPeerRecord) is an 8-byte Galaxy ID, then a
+// sockaddr_in. On LAN, and so on -dedicated, every Galaxy ID is 0: retail's compare of those 8
+// bytes put every sender in one admin session, so one login authorized anyone. The socket
+// address tells peers apart there.
+const int kRconSlots = 3;
+const float kRconSessionSeconds = 60.0f;
+unsigned __int64 RconPeerKey(const void* pPeerRecord, bool bLAN);
+// The login rate limit's key: the sender's IP on LAN (all its ports share one limit), the Galaxy
+// ID online; never 0, which LoginLimiter treats as "no limit".
+unsigned int RconLoginKey(const void* pPeerRecord, bool bLAN);
+// The admin slot a new rcon peer takes: a free, stale or future-dated one first, then the oldest
+// that isn't logged in. -1 when every slot holds a live login: a flood of heartbeats must not push
+// an admin out.
+int PickRconSlot(const float* pafLastRecv, const bool* pabLoggedIn, int iCount, float fNow);
 int ClampPlayerCount(unsigned int uWire);
 bool IsValidGuestCount(unsigned int uGuests);
 int DecodeLanMaxPlayers(unsigned int uWire);

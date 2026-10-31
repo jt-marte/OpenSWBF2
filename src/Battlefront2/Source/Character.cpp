@@ -56,6 +56,7 @@
 #include "GameMusic.h"
 #include "ShellLoop.h"
 #include "TeamAssist.h"
+#include "RedEngineFL/Util/RedLog.h"
 
 // GLOBAL: SWBF2 0x01e30330
 int Character::sCharacterLimit;
@@ -614,6 +615,12 @@ bool Character::Update(float fDeltaTime)
         return true;
     }
 
+    // OpenSWBF2: nobody spawns in a dedicated server's lobby; the request waits for /start
+    if (mPlayerId >= 0 && NetGame::IsLobby())
+    {
+        return true;
+    }
+
     if (NetGame::IsEnabled() || mPlayerId < 0)
     {
         SpawnManager* pSpawnManager = SpawnManager::Instance();
@@ -972,6 +979,10 @@ void Character::Spawn(const PblMatrix& mMatrix)
     {
         return;
     }
+    if (mPlayerId >= 0 && NetGame::IsLobby() && !(NetGame::IsEnabled() && NetGame::IsClient()))
+    {
+        return; // OpenSWBF2: the lobby (NetLobby.h)
+    }
     if (mPost && mTeamPtr->GetAffiliation(GetTeam(mPost->GetGameObject())) <= 0)
     {
         SelectPost(0);
@@ -1058,6 +1069,11 @@ void Character::Spawn(const PblMatrix& mMatrix)
 
     GameObject* pObject = pEntity->GetGameObject();
     mUnit = pObject->GetControllable();
+    if (mPlayerId >= 0 && NetGame::IsEnabled() && !NetGame::IsClient())
+    {
+        // OpenSWBF2: the host's record of a human spawning (the lobby keeps these back)
+        LOG(LogNet, Inform, "OPENSWBF2 NET player spawn id=%d team=%d", mPlayerId, mTeamNumber);
+    }
     pObject->SetTeam(mTeamNumber);
     pObject->mPerceivedTeam = mTeamNumber;
     mUnit->SetCharacter(this);

@@ -42,4 +42,19 @@ unsigned int GetFirstMission();
 unsigned int GetNextMission();
 extern int mFindIndex;
 
+// OpenSWBF2: rotation edits while a server runs (rcon /clearmaps, /appendmap, /movemap, /removemap,
+// /maplist; MissionPlayListOps.h). Indices are 0-based.
+// Empties the rotation for a new list: the running map plays on, the first appended entry plays
+// next, and with nothing appended the running map replays.
+void ClearForRebuild();
+// Adds at the end; the entry's index, or -1 when the rotation is full.
+int AppendEntry(char const* pcLuaFile, int iTickets1, int iTickets2);
+// Both keep list order: when the running map is listed, the entry after it plays next.
+bool MoveEntry(int iFrom, int iTo);
+bool RemoveEntry(int iIndex);
+// Read-only: unlike PeekNextEntry, these never wrap or shuffle the rotation.
+int GetNextEntryIndex();
+// The running map's entry, or -1 once ClearForRebuild has taken it out of the list.
+int GetCurrentListedIndex();
+
 }

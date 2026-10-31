@@ -1,4 +1,5 @@
 #include "ShellLoop.h"
+#include <stdio.h>
 #include "CameraManager.h"
 #include "DownloadableContent.h"
 #include "Entity.h"
@@ -21,6 +22,7 @@
 #include "PebbleFL/Common/PblHashTable.h"
 #include "RedEngineFL/Interface/RedShadowBlob.h"
 #include "RedEngineFL/Util/RedLocalizeDB.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Util/RedSceneManager.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
 #include "PlayerProfile.h"
@@ -74,6 +76,58 @@ extern bool gAttractMode;
 extern bool gDemoMode;
 
 namespace ObjectiveManager { void Init(); void DestroyAll(); }
+
+extern HWND hGlobalWnd;
+namespace GameLoop { extern bool sQuitRequested; }
+
+// OpenSWBF2 -listmissions <file>: once the mods' addme scripts have run, write the multiplayer
+// mission list (missionlist_DumpJSON) for a launcher's server manager, then quit: exit code 0, or
+// 2 when it couldn't. Written to <file>.tmp first, so a reader never sees half a file.
+static void WriteMissionList()
+{
+    lua_State* L = LuaHelper::mState;
+    const int iTop = lua_gettop(L);
+    bool bOk = false;
+    int iMaps = 0;
+    LuaHelper::GetGlobal("missionlist_DumpJSON");
+    if (lua_isfunction(L, -1) && lua_pcall(L, 0, 2, 0) == 0 && lua_isstring(L, -2))
+    {
+        iMaps = (int)lua_tonumber(L, -1);
+        char acTemp[sizeof(gListMissionsPath) + 8];
+        _snprintf(acTemp, sizeof(acTemp) - 1, "%s.tmp", gListMissionsPath);
+        acTemp[sizeof(acTemp) - 1] = 0;
+        FILE* pFile = fopen(acTemp, "wb");
+        if (pFile)
+        {
+            const size_t uLength = lua_strlen(L, -2);
+            bOk = fwrite(lua_tostring(L, -2), 1, uLength, pFile) == uLength;
+            bOk = fclose(pFile) == 0 && bOk;
+            bOk = bOk && MoveFileExA(acTemp, gListMissionsPath, MOVEFILE_REPLACE_EXISTING) != 0;
+        }
+    }
+    else if (lua_isstring(L, -1))
+    {
+        LOG(LogCore, Error, "OPENSWBF2 MISSIONS failed: %s", lua_tostring(L, -1));
+    }
+    lua_settop(L, iTop);
+    if (bOk)
+    {
+        LOG(LogCore, Inform, "OPENSWBF2 MISSIONS wrote maps=%d path=%s", iMaps, gListMissionsPath);
+    }
+    else
+    {
+        LOG(LogCore, Error, "OPENSWBF2 MISSIONS not written path=%s", gListMissionsPath);
+    }
+    gExitCode = bOk ? 0 : 2;
+    if (hGlobalWnd)
+    {
+        PostMessageA(hGlobalWnd, WM_CLOSE, 0, 0);
+    }
+    else
+    {
+        GameLoop::sQuitRequested = true;
+    }
+}
 
 // FUNCTION: SWBF2 0x00635d50
 float ShellLoop::GetMissionTime()
@@ -162,6 +216,10 @@ int ShellLoop::Init()
         lua_settop(LuaHelper::mState, -2);
     }
     DownloadableContent::AddMissions(ifScript);
+    if (gListMissionsPath[0])
+    {
+        WriteMissionList();
+    }
     MissionPlayList::PushToLua();
     LuaScriptFactory::PurgeUnused();
     NetGame::CreateClient();

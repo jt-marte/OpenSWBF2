@@ -1559,7 +1559,7 @@ TEST_CASE("hardware cursor source pins" * doctest::test_suite("unit"))
     CHECK(CountOf(sMain, "HwCursor::ReleaseClip();") == 3);
     const size_t uiClose = sMain.find("case WM_CLOSE:");
     REQUIRE(uiClose != std::string::npos);
-    const size_t uiExit = sMain.find("pcCrash::Exit(0);", uiClose);
+    const size_t uiExit = sMain.find("pcCrash::Exit(gExitCode);", uiClose);
     REQUIRE(uiExit != std::string::npos);
     const std::string sClose = sMain.substr(uiClose, uiExit - uiClose);
     CHECK(Has(sClose, "HwCursor::ReleaseClip();"));

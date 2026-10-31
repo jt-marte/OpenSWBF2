@@ -93,6 +93,13 @@ public:
     static void SetMaxPreGameTime(int iSeconds);
 
     static int GetPreGameTime();
+    // OpenSWBF2 lobby (NetLobby.h): host and clients alike
+    static bool IsLobby();
+    // The dedicated host holds each mission that becomes ready in the lobby while this is set.
+    static void SetLobbyHold(bool bHold);
+    static bool GetLobbyHold();
+    // Ends the lobby now (0) or after an N-second warm-up; false when not in the lobby.
+    static bool RequestLobbyStart(int iSeconds);
     static const char* GetPlayerName(int iPlayer);
 
     static void CreateEvent_CreateOrdnance(const OrdnanceClass* pClass, const OrdnanceDesc& desc);

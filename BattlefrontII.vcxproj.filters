@@ -2453,6 +2453,15 @@
     <ClInclude Include="src\Battlefront2\Source\GameplayCfg.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\NetLobby.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\NetAdminText.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Battlefront2\Source\MissionPlayListOps.h">
+      <Filter>src\Battlefront2\Source</Filter>
+    </ClInclude>
     <ClInclude Include="src\Battlefront2\Source\AIDifficultyLevel.h">
       <Filter>src\Battlefront2\Source</Filter>
     </ClInclude>

@@ -79,6 +79,7 @@ bool gLogStdout;
 bool gLogConsole;
 // Set by GameWinMain when "-dedicated" expanded into the autonet dedicated switches.
 bool gDedicatedShorthand;
+char gListMissionsPath[260];
 extern int hostshort;
 bool gSeedSet;
 unsigned int gSeed;
@@ -443,6 +444,28 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         {
             gLogStdout = true;
             gLogConsole = true;
+            continue;
+        }
+
+        // OpenSWBF2: a dedicated server opens each map in a lobby until an admin's /start (NetLobby.h)
+        if (_stricmp(pcArg + 1, "lobby") == 0)
+        {
+            NetGame::SetLobbyHold(true);
+            continue;
+        }
+
+        // OpenSWBF2: -listmissions <file> writes the multiplayer mission list, mods included, as
+        // JSON once the shell has loaded, then quits (pcMain runs it headless; ShellLoop writes it)
+        if (_stricmp(pcArg + 1, "listmissions") == 0)
+        {
+            if (i + 1 < iArgc && strlen(apcArgv[i + 1]) < sizeof(gListMissionsPath))
+            {
+                strcpy(gListMissionsPath, apcArgv[++i]);
+            }
+            else
+            {
+                LOG(LogCore, Warning, "-listmissions needs a file name, ignored");
+            }
             continue;
         }
 

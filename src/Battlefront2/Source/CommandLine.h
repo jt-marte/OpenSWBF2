@@ -36,6 +36,10 @@ extern bool gNetTestPlayer;
 extern bool gLogStdout;
 extern bool gLogConsole;
 extern bool gDedicatedShorthand;
+// -listmissions <file>: where ShellLoop writes the mission list before quitting; "" when not asked
+extern char gListMissionsPath[260];
+// The process exit code a normal quit (WM_CLOSE) returns; -listmissions sets 2 when it fails.
+extern int gExitCode;
 extern bool gSeedSet;
 extern unsigned int gSeed;
 extern int gBootLaggerPing;
