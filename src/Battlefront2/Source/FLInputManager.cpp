@@ -348,6 +348,10 @@ GUIInputs* FLInputManager::GetPlayerGuiInputs(int iPlayer)
 // FUNCTION: SWBF2 0x0052a210
 bool FLInputManager::IsControllerBound(int iPlayer) const
 {
+#ifndef _WIN64
+    // Retail NetSetup read this array as the raw byte at +0x2e6c
+    static_assert(offsetof(FLInputManager, mActiveControllers) == 0x2e6c, "FLInputManager layout moved");
+#endif
     if ((unsigned int)iPlayer >= 1)
     {
         return false;

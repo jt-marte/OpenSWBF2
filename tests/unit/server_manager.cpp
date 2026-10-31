@@ -215,3 +215,15 @@ TEST_CASE("the server manager is wired into the game" * doctest::test_suite("reg
     CHECK((unsigned int)PblHash("openswbf2.lobby.waiting") == 0xba3e6ee8);
     CHECK(Has(sText, "{ 0xba3e6ee8, L\"Waiting for the host to start the match\" },"));
 }
+
+TEST_CASE("a JOIN carries the player's name on x64" * doctest::test_suite("regression"))
+{
+    // Retail found the bound pad as the byte at FLInputManager+0x2e6c. On x64 that offset is
+    // elsewhere, so no pad looked bound and every JOIN went out with an empty name.
+    const std::string sSetup = ReadScript("../src/Battlefront2/Source/NetSetup.cpp");
+    const std::string sInput = ReadScript("../src/Battlefront2/Source/FLInputManager.cpp");
+    CHECK(!Has(sSetup, "[0x2e6c"));
+    CHECK(Has(sSetup, "if (input->IsControllerBound(i))"));
+    CHECK(Has(sSetup, "bool bActive = pInput->IsControllerBound(j);"));
+    CHECK(Has(sInput, "static_assert(offsetof(FLInputManager, mActiveControllers) == 0x2e6c"));
+}
