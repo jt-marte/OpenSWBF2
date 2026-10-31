@@ -2,7 +2,7 @@
 # scripts) under Wine. No game data is in the image: mount your own copy (see README.md).
 FROM debian:bookworm-slim
 
-ARG OPENSWBF2_VERSION=0.2.2
+ARG OPENSWBF2_VERSION=0.2.3
 ARG OPENSWBF2_REPO=jt-marte/OpenSWBF2
 
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -12,11 +12,11 @@ ENV DEBIAN_FRONTEND=noninteractive \
     WINEDEBUG=-all \
     WINEDLLOVERRIDES="mscoree,mshtml="
 
-# 64-bit Wine runs the game; 32-bit Wine runs LuaCompiler, which builds the core lvls
-RUN dpkg --add-architecture i386 \
- && apt-get update \
+# 64-bit Wine only: the game and LuaCompiler are both x64. (Docker's default seccomp profile
+# blocks the socket calls 32-bit Wine makes, so a 32-bit program can't run here.)
+RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-        wine wine64 wine32:i386 xvfb xauth tini python3 ca-certificates curl unzip \
+        wine wine64 xvfb xauth tini python3 ca-certificates curl unzip \
  && rm -rf /var/lib/apt/lists/*
 
 RUN groupadd -g 1000 swbf2 \
@@ -33,7 +33,10 @@ RUN set -eu; \
     curl -fsSLO "$base/$name.sha256"; \
     sha256sum -c "$name.sha256"; \
     unzip -q "$name" -d /opt/openswbf2; \
-    rm -f "$name" "$name.sha256"
+    rm -f "$name" "$name.sha256"; \
+    python3 -c 'import struct, sys; b = open(sys.argv[1], "rb").read(); pe = struct.unpack_from("<I", b, 0x3C)[0]; sys.exit(struct.unpack_from("<H", b, pe + 4)[0] != 0x8664)' \
+        /opt/openswbf2/LuaCompiler.exe \
+     || { echo "OpenSWBF2 ${OPENSWBF2_VERSION} ships a 32-bit LuaCompiler: the image needs 0.2.3 or later" >&2; exit 1; }
 
 COPY entrypoint.sh /opt/docker/entrypoint.sh
 COPY rcon.py /usr/local/bin/rcon

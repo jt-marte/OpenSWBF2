@@ -289,7 +289,8 @@ TEST_CASE("lua undump runs a native dump" * doctest::test_suite("unit"))
 {
     std::string sChunk = Compile(kScript);
     REQUIRE(sChunk.size() > kHeaderLen);
-    CHECK((unsigned char)sChunk[kSizeTByte] == sizeof(size_t));
+    // lua_dump writes the 32-bit tools' 4-byte size_t on every build
+    CHECK((unsigned char)sChunk[kSizeTByte] == 4);
     RunScriptChunk(sChunk);
 }
 
@@ -299,10 +300,7 @@ TEST_CASE("lua undump runs a dump rewritten with 8-byte sizes" * doctest::test_s
     std::string sWide = RewriteSizeWidth(sNative, 8);
     REQUIRE(sWide.size() > kHeaderLen);
     CHECK(sWide[kSizeTByte] == 8);
-    if (sizeof(size_t) == 4)
-    {
-        CHECK(sWide.size() > sNative.size());
-    }
+    CHECK(sWide.size() > sNative.size());
     RunScriptChunk(sWide);
 }
 
@@ -312,10 +310,7 @@ TEST_CASE("lua undump runs a dump rewritten with 4-byte sizes" * doctest::test_s
     std::string sNarrow = RewriteSizeWidth(sNative, 4);
     REQUIRE(sNarrow.size() > kHeaderLen);
     CHECK(sNarrow[kSizeTByte] == 4);
-    if (sizeof(size_t) == 8)
-    {
-        CHECK(sNarrow.size() < sNative.size());
-    }
+    CHECK(sNarrow == sNative);
     RunScriptChunk(sNarrow);
 }
 

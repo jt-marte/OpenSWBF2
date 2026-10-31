@@ -40,9 +40,12 @@ static void DumpInt(int x, DumpState* D)
 }
 
 // FUNCTION: SWBF2 0x006a5570
+// Chunks keep the 32-bit tools' 4-byte size_t on every build, so a 64-bit
+// LuaCompiler writes the same bytes as the 32-bit one
 static void DumpSize(size_t x, DumpState* D)
 {
- DumpBlock(&x,sizeof(x),D);
+ unsigned int y=(unsigned int)x;
+ DumpBlock(&y,sizeof(y),D);
 }
 
 // FUNCTION: SWBF2 0x006a5550
@@ -152,7 +155,7 @@ static void DumpHeader(DumpState* D)
  DumpByte(VERSION,D);
  DumpByte(luaU_endianness(),D);
  DumpByte(sizeof(int),D);
- DumpByte(sizeof(size_t),D);
+ DumpByte(sizeof(unsigned int),D);
  DumpByte(sizeof(Instruction),D);
  DumpByte(SIZE_OP,D);
  DumpByte(SIZE_A,D);

@@ -79,10 +79,10 @@ if [[ ${1:-} == selftest ]]; then
     cd "$APP"
     status=0
     wine_to_file 180 "$out" LuaCompiler.exe || status=$?
-    grep -q 'usage: luac' "$out" || selftest_fail "LuaCompiler (32-bit) did not run under Wine (exit $status)" "$out"
+    grep -q 'usage: luac' "$out" || selftest_fail "LuaCompiler did not run under Wine (exit $status)" "$out"
     status=0
     wine_to_file 180 "$out" cmd /c echo wine64-ok || status=$?
-    grep -q 'wine64-ok' "$out" || selftest_fail "64-bit Wine did not run (exit $status)" "$out"
+    grep -q 'wine64-ok' "$out" || selftest_fail "Wine's cmd did not run (exit $status)" "$out"
     log "selftest ok: OpenSWBF2 $VERSION, $(wine --version)"
     wineserver -k >/dev/null 2>&1 || true
     exit 0

@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: OpenSWBF2 release to package, such as 0.2.2
+        description: OpenSWBF2 release to package (0.2.3 or later), such as 0.2.3
         required: true
 
 permissions:
