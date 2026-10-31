@@ -959,12 +959,14 @@ end
 -- Returns -1, 0, or 1, depending on error, busy, or success
 -- Join IP (AddrStr, "host" or "host:port") or, with no address, a pending special join.
 -- The busy popup polls the find and joins once the server answers.
-function ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr)
+-- OpenSWBF2: PassStr is the password given with the address (-connect with -password)
+function ifs_mp_sessionlist_fnBeginSpecialJoin(this, AddrStr, PassStr)
 	Popup_Busy:fnActivate(nil)
 	ScriptCB_SetAmHost(nil)
 	ScriptCB_SetDedicated(nil)
+	this.SpecialJoinPass = PassStr
 	if(AddrStr) then
-		ScriptCB_BeginJoinIP(AddrStr)
+		ScriptCB_BeginJoinIP(AddrStr, PassStr or "")
 	else
 		ScriptCB_BeginJoinSpecial()
 	end
@@ -995,8 +997,11 @@ function ifs_mp_sessionlist_buddymatch_fnOnSuccess()
 	local this = ifs_mp_sessionlist
 
 	Popup_Busy:fnActivate(nil)
-	-- OpenSWBF2: a passworded server reached by Join IP asks for its password first
-	if((gPlatformStr == "PC") and ScriptCB_IsQuickmatchPassworded()) then
+	-- OpenSWBF2: a passworded server reached by Join IP asks for its password first, unless it
+	-- came with the address (ScriptCB_LaunchQuickmatch then uses the one BeginJoinIP kept)
+	local PassStr = this.SpecialJoinPass
+	this.SpecialJoinPass = nil
+	if((gPlatformStr == "PC") and ScriptCB_IsQuickmatchPassworded() and not (PassStr and PassStr ~= "")) then
 		this.bSpecialJoinPass = 1
 		this.bPasswordMode = 1
 		ifs_mp_sessionlist_fnShowHideInterface(this, 1)
@@ -1968,7 +1973,7 @@ ifs_mp_sessionlist = NewIFShellScreen {
 		this.bPasswordJoinOnEnter = nil -- always clear this.
 
 		local bSpecialJoinPending = ScriptCB_IsSpecialJoinPending()
-		local CmdlinePending = ScriptCB_IsCmdlineJoinPending()
+		local CmdlinePending, CmdlinePass = ScriptCB_IsCmdlineJoinPending()
 		if(CmdlinePending) then
 			this.bJoinIPOnEntry = 1
 			ifs_vkeyboard = ifs_vkeyboard or {}
@@ -1979,7 +1984,7 @@ ifs_mp_sessionlist = NewIFShellScreen {
 		if(this.bJoinIPOnEntry or bSpecialJoinPending) then
 --			print(" ** Begin special join!")
 			if(this.bJoinIPOnEntry) then
-				ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString)
+				ifs_mp_sessionlist_fnBeginSpecialJoin(this, ifs_vkeyboard.CurString, CmdlinePending and CmdlinePass)
 			else
 				ifs_mp_sessionlist_fnBeginSpecialJoin(this, nil)
 			end

@@ -1060,11 +1060,18 @@ int ScriptCB_IsSpecialJoinPending(lua_State* L)
 }
 
 // FUNCTION: SWBF2 0x00594d10
+// OpenSWBF2: with /password on the command line too, that password comes second, so the join
+// (the launcher's Join a server) needs no password box.
 int ScriptCB_IsCmdlineJoinPending(lua_State* L)
 {
     if (gGamespyAutoConnectAddr[0])
     {
         lua_pushstring(LuaHelper::mState, gGamespyAutoConnectAddr);
+        if (gGamespyAutoPassStr[0])
+        {
+            lua_pushstring(LuaHelper::mState, gGamespyAutoPassStr);
+            return 2;
+        }
     }
     else
     {
