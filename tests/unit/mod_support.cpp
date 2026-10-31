@@ -170,6 +170,58 @@ TEST_CASE("mod registry finds eras and modes from mission list entries" * doctes
     CHECK(lua.Global("mission") == "bf1k_bf1");
 }
 
+TEST_CASE("the Conversion Pack's maps win over the Xbox DLC's copies" * doctest::test_suite("unit"))
+{
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(RegistryCode()));
+    REQUIRE(lua.Run(
+        // the pairs as the two packs' addme scripts list them (shortened)
+        "local function Lists()\n"
+        "  return {\n"
+        "    { mapluafile = 'bes2%s_%s', era_c = 1, era_g = 1, mode_con_c = 1, mode_con_g = 1, mode_ctf_g = 1, mode_eli_g = 1 },\n"
+        "    { mapluafile = 'rhn1%s_%s', era_c = 1, era_g = 1, mode_con_c = 1, mode_con_g = 1, mode_eli_g = 1 },\n"
+        "    { mapluafile = 'cor1%s_%s', era_g = 1, mode_eli_g = 1 },\n"
+        "  }\n"
+        "end\n"
+        "local function Has(List, Code)\n"
+        "  local i\n"
+        "  for i = 1, table.getn(List) do\n"
+        "    if List[i].mapluafile == Code .. '%s_%s' then return List[i] end\n"
+        "  end\n"
+        "end\n"
+        "local function Keys(Entry)\n"
+        "  local Out, k = {}\n"
+        "  for k in Entry do if k ~= 'mapluafile' then table.insert(Out, k) end end\n"
+        "  table.sort(Out)\n"
+        "  return table.concat(Out, ',')\n"
+        "end\n"
+        // the DLC alone: nothing changes
+        "local alone = Lists()\n"
+        "missionlist_PreferMaps(alone)\n"
+        "alone_count = table.getn(alone)\n"
+        "alone_rhn1 = Keys(Has(alone, 'rhn1'))\n"
+        // with the pack: its Cloud City has Hero Assault (but no CTF), its Harbor has none
+        "local both = Lists()\n"
+        "table.insert(both, { mapluafile = 'BS2%s_%s', era_c = 1, era_g = 1, era_k = 1, mode_con_c = 1, mode_con_g = 1,\n"
+        "  mode_hctf_g = 1, mode_eli_g = 1, mode_con_k = 1 })\n"
+        "table.insert(both, { mapluafile = 'rh1%s_%s', era_c = 1, era_g = 1, mode_con_c = 1, mode_con_g = 1, mode_xl_c = 1 })\n"
+        "missionlist_PreferMaps(both)\n"
+        "both_count = table.getn(both)\n"
+        "both_bes2 = Has(both, 'bes2') and 'kept' or 'gone'\n"
+        "both_rhn1 = Keys(Has(both, 'rhn1'))\n"
+        "both_cor1 = Keys(Has(both, 'cor1'))\n"
+        "both_rh1 = Keys(Has(both, 'rh1'))\n"));
+
+    CHECK(lua.Global("alone_count") == "3");
+    CHECK(lua.Global("alone_rhn1") == "era_c,era_g,mode_con_c,mode_con_g,mode_eli_g");
+    CHECK(lua.Global("both_count") == "4"); // bes2 went, CTF and all: the pack's version wins
+    CHECK(lua.Global("both_bes2") == "gone");
+    CHECK(lua.Global("both_rhn1") == "era_g,mode_eli_g"); // only a Hero Assault the pack lacks is left
+    CHECK(lua.Global("both_cor1") == "era_g,mode_eli_g"); // maps only the DLC has are untouched
+    CHECK(lua.Global("both_rh1") == "era_c,era_g,mode_con_c,mode_con_g,mode_xl_c");
+}
+
 TEST_CASE("mod registry merges what custom_gc scripts add" * doctest::test_suite("unit"))
 {
     Lua lua;
@@ -480,6 +532,10 @@ TEST_CASE("mod support is wired into the shell" * doctest::test_suite("regressio
     const std::string sExpand = Between(sList, "function missionlist_ExpandMaplist(bForMP)", "table.sort(sp_");
     CHECK(Has(sExpand, "missionlist_DiscoverErasAndModes(sp_missionselect_listbox_contents)"));
     CHECK(Has(sExpand, "missionlist_DiscoverErasAndModes(mp_missionselect_listbox_contents)"));
+    // before that, the Conversion Pack's maps win over the Xbox DLC's copies
+    CHECK(sExpand.find("missionlist_PreferMaps(sp_missionselect_listbox_contents)") <
+          sExpand.find("missionlist_DiscoverErasAndModes(sp_missionselect_listbox_contents)"));
+    CHECK(Has(sExpand, "missionlist_PreferMaps(mp_missionselect_listbox_contents)"));
 
     // Galactic Conquest scenario buttons come from the hook, and script mods handle their own
     CHECK(Has(sPick, "buttonlist = custom_GetGCButtonList(),"));

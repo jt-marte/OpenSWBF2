@@ -561,6 +561,69 @@ function missionlist_DiscoverErasAndModes(List)
 	end
 end
 
+-- The Xbox DLC and the Battlefront Conversion Pack both bring these maps, and the pack's
+-- versions are far more detailed. With both installed, the DLC's copy keeps only a Hero Assault
+-- the pack's lacks, and goes when nothing is left.
+gPreferredMaps = {
+	{ keep = "bs2", drop = "bes2" },	-- Bespin: Cloud City
+	{ keep = "rh1", drop = "rhn1" },	-- Rhen Var: Harbor
+	{ keep = "rnv", drop = "rhn2" },	-- Rhen Var: Citadel
+	{ keep = "yv2", drop = "yav2" },	-- Yavin 4: Arena
+}
+
+function missionlist_PreferMaps(List)
+	local function Find(Code)
+		local i
+		for i = 1, table.getn(List) do
+			if(List[i].mapluafile and string.lower(List[i].mapluafile) == Code .. "%s_%s") then
+				return i
+			end
+		end
+	end
+
+	local p, i, k, v
+	for p = 1, table.getn(gPreferredMaps) do
+		local Keep = Find(gPreferredMaps[p].keep)
+		local Drop = Find(gPreferredMaps[p].drop)
+		if(Keep and Drop) then
+			local Entry = List[Drop]
+			local Gone = {}
+			for k, v in Entry do
+				if(type(k) == "string" and string.sub(k, 1, 5) == "mode_" and
+				   (string.sub(k, 1, 9) ~= "mode_eli_" or List[Keep][k])) then
+					table.insert(Gone, k)
+				end
+			end
+			for i = 1, table.getn(Gone) do
+				Entry[Gone[i]] = nil
+			end
+
+			local Used = {}
+			local bAny = nil
+			for k, v in Entry do
+				local _, _, Era = string.find(type(k) == "string" and v and k or "", "^mode_.+_([^_]+)$")
+				if(Era) then
+					Used[Era] = 1
+					bAny = 1
+				end
+			end
+			if(bAny) then
+				Gone = {}
+				for k, v in Entry do
+					if(type(k) == "string" and string.sub(k, 1, 4) == "era_" and not Used[string.sub(k, 5)]) then
+						table.insert(Gone, k)
+					end
+				end
+				for i = 1, table.getn(Gone) do
+					Entry[Gone[i]] = nil
+				end
+			else
+				table.remove(List, Drop)
+			end
+		end
+	end
+end
+
 -- Display names as unicode: the localized key if there is one, else readable English
 function missionlist_EraUName(Era)
 	local UStr = Era.showstr and ScriptCB_getlocalizestr(Era.showstr, 1)
@@ -641,6 +704,8 @@ function missionlist_ExpandMaplist(bForMP)
 	if(not gSortedMaplist) then
 		-- OpenSWBF2: the mods' addme scripts have run by now; register their eras and modes
 		missionlist_BuildRegistry()
+		missionlist_PreferMaps(sp_missionselect_listbox_contents)
+		missionlist_PreferMaps(mp_missionselect_listbox_contents)
 		missionlist_DiscoverErasAndModes(sp_missionselect_listbox_contents)
 		missionlist_DiscoverErasAndModes(mp_missionselect_listbox_contents)
 		table.sort(sp_missionselect_listbox_contents, missionlist_mapsorthelper)
