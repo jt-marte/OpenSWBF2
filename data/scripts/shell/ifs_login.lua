@@ -734,24 +734,32 @@ ifs_login = NewIFShellScreen {
 
 			-- If there's a name on the commandline, try and log that player in
 			-- immediately
+			-- OpenSWBF2: once per run (the launcher's -name), so switching profiles from the
+			-- Profile tab still works; any case, and a profile that isn't there yet is made
 			local CmdNickStr,CmdEmailStr,CmdPassStr = ScriptCB_GetCmdlineLogin()
-			if(CmdNickStr and (string.len(CmdNickStr) > 0)) then
+			if(CmdNickStr and (string.len(CmdNickStr) > 0) and not gCmdlineLoginUsed) then
+				gCmdlineLoginUsed = 1
 				local i
 				for i=1,table.getn(ifs_login_listbox_contents) do
 					local TheirStr = ScriptCB_ununicode(ifs_login_listbox_contents[i].showstr)
-					if(TheirStr == CmdNickStr) then
+					if(string.lower(TheirStr) == string.lower(CmdNickStr)) then
 						ifs_login_listbox_layout.SelectedIdx = i
 						ifs_login_listbox_layout.CursorIdx = i
 						this.CurButton = "_accept"
 						ListManager_fnFillContents(this.listbox,ifs_login_listbox_contents,ifs_login_listbox_layout)
 						this.iForceLoginTime = 2
 						this.iForceLoginIdx = i
---						
+--
 --print("+++++2")
 						return
 					end
 				end
 
+				-- as typing the name in and accepting it would (names are 3 to 15 characters)
+				if((not this.ListFull) and string.len(CmdNickStr) > 2 and string.len(CmdNickStr) <= 15) then
+					this.iForceCreateTime = 2
+					this.sForceCreateName = CmdNickStr
+				end
 			end
 
 			IFEditbox_fnSetUString(this.NewBox.nameedit, ScriptCB_GetUniqueLoginName())
@@ -834,6 +842,17 @@ ifs_login = NewIFShellScreen {
 				this.iForceLoginTime = nil
 --				print("Forcing login...")
 				ifs_login_StartLoadProfile(ifs_login_listbox_contents[this.iForceLoginIdx].showstr,nil)
+			end
+		end
+
+		if(this.iForceCreateTime) then
+			this.iForceCreateTime = this.iForceCreateTime - 1
+			if(this.iForceCreateTime <= 0) then
+				this.iForceCreateTime = nil
+				ifs_login_SetCreateVis(1)
+				IFEditbox_fnSetUString(this.NewBox.nameedit, ScriptCB_tounicode(this.sForceCreateName))
+				this.CurButton = "_accept"
+				this:Input_Accept()
 			end
 		end
 

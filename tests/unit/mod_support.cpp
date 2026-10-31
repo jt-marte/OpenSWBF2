@@ -285,6 +285,18 @@ TEST_CASE("a mode a mod lists without its mission is left out" * doctest::test_s
     CHECK(lua.Global("geo_hunt_c") == "1");
 }
 
+TEST_CASE("the launcher's player name signs in or makes the profile once" * doctest::test_suite("regression"))
+{
+    const std::string sLogin = ReadScript("../data/scripts/shell/ifs_login.lua");
+    // -name: any case, once per run (switching profiles from the Profile tab still works)
+    CHECK(sLogin.find("if(CmdNickStr and (string.len(CmdNickStr) > 0) and not gCmdlineLoginUsed) then") != std::string::npos);
+    CHECK(sLogin.find("if(string.lower(TheirStr) == string.lower(CmdNickStr)) then") != std::string::npos);
+    // a name with no profile is made, as typing it in and accepting would
+    CHECK(sLogin.find("this.sForceCreateName = CmdNickStr") != std::string::npos);
+    CHECK(sLogin.find("IFEditbox_fnSetUString(this.NewBox.nameedit, ScriptCB_tounicode(this.sForceCreateName))") !=
+          std::string::npos);
+}
+
 TEST_CASE("the mission list dump writes what the launcher needs" * doctest::test_suite("unit"))
 {
     Lua lua;

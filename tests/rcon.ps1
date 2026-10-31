@@ -22,7 +22,13 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-$udp = New-Object System.Net.Sockets.UdpClient $LocalPort
+# A fixed local port binds loopback only: bound on every interface, Windows Firewall asks about
+# PowerShell
+$udp = if ($LocalPort -gt 0 -and ($Server -eq '127.0.0.1' -or $Server -eq 'localhost')) {
+    New-Object System.Net.Sockets.UdpClient (New-Object System.Net.IPEndPoint ([System.Net.IPAddress]::Loopback, $LocalPort))
+} else {
+    New-Object System.Net.Sockets.UdpClient $LocalPort
+}
 $udp.Client.ReceiveTimeout = $TimeoutMs
 $udp.Connect($Server, $Port)
 $script:group = Get-Random -Minimum 1 -Maximum 60000
