@@ -1100,7 +1100,11 @@ end
 -- Retail's mode order comes first, the rest follow in registry order
 ifs_mspc_ModeOrder = { "mode_con", "mode_ctf", "mode_1flag", "mode_assault", "mode_hunt", "mode_xl" }
 
--- The modes the selected maps have. Multiplayer leaves out XL, as retail did.
+-- Modes multiplayer leaves out: XL, as retail did, and Uber (a mod mode). Their 320 to 560
+-- soldiers ran clients' packet pools dry, or sent updates too big to take, on a server.
+ifs_mspc_SinglePlayerModes = { mode_xl = 1, mode_uber = 1 }
+
+-- The modes the selected maps have. Multiplayer leaves out ifs_mspc_SinglePlayerModes.
 function ifs_missionselect_pcMulti_fnShownModes( this )
 	local Maps = ifs_missionselect_pcMulti_fnSelectedMaps(this)
 	local Has = {}
@@ -1119,7 +1123,10 @@ function ifs_missionselect_pcMulti_fnShownModes( this )
 		end
 	end
 	if(this ~= ifs_missionselect) then
-		Has["mode_xl"] = nil
+		local Key
+		for Key in ifs_mspc_SinglePlayerModes do
+			Has[Key] = nil
+		end
 	end
 
 	local Shown = {}
@@ -1560,9 +1567,9 @@ else
 	for i = 1,table.getn(gMissionselectModes) do
 		local ModeSelection2 = gMissionselectModes[i]
 		-- OpenSWBF2: the mode's box is ticked (its row may be scrolled out of view); "mode_eli"
-		-- counts as "mode_assault", and multiplayer has no XL, as in retail
+		-- counts as "mode_assault", and multiplayer has no XL or Uber (ifs_mspc_SinglePlayerModes)
 		if((not ModeSelection2.bIsWildcard) and ifs_missionselect_pcMulti_fnModeOn(this, ModeSelection2.key) and
-		   ((ModeSelection2.key ~= "mode_xl") or (this == ifs_missionselect))) then
+		   ((not ifs_mspc_SinglePlayerModes[ModeSelection2.key]) or (this == ifs_missionselect))) then
 			-- Ensure this map supports this mode before adding.
 			local Key = ModeSelection2.key .. "_" .. subst
 			if(MapSelection[Key]) then

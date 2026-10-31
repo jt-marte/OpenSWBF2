@@ -426,7 +426,7 @@ TEST_CASE("mission select offers and adds every era and mode a map has" * doctes
         // a BF1 Conversion Pack map: its KotOR era only shows in mode keys; and a stock map
         "missionselect_listbox_contents = {\n"
         "  { mapluafile = 'AB1%s_%s', era_c = 1, mode_con_c = 1, mode_bf1_c = 1, mode_xl_c = 1, mode_eli_c = 1,\n"
-        "    mode_con_k = 1, bSelected = 1 },\n"
+        "    mode_uber_c = 1, mode_con_k = 1, bSelected = 1 },\n"
         "  { mapluafile = 'tat2%s_%s', era_g = 1, mode_con_g = 1, mode_ctf_g = 1 },\n"
         "}\n"
         "missionlist_DiscoverErasAndModes(missionselect_listbox_contents)\n"
@@ -463,12 +463,12 @@ TEST_CASE("mission select offers and adds every era and mode a map has" * doctes
         "ifs_missionselect_pcMulti_fnClickCheckButtons(sp)\n"
         "top = sp.ModeTop\n"));
 
-    // retail's order first, Hero Assault shown as Assault, XL only in single player
-    CHECK(lua.Global("sp_modes") == "mode_con,mode_assault,mode_xl,mode_bf1,");
+    // retail's order first, Hero Assault shown as Assault, XL and Uber only in single player
+    CHECK(lua.Global("sp_modes") == "mode_con,mode_assault,mode_xl,mode_uber,mode_bf1,");
     CHECK(lua.Global("mp_modes") == "mode_con,mode_assault,mode_bf1,");
     // the KotOR era counts although the entry has no era_k key
     CHECK(lua.Global("eras") == "era_c,era_k,");
-    CHECK(lua.Global("all") == "AB1c_con;AB1c_eli;AB1c_xl;AB1c_bf1;AB1k_con;");
+    CHECK(lua.Global("all") == "AB1c_con;AB1c_eli;AB1c_xl;AB1c_uber;AB1c_bf1;AB1k_con;");
     CHECK(lua.Global("bf1_off") == "1");
     CHECK(lua.Global("c_off") == "1");
     CHECK(lua.Global("some") == "AB1k_con;");
