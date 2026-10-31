@@ -67,10 +67,15 @@ RUN sed -i 's/\r$//' /opt/docker/entrypoint.sh /opt/docker/modserver.py /opt/doc
 USER swbf2
 RUN xvfb-run -a wineboot -i && wineserver -w
 
+# The entrypoint starts as root only to make /config the server's own (Docker creates a missing
+# host folder root-owned), then runs everything as swbf2 (uid 1000) through setpriv
+USER root
+
 WORKDIR /srv/game
 # UDP: the game and admin; TCP: mod downloads
 EXPOSE 3658/udp 3658/tcp
 VOLUME ["/config"]
 # A first start downloads the game (once) and builds the core lvls, so it counts as unhealthy until then
 HEALTHCHECK --interval=30s --timeout=10s --start-period=300s --retries=3 CMD ["rcon", "--ping"]
-ENTRYPOINT ["/usr/bin/tini", "--", "/opt/docker/entrypoint.sh"]
+# The entrypoint starts tini itself, after leaving root
+ENTRYPOINT ["/opt/docker/entrypoint.sh"]

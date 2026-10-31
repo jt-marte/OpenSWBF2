@@ -31,7 +31,7 @@ docker compose exec openswbf2 steam-login
 
 It shows a QR code: in the Steam app on your phone, open **Steam Guard** (the shield) and choose
 **Scan a QR code**. Your password never touches the server; only a login token is kept, in the
-`config` volume. (`steam-login --password` asks for the account name, password and Steam Guard
+`config` folder next to `compose.yaml`. (`steam-login --password` asks for the account name, password and Steam Guard
 code instead.)
 
 The server then downloads the game's data (about 13 GB, once), checks the core files are the
@@ -83,7 +83,7 @@ the server itself when they join (see [Mod downloads](#mod-downloads)).
 |---|---|---|
 | `PORT` | `3658` | UDP port for players and admin. Map the same number in `ports`. |
 | `SERVER_NAME` | `OpenSWBF2 Server` | Up to 31 characters. |
-| `ADMIN_PASSWORD` | generated | 6-31 letters or digits. Empty: one is generated; `docker compose exec openswbf2 cat /config/admin-password` shows it. |
+| `ADMIN_PASSWORD` | generated | 6-31 letters or digits. Empty: one is generated into `config/admin-password`. |
 | `JOIN_PASSWORD` | empty | Up to 15 characters, no spaces. Empty means anyone can join. |
 | `MAPS` | 8 stock Conquest maps | Mission names, space-separated (`geo1c_con`, `BS1k_con`, ...). |
 | `MAX_PLAYERS` | `32` | 2-64. |
@@ -194,8 +194,9 @@ Is that safe enough? It is a reasonable setup for a home server, with one caveat
 - **The caveat: this is a 2005 game engine,** rebuilt from the original. Its network readers were
   hardened and fuzz-tested, but it has not been security-audited like a modern server. So the
   container is the safety net:
-  - it runs as an unprivileged user, with no capabilities and `no-new-privileges`;
-  - your own game copy, if you mount one, is read-only; the Steam download and settings sit in their own volume;
+  - it starts as root only to give `/config` to the server's user, then runs as that unprivileged
+    user with no capabilities and `no-new-privileges`;
+  - your own game copy, if you mount one, is read-only; the Steam download and settings sit in `config`;
   - memory, CPU and process counts are capped;
   - it uses Docker's normal network (not host networking).
 - **Keep it current:** `docker compose pull` picks up fixes.
@@ -211,10 +212,11 @@ Is that safe enough? It is a reasonable setup for a home server, with one caveat
   `steam-login` again. A download that stopped part-way carries on at the next start.
 - `building the core game files failed`: the four core lvls aren't the original ones (a patch or
   mod replaced them). Use the Steam download, or copy them from a clean install.
-- `/config is not writable`: only with a host folder mounted at `/config` instead of the volume:
-  `sudo chown -R 1000:1000` that folder.
+- `/config is not writable`: the server fixes a host folder's ownership itself unless
+  `compose.yaml` sets `user:` (older examples did). Remove that line, or `sudo chown -R 1000:1000`
+  the folder.
 - The launcher says the server doesn't share mods: check the TCP mapping and forward, then
   `curl -H "Authorization: Bearer <JOIN_PASSWORD>" http://your-address:3658/mods.json` from outside.
   The log names any mod folder or file left out, and why.
-- Logs: `docker compose logs`, and inside the `config` volume `logs/server.log` and
-  `logs/steam-download.log` (`docker compose exec openswbf2 tail -n 50 /config/logs/server.log`).
+- Logs: `docker compose logs`, and `config/logs/server.log` and `config/logs/steam-download.log`
+  next to `compose.yaml`.

@@ -26,6 +26,22 @@ VERSION=$(python3 -c 'import json; print(json.load(open("/opt/openswbf2/manifest
 log() { echo "[openswbf2] $*"; }
 die() { echo "[openswbf2] error: $*" >&2; exit 1; }
 
+# Started as root (the image's default): make /config the server's own, since Docker creates a
+# missing host folder root-owned, then run everything as swbf2 (uid 1000). Leaving root this way
+# drops every capability, and it happens before tini starts, so nothing stays root. As PID 1 the
+# script hands over to tini, which reaps and forwards signals, and tini runs it again.
+if (($(id -u) == 0)); then
+    if [[ ${1:-} != selftest && -d $CONFIG ]]; then
+        find "$CONFIG" -xdev \( ! -user 1000 -o ! -group 1000 \) -exec chown -h 1000:1000 {} + 2>/dev/null ||
+            log "couldn't give all of $CONFIG to uid 1000"
+    fi
+    if (($$ == 1)); then
+        exec setpriv --reuid=1000 --regid=1000 --init-groups --inh-caps=-all /usr/bin/tini -- "$0" "$@"
+    fi
+    exec setpriv --reuid=1000 --regid=1000 --init-groups --inh-caps=-all "$0" "$@"
+fi
+(($$ == 1)) && exec /usr/bin/tini -- "$0" "$@"
+
 # An integer setting: the variable clamped to [min, max], or its default
 int_env() {
     local name=$1 default=$2 min=$3 max=$4
@@ -103,7 +119,7 @@ if [[ ${1:-} == selftest ]]; then
 fi
 
 # DepotDownloader with its login store in STEAM_DIR, run from a folder of its own. It aborts when
-# a login can't go ahead; no core dump of that lands in the volume.
+# a login can't go ahead; no core dump of that lands in /config.
 depot() {
     mkdir -p "$STEAM_DIR/work"
     (ulimit -c 0 && cd "$STEAM_DIR/work" && XDG_DATA_HOME=$STEAM_DIR "$DEPOT" "$@")
@@ -111,7 +127,7 @@ depot() {
 
 check_config() {
     mkdir -p "$STEAM_DIR" 2>/dev/null && touch "$CONFIG/.write-test" 2>/dev/null && rm -f "$CONFIG/.write-test" ||
-        die "$CONFIG is not writable by uid $(id -u): run 'sudo chown -R $(id -u):$(id -g)' on the host folder you mounted there"
+        die "$CONFIG is not writable by uid $(id -u). Remove 'user:' from compose.yaml so the server can fix that itself, or run 'sudo chown -R $(id -u):$(id -g)' on the host folder you mounted there"
 }
 
 # --- steam-login: once, interactively (docker compose exec openswbf2 steam-login) --------------
@@ -195,7 +211,7 @@ steam_download() {
     depot -app "$STEAM_APP" -depot "$STEAM_DEPOT" -os windows -username "$user" -remember-password \
         -filelist "$STEAM_DIR/files.txt" -dir "$STEAM_GAME" </dev/null 2>&1 |
         tee "$out" |
-        awk '/^ *[0-9.]+%/ { p = int($1 / 5); if (p > last) { last = p; print "[openswbf2] Steam download " p * 5 "%" }; next } { print }' ||
+        awk '/^Pre-allocating / { next } /^ *[0-9.]+%/ { p = int($1 / 5); if (p > last) { last = p; print "[openswbf2] Steam download " p * 5 "%" }; next } { print }' ||
         status=$?
     if grep -q -E 'Enter account password|Access token was rejected|Unable to login to Steam3: (InvalidPassword|InvalidSignature|AccessDenied|Expired|Revoked)' "$out"; then
         rm -f "$STEAM_DIR/username"
