@@ -1742,14 +1742,17 @@ TEST_CASE("display logic field of view scale" * doctest::test_suite("unit"))
     CHECK(FovTanScale(kFovMax) > 1.0f);
     CHECK(FovTanScale(10) == FovTanScale(kFovMin));
     CHECK(FovTanScale(170) == FovTanScale(kFovMax));
-    // 90 degrees: tan(45) / tan(30.5)
-    CHECK(FovTanScale(90) == doctest::Approx(1.0f / 0.58904f).epsilon(0.001));
-    // the 16:9 default camera (~61.4 degrees) at 90 comes out near 90
+    // the top is 80 (past it the view stretched too much); an earlier build's 90 is 80
+    CHECK(kFovMax == 80);
+    CHECK(FovTanScale(90) == FovTanScale(80));
+    // 80 degrees: tan(40) / tan(30.5)
+    CHECK(FovTanScale(80) == doctest::Approx(0.83910f / 0.58904f).epsilon(0.001));
+    // the 16:9 default camera (~61.4 degrees) at 80 comes out near 80
     const float fDefault169 = 2.0f * atanf(0.75f * tanf(0.41887903f) * 16.0f / 9.0f);
-    const float fWide = ScaleFov(fDefault169, FovTanScale(90));
-    CHECK(fWide * 57.29578f == doctest::Approx(90.0f).epsilon(0.01));
+    const float fWide = ScaleFov(fDefault169, FovTanScale(80));
+    CHECK(fWide * 57.29578f == doctest::Approx(80.0f).epsilon(0.01));
     // scaling the tangent keeps narrower units narrower
-    CHECK(ScaleFov(0.6f, FovTanScale(90)) < ScaleFov(0.8f, FovTanScale(90)));
+    CHECK(ScaleFov(0.6f, FovTanScale(80)) < ScaleFov(0.8f, FovTanScale(80)));
 }
 
 TEST_CASE("display logic scope box" * doctest::test_suite("unit"))

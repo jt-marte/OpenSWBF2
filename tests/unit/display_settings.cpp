@@ -582,7 +582,9 @@ TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("
     CHECK(SetFromText(kSettings, kHudScale, "75", "test"));
     CHECK(kSettings.uiHudScale == 75);
     CHECK(SetFromText(kSettings, kFov, "90", "test"));
-    CHECK(kSettings.uiFov == 90);
+    CHECK(kSettings.uiFov == 80); // an earlier build saved up to 100; the top is 80 now
+    CHECK(SetFromText(kSettings, kFov, "72", "test"));
+    CHECK(kSettings.uiFov == 72);
     {
         LogCapture capture;
         CHECK_FALSE(SetFromText(kSettings, kHudScale, "49", "test"));
@@ -592,7 +594,7 @@ TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("
         CHECK_FALSE(SetFromText(kSettings, kFov, "wide", "test"));
     }
     CHECK(kSettings.uiHudScale == 75);
-    CHECK(kSettings.uiFov == 90);
+    CHECK(kSettings.uiFov == 72);
 
     // each saved on its own, next to the other keys
     Cleanup();
@@ -603,9 +605,9 @@ TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("
     CHECK(gDisplay.uiHudScale == 100);
     CHECK(gDisplay.uiFov == 61);
     CHECK(SaveHudScale(80));
-    CHECK(SaveFov(85));
+    CHECK(SaveFov(75));
     CHECK(gDisplay.uiHudScale == 80);
-    CHECK(gDisplay.uiFov == 85);
+    CHECK(gDisplay.uiFov == 75);
     DisplaySettings kLoaded;
     SetDefaults(kLoaded);
     LoadIni(kLoaded, IniPath());
@@ -613,11 +615,11 @@ TEST_CASE("display settings hud scale and field of view" * doctest::test_suite("
     ReadText(acText, sizeof(acText));
     Cleanup();
     CHECK(kLoaded.uiHudScale == 80);
-    CHECK(kLoaded.uiFov == 85);
+    CHECK(kLoaded.uiFov == 75);
     CHECK(kLoaded.uiPadLookSpeed == 6);
     CHECK(kLoaded.bBorderless);
     const bool bHud = strstr(acText, "HudScale=80") != 0;
-    const bool bFov = strstr(acText, "Fov=85") != 0;
+    const bool bFov = strstr(acText, "Fov=75") != 0;
     CHECK(bHud);
     CHECK(bFov);
     SetDefaults(gCliDisplay);

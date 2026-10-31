@@ -249,10 +249,10 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
         }
         break;
     case kFov:
-        bValid = ParseUInt(pcValue, DisplayLogic::kFovMin, DisplayLogic::kFovMax, uiValue);
+        bValid = ParseUInt(pcValue, DisplayLogic::kFovMin, DisplayLogic::kFovSavedMax, uiValue);
         if (bValid)
         {
-            kSettings.uiFov = uiValue;
+            kSettings.uiFov = uiValue < DisplayLogic::kFovMax ? uiValue : DisplayLogic::kFovMax;
         }
         break;
     case kCrispFonts:

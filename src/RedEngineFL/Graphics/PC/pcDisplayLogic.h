@@ -487,8 +487,11 @@ float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent);
 // default camera (the stock 48 degrees at 4:3 widened for 16:9 is ~61). The
 // cameras' tan(FOV / 2) is scaled by FovTanScale, exactly 1 at the default,
 // so every unit's own FOV keeps its proportion and wider screens keep Hor+.
+// The top is 80: past it the view stretched too much. Earlier builds saved up
+// to kFovSavedMax; such a value reads as 80.
 const unsigned int kFovMin = 55;
-const unsigned int kFovMax = 100;
+const unsigned int kFovMax = 80;
+const unsigned int kFovSavedMax = 100;
 const unsigned int kFovDefault = 61;
 float FovTanScale(unsigned int uiDegrees);
 float ScaleFov(float fFov, float fTanScale);

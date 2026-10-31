@@ -1040,7 +1040,7 @@ ifs_opt_pcvideo_general_options_layout = {
         { tag = "futureframes", title = "Future Frame Rendering", fnChanged = ifs_opt_pcvideo.OnRadioChanged, selValue = 2, control = "radio", values = {"common.off", "common.on"} },
         -- OpenSWBF2: HUD scale (percent) and field of view (degrees across 16:9), applied at once and saved to display.ini
         { tag = "hudscale", title = "HUD scale", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 100, control = "slider", minValue = 50, maxValue = 150, sliderMultiplier = 1 },
-        { tag = "fov", title = "Field of view", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 61, control = "slider", minValue = 55, maxValue = 100, sliderMultiplier = 1 },
+        { tag = "fov", title = "Field of view", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 61, control = "slider", minValue = 55, maxValue = 80, sliderMultiplier = 1 },
         { tag = "overallquality", title = "ifs.videoopt.overallquality", fnChanged = ifs_opt_pcvideo.OnElementChanged, selValue = 1, control = "dropdown", values = {"ifs.VideoOpt.low", "ifs.VideoOpt.med", "ifs.VideoOpt.high", "ifs.VideoOpt.custom"} },
     },
 }
