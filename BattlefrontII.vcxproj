@@ -87,7 +87,7 @@
       <GenerateMapFile>true</GenerateMapFile>
       <ProgramDatabaseFile>$(IntDir)$(TargetName).pdb</ProgramDatabaseFile>
       <MapFileName>$(IntDir)$(TargetName).map</MapFileName>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;lib\binkw32.lib;lib\steam_api.lib;lib\Galaxy.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;hid.lib;setupapi.lib;lib\binkw32.lib;lib\steam_api.lib;lib\Galaxy.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Platform)'=='x64'">
@@ -99,7 +99,7 @@
     <Link>
       <TargetMachine>MachineX64</TargetMachine>
       <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
-      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib</AdditionalDependencies>
+      <AdditionalDependencies>kernel32.lib;user32.lib;gdi32.lib;advapi32.lib;winmm.lib;d3d9.lib;d3dx9.lib;ws2_32.lib;dinput8.lib;dxguid.lib;dsound.lib;ole32.lib;dmoguids.lib;hid.lib;setupapi.lib;avformat.lib;avcodec.lib;avutil.lib;swscale.lib;swresample.lib</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Debug'">
@@ -834,6 +834,8 @@
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedJoystick.cpp" />
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedKeyboard.cpp" />
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedMouse.cpp" />
+    <ClCompile Include="src\RedEngineFL\input\pc\pcSonyHid.cpp" />
+    <ClCompile Include="src\RedEngineFL\input\pc\pcSonyPad.cpp" />
     <ClCompile Include="src\RedEngineFL\input\pc\pcXInputPad.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedCircularBuffer.cpp" />
     <ClCompile Include="src\RedEngineFL\movie\RedFileAsync.cpp" />
@@ -1593,6 +1595,8 @@
     <ClInclude Include="src\RedEngineFL\geometry\vector.h" />
     <ClInclude Include="src\RedEngineFL\input\RedInputEventHandler.h" />
     <ClInclude Include="src\RedEngineFL\input\RedJoystick.h" />
+    <ClInclude Include="src\RedEngineFL\input\pc\pcSonyHid.h" />
+    <ClInclude Include="src\RedEngineFL\input\pc\pcSonyPad.h" />
     <ClInclude Include="src\RedEngineFL\input\pc\pcXInputPad.h" />
     <ClInclude Include="src\RedEngineFL\input\RedKeyboard.h" />
     <ClInclude Include="src\RedEngineFL\input\RedMouse.h" />

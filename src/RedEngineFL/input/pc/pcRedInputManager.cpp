@@ -1,4 +1,6 @@
 #include "pcRedInputManager.h"
+#include "pcSonyHid.h"
+#include "pcSonyPad.h"
 #include "pcXInputPad.h"
 
 #include "PebbleFL/Common/PblJournal.h"
@@ -208,15 +210,22 @@ static void CollectXInputDevices()
     delete[] pList;
 }
 
+// Sony pads are read over HID (SonyHid) unless that's turned off.
+static bool sSonyPads;
+
 static bool IsXInputDirectInputDevice(DIDEVICEINSTANCEA const* pInstance)
 {
-    if (!pInstance || sNumXInputDevices <= 0)
+    if (!pInstance)
     {
         return false;
     }
     // DirectInput packs the product GUID's first field as MAKELONG(vid, pid).
     const unsigned short usVid = LOWORD(pInstance->guidProduct.Data1);
     const unsigned short usPid = HIWORD(pInstance->guidProduct.Data1);
+    if (sSonyPads && SonyPad::ModelFor(usVid, usPid) != SonyPad::kModelNone)
+    {
+        return true;
+    }
     for (int i = 0; i < sNumXInputDevices; ++i)
     {
         if (sXInputDevices[i].usVid == usVid && sXInputDevices[i].usPid == usPid)
@@ -281,8 +290,22 @@ void Init()
             }
         }
 
+        sSonyPads = !g_bNoRender && !XInputPad::gDisabled && !SonyPad::gDisabled;
         m_pDI->EnumDevices(DI8DEVCLASS_GAMECTRL, pcEnumJoystickDevice, 0,
                            DIEDFL_ATTACHEDONLY);
+
+        // DualSense / DualShock 4 pads play like XInput pads, read over HID.
+        // Their ports come after the DirectInput ones, so those keep the port
+        // numbers their saved bindings use; a pad can be plugged in later.
+        if (sSonyPads)
+        {
+            int iSlots = 0;
+            while (iSlots < SonyPad::kMaxPads && m_numJoysticks < 10)
+            {
+                m_joysticks[m_numJoysticks++].InitSonyPad(iSlots++);
+            }
+            SonyHid::Init(iSlots);
+        }
     }
     else
     {
@@ -312,7 +335,7 @@ BOOL CALLBACK pcEnumJoystickDevice(DIDEVICEINSTANCEA const* pInstance, void*  )
         return DIENUM_STOP;
     }
 
-    // The same pad already has an XInput port; don't give it a second one.
+    // The same pad already has an XInput (or Sony HID) port; don't give it a second one.
     if (IsXInputDirectInputDevice(pInstance))
     {
         return DIENUM_CONTINUE;
@@ -363,6 +386,7 @@ void Cleanup()
         m_joysticks[ucPort].Remove();
         m_joysticks[ucPort].Cleanup();
     }
+    SonyHid::Shutdown();
 
     m_keyboards[0].Remove();
     m_keyboards[0].Cleanup();
@@ -413,6 +437,7 @@ bool gDisableLCD;
 // FUNCTION: SWBF2 0x006dc1c0
 void RedInputManager::Update(float fDeltaTime)
 {
+    SonyHid::Update(fDeltaTime);
     for (int i = 0; i < 10; i++)
     {
         m_joysticks[i].Update(fDeltaTime);

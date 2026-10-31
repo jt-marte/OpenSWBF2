@@ -263,6 +263,31 @@ TEST_CASE("display settings merge precedence" * doctest::test_suite("unit"))
     CHECK((kFinal.uiCliMask & kSoftwareCursor) != 0);
 }
 
+TEST_CASE("display settings NoSonyPad from ini and command line" * doctest::test_suite("unit"))
+{
+    DisplaySettings kDefaults;
+    SetDefaults(kDefaults);
+    CHECK_FALSE(kDefaults.bNoSonyPad);
+
+    WriteText("[Display]\r\nNoSonyPad=1\r\n");
+    DisplaySettings kIni;
+    SetDefaults(kIni);
+    LoadIni(kIni, IniPath());
+    Cleanup();
+    CHECK(kIni.bNoSonyPad);
+    CHECK((kIni.uiSet & kNoSonyPad) != 0);
+
+    DisplaySettings kOff;
+    SetDefaults(kOff);
+    SetFromText(kOff, kNoSonyPad, "off", "display.ini");
+    DisplaySettings kCli;
+    SetDefaults(kCli);
+    SetFlag(kCli, kNoSonyPad);
+    Merge(kOff, kCli);
+    CHECK(kOff.bNoSonyPad);
+    CHECK((kOff.uiCliMask & kNoSonyPad) != 0);
+}
+
 TEST_CASE("display settings save gate refuses without a good frame" * doctest::test_suite("unit"))
 {
     Cleanup();

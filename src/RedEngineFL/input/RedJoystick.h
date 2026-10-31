@@ -31,7 +31,11 @@ public:
     void SetLightEngine(float f);
 
     void InitXInput(int iSlot);
-    bool IsXInput() const { return m_xinputSlot >= 0; }
+    // A DualSense / DualShock 4 read over HID (SonyHid slot iSlot); it plays
+    // as an XInput pad, so IsXInput() is true for it too.
+    void InitSonyPad(int iSlot);
+    bool IsXInput() const { return m_xinputSlot >= 0 || m_sonySlot >= 0; }
+    bool IsSonyPad() const { return m_sonySlot >= 0; }
 
     unsigned char m_portNum;
     bool m_connected;
@@ -51,6 +55,7 @@ public:
     float mDeadZoneScale;
 
     int m_xinputSlot;
+    int m_sonySlot;
     unsigned long m_xinputPacket;
     float m_xinputProbeTimer;
     unsigned short m_usSentHeavy;

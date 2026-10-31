@@ -51,6 +51,8 @@ static const char* KeyName(unsigned int uiKey)
         return "CrispFonts";
     case kRenderer:
         return "Renderer";
+    case kNoSonyPad:
+        return "NoSonyPad";
     }
     return "?";
 }
@@ -222,6 +224,13 @@ bool SetFromText(DisplaySettings& kSettings, unsigned int uiKey, const char* pcV
             kSettings.bSoftwareCursor = bBool;
         }
         break;
+    case kNoSonyPad:
+        bValid = ParseBool(pcValue, bBool);
+        if (bValid)
+        {
+            kSettings.bNoSonyPad = bBool;
+        }
+        break;
     case kPadLayout:
         if (pcValue != 0 && (_stricmp(pcValue, "modern") == 0 || strcmp(pcValue, "0") == 0))
         {
@@ -315,6 +324,9 @@ void SetFlag(DisplaySettings& kSettings, unsigned int uiKey)
     case kSoftwareCursor:
         kSettings.bSoftwareCursor = true;
         break;
+    case kNoSonyPad:
+        kSettings.bNoSonyPad = true;
+        break;
     default:
         return;
     }
@@ -359,6 +371,10 @@ void Merge(DisplaySettings& dst, const DisplaySettings& cli)
     {
         dst.bSoftwareCursor = cli.bSoftwareCursor;
     }
+    if (cli.uiSet & kNoSonyPad)
+    {
+        dst.bNoSonyPad = cli.bNoSonyPad;
+    }
     if (cli.uiSet & kPadLayout)
     {
         dst.uiPadLayout = cli.uiPadLayout;
@@ -401,7 +417,7 @@ void LoadIni(DisplaySettings& kSettings, const char* pcPath)
     static const unsigned int auiKeys[] = {kAdapter, kAdapterName, kBorderless, kRefresh,
                                            kVsync,   kFps,         kNoWaitQuery, kNoDpi,
                                            kSoftwareCursor, kPadLayout, kPadLookSpeed, kHudScale, kFov, kCrispFonts,
-                                           kRenderer};
+                                           kRenderer, kNoSonyPad};
     for (unsigned int i = 0; i < sizeof(auiKeys) / sizeof(auiKeys[0]); ++i)
     {
         char acValue[256];
@@ -473,6 +489,10 @@ bool SaveIni(const DisplaySettings& kSettings, const char* pcPath, bool bGoodFra
     if (ShouldWrite(kSettings, kSoftwareCursor))
     {
         bOk = PutKey("SoftwareCursor", kSettings.bSoftwareCursor ? "1" : "0", acTemp) && bOk;
+    }
+    if (ShouldWrite(kSettings, kNoSonyPad))
+    {
+        bOk = PutKey("NoSonyPad", kSettings.bNoSonyPad ? "1" : "0", acTemp) && bOk;
     }
     if (ShouldWrite(kSettings, kPadLayout))
     {
