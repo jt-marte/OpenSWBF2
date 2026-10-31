@@ -132,6 +132,19 @@ TEST_CASE("a soldier addon without a loaded model is not drawn" * doctest::test_
     CHECK(sAddon.find("if (!pJoint || !mModel || !mModel->GetRedModel(0))") != std::string::npos);
     CHECK(sAddon.find("if (mModel && mModel->GetRedModel(0))") != std::string::npos);
 
+    // The droideka's low-res models the same way as the soldier's
+    const std::string sDroideka = ReadSource("../src/Battlefront2/Source/EntityDroideka.cpp");
+    CHECK(sDroideka.find("mUprightLowRes = pLowRes;") != std::string::npos);
+    CHECK(sDroideka.find("mBallLowRes = pLowRes;") != std::string::npos);
+    CHECK(sDroideka.find("mUprightLowRes = const_cast<GameModel*>(GameModel::Find(") == std::string::npos);
+
+    // An animated prop's skeleton reads its pose through a set pointer: headless games (every
+    // dedicated server) crashed on tat3 (Jabba's Palace)
+    const std::string sProp = ReadSource("../src/Battlefront2/Source/EntityPropAnimated.cpp");
+    CHECK(sProp.find("mZephyrSkeleton.Open(*mAnimObj->GetZephyrSkeletonShared(), mZephyrPoseStatic);") != std::string::npos);
+    const std::string sSkel = ReadSource("../src/Zephyr/Source/ZephyrSkeleton.cpp");
+    CHECK(sSkel.find("if (!m_pPoseFinal || !m_pShared)") != std::string::npos);
+
     // With auto-assign on, both team rows on team select stay readable (one looked blank)
     const std::string sSide = ReadSource("../data/scripts/ingame/ifs_sideselect.lua");
     CHECK(sSide.find("IFFlashyText_fnSetTextColor(button.label, 150, 150, 150)") != std::string::npos);

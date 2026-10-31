@@ -13,7 +13,8 @@ class ZephyrSkeleton
 public:
 
     // FUNCTION: SWBF2 0x0072bbf0
-    ZephyrSkeleton() { m_pShared = 0; }
+    // OpenSWBF2: the final pose starts unset (it was left uninitialised; BuildWorldMatrices checks it)
+    ZephyrSkeleton() { m_pShared = 0; m_pPoseFinal = 0; }
     // FUNCTION: SWBF2 0x0072bc10
     ~ZephyrSkeleton() { m_pShared = 0; }
 

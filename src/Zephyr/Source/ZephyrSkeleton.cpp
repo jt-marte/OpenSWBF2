@@ -84,6 +84,11 @@ void ZephyrSkeleton<N>::Close()
 template <int N>
 void ZephyrSkeleton<N>::BuildWorldMatrices(const PblMatrix& kRootMatrix)
 {
+    // OpenSWBF2: a skeleton opened without its final pose has nothing to build from
+    if (!m_pPoseFinal || !m_pShared)
+    {
+        return;
+    }
     BuildRootWorldMatrix(*this, kRootMatrix);
 
     char iChild = m_pShared->m_pJoints[0].m_iChild;

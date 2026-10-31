@@ -91,7 +91,11 @@ EntityPropAnimated::EntityPropAnimated(EntityPropAnimatedClass* pClass, const En
     {
         mShadowProxy->Deactivate();
     }
-    mZephyrSkeleton.Open(*mAnimObj->GetZephyrSkeletonShared());
+    // OpenSWBF2: open the skeleton with its final pose (every BuildWorldMatrices here fills
+    // mZephyrPoseStatic first), as the other animated classes do; without it the skeleton read its
+    // pose through an unset pointer, and any headless game (a dedicated server) crashed on
+    // tat3 (Jabba's Palace) a few seconds in
+    mZephyrSkeleton.Open(*mAnimObj->GetZephyrSkeletonShared(), mZephyrPoseStatic);
     mZephyrPoseStatic.Open(mZephyrSkeleton);
     mZephyrPoseDyn.Open(mZephyrSkeleton);
     mAttachedSoldier.mObject = 0;

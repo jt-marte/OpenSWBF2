@@ -1544,13 +1544,28 @@ void EntityDroidekaClass::SetProperty(unsigned int uProperty, const char* pszVal
         GameObjectClass::SetProperty(0x47C86B4A, pszValue);
         mLodData = SoldierLodData(mModel ? mModel->GetRedModel(0) : 0, 0);
         break;
+    // OpenSWBF2: a script mod's skin can name a low-res model the map didn't load (as for soldiers,
+    // EntitySoldierClass::SetProperty); keep the old one rather than crash here or in the render
     case 0xF1F9F3E3:
-        mUprightLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
-        mLodData = SoldierLodData(mModel ? mModel->GetRedModel(0) : 0, mUprightLowRes->GetRedModel(0));
+    {
+        GameModel* pLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+        if (pLowRes)
+        {
+            mUprightLowRes = pLowRes;
+        }
+        mLodData = SoldierLodData(mModel ? mModel->GetRedModel(0) : 0,
+                                  mUprightLowRes ? mUprightLowRes->GetRedModel(0) : 0);
         break;
+    }
     case 0x19D9AB85:
-        mBallLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+    {
+        GameModel* pLowRes = const_cast<GameModel*>(GameModel::Find(PblHash(pszValue)));
+        if (pLowRes)
+        {
+            mBallLowRes = pLowRes;
+        }
         break;
+    }
 
     default:
     {

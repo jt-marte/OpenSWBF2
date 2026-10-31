@@ -93,10 +93,10 @@ tat2g_con Pass
 tat2g_ctf TimeOut
 tat2g_eli Pass
 tat2g_hunt Pass
-tat3c_1flag Fatal
-tat3c_con Fatal
-tat3g_1flag Fatal
-tat3g_con Fatal
+tat3c_1flag TimeOut
+tat3c_con Pass
+tat3g_1flag TimeOut
+tat3g_con Pass
 uta1c_1flag TimeOut
 uta1c_c TimeOut
 uta1c_con Pass
