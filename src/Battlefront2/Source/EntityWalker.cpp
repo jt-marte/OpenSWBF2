@@ -25,6 +25,7 @@
 #include "RedEngineFL/Graphics/RedModel.h"
 #include "RedEngineFL/Graphics/RedSkeleton.h"
 #include "RedEngineFL/Util/RedAnimation.h"
+#include "RedEngineFL/Util/RedLog.h"
 #include "Zephyr/Source/ZephyrSkeletonShared.h"
 #include <new>
 #include "Aimer.h"
@@ -708,6 +709,18 @@ Entity* EntityWalkerClass::Build(const EntityDesc& desc)
     {
         return 0;
     }
+    // OpenSWBF2: a walker whose animation never loaded has no skeleton for the constructor to
+    // pose; retail followed the null. It crashed a dedicated server spawning BF1 pack AT4's walker.
+    if (!m_pZephyrSkeletonShared)
+    {
+        static bool sbLogged;
+        if (!sbLogged)
+        {
+            sbLogged = true;
+            LOG(LogSim, Warning, "OPENSWBF2 walker class without a skeleton is not built");
+        }
+        return 0;
+    }
 
     EntityWalker* pWalker = new EntityWalker(this, desc);
     if (pWalker)
@@ -1148,9 +1161,14 @@ void EntityWalkerClass::SetProperty(unsigned int uProperty, const char* pszValue
         break;
 
     case 0x7012f6cd:
+    {
+        // OpenSWBF2: a skeleton name whose animation isn't loaded leaves no skeleton (Build then
+        // refuses the walker) instead of following the null
         s_bSetZephyrSkeletonShared = true;
-        m_pZephyrSkeletonShared = RedAnimation::Find(PblHash(pszValue))->GetZephyrSkeletonShared();
+        const RedAnimation* pAnim = RedAnimation::Find(PblHash(pszValue));
+        m_pZephyrSkeletonShared = pAnim ? pAnim->GetZephyrSkeletonShared() : 0;
         break;
+    }
     case 0x4cacc3d0:
         sscanf(pszValue, "%f", &mSkeletonRootScale);
         break;

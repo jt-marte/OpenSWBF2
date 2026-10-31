@@ -310,10 +310,15 @@ void EntityBuildingArmed::Kill()
         Character::GetPlayerStats(mDamageOwner.mCharacter).PointsProcess(13, 0);
     }
 
+    // OpenSWBF2: a turret slot can be empty, as Init and Render already allow (BF1 pack Rhen Var:
+    // Harbor)
     for (int i = 0; i < mNumTurrets; ++i)
     {
-        mTurret[i]->Kill();
-        mTurret[i]->DeactivatePhysics();
+        if (mTurret[i])
+        {
+            mTurret[i]->Kill();
+            mTurret[i]->DeactivatePhysics();
+        }
     }
     EntityBuilding::Kill();
 }
@@ -335,7 +340,10 @@ void EntityBuildingArmed::Respawn()
 
     for (int i = 0; i < mNumTurrets; ++i)
     {
-        mTurret[i]->ActivatePhysics();
+        if (mTurret[i])
+        {
+            mTurret[i]->ActivatePhysics();
+        }
     }
 
     if (!NetGame::IsEnabled() || !NetGame::IsClient())

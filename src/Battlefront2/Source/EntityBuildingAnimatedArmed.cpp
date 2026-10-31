@@ -233,10 +233,14 @@ void EntityBuildingAnimatedArmed::Kill()
     {
         return;
     }
+    // OpenSWBF2: a turret slot can be empty, as Init and Render already allow
     for (int i = 0; i < mNumTurrets; ++i)
     {
-        mTurret[i]->Kill();
-        mTurret[i]->DeactivatePhysics();
+        if (mTurret[i])
+        {
+            mTurret[i]->Kill();
+            mTurret[i]->DeactivatePhysics();
+        }
     }
     EntityBuildingAnimated::Kill();
 }
@@ -246,7 +250,10 @@ void EntityBuildingAnimatedArmed::Respawn()
 {
     for (int i = 0; i < mNumTurrets; ++i)
     {
-        mTurret[i]->ActivatePhysics();
+        if (mTurret[i])
+        {
+            mTurret[i]->ActivatePhysics();
+        }
     }
     EntityBuilding::Respawn();
 }

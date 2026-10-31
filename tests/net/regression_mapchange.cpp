@@ -172,3 +172,29 @@ TEST_CASE("BF1 pack Bespin maps load and play on server and client" * doctest::t
     CHECK(sAnim.find("return mMap[eMap].mAnimation[i - NUM_WEAPON_ANIMATIONS_TOTAL];") == std::string::npos);
     CHECK(sAnim.find("const int iFlat = iMap * ANIMATION_MAP_SIZE + iSlot;") != std::string::npos);
 }
+
+TEST_CASE("BF1 pack Rhen Var and AT4 load and play on server and client" * doctest::test_suite("regression"))
+{
+    // Every client crashed joining Rhen Var: Harbor: an armed building with an empty turret slot
+    const std::string sNet = ReadSource("../src/Battlefront2/Source/NetState.cpp");
+    const size_t uMove = sNet.find("void NetEntityBuildingArmed::MoveToClient()");
+    REQUIRE(uMove != std::string::npos);
+    CHECK(sNet.find("Controllable* control = mTurret[i];\n        if (!control)", uMove) <
+          sNet.find("void NetCommandBuilding::MoveToClient()"));
+    const std::string sArmed = ReadSource("../src/Battlefront2/Source/EntityBuildingArmed.cpp");
+    CHECK(sArmed.find("    {\n        mTurret[i]->Kill();") == std::string::npos);
+    const std::string sAnimArmed = ReadSource("../src/Battlefront2/Source/EntityBuildingAnimatedArmed.cpp");
+    CHECK(sAnimArmed.find("    {\n        mTurret[i]->Kill();") == std::string::npos);
+
+    // A dedicated server crashed spawning AT4's walker, whose animation never loaded
+    const std::string sWalker = ReadSource("../src/Battlefront2/Source/EntityWalker.cpp");
+    const size_t uBuild = sWalker.find("Entity* EntityWalkerClass::Build(const EntityDesc& desc)");
+    REQUIRE(uBuild != std::string::npos);
+    CHECK(sWalker.find("if (!m_pZephyrSkeletonShared)", uBuild) < sWalker.find("new EntityWalker(this, desc)", uBuild));
+    CHECK(sWalker.find("RedAnimation::Find(PblHash(pszValue))->GetZephyrSkeletonShared()") == std::string::npos);
+
+    // Utapau Hunt in the Galactic Civil War is listed by the pack but doesn't exist
+    const std::string sList = ReadSource("../data/scripts/shell/missionlist.lua");
+    CHECK(sList.find("{ map = \"uta1\", key = \"mode_hunt_g\" }") != std::string::npos);
+    CHECK(sList.find("missionlist_DropMissing(mp_missionselect_listbox_contents)") != std::string::npos);
+}

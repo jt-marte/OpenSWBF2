@@ -262,6 +262,29 @@ TEST_CASE("the Conversion Pack's maps win over the Xbox DLC's copies" * doctest:
     CHECK(lua.Global("both_rh1") == "era_c,era_g,mode_con_c,mode_con_g,mode_xl_c");
 }
 
+TEST_CASE("a mode a mod lists without its mission is left out" * doctest::test_suite("unit"))
+{
+    Lua lua;
+    CAPTURE(lua.sError);
+    REQUIRE(lua.Run(RegistryCode()));
+    REQUIRE(lua.Run(
+        // the Conversion Pack lists Utapau Hunt in the Galactic Civil War but ships no uta1g_hunt
+        "local list = {\n"
+        "  { mapluafile = 'uta1%s_%s', era_c = 1, era_g = 1, mode_hunt_c = 1, mode_hunt_g = 1, mode_con_g = 1 },\n"
+        "  { mapluafile = 'geo1%s_%s', era_c = 1, mode_hunt_c = 1 },\n"
+        "}\n"
+        "missionlist_DropMissing(list)\n"
+        "uta_hunt_g = tostring(list[1].mode_hunt_g)\n"
+        "uta_hunt_c = tostring(list[1].mode_hunt_c)\n"
+        "uta_con_g = tostring(list[1].mode_con_g)\n"
+        "geo_hunt_c = tostring(list[2].mode_hunt_c)\n"));
+
+    CHECK(lua.Global("uta_hunt_g") == "nil");
+    CHECK(lua.Global("uta_hunt_c") == "1");
+    CHECK(lua.Global("uta_con_g") == "1");
+    CHECK(lua.Global("geo_hunt_c") == "1");
+}
+
 TEST_CASE("the mission list dump writes what the launcher needs" * doctest::test_suite("unit"))
 {
     Lua lua;

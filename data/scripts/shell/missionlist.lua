@@ -669,6 +669,23 @@ function missionlist_PreferMaps(List)
 	end
 end
 
+-- Modes a mod lists for a map without shipping the mission: picking one closed the game ("Could
+-- not open MISSION\...lvl"). Found by loading every mission of the Conversion Pack and Xbox DLC.
+gMissingMissions = {
+	{ map = "uta1", key = "mode_hunt_g" },	-- Utapau: Hunt, Galactic Civil War
+}
+
+function missionlist_DropMissing(List)
+	local i, j
+	for i = 1, table.getn(List) do
+		for j = 1, table.getn(gMissingMissions) do
+			if(List[i].mapluafile and string.lower(List[i].mapluafile) == gMissingMissions[j].map .. "%s_%s") then
+				List[i][gMissingMissions[j].key] = nil
+			end
+		end
+	end
+end
+
 -- OpenSWBF2 -listmissions: the multiplayer mission list as JSON for a launcher's server manager,
 -- after the mods' addme scripts (and missionlist_ExpandMaplist's registry) have run. Returns the
 -- text and the number of maps. Names are as localized (-lang 0 gives English); a character past
@@ -842,6 +859,8 @@ function missionlist_ExpandMaplist(bForMP)
 		missionlist_BuildRegistry()
 		missionlist_PreferMaps(sp_missionselect_listbox_contents)
 		missionlist_PreferMaps(mp_missionselect_listbox_contents)
+		missionlist_DropMissing(sp_missionselect_listbox_contents)
+		missionlist_DropMissing(mp_missionselect_listbox_contents)
 		missionlist_DiscoverErasAndModes(sp_missionselect_listbox_contents)
 		missionlist_DiscoverErasAndModes(mp_missionselect_listbox_contents)
 		table.sort(sp_missionselect_listbox_contents, missionlist_mapsorthelper)

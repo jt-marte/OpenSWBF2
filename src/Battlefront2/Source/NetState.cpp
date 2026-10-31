@@ -5903,14 +5903,23 @@ void NetEntityBuildingArmed::MoveToClient()
     {
         static_cast<NetEntityHologram*>(m_pHologram)->MoveToClient();
     }
+    // OpenSWBF2: a turret slot can be empty (a mod building whose turret wasn't made); retail
+    // followed it. Every client crashed joining BF1 pack Rhen Var: Harbor.
     for (int i = 0; i < mNumTurrets; ++i)
     {
         Controllable* control = mTurret[i];
+        if (!control)
+        {
+            continue;
+        }
         for (int j = 0; j < control->GetWeaponCount(); ++j)
         {
             Weapon* weapon = control->GetWeaponPtr(j);
-            weapon->DeactivateThread();
-            weapon->ActivatePhysics();
+            if (weapon)
+            {
+                weapon->DeactivateThread();
+                weapon->ActivatePhysics();
+            }
         }
     }
 }
