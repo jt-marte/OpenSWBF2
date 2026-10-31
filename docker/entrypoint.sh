@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
-# OpenSWBF2 dedicated server in a container. Builds the core lvls from the player's own game data
+# OpenSWBF2 dedicated server in a container. Finds the player's game data (a copy mounted at
+# /gamedata, or a download from their own Steam account, made once), builds the core lvls from it
 # (once per OpenSWBF2 version), assembles a game folder of links, writes the server settings from
 # the environment and runs BattlefrontII.exe -dedicated under Wine, next to the mod download
-# service (modserver.py). See README.md.
+# service (modserver.py). "steam-login" is the one-time Steam login. See README.md.
 set -euo pipefail
 
 APP=/opt/openswbf2
 GAME=/srv/game
-GAMEDATA=/gamedata
+MOUNTED=/gamedata
 ADDONS=/addons
 CONFIG=/config
 UPLOADS=/config/addons
+
+# The game from Steam: STAR WARS Battlefront II (Classic, 2005) and the depot with its files.
+# DepotDownloader keeps the login token from the QR code in .NET isolated storage, which follows
+# XDG_DATA_HOME, so it lives in STEAM_DIR; the password is never stored.
+STEAM_APP=6060
+STEAM_DEPOT=6061
+STEAM_DIR=$CONFIG/steam
+STEAM_GAME=$CONFIG/steam-game
+DEPOT=/opt/depotdownloader/DepotDownloader
 VERSION=$(python3 -c 'import json; print(json.load(open("/opt/openswbf2/manifest.json"))["version"])')
 
 log() { echo "[openswbf2] $*"; }
@@ -85,19 +95,154 @@ if [[ ${1:-} == selftest ]]; then
     status=0
     wine_to_file 180 "$out" cmd /c echo wine64-ok || status=$?
     grep -q 'wine64-ok' "$out" || selftest_fail "Wine's cmd did not run (exit $status)" "$out"
-    log "selftest ok: OpenSWBF2 $VERSION, $(wine --version)"
+    "$DEPOT" >"$out" 2>&1 || true
+    grep -q 'DepotDownloader v' "$out" || selftest_fail "DepotDownloader did not run" "$out"
+    log "selftest ok: OpenSWBF2 $VERSION, $(wine --version), $(grep -o 'DepotDownloader v[0-9.]*' "$out")"
     wineserver -k >/dev/null 2>&1 || true
     exit 0
 fi
 
+# DepotDownloader with its login store in STEAM_DIR, run from a folder of its own
+depot() {
+    mkdir -p "$STEAM_DIR/work"
+    (cd "$STEAM_DIR/work" && XDG_DATA_HOME=$STEAM_DIR "$DEPOT" "$@")
+}
+
+check_config() {
+    mkdir -p "$STEAM_DIR" 2>/dev/null && touch "$CONFIG/.write-test" 2>/dev/null && rm -f "$CONFIG/.write-test" ||
+        die "$CONFIG is not writable by uid $(id -u): run 'sudo chown -R $(id -u):$(id -g)' on the host folder you mounted there"
+}
+
+# --- steam-login: once, interactively (docker compose exec openswbf2 steam-login) --------------
+# A QR code scanned in the Steam app, or with --password the account name, password and Steam
+# Guard code. Either way DepotDownloader keeps only a login token, and the check below proves the
+# account owns the game.
+if [[ ${1:-} == steam-login ]]; then
+    check_config
+    out=$(mktemp)
+    rm -rf "$STEAM_DIR/check"
+    if [[ ${2:-} == --password ]]; then
+        read -r -p "Steam account name: " user
+        [[ $user =~ ^[A-Za-z0-9_]{1,64}$ ]] || die "'$user' isn't a Steam account name (the name you sign in with)"
+        depot -app "$STEAM_APP" -depot "$STEAM_DEPOT" -os windows -username "$user" -remember-password \
+            -manifest-only -dir "$STEAM_DIR/check" || true
+    else
+        log "In the Steam app on your phone, open Steam Guard (the shield), choose 'Scan a QR code' and scan this:"
+        depot -app "$STEAM_APP" -depot "$STEAM_DEPOT" -os windows -qr -remember-password \
+            -manifest-only -dir "$STEAM_DIR/check" 2>&1 | tee "$out" || true
+        user=$(sed -n -e "s/.*-username \([^ ]*\) -remember-password.*/\1/p" \
+            -e "s/.*Logging '\([^']*\)' into Steam3.*/\1/p" "$out" | tail -n 1)
+        if [[ -z $user ]]; then
+            read -r -p "Steam account name (the name you sign in with): " user
+        fi
+    fi
+    if ! compgen -G "$STEAM_DIR/check/manifest_${STEAM_DEPOT}_*" >/dev/null; then
+        if grep -q 'is not available from this account' "$out" 2>/dev/null; then
+            die "this Steam account doesn't own STAR WARS Battlefront II (Classic, 2005)"
+        fi
+        die "the Steam login didn't go through; run steam-login again (or 'steam-login --password')"
+    fi
+    echo "$user" >"$STEAM_DIR/username"
+    rm -rf "$STEAM_DIR/check"
+    log "Logged in to Steam as $user. The server downloads the game (about 13 GB) on its own now if it's"
+    log "waiting, or on its next start: docker compose up -d && docker compose logs -f"
+    exit 0
+fi
+
 # --- The player's game data --------------------------------------------------------------------
-for lvl in core shell common ingame mission; do
-    [[ -f $GAMEDATA/data/_lvl_pc/$lvl.lvl ]] ||
-        die "no $GAMEDATA/data/_lvl_pc/$lvl.lvl: mount your Star Wars Battlefront II GameData folder at $GAMEDATA (see README.md)"
-done
-touch "$CONFIG/.write-test" 2>/dev/null && rm -f "$CONFIG/.write-test" ||
-    die "$CONFIG is not writable by uid $(id -u): run 'sudo chown -R $(id -u):$(id -g)' on the host folder you mounted there"
+# The folder holding data/_lvl_pc/core.lvl below $1, in any letter case and up to two folders
+# deeper than expected (a whole GameData folder copied in, say). Sets GAMEDATA, DATA_DIR, LVL_DIR.
+find_gamedata() {
+    local found
+    found=$(find "$1" -maxdepth 5 -ipath '*/data/_lvl_pc/core.lvl' -print -quit 2>/dev/null) || true
+    [[ -n $found ]] || return 1
+    LVL_DIR=${found%/*}
+    DATA_DIR=${LVL_DIR%/*}
+    GAMEDATA=${DATA_DIR%/*}
+}
+
+# The four core lvls must be the stock ones LuaCompiler rebuilds from (the package lists them)
+stock_lvls() {
+    python3 - "$1" <<'EOF'
+import hashlib, json, os, sys
+lvl_dir = sys.argv[1]
+stock = json.load(open("/opt/openswbf2/manifest.json"))["stockLvls"]
+names = {name.lower(): name for name in os.listdir(lvl_dir)}
+bad = []
+for lvl, hashes in stock.items():
+    name = names.get(lvl + ".lvl")
+    digest = name and hashlib.sha256(open(os.path.join(lvl_dir, name), "rb").read()).hexdigest()
+    if digest not in hashes:
+        bad.append(lvl + ".lvl")
+print(" ".join(bad))
+EOF
+}
+
+# Download the game from the logged-in Steam account into STEAM_GAME. A dropped download picks up
+# where it stopped on the next start. A login Steam no longer takes is forgotten, so the server
+# waits for steam-login again instead of failing over and over.
+steam_download() {
+    local user out free
+    user=$(<"$STEAM_DIR/username")
+    out=$CONFIG/logs/steam-download.log
+    free=$(df -Pk "$CONFIG" | awk 'NR == 2 { print int($4 / 1048576) }')
+    ((free >= 15)) || log "warning: $CONFIG has ${free} GB free; the game needs about 14 GB"
+    # Only the data folder: the dedicated server needs nothing else from the game
+    printf 'regex:(?i)^(GameData/)?data/\n' >"$STEAM_DIR/files.txt"
+    log "Downloading STAR WARS Battlefront II from Steam account $user into $STEAM_GAME (about 13 GB, once)"
+    local status=0
+    depot -app "$STEAM_APP" -depot "$STEAM_DEPOT" -os windows -username "$user" -remember-password \
+        -filelist "$STEAM_DIR/files.txt" -dir "$STEAM_GAME" </dev/null 2>&1 |
+        tee "$out" |
+        awk '/^ *[0-9.]+%/ { p = int($1 / 5); if (p > last) { last = p; print "[openswbf2] Steam download " p * 5 "%" }; next } { print }' ||
+        status=$?
+    if grep -q -E 'Enter account password|Access token was rejected|Unable to login to Steam3: (InvalidPassword|InvalidSignature|AccessDenied|Expired|Revoked)' "$out"; then
+        rm -f "$STEAM_DIR/username"
+        log "Steam no longer takes the saved login. Log in again: docker compose exec openswbf2 steam-login"
+        return 0
+    fi
+    grep -q 'is not available from this account' "$out" &&
+        die "Steam account $user doesn't own STAR WARS Battlefront II (Classic, 2005)"
+    ((status == 0)) || die "the Steam download stopped (exit $status; $out has the details); it carries on at the next start"
+    find_gamedata "$STEAM_GAME" || die "the Steam download has no data/_lvl_pc/core.lvl ($out has the details)"
+    local bad
+    bad=$(stock_lvls "$LVL_DIR")
+    [[ -z $bad ]] || die "the downloaded $bad aren't the stock files OpenSWBF2 rebuilds from"
+    touch "$STEAM_GAME/.complete"
+    log "The game is downloaded"
+}
+
+check_config
 mkdir -p "$CONFIG/settings" "$CONFIG/logs" "$CONFIG/lvl" "$UPLOADS"
+GAMEDATA=
+waited=0
+while :; do
+    if find_gamedata "$MOUNTED"; then
+        [[ $GAMEDATA == "$MOUNTED" ]] || log "Using the game data in $GAMEDATA"
+        break
+    fi
+    if [[ -f $STEAM_GAME/.complete ]] && find_gamedata "$STEAM_GAME"; then
+        break
+    fi
+    if [[ -s $STEAM_DIR/username ]]; then
+        steam_download
+        continue
+    fi
+    if ((waited % 60 == 0)); then
+        log "No game data yet. The server needs your copy of STAR WARS Battlefront II (2005), either:"
+        log "  - from Steam, once: docker compose exec openswbf2 steam-login   (scan the QR code with the Steam app)"
+        log "  - or your own files: copy GameData/data into the folder mounted at $MOUNTED (see README.md)"
+        log "Waiting; it carries on by itself once either is done."
+    fi
+    waited=$((waited + 1))
+    sleep 10
+done
+for lvl in core shell common ingame mission; do
+    [[ -n $(find "$LVL_DIR" -maxdepth 1 -iname "$lvl.lvl" -print -quit) ]] ||
+        die "no $lvl.lvl in $LVL_DIR: the game data is incomplete"
+done
+# Wine's path to it, for LuaCompiler
+GAMEDATA_WIN="Z:${GAMEDATA//\//\\}"
 
 # --- Settings ----------------------------------------------------------------------------------
 PORT=$(int_env PORT 3658 1024 65534)
@@ -183,8 +328,8 @@ LVL=$CONFIG/lvl/$VERSION
 mkdir -p "$LVL"
 log "Core game files for OpenSWBF2 $VERSION (built once, then cached in /config/lvl)"
 start_display
-(cd "$APP" && timeout -k 10 1800 wine LuaCompiler.exe lvl --index 'data\scripts\index.json' --gamedata 'Z:\gamedata' --out-dir "Z:\\config\\lvl\\$VERSION" </dev/null) ||
-    die "building the core game files failed: are $GAMEDATA/data/_lvl_pc's shell, common, ingame and mission.lvl the original Steam/GOG ones?"
+(cd "$APP" && timeout -k 10 1800 wine LuaCompiler.exe lvl --index 'data\scripts\index.json' --gamedata "$GAMEDATA_WIN" --out-dir "Z:\\config\\lvl\\$VERSION" </dev/null) ||
+    die "building the core game files failed: are $LVL_DIR's shell, common, ingame and mission.lvl the original Steam/GOG ones?"
 
 # --- The game folder: links to the package, the player's data, the rebuilt lvls and the mods ---
 # Made again before each game start, so mods uploaded since then are in it
@@ -195,11 +340,11 @@ assemble() {
     for file in "$APP"/*.exe "$APP"/*.dll; do
         ln -s "$file" "$GAME/"
     done
-    for entry in "$GAMEDATA"/data/*; do
+    for entry in "$DATA_DIR"/*; do
         name=${entry##*/}
         [[ ${name,,} == _lvl_pc ]] || ln -s "$entry" "$GAME/data/$name"
     done
-    for entry in "$GAMEDATA"/data/_lvl_pc/*; do
+    for entry in "$LVL_DIR"/*; do
         name=${entry##*/}
         case ${name,,} in
             shell.lvl | common.lvl | ingame.lvl | mission.lvl | *.orig | *.cache) continue ;;
