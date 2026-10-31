@@ -407,7 +407,8 @@ def reply_lines(payload):
 
 
 def parse_state(lines):
-    """rcon /state: {phase, map, next, players (everyone connected)}."""
+    """rcon /state: {phase, map, next, players (everyone connected), teams (those on a team: a
+    player still loading the map has none yet)}."""
     values = {}
     for line in lines:
         for token in line.split():
@@ -415,15 +416,16 @@ def parse_state(lines):
             if eq:
                 values[key] = value
     try:
-        players = int(values.get("players", "").split("/")[-1])
+        team1, team2, players = (int(n) for n in values.get("players", "").split("/"))
     except ValueError:
-        players = 0
+        team1 = team2 = players = 0
     phase = values.get("state", "")
     return {
         "phase": phase if phase in ("shell", "lobby", "warmup", "playing", "ended") else "offline",
         "map": values.get("map", ""),
         "next": values.get("next", ""),
         "players": players,
+        "teams": team1 + team2,
     }
 
 
@@ -608,10 +610,12 @@ class Lobby:
 class GameWatch:
     """What the game is doing, polled over rcon (every 2 s while a launcher waits, else every 15 s),
     and the lobby start: Start opens every waiting player's game into the server's held lobby, and
-    the match begins once that many players are connected, or after 60 s. Players still downloading
-    don't hold it up; they join when their download is done."""
+    the match begins once that many players have loaded (they are on a team), 15 s after that many
+    are connected (some may sit on the team select screen), or after 60 s. Players still
+    downloading don't hold it up; they join when their download is done."""
 
-    BUSY, IDLE, NAMES, DEADLINE, COUNTDOWN = 2.0, 15.0, 4.0, 60.0, 5
+    BUSY, IDLE, NAMES, DEADLINE, COUNTDOWN, SETTLE = 2.0, 15.0, 4.0, 60.0, 5, 15.0
+    OFFLINE = {"phase": "offline", "map": "", "next": "", "players": 0, "teams": 0}
 
     def __init__(self, game, lobby, clock=time.monotonic):
         self.game = game
@@ -619,7 +623,8 @@ class GameWatch:
         self.clock = clock
         self.lock = threading.Lock()
         self.wake = threading.Event()
-        self.state = {"phase": "offline", "map": "", "next": "", "players": 0}
+        self.state = dict(self.OFFLINE)
+        self.connected = None
         self.names = []
         self.polled = None
         self.named = None
@@ -638,7 +643,7 @@ class GameWatch:
             state = None
         now = self.clock()
         with self.lock:
-            self.state = state or {"phase": "offline", "map": "", "next": "", "players": 0}
+            self.state = state or dict(self.OFFLINE)
             self.polled = now
         if state and self.busy and (self.named is None or now - self.named >= self.NAMES):
             try:
@@ -656,11 +661,18 @@ class GameWatch:
         with self.lock:
             if not self.loading:
                 return
-            phase, players = self.state["phase"], self.state["players"]
+            phase, players, teams = self.state["phase"], self.state["players"], self.state.get("teams", 0)
             if phase != "lobby":
                 self.loading = False  # started some other way, or the server changed map
                 return
-            if players < self.expected and self.clock() < self.deadline:
+            now = self.clock()
+            if players >= self.expected:
+                self.connected = self.connected or now
+            else:
+                self.connected = None
+            loaded = teams >= self.expected
+            settled = self.connected is not None and now - self.connected >= self.SETTLE
+            if not (loaded or settled or now >= self.deadline):
                 return
             self.loading = False
         self.send_start()
@@ -668,7 +680,7 @@ class GameWatch:
     def send_start(self):
         try:
             self.game.command(f"/start {self.COUNTDOWN}")
-            log(f"match starting: {self.state['players']} of {self.expected} players in")
+            log(f"match starting: {self.state.get('teams', 0)} of {self.expected} players loaded, {self.state['players']} connected")
         except OSError as error:
             log(f"couldn't start the match: {error}")
         self.refresh()
@@ -704,6 +716,7 @@ class GameWatch:
             else:
                 now_start = False
                 self.loading = True
+                self.connected = None
                 self.deadline = self.clock() + self.DEADLINE
         log(f"start: loading {waiting} waiting players' games" if not now_start else "start: nobody waits in a launcher")
         if now_start:

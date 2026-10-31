@@ -473,7 +473,7 @@ class FakeGame:
     """The game as rcon reports it; /start and /lobby change its phase as the server does."""
 
     def __init__(self):
-        self.status = {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 0}
+        self.status = {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 0, "teams": 0}
         self.players = []
         self.commands = []
         self.up = True
@@ -557,10 +557,13 @@ class LobbyTests(ServiceCase):
         self.assertEqual(reply["startIn"], modserver.GameWatch.DEADLINE)
         self.assertEqual(self.status()["start"], "loading")
 
-        self.game.status["players"] = 1
+        self.game.status.update(players=1, teams=1)
         self.service.watch.step()
         self.assertEqual(self.game.commands, [])
-        self.game.status["players"] = 2
+        self.game.status.update(players=2, teams=1)  # the second is still loading the map
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, [])
+        self.game.status["teams"] = 2
         self.game.players = ["Pat", "Player 2"]
         self.service.watch.step()
         self.assertEqual(self.game.commands, ["/start 5"])
@@ -575,6 +578,18 @@ class LobbyTests(ServiceCase):
         self.service.watch.step()
         self.assertEqual(self.game.commands, [])
         self.clock.now += modserver.GameWatch.DEADLINE + 1
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, ["/start 5"])
+
+    def test_connected_but_not_on_a_team_starts_after_a_while(self):
+        self.update(self.join("Pat"), "waiting")
+        self.match("start")
+        self.game.status.update(players=1, teams=0)  # on the team select screen: auto-assign is off
+        self.service.watch.step()
+        self.clock.now += modserver.GameWatch.SETTLE - 1
+        self.service.watch.step()
+        self.assertEqual(self.game.commands, [])
+        self.clock.now += 2
         self.service.watch.step()
         self.assertEqual(self.game.commands, ["/start 5"])
 
@@ -642,7 +657,7 @@ class RconParsingTests(unittest.TestCase):
     def test_state(self):
         line = "state=lobby hold=1 players=1/2/4 time=-1 tickets=0/0 scores=0/0 map=BS1g_con next=geo1c_con"
         self.assertEqual(modserver.parse_state([line]),
-                         {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 4})
+                         {"phase": "lobby", "map": "BS1g_con", "next": "geo1c_con", "players": 4, "teams": 3})
         self.assertEqual(modserver.parse_state(["state=weird"])["phase"], "offline")
 
     def test_playerinfo(self):
