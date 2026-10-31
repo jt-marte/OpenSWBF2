@@ -786,7 +786,7 @@ SaveResult SaveMenu(const DisplaySettings& kMark, const DisplaySettings& kNow, c
     return kSaveOk;
 }
 
-void Init()
+void Init(bool bCliWindowed)
 {
     SetDefaults(gIniDisplay);
     char acPath[MAX_PATH];
@@ -796,6 +796,12 @@ void Init()
     }
     gDisplay = gIniDisplay;
     Merge(gDisplay, gCliDisplay);
+    // OpenSWBF2: borderless unless display.ini or the command line chose, or -win asked for a
+    // window. Picking Fullscreen or Windowed in the options then saves Borderless=0.
+    if (!((gIniDisplay.uiSet | gCliDisplay.uiSet) & kBorderless))
+    {
+        gDisplay.bBorderless = !bCliWindowed;
+    }
 }
 
 }

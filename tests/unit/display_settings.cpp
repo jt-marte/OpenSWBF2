@@ -348,10 +348,20 @@ TEST_CASE("display settings init merges defaults ini and command line" * doctest
     SetFromText(gCliDisplay, kRefresh, "75", "command line");
     SetFromText(gCliDisplay, kDisplayIni, IniPath(), "command line");
     Init();
-    Cleanup();
     CHECK(gDisplay.uiRefresh == 75);
     CHECK(gDisplay.uiFps == 100);
     CHECK(gDisplay.uiVsync == 1);
+    // borderless unless the ini or command line chose, or -win asked for a window
+    CHECK(gDisplay.bBorderless);
+    Init(true);
+    CHECK_FALSE(gDisplay.bBorderless);
+    WriteText("[Display]\r\nBorderless=0\r\n");
+    Init();
+    CHECK_FALSE(gDisplay.bBorderless);
+    WriteText("[Display]\r\nBorderless=1\r\n");
+    Init(true);
+    CHECK(gDisplay.bBorderless);
+    Cleanup();
     SetDefaults(gCliDisplay);
 }
 

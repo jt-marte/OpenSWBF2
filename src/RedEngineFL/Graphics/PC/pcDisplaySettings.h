@@ -106,7 +106,8 @@ void ClearPendingAdapter();
 const PendingAdapter& GetPendingAdapter();
 bool ValidateMenu(const MenuFields& kFields);
 SaveResult SaveMenu(const DisplaySettings& kMark, const DisplaySettings& kNow, const char* pcPath, bool bGoodFrame, unsigned int& uiWritten);
-void Init();
+// bCliWindowed: the command line asked for a window (-win)
+void Init(bool bCliWindowed = false);
 
 extern DisplaySettings gCliDisplay;
 extern DisplaySettings gIniDisplay;

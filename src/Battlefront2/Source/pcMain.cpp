@@ -519,7 +519,7 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         SetConsoleCtrlHandler(DedicatedConsoleHandler, TRUE);
         LOG(LogCore, Inform, "OPENSWBF2 SERVER dedicated name=\"%s\" port=%d", autoNetSession, hostshort);
     }
-    DisplayCfg::Init();
+    DisplayCfg::Init(pcWindowed);
     if (g_bNoRender && g_fFixedRate <= 0.0f)
     {
         // A headless frame sleeps 1 ms (GameState::UpdateTime), which at Windows' default 15.6 ms
