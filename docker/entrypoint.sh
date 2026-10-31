@@ -41,15 +41,52 @@ bool_env() {
     esac
 }
 
+# One virtual screen for everything Wine runs here: nothing is shown, but the game opens a window
+start_display() {
+    rm -f /tmp/.X99-lock /tmp/.X11-unix/X99
+    Xvfb :99 -screen 0 640x480x24 -nolisten tcp >/dev/null 2>&1 &
+    export DISPLAY=:99
+    for _ in $(seq 100); do
+        [[ -e /tmp/.X11-unix/X99 ]] && return 0
+        sleep 0.1
+    done
+    die "the virtual screen (Xvfb) did not start"
+}
+
+# A Wine command with a time limit and its output in a file: Wine's background processes keep
+# pipes open after the command ends, so $(wine ...) can wait forever
+wine_to_file() {
+    local seconds=$1 out=$2
+    shift 2
+    timeout -k 10 "$seconds" wine "$@" </dev/null >"$out" 2>&1
+}
+
+# Why a selftest step failed: the command's output and the processes still running
+selftest_fail() {
+    echo "[openswbf2] error: $1. Its output:" >&2
+    cat "$2" >&2
+    echo "[openswbf2] Processes:" >&2
+    for p in /proc/[0-9]*; do
+        tr '\0' ' ' 2>/dev/null <"$p/cmdline" && echo
+    done | grep -v '^$' >&2
+    exit 1
+}
+
 # The shipped tools under Wine, as a check that the image works without any game data
 if [[ ${1:-} == selftest ]]; then
     [[ -f $APP/BattlefrontII.exe && -f $APP/LuaCompiler.exe && -f $APP/data/scripts/index.json ]] ||
         die "the OpenSWBF2 package is incomplete"
-    out=$(cd "$APP" && wine LuaCompiler.exe 2>&1 || true)
-    grep -q 'usage: luac' <<<"$out" || die "LuaCompiler (32-bit) did not run under Wine: $out"
-    out=$(wine cmd /c echo wine64-ok 2>&1 || true)
-    grep -q 'wine64-ok' <<<"$out" || die "64-bit Wine did not run: $out"
+    start_display
+    out=$(mktemp)
+    cd "$APP"
+    status=0
+    wine_to_file 180 "$out" LuaCompiler.exe || status=$?
+    grep -q 'usage: luac' "$out" || selftest_fail "LuaCompiler did not run under Wine (exit $status)" "$out"
+    status=0
+    wine_to_file 180 "$out" cmd /c echo wine64-ok || status=$?
+    grep -q 'wine64-ok' "$out" || selftest_fail "Wine's cmd did not run (exit $status)" "$out"
     log "selftest ok: OpenSWBF2 $VERSION, $(wine --version)"
+    wineserver -k >/dev/null 2>&1 || true
     exit 0
 fi
 
@@ -145,7 +182,8 @@ HERO_PLAYER=$(int_env HERO_PLAYER 1 1 7)
 LVL=$CONFIG/lvl/$VERSION
 mkdir -p "$LVL"
 log "Core game files for OpenSWBF2 $VERSION (built once, then cached in /config/lvl)"
-(cd "$APP" && wine LuaCompiler.exe lvl --index 'data\scripts\index.json' --gamedata 'Z:\gamedata' --out-dir "Z:\\config\\lvl\\$VERSION") ||
+start_display
+(cd "$APP" && timeout -k 10 1800 wine LuaCompiler.exe lvl --index 'data\scripts\index.json' --gamedata 'Z:\gamedata' --out-dir "Z:\\config\\lvl\\$VERSION" </dev/null) ||
     die "building the core game files failed: are $GAMEDATA/data/_lvl_pc's shell, common, ingame and mission.lvl the original Steam/GOG ones?"
 
 # --- The game folder: links to the package, the player's data, the rebuilt lvls and the mods ---
@@ -267,7 +305,8 @@ while true; do
     fi
     log "Starting \"$SERVER_NAME\" on UDP $PORT: ${#MAP_LIST[@]} maps, up to $MAX_PLAYERS players, $TICK_RATE turns a second"
     restart=0
-    xvfb-run -a -s '-screen 0 640x480x24' wine BattlefrontII.exe "${args[@]}" &
+    # On the virtual screen start_display made; $child is the game's own process
+    wine BattlefrontII.exe "${args[@]}" </dev/null &
     child=$!
     wait "$child"
     status=$?

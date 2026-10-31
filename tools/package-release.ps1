@@ -23,7 +23,10 @@ if (-not $OutDir) { $OutDir = Join-Path $root 'dist' }
 
 $name = "OpenSWBF2-$Version-x64"
 $bin = Join-Path $root 'bin\x64\Release'
-$luac = Join-Path $root 'bin\Win32\Release\LuaCompiler.exe'
+# The x64 LuaCompiler ships (the Docker server runs it under 64-bit-only Wine); the Win32 one is
+# built too, and both must compile every script to the same bytes
+$luac = Join-Path $bin 'LuaCompiler.exe'
+$luac32 = Join-Path $root 'bin\Win32\Release\LuaCompiler.exe'
 
 # Every path in the package must match one of these. Retail files can never match.
 $allowed = @(
@@ -60,8 +63,10 @@ function Get-PeMachine([string]$file) {
 
 if (-not $NoBuild) {
     $msbuild = Find-MSBuild
-    & $msbuild (Join-Path $root 'LuaCompiler.vcxproj') /p:Configuration=Release /p:Platform=Win32 /m /v:minimal /nologo
-    if ($LASTEXITCODE) { throw 'The LuaCompiler build failed.' }
+    foreach ($platform in 'x64', 'Win32') {
+        & $msbuild (Join-Path $root 'LuaCompiler.vcxproj') /p:Configuration=Release /p:Platform=$platform /m /v:minimal /nologo
+        if ($LASTEXITCODE) { throw "The $platform LuaCompiler build failed." }
+    }
     & $msbuild (Join-Path $root 'BattlefrontII.vcxproj') /p:Configuration=Release /p:Platform=x64 /m /v:minimal /nologo
     if ($LASTEXITCODE) { throw 'The x64 game build failed.' }
 }
@@ -91,10 +96,32 @@ if (@($files.Keys | Where-Object { $_ -match '^(avcodec|avformat|avutil|swresamp
 }
 if (-not $files.Contains('data/scripts/index.json')) { throw 'data/scripts/index.json is not tracked.' }
 
-# The game must be x64 and the lvl builder must run without the x86 VC++ runtime.
+# The game and the lvl builder must be x64, and the lvl builder must run without the VC++ runtime.
 if ((Get-PeMachine $files['BattlefrontII.exe']) -ne 0x8664) { throw 'BattlefrontII.exe is not an x64 build.' }
+if ((Get-PeMachine $luac) -ne 0x8664) { throw 'LuaCompiler.exe is not an x64 build.' }
 $crt = @(Get-Imports $luac | Where-Object { $_ -match '^(vcruntime|msvcp)\d+|^api-ms-win-crt-' })
 if ($crt.Count) { throw "LuaCompiler.exe links the VC++ runtime dynamically ($($crt -join ', ')); rebuild it." }
+
+# The x64 LuaCompiler writes the 32-bit tools' bytecode: check it against the Win32 build
+if (-not (Test-Path -LiteralPath $luac32)) { throw "Missing the Win32 LuaCompiler ($luac32) to check the x64 one against." }
+$check = Join-Path ([IO.Path]::GetTempPath()) "luac-check-$PID"
+New-Item -ItemType Directory -Force $check | Out-Null
+try {
+    foreach ($script in $files.Keys | Where-Object { $_ -match '\.lua$' }) {
+        foreach ($strip in $false, $true) {
+            $outputs = foreach ($compiler in $luac, $luac32) {
+                $out = Join-Path $check ([IO.Path]::GetRandomFileName())
+                $arguments = @(if ($strip) { '-s' }) + @('-o', $out, $files[$script])
+                & $compiler @arguments 2>$null
+                if ($LASTEXITCODE) { throw "LuaCompiler could not compile $script." }
+                (Get-FileHash -LiteralPath $out).Hash
+            }
+            if ($outputs[0] -ne $outputs[1]) { throw "The x64 and Win32 LuaCompilers compile $script differently." }
+        }
+    }
+} finally {
+    Remove-Item -LiteralPath $check -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 $stage = Join-Path $OutDir $name
 $zip = Join-Path $OutDir "$name.zip"

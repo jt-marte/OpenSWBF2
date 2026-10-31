@@ -4,6 +4,10 @@ Runs the OpenSWBF2 dedicated server headless on Linux. The image is `ghcr.io/jt-
 built from each OpenSWBF2 release by `.github/workflows/docker.yml`. It holds only OpenSWBF2's own
 files, run under Wine. The game data is yours: you mount your copy of Star Wars Battlefront II (2005).
 
+It runs on any x86-64 machine with Docker: any Linux distribution, a NAS, a cloud server, or Docker
+Desktop on Windows or an Intel Mac. ARM machines (Raspberry Pi, Apple Silicon) can't run it, since
+Wine runs x86 code. Everything inside is 64-bit, so Docker's default security settings work as they are.
+
 ## 1. Copy your game data to the server
 
 On the server, make a folder for it:
