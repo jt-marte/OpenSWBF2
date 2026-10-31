@@ -41,6 +41,9 @@
 #include "Steam/galaxy_api.h"
 #include "Team.h"
 #include "DownloadableContent.h"
+#include "NetClock.h"
+
+extern int netTurnsPerSecond;
 #include <math.h>
 
 extern void sub_42E960();
@@ -2062,7 +2065,8 @@ void ReadLoad(NetPktGroup& group, bool& bReady)
     group.Read(Lua_Callbacks::gSpaceAssaultScoreLimit[Lua_Callbacks::gCurRules]);
     if (bReady)
     {
-        NetGameP::SetClientTurnNumber(turn + 4);
+        // OpenSWBF2: retail's 4 turns (200 ms at 20 a second), scaled with the rate (NetClock.h)
+        NetGameP::SetClientTurnNumber(turn + NetClock::JoinLead(netTurnsPerSecond));
     }
 }
 
@@ -4919,6 +4923,10 @@ bool ReadShellUpdate(NetPktGroup& group, ShellUpdate& update, ShellMove& move)
         if (!DownloadableContent::IsMissionDownloaded(missionHash))
         {
             netJoinUpdatePending = true;
+            // OpenSWBF2: the join is refused as "missing downloadable content"; the host only
+            // sends the mission's hash, so say which one for whoever reads the log
+            LOG(LogNet, Warning, "OPENSWBF2 NET join refused missing=%08x (a map in the host's rotation that this game lacks)",
+                missionHash);
         }
         group.ReadBits(missionHash, 32);
     }

@@ -139,6 +139,7 @@ function Invoke-NetPair($name, $drag) {
     $loss = @()
     $corrAvg = @()
     $corrMax = @()
+    $leads = @()
     $fills = @()
     $fixed = @()
     $lost = @()
@@ -165,6 +166,9 @@ function Invoke-NetPair($name, $drag) {
                 $corrMax += [double]$m.Groups[5].Value
             }
         }
+        # The client's lead over the host in turns, once its clock had 15 s to settle: a lead
+        # that keeps growing is a clock that never settles (it reached 40 at 120 a second)
+        $leads += @(Read-Stats $log 'OPENSWBF2 NET STATS client .* lag=(-?\d+) ' | Select-Object -Skip 15 | ForEach-Object { [int]$_.Groups[1].Value })
     }
     # Host side, per remote player and second: turns filled with a guess, late moves replayed,
     # and filled turns whose real move never came in time.
@@ -184,8 +188,9 @@ function Invoke-NetPair($name, $drag) {
     if ($joined -and $updates.Count -lt 5) { $problems += "only $($updates.Count) stats seconds" }
     if ($updates.Count -and $u -lt $profiles[$name].MinUpdates) { $problems += "updates/s $u below $($profiles[$name].MinUpdates)" }
     $mode = if ($Direct) { 'direct' } else { 'lan' }
+    $leadMax = if ($leads.Count) { ($leads | Measure-Object -Maximum).Maximum } else { 0 }
     $summary = "netpair:$name join=$mode clients=$Clients updates=$u ping=$p loss=$l seconds=$($updates.Count)" +
-        " fills/s=$(& $avg $fills) replayed/s=$(& $avg $fixed) lost/s=$(& $avg $lost) corr=$ca/$cm"
+        " fills/s=$(& $avg $fills) replayed/s=$(& $avg $fixed) lost/s=$(& $avg $lost) corr=$ca/$cm lead=$(& $avg $leads)/$leadMax"
     $problems = @($problems | Select-Object -Unique)
     $token = if ($problems.Count) { 'FAIL' } else { 'PASS' }
     $text = "[$token] $summary"

@@ -32,6 +32,7 @@
 #include "NetWire.h"
 #include "NetLobby.h"
 #include "NetHeroAi.h"
+#include "NetClock.h"
 #include "LocalLimits.h"
 #include "RedEngineFL/Util/RedLog.h"
 #include "RedEngineFL/Util/RedWarning.h"
@@ -688,7 +689,11 @@ NetTurn remoteClientTurns;
 // `dynamic initializer for 'localClientTurns''
 // SYNTHETIC: SWBF2 0x00768db0
 // `dynamic atexit destructor for 'localClientTurns''
-ProcessedInputs localClientTurns[32][2];
+// OpenSWBF2: 128 turns (retail 32): at 120 turns a second a client can lead the host by more than
+// 32, and prediction replayed its own soldier with inputs already overwritten
+const unsigned int kLocalTurnRing = 128;
+const unsigned int kLocalTurnMask = kLocalTurnRing - 1;
+ProcessedInputs localClientTurns[kLocalTurnRing][2];
 // OpenSWBF2: the host keeps 64 turns of moves (retail 32) and 32 turns of late-move state
 // (retail 8). Retail's late window was a fixed 3 turns, 150 ms at its 20 turns a second but only
 // 25 ms at 120; LateWindowTurns keeps it about 150 ms at any rate, and the bigger move ring lets
@@ -4418,9 +4423,9 @@ static void LogNetStats()
         const float fCorrAvg = gNetCorrCount ? gNetCorrSum / (float)gNetCorrCount : 0.0f;
         LOG(LogNet, Inform,
             "OPENSWBF2 NET STATS client player=%d ping=%d updates=%d in=%d out=%d loss=%d lag=%d ts=%.2f "
-            "corr=%.2f/%.2f",
+            "corr=%.2f/%.2f steer=%d locked=%d stable=%d",
             iLocal, NetComm::GetPing(iLocal), iUpdates, iInKbit, iOutKbit, iLoss, iLag, NetGame::GetTimeScale(),
-            fCorrAvg, gNetCorrMax);
+            fCorrAvg, gNetCorrMax, clientLag, timeLocked ? 1 : 0, timeStableCount);
         gNetCorrSum = 0.0f;
         gNetCorrMax = 0.0f;
         gNetCorrCount = 0;
@@ -4847,7 +4852,7 @@ void NetGame::SendClient()
             group.isSmall = true;
             group.BeginWrite();
             group.Write(true);
-            int iSlot = (clientTurnNumber - 1) & 0x1f;
+            int iSlot = (clientTurnNumber - 1) & kLocalTurnMask;
             WriteMiniMove(&group, &localClientTurns[iSlot][0]);
             group.EndWrite();
             NetComm::Send(64, 11, &group);
@@ -4939,7 +4944,7 @@ void NetGame::SendClient()
             group.Write(bCockpitCam);
 
             uTurn = uLastTurn;
-            ProcessedInputs* pPrev = &localClientTurns[uTurn & 0x1f][curIndex];
+            ProcessedInputs* pPrev = &localClientTurns[uTurn & kLocalTurnMask][curIndex];
             WriteMove(&group, &noInputs, pPrev);
             unsigned int uOldest = sendTurnNumber - 4;
             if (uOldest > (unsigned int)sendTurnNumber)
@@ -4949,7 +4954,7 @@ void NetGame::SendClient()
             while (uTurn > uOldest)
             {
                 uTurn--;
-                ProcessedInputs* pCur = &localClientTurns[uTurn & 0x1f][curIndex];
+                ProcessedInputs* pCur = &localClientTurns[uTurn & kLocalTurnMask][curIndex];
                 WriteMove(&group, pPrev, pCur);
                 pPrev = pCur;
             }
@@ -6115,9 +6120,12 @@ void NetGame::SubmitMove(int iTurns)
             ++gDebugCount;
         }
     }
-    if (iTurns > 3)
+    // OpenSWBF2: retail's 3 turns a frame, scaled with the rate (NetClock.h); at 120 a frame over
+    // 25 ms lost turns for good, and a dedicated host's clock fell behind its clients
+    const int iMaxTurns = NetClock::MaxSubmitTurns(netTurnsPerSecond);
+    if (iTurns > iMaxTurns)
     {
-        iTurns = 3;
+        iTurns = iMaxTurns;
     }
 
     if (NetGame::IsHost() && NetGame::IsOneWorld())
@@ -6166,7 +6174,7 @@ void NetGame::SubmitMove(int iTurns)
 
     for (int iTurn = 0; iTurn < iTurns; ++iTurn)
     {
-        int iSlot = clientTurnNumber & 0x1f;
+        int iSlot = clientTurnNumber & kLocalTurnMask;
         for (i = 0; i < 2; ++i)
         {
             if (!apInputs[i])
@@ -6198,7 +6206,7 @@ void NetGame::SubmitMove(int iTurns)
 // FUNCTION: SWBF2 0x005b99c0
 int NetGame::GetMaxSimTurns()
 {
-    return 4;
+    return NetClock::MaxSimTurns(netTurnsPerSecond); // OpenSWBF2: retail's 4, scaled with the rate
 }
 
 // FUNCTION: SWBF2 0x005b99d0
@@ -12860,7 +12868,7 @@ bool IsSkippedND(const GameObject* pObject)
 // FUNCTION: SWBF2 0x005be3a0
 void PredictTurn()
 {
-    const int iTurn = predictTurnNumber & 31;
+    const int iTurn = predictTurnNumber & kLocalTurnMask;
     for (int iPlayer = 0; iPlayer < netCurMaxPlayers; ++iPlayer)
     {
         if (!NetGame::IsPlaying(iPlayer, false))
@@ -13500,19 +13508,8 @@ void AdjustClock()
     }
     if (timeScale == 1.0f)
     {
-        int iWindow;
-        if (timeStableCount < 5)
-        {
-            iWindow = 3;
-        }
-        else if (timeStableCount < 10)
-        {
-            iWindow = 2;
-        }
-        else
-        {
-            iWindow = timeStableCount < 15 ? 1 : 0;
-        }
+        // OpenSWBF2: retail's 3/2/1/0 turns, scaled with the rate (NetClock.h)
+        const int iWindow = NetClock::StableWindow(timeStableCount, netTurnsPerSecond);
         if (clientLag >= -iWindow && clientLag <= 0)
         {
             adjustTime = fTime + 1.0f;
@@ -13529,7 +13526,7 @@ void AdjustClock()
             {
                 if (timeLocked)
                 {
-                    iLimit = 1;
+                    iLimit = NetClock::LockedStep(netTurnsPerSecond); // OpenSWBF2: retail's 1
                 }
             }
             else
@@ -13553,19 +13550,7 @@ void AdjustClock()
         adjustTime = fTime + 0.5f;
         if (clientLag <= 0)
         {
-            int iWindow;
-            if (timeStableCount < 5)
-            {
-                iWindow = 3;
-            }
-            else if (timeStableCount < 10)
-            {
-                iWindow = 2;
-            }
-            else
-            {
-                iWindow = timeStableCount < 15 ? 1 : 0;
-            }
+            const int iWindow = NetClock::StableWindow(timeStableCount, netTurnsPerSecond);
             if (clientLag < -iWindow)
             {
                 timeStableCount -= 5;
@@ -15339,7 +15324,7 @@ void SendToReplicas()
             if (player.clientOfIndex == iHost)
             {
                 WriteTurnLowBits(&group, player.clientTurn);
-                group.WriteBits(GetLag(iPlayer) + 128, 8);
+                group.WriteBits(NetClock::LagByte(GetLag(iPlayer)), 8);
                 WriteSwitchResponse(&group,
                     (int)player.objSwitchRelay.switchResponse,
                     player.objSwitchRelay.switchTurn);
@@ -16699,7 +16684,7 @@ void WriteUpdate(NetPktGroup& group)
     }
     if (curDst >= 0)
     {
-        group.WriteBits(GetLag(curDst) + 128, 8);
+        group.WriteBits(NetClock::LagByte(GetLag(curDst)), 8);
         int pingDelta = hostTurnNumber - netPlayers[curDst].mLastReceivedTurn + 128;
         group.WriteBits(pingDelta, 8);
         NetPlayer* player = &netPlayers[curDst];
