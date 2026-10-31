@@ -12,6 +12,7 @@
 #include "RedEngineFL/Application/pc/pcWindow.h"
 #include "RedEngineFL/Graphics/PC/pcDisplayLogic.h"
 #include "RedEngineFL/Graphics/PC/pcDisplaySettings.h"
+#include "RedEngineFL/input/pc/pcSonyPad.h"
 #include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Graphics/PC/pcRedAutoSettings.h"
 #include "RedEngineFL/Graphics/PC/pcRedRenderer.h"
@@ -538,6 +539,7 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
     XInputPad::gPadLayout =
         DisplayCfg::gDisplay.uiPadLayout ? XInputPad::kLayoutLegacy : XInputPad::kLayoutModern;
     XInputPad::gPadLookLevel = (int)DisplayCfg::gDisplay.uiPadLookSpeed;
+    SonyPad::gDisabled = DisplayCfg::gDisplay.bNoSonyPad;
     PcWindow::InitDpi(DisplayCfg::gDisplay.bNoDpi);
 
     if (!bDedicated && !g_bNoRender)

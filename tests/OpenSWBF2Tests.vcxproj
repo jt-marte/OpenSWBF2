@@ -157,6 +157,7 @@
     <ClCompile Include="..\src\Battlefront2\Source\LuaMemory.cpp" />
     <ClCompile Include="..\src\Battlefront2\Source\LuaVideoArgs.cpp" />
     <ClCompile Include="..\src\RedEngineFL\Memory\RedMemoryPool.cpp" />
+    <ClCompile Include="..\src\RedEngineFL\input\pc\pcSonyPad.cpp" />
     <ClCompile Include="..\src\RedEngineFL\input\pc\pcXInputPad.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="testutil.cpp" />

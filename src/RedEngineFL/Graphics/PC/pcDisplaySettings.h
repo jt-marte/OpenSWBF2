@@ -19,6 +19,7 @@ const unsigned int kHudScale = 4096; // OpenSWBF2: HUD scale, percent 50..150 (d
 const unsigned int kFov = 8192; // OpenSWBF2: field of view, degrees at 16:9 55..80 (default 61)
 const unsigned int kCrispFonts = 16384; // OpenSWBF2: redraw the font atlases sharp above 1080p (default on)
 const unsigned int kRenderer = 32768; // OpenSWBF2: renderer, vulkan (default) or d3d9, read at startup
+const unsigned int kNoSonyPad = 65536; // OpenSWBF2: PlayStation pads stay on DirectInput (Steam Input, DS4Windows)
 
 const unsigned int kAdapterMax = 15;
 const unsigned int kRefreshMax = 1000;
@@ -46,6 +47,7 @@ const unsigned int kHashDisplayIni = 0x8CDD8845;
 const unsigned int kHashSwCursor = 0x21567C6D;
 const unsigned int kHashVulkan = 0xFC99B1F2;
 const unsigned int kHashD3d9 = 0x3E21D70F;
+const unsigned int kHashNoSonyPad = 0xEFA3DC22;
 
 struct DisplaySettings
 {
@@ -64,6 +66,7 @@ struct DisplaySettings
     unsigned int uiFov;
     bool bCrispFonts;
     unsigned int uiRenderer;
+    bool bNoSonyPad;
     char acDisplayIni[260];
     unsigned int uiSet;
     unsigned int uiCliMask;

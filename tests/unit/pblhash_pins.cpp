@@ -409,3 +409,9 @@ TEST_CASE("hash pin norumble" * doctest::test_suite("unit"))
     CHECK((unsigned int)PblHash("norumble") == 0x820BCB67);
     CHECK((unsigned int)PblHash("norumble") == XInputPad::kHashNoRumble);
 }
+
+TEST_CASE("hash pin nosonypad" * doctest::test_suite("unit"))
+{
+    CHECK((unsigned int)PblHash("nosonypad") == 0xEFA3DC22);
+    CHECK((unsigned int)PblHash("nosonypad") == DisplayCfg::kHashNoSonyPad);
+}

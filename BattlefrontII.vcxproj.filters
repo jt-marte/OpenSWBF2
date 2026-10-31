@@ -2058,6 +2058,12 @@
     <ClCompile Include="src\RedEngineFL\input\pc\pcRedMouse.cpp">
       <Filter>src\RedEngineFL\input\pc</Filter>
     </ClCompile>
+    <ClCompile Include="src\RedEngineFL\input\pc\pcSonyHid.cpp">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClCompile>
+    <ClCompile Include="src\RedEngineFL\input\pc\pcSonyPad.cpp">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClCompile>
     <ClCompile Include="src\RedEngineFL\input\pc\pcXInputPad.cpp">
       <Filter>src\RedEngineFL\input\pc</Filter>
     </ClCompile>
@@ -4305,6 +4311,12 @@
       <Filter>src\RedEngineFL\input</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\input\pc\pcRedInputManager.h">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\input\pc\pcSonyHid.h">
+      <Filter>src\RedEngineFL\input\pc</Filter>
+    </ClInclude>
+    <ClInclude Include="src\RedEngineFL\input\pc\pcSonyPad.h">
       <Filter>src\RedEngineFL\input\pc</Filter>
     </ClInclude>
     <ClInclude Include="src\RedEngineFL\input\pc\pcXInputPad.h">

@@ -581,6 +581,9 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         case XInputPad::kHashNoRumble:
             XInputPad::gNoRumble = true;
             break;
+        case DisplayCfg::kHashNoSonyPad:
+            DisplayCfg::SetFlag(DisplayCfg::gCliDisplay, DisplayCfg::kNoSonyPad);
+            break;
         case DisplayCfg::kHashDisplayIni:
             if (i + 1 < iArgc)
             {

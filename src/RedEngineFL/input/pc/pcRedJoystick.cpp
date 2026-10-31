@@ -5,6 +5,7 @@
 static_assert(sizeof(sin(1.0f)) == 4, "float math overloads");
 
 #include "pcRedInputManager.h"
+#include "pcSonyHid.h"
 #include "pcXInputPad.h"
 #include "RedEngineFL/Interface/RedInterfaceScreen.h"
 #include "RedEngineFL/Util/RedLog.h"
@@ -102,6 +103,7 @@ void RedJoystick::Init(unsigned char ucPortNum)
     mPreviousAxisY = 1000.0f;
 
     m_xinputSlot = -1;
+    m_sonySlot = -1;
     m_xinputPacket = 0;
     m_xinputProbeTimer = 0.0f;
     m_iHeavyEngine = 0;
@@ -116,6 +118,16 @@ void RedJoystick::InitXInput(int iSlot)
     m_connected = false;
     m_xinputPacket = 0xFFFFFFFF;
     m_xinputProbeTimer = 0.0f;
+    m_uiDownButtons = 0;
+    m_uiPressedButtons = 0;
+    m_uiReleasedButtons = 0;
+    memset(m_fAxis, 0, sizeof(m_fAxis));
+}
+
+void RedJoystick::InitSonyPad(int iSlot)
+{
+    m_sonySlot = iSlot;
+    m_connected = false;
     m_uiDownButtons = 0;
     m_uiPressedButtons = 0;
     m_uiReleasedButtons = 0;
@@ -190,6 +202,7 @@ RedJoystick::RedJoystick()
 {
     mDeadZoneScale = 0.2f;
     m_xinputSlot = -1;
+    m_sonySlot = -1;
 }
 
 // FUNCTION: SWBF2 0x006c5330
@@ -400,7 +413,7 @@ void RedJoystick::UpdateXInput(float fDeltaTime)
         return;
     }
 
-    if (!m_connected)
+    if (!m_connected && !IsSonyPad())
     {
         // XInputGetState on an empty slot is slow, so only re-probe now and then.
         m_xinputProbeTimer -= fDeltaTime;
@@ -411,13 +424,41 @@ void RedJoystick::UpdateXInput(float fDeltaTime)
         m_xinputProbeTimer = 2.0f;
     }
 
-    XINPUT_STATE state;
-    memset(&state, 0, sizeof(state));
-    if (!sXInputGetState || sXInputGetState((DWORD)m_xinputSlot, &state) != ERROR_SUCCESS)
+    // A Sony pad's HID reports, already turned into XInput state (SonyHid
+    // logs its own connects and disconnects).
+    XInputPad::Pad pad;
+    memset(&pad, 0, sizeof(pad));
+    bool bRead;
+    if (IsSonyPad())
+    {
+        bRead = SonyHid::GetState(m_sonySlot, pad);
+    }
+    else
+    {
+        XINPUT_STATE state;
+        memset(&state, 0, sizeof(state));
+        bRead = sXInputGetState && sXInputGetState((DWORD)m_xinputSlot, &state) == ERROR_SUCCESS;
+        if (bRead)
+        {
+            m_xinputPacket = state.dwPacketNumber;
+            pad.wButtons = state.Gamepad.wButtons;
+            pad.bLeftTrigger = state.Gamepad.bLeftTrigger;
+            pad.bRightTrigger = state.Gamepad.bRightTrigger;
+            pad.sThumbLX = state.Gamepad.sThumbLX;
+            pad.sThumbLY = state.Gamepad.sThumbLY;
+            pad.sThumbRX = state.Gamepad.sThumbRX;
+            pad.sThumbRY = state.Gamepad.sThumbRY;
+        }
+    }
+
+    if (!bRead)
     {
         if (m_connected)
         {
-            LOG(LogCore, Inform, "XInput: pad %d disconnected", m_xinputSlot);
+            if (!IsSonyPad())
+            {
+                LOG(LogCore, Inform, "XInput: pad %d disconnected", m_xinputSlot);
+            }
             m_connected = false;
             m_xinputProbeTimer = 2.0f;
             m_uiReleasedButtons = m_uiDownButtons;
@@ -432,19 +473,12 @@ void RedJoystick::UpdateXInput(float fDeltaTime)
 
     if (!m_connected)
     {
-        LOG(LogCore, Inform, "XInput: pad %d connected", m_xinputSlot);
+        if (!IsSonyPad())
+        {
+            LOG(LogCore, Inform, "XInput: pad %d connected", m_xinputSlot);
+        }
         m_connected = true;
     }
-    m_xinputPacket = state.dwPacketNumber;
-
-    XInputPad::Pad pad;
-    pad.wButtons = state.Gamepad.wButtons;
-    pad.bLeftTrigger = state.Gamepad.bLeftTrigger;
-    pad.bRightTrigger = state.Gamepad.bRightTrigger;
-    pad.sThumbLX = state.Gamepad.sThumbLX;
-    pad.sThumbLY = state.Gamepad.sThumbLY;
-    pad.sThumbRX = state.Gamepad.sThumbRX;
-    pad.sThumbRY = state.Gamepad.sThumbRY;
 
     // XInput keeps reporting while the game is in the background; DirectInput
     // pads are DISCL_FOREGROUND, so match that and go quiet.
@@ -486,7 +520,22 @@ void RedJoystick::SendRumble(bool bForceOff)
     m_iHeavyEngine = 0;
     m_iLightEngine = 0;
 
-    if (!sXInputSetState || (usHeavy == m_usSentHeavy && usLight == m_usSentLight))
+    if (usHeavy == m_usSentHeavy && usLight == m_usSentLight)
+    {
+        return;
+    }
+
+    if (IsSonyPad())
+    {
+        if (SonyHid::SetRumble(m_sonySlot, usHeavy, usLight))
+        {
+            m_usSentHeavy = usHeavy;
+            m_usSentLight = usLight;
+        }
+        return;
+    }
+
+    if (!sXInputSetState)
     {
         return;
     }
