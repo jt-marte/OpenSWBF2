@@ -7,8 +7,9 @@
 ^\[t=\d+\.\d{3}\] \[f=\d+\] LogMemory Error Battlefront2\\Source\\MemFailLog\.cpp:\d+: alloc failure heap Runtime \(\d+\) size 268435456
 
 [crash-luaoom]
-^\[t=\d+\.\d{3}\] \[f=\d+\] LogMemory Error Battlefront2\\Source\\MemFailLog\.cpp:\d+: alloc failure heap Lua \(\d+\) size 67108880
-^\[t=\d+\.\d{3}\] \[f=\d+\] LogLua Error Battlefront2\\Source\\LuaMemory\.cpp:\d+: Lua out of memory \(\d+ used in \d+ blocks, trying to alloc 67108880\)$
+# 64 MB plus the block header: 16 bytes on Win32, 32 on x64
+^\[t=\d+\.\d{3}\] \[f=\d+\] LogMemory Error Battlefront2\\Source\\MemFailLog\.cpp:\d+: alloc failure heap Lua \(\d+\) size 671088(80|96)
+^\[t=\d+\.\d{3}\] \[f=\d+\] LogLua Error Battlefront2\\Source\\LuaMemory\.cpp:\d+: Lua out of memory \(\d+ used in \d+ blocks, trying to alloc 671088(80|96)\)$
 
 [crash-luapanic]
 ^\[t=\d+\.\d{3}\] \[f=\d+\] LogLua Fatal Battlefront2\\Source\\LuaMemory\.cpp:\d+: Lua panic: crashtest$

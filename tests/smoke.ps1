@@ -744,7 +744,7 @@ function Get-SmokeCases($which, $missions, $movies, $dedicatedSpec, $hog = $fals
         $cases += New-Object PSObject -Property @{
             Name = 'crash-menukeep'
             Args = "$standard $tail -crashtest menukeep -displayini ""{CASEDIR}\display.ini"""
-            Expect = @{ Class = 'Pass'; LogRx = @('OPENSWBF2 DISPLAY confirm pending 15s', 'OPENSWBF2 DISPLAY confirm kept', 'OPENSWBF2 DISPLAY menutest done result=1', 'OPENSWBF2 DISPLAY menutest save=1', 'OPENSWBF2 DISPLAY menu save deferred until the confirm ends', '(?s)OPENSWBF2 DISPLAY confirm kept.*OPENSWBF2 DISPLAY menu saved keys=0x', 'menutest done result=1 fps=\d+ waitquery=\d keepsave=0', '(?s)\A(?!.*OPENSWBF2 DISPLAY confirm timeout)', '(?s)\A(?!.*FATAL:)'); IniRx = @('(?m)^Vsync=2\r?$', '(?s)\A(?!.*\bFps=)(?!.*\bRefresh=)(?!.*\bNoWaitQuery=)(?!.*\bBorderless=)') }
+            Expect = @{ Class = 'Pass'; LogRx = @('OPENSWBF2 DISPLAY confirm pending 15s', 'OPENSWBF2 DISPLAY confirm kept', 'OPENSWBF2 DISPLAY menutest done result=1', 'OPENSWBF2 DISPLAY menutest save=1', 'OPENSWBF2 DISPLAY menu save deferred until the confirm ends', '(?s)OPENSWBF2 DISPLAY confirm kept.*OPENSWBF2 DISPLAY menu saved keys=0x', 'menutest done result=1 fps=\d+ waitquery=\d keepsave=0', '(?s)\A(?!.*OPENSWBF2 DISPLAY confirm timeout)', '(?s)\A(?!.*FATAL:)'); IniRx = @('(?m)^Vsync=2\r?$', '(?m)^Borderless=0\r?$', '(?s)\A(?!.*\bFps=)(?!.*\bRefresh=)(?!.*\bNoWaitQuery=)') }
             Twice = 0; Timeout = 0
         }
         $cases += New-Object PSObject -Property @{
