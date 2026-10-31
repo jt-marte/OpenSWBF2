@@ -456,6 +456,14 @@ static void SendStateTransitions()
     MissionPlayList::GetCurrentTeamNames(uiTeam1, uiTeam2);
     const unsigned short* pusTeam1 = RedLocalizeDB::Find(uiTeam1, true);
     const unsigned short* pusTeam2 = RedLocalizeDB::Find(uiTeam2, true);
+    // OpenSWBF2: maps from the command line or rcon (/appendmap, /changemap) carry no team names
+    // in the rotation, so pushes said "Unknown(150) to Unknown(150)"; ask the teams themselves
+    if ((!pusTeam1 || !pusTeam2) && Team::sTeams[1] && Team::sTeams[2] && Team::sTeams[1]->GetName() &&
+        Team::sTeams[2]->GetName())
+    {
+        pusTeam1 = Team::sTeams[1]->GetName();
+        pusTeam2 = Team::sTeams[2]->GetName();
+    }
     char acTeam1[32] = "Unknown";
     char acTeam2[32] = "Unknown";
     if (pusTeam1 && pusTeam2)

@@ -96,6 +96,9 @@ TEST_CASE("an admin keeps its session and pushes across a map change" * doctest:
     // /restart replays the running map's own entry
     const std::string sList = ReadSource("../src/Battlefront2/Source/MissionPlayList.cpp");
     CHECK(sList.find("sPlaylistPosn = siCurrentEntry;") != std::string::npos);
+
+    // Score pushes name the teams for maps from the command line or rcon too
+    CHECK(sAdmin.find("pusTeam1 = Team::sTeams[1]->GetName();") != std::string::npos);
 }
 
 TEST_CASE("nobody keeps a deleted vehicle and bots made from players get the right team" *
