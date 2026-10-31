@@ -43,7 +43,8 @@ ChatMessageDisplay::~ChatMessageDisplay()
 static float ChatLineWidth()
 {
     return (float)RedInterfaceScreen::GetScreenWidth() * RedInterfaceScreen::GetScreenSafeZone() /
-           DisplayLogic::HudGroupScale(RedInterfaceScreen::GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale);
+           DisplayLogic::HudGroupScale(RedInterfaceScreen::GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale,
+                                       RedInterfaceScreen::GetUiLayoutHeight());
 }
 
 // FUNCTION: SWBF2 0x00454850

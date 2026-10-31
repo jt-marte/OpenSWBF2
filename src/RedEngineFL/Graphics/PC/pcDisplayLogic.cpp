@@ -1378,6 +1378,27 @@ void UiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int& uiW, u
     uiH = (unsigned int)((float)uiScreenH / fScale + 0.5f);
 }
 
+float LayoutUiScale(unsigned int uiScreenH, unsigned int uiLayoutH)
+{
+    if (uiLayoutH == 0 || uiLayoutH > kMaxDim || uiScreenH == 0 || uiScreenH > kMaxDim)
+    {
+        return UiScale(uiScreenH);
+    }
+    return (float)uiScreenH / (float)uiLayoutH;
+}
+
+void LayoutUiSize(unsigned int uiScreenW, unsigned int uiScreenH, unsigned int uiLayoutH,
+                  unsigned int& uiW, unsigned int& uiH)
+{
+    if (uiLayoutH == 0 || uiLayoutH > kMaxDim || uiScreenH == 0 || uiScreenH > kMaxDim)
+    {
+        UiSize(uiScreenW, uiScreenH, uiW, uiH);
+        return;
+    }
+    uiW = (unsigned int)((float)uiScreenW * (float)uiLayoutH / (float)uiScreenH + 0.5f);
+    uiH = uiLayoutH;
+}
+
 float HudAnchor(float fPos, float fExtent)
 {
     if (fPos < fExtent / 3.0f)
@@ -1401,7 +1422,7 @@ bool HudIsCentral(float fX, float fY, float fW, float fH)
     return HudAnchor(fX, fW) == fW * 0.5f && HudAnchor(fY, fH) == fH * 0.5f;
 }
 
-float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent)
+float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent, unsigned int uiLayoutH)
 {
     if (uiPercent == 0)
     {
@@ -1415,7 +1436,7 @@ float HudGroupScale(unsigned int uiScreenH, unsigned int uiPercent)
     {
         uiPercent = kHudScaleMax;
     }
-    return UiScale(uiScreenH) * (float)uiPercent / 100.0f;
+    return LayoutUiScale(uiScreenH, uiLayoutH) * (float)uiPercent / 100.0f;
 }
 
 float FovTanScale(unsigned int uiDegrees)

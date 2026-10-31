@@ -105,24 +105,22 @@ end
 function ifs_opt_pcvideo_fnShowRows(this)
 	local generalForm = this.formcontainergeneral.form
 	local customForm = this.formcontainercustom.form
-	if(ScriptCB_GetShellActive()) then
-		local element = generalForm.elements["framecap"]
-		if(generalForm.elements["vsync"].selValue == 2) then
-			if(not element.locked) then
-				this.iFrameCap = ifs_opt_pcvideo_fnSelData(generalForm, "framecap")
-			end
-			element.locked = 1
-			element.values = { { label = ScriptCB_tounicode("Vsync on"), data = this.iFrameCap } }
-			element.selValue = 1
-			ListManager_fnFillContents(generalForm.dropdowns["framecap"].listbox, element.values, generalForm.dropdowns["framecap"].listbox.Layout)
-			Form_UpdateElement(generalForm, "framecap")
-		elseif(element.locked) then
-			element.locked = nil
-			ifs_opt_pcvideo_fnFillList(generalForm, "framecap", this.framecapList, this.iFrameCap)
-			Form_UpdateElement(generalForm, "framecap")
+	local element = generalForm.elements["framecap"]
+	if(generalForm.elements["vsync"].selValue == 2) then
+		if(not element.locked) then
+			this.iFrameCap = ifs_opt_pcvideo_fnSelData(generalForm, "framecap")
 		end
-		Form_SetValues(generalForm)
+		element.locked = 1
+		element.values = { { label = ScriptCB_tounicode("Vsync on"), data = this.iFrameCap } }
+		element.selValue = 1
+		ListManager_fnFillContents(generalForm.dropdowns["framecap"].listbox, element.values, generalForm.dropdowns["framecap"].listbox.Layout)
+		Form_UpdateElement(generalForm, "framecap")
+	elseif(element.locked) then
+		element.locked = nil
+		ifs_opt_pcvideo_fnFillList(generalForm, "framecap", this.framecapList, this.iFrameCap)
+		Form_UpdateElement(generalForm, "framecap")
 	end
+	Form_SetValues(generalForm)
 	Form_ShowHideElements(generalForm)
 	Form_ShowHideElements(customForm)
 end
@@ -131,7 +129,7 @@ function ifs_opt_pcvideo_fnFillMultisample(this, bKeep)
 	local generalForm = this.formcontainergeneral.form
 	local customForm = this.formcontainercustom.form
 	local bWindowed = nil
-	if(bKeep and ScriptCB_GetShellActive()) then
+	if(bKeep) then
 		bWindowed = generalForm.elements["displaymode"].selValue ~= 1
 	end
 	local index = ScriptCB_FillMultisampleTable(this.resX, this.resY, bWindowed)
@@ -246,19 +244,17 @@ function ifs_opt_pcvideo_fnMark(this)
 end
 
 function ifs_opt_pcvideo_fnConfirmEnded(this)
-	if(ScriptCB_GetShellActive()) then
-		local customForm = this.formcontainercustom.form
-		local element = customForm.elements["resolution"]
-		local index = ScriptCB_FillResolutionTable(this.iMultiSample, this.iMultiSampleQuality)
-		element.values = ifs_opt_pcvideo_reslistbox_contents
-		element.selValue = index
-		ListManager_fnFillContents(customForm.dropdowns["resolution"].listbox, element.values, customForm.dropdowns["resolution"].listbox.Layout)
-		Form_UpdateElement(customForm, "resolution")
-		local item = element.values[index]
-		if(type(item) == "table" and type(item.data) == "table") then
-			this.resX = item.data.resX
-			this.resY = item.data.resY
-		end
+	local customForm = this.formcontainercustom.form
+	local element = customForm.elements["resolution"]
+	local index = ScriptCB_FillResolutionTable(this.iMultiSample, this.iMultiSampleQuality)
+	element.values = ifs_opt_pcvideo_reslistbox_contents
+	element.selValue = index
+	ListManager_fnFillContents(customForm.dropdowns["resolution"].listbox, element.values, customForm.dropdowns["resolution"].listbox.Layout)
+	Form_UpdateElement(customForm, "resolution")
+	local item = element.values[index]
+	if(type(item) == "table" and type(item.data) == "table") then
+		this.resX = item.data.resX
+		this.resY = item.data.resY
 	end
 	ifs_opt_pcvideo_fnReadDisplay(this)
 	if(this.bMarkPending) then
@@ -356,26 +352,23 @@ ifs_opt_pcvideo = NewIFShellScreen {
 		local customForm = this.formcontainercustom.form
 
 		-- apply all the changes, then bail
-		if(ScriptCB_GetShellActive()) then
-			-- only change resolutions in the shell
-			local values = customForm.elements["resolution"].values
-			local index = customForm.elements["resolution"].selValue
+		-- OpenSWBF2: the resolution and display rows apply in a match too (retail
+		-- changed them in the shell only); the device reset is the same one, and
+		-- the keep-or-revert prompt guards it
+		local values = customForm.elements["resolution"].values
+		local index = customForm.elements["resolution"].selValue
+		if(values[index] and type(values[index].data) == "table") then
 			ScriptCB_SetResolution(values[index].data["resX"],values[index].data["resY"])
 		end
-		-- change other options all the time
 		ScriptCB_SetHUDScale(generalForm.elements["hudscale"].selValue / 100)
 
-		local iWindowed = this.iLegacyWindowed or 1
-		local iVsync = this.iLegacyVsync or 1
-		if(ScriptCB_GetShellActive()) then
-			iWindowed = 1
-			if(generalForm.elements["displaymode"].selValue == 2) then
-				iWindowed = 2
-			end
-			iVsync = 1
-			if(generalForm.elements["vsync"].selValue ~= 1) then
-				iVsync = 2
-			end
+		local iWindowed = 1
+		if(generalForm.elements["displaymode"].selValue == 2) then
+			iWindowed = 2
+		end
+		local iVsync = 1
+		if(generalForm.elements["vsync"].selValue ~= 1) then
+			iVsync = 2
 		end
 
 		ScriptCB_SetPCVideoOptions(
@@ -392,19 +385,17 @@ ifs_opt_pcvideo = NewIFShellScreen {
 									iVsync
 									)
 
-		if(ScriptCB_GetShellActive()) then
-			local iVsyncMode = generalForm.elements["vsync"].selValue
-			if(iVsyncMode == 2 and this.bVsyncHalf) then
-				iVsyncMode = 3
-			end
-			ScriptCB_SetDisplayOptions({
-				mode = generalForm.elements["displaymode"].selValue,
-				refresh = this.iRefresh or 0,
-				vsync = iVsyncMode,
-				fps = ifs_opt_pcvideo_fnSelData(generalForm, "framecap"),
-				futureframes = generalForm.elements["futureframes"].selValue,
-			})
+		local iVsyncMode = generalForm.elements["vsync"].selValue
+		if(iVsyncMode == 2 and this.bVsyncHalf) then
+			iVsyncMode = 3
 		end
+		ScriptCB_SetDisplayOptions({
+			mode = generalForm.elements["displaymode"].selValue,
+			refresh = this.iRefresh or 0,
+			vsync = iVsyncMode,
+			fps = ifs_opt_pcvideo_fnSelData(generalForm, "framecap"),
+			futureframes = generalForm.elements["futureframes"].selValue,
+		})
 
 		ScriptCB_SetPCBrightnessContrast(generalForm.elements["brightness"].selValue, generalForm.elements["contrast"].selValue)
 
@@ -471,18 +462,11 @@ ifs_opt_pcvideo = NewIFShellScreen {
 			customForm.elements["bumpmapping"].hidden = 1
 		end
 		-- hide some options if we're in game
+		-- OpenSWBF2: only the texture rows and the quality preset that sets them,
+		-- since textures load with the map; the display rows apply in a match too
 		if(not ScriptCB_GetShellActive()) then
-			customForm.elements["resolution"].hidden = 1
 			customForm.elements["texturedetail"].hidden = 1
 			customForm.elements["texturequality"].hidden = 1
-			customForm.elements["multisample"].hidden = 1
-			generalForm.elements["displaymode"].hidden = 1
-			generalForm.elements["adapter"].hidden = 1
-			generalForm.elements["renderer"].hidden = 1
-			generalForm.elements["vsync"].hidden = 1
-			generalForm.elements["framecap"].hidden = 1
-			generalForm.elements["futureframes"].hidden = 1
-			customForm.elements["resolution"].hidden = 1
 			generalForm.elements["overallquality"].hidden = 1
 		end
 
@@ -491,11 +475,11 @@ ifs_opt_pcvideo = NewIFShellScreen {
 		Form_ShowHideElements(customForm)
 
 		-- fill the resolution content list here
-		if(ScriptCB_GetShellActive()) then
-			local index = ScriptCB_FillResolutionTable(nil, nil)
-			customForm.elements["resolution"].selValue = index         
-			customForm.elements["resolution"].values = ifs_opt_pcvideo_reslistbox_contents
-			Form_UpdateElement(customForm, "resolution")
+		local index = ScriptCB_FillResolutionTable(nil, nil)
+		customForm.elements["resolution"].selValue = index
+		customForm.elements["resolution"].values = ifs_opt_pcvideo_reslistbox_contents
+		Form_UpdateElement(customForm, "resolution")
+		if(customForm.elements["resolution"].values[index]) then
 			this.resX = customForm.elements["resolution"].values[index].data.resX
 			this.resY = customForm.elements["resolution"].values[index].data.resY
 		end
@@ -675,30 +659,28 @@ ifs_opt_pcvideo = NewIFShellScreen {
 			autodetect.lightbloom, autodetect.bumpmapping, autodetect.motionblur, autodetect.distortion,
 			windowed, vsync = ScriptCB_GetAutodetectPCVideoOptions()
 
-			if( ScriptCB_GetShellActive() ) then
-				this.resX, this.resY = ScriptCB_GetIdealResolution()
-				--go from res to index?
-				for idx, resItem in customForm.elements["resolution"].values do
-					if (resItem.data.resX == this.resX and resItem.data.resY == this.resY) then
-						customForm.elements["resolution"].selValue = idx
-	   						this.resX = customForm.elements["resolution"].values[idx].data.resX
-							this.resY = customForm.elements["resolution"].values[idx].data.resY
-						break
-					end
+			this.resX, this.resY = ScriptCB_GetIdealResolution()
+			--go from res to index?
+			for idx, resItem in customForm.elements["resolution"].values do
+				if (resItem.data.resX == this.resX and resItem.data.resY == this.resY) then
+					customForm.elements["resolution"].selValue = idx
+   						this.resX = customForm.elements["resolution"].values[idx].data.resX
+						this.resY = customForm.elements["resolution"].values[idx].data.resY
+					break
 				end
-				
-				-- OpenSWBF2: 4x antialiasing by default when the list has it
-				local multisampleIndex = 1
-				for idx, msItem in customForm.elements["multisample"].values do
-					if ( msItem.data.multisampleType == 4 and msItem.data.multisampleQuality == 0 and not msItem.bUnselectable ) then
-						multisampleIndex = idx
-						break
-					end
-				end
-				customForm.elements["multisample"].selValue = multisampleIndex
-				this.iMultiSample = customForm.elements["multisample"].values[multisampleIndex].data.multisampleType
-				this.iMultiSampleQuality = customForm.elements["multisample"].values[multisampleIndex].data.multisampleQuality
 			end
+
+			-- OpenSWBF2: 4x antialiasing by default when the list has it
+			local multisampleIndex = 1
+			for idx, msItem in customForm.elements["multisample"].values do
+				if ( msItem.data.multisampleType == 4 and msItem.data.multisampleQuality == 0 and not msItem.bUnselectable ) then
+					multisampleIndex = idx
+					break
+				end
+			end
+			customForm.elements["multisample"].selValue = multisampleIndex
+			this.iMultiSample = customForm.elements["multisample"].values[multisampleIndex].data.multisampleType
+			this.iMultiSampleQuality = customForm.elements["multisample"].values[multisampleIndex].data.multisampleQuality
 
 			for key, value in pairs(autodetect) do
 				if( generalForm.elements[key] and (not generalForm.elements[key].hidden) ) then
@@ -936,6 +918,9 @@ ifs_opt_pcvideo = NewIFShellScreen {
 	end,
 
 	Input_Start = function(this)
+		if(ScriptCB_PollDisplayConfirm() ~= 0) then
+			return
+		end
 		if not this.bShellMode then
  			this.bResetProfile = 1
 			ScriptCB_SetPCBrightnessContrast(this.fOriginalBrightness, this.fOriginalContrast)
@@ -1005,9 +990,7 @@ ifs_opt_pcvideo = NewIFShellScreen {
         local customForm = this.formcontainercustom.form           
 		Form_Update(generalForm, fDt)
 		Form_Update(customForm, fDt)
-		if(ScriptCB_GetShellActive()) then
-			ifs_opt_pcvideo_fnConfirmUpdate(this)
-		end
+		ifs_opt_pcvideo_fnConfirmUpdate(this)
     end,
 }
 

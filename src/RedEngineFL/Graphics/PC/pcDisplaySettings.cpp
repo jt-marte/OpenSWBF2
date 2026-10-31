@@ -804,4 +804,17 @@ void Init(bool bCliWindowed)
     }
 }
 
+const char* BorderlessSource(bool bCliWindowed)
+{
+    if (gCliDisplay.uiSet & kBorderless)
+    {
+        return "command line";
+    }
+    if (gIniDisplay.uiSet & kBorderless)
+    {
+        return "display.ini";
+    }
+    return bCliWindowed ? "-win" : "default";
+}
+
 }

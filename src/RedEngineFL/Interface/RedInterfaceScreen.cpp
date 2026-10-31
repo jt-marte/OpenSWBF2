@@ -343,8 +343,8 @@ void RedInterfaceScreen::Render() const
     // are scaled up. Axes and depth scale alike: the group is the 1080p layout
     // magnified about the camera, so 3D models keep their perspective.
     const float fUiScale = GetUiScale();
-    const float fHudScale =
-        DisplayLogic::HudGroupScale(GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale);
+    const float fHudScale = DisplayLogic::HudGroupScale(
+        GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale, GetUiLayoutHeight());
 
     for (PblList<RedScreenGroupElement>::Itor it = m_children.Begin(); it != m_children.End(); ++it)
     {
@@ -439,6 +439,9 @@ void RedInterfaceScreen::GetSafeZone(float& fWidth, float& fHeight, float& fOffs
     fHeight = m_fSafeZoneHeight;
 }
 
+// OpenSWBF2: the UI height the in-game menus were built at (LockUiLayout), 0 before
+static unsigned int sUiLayoutH;
+
 // FUNCTION: SWBF2 0x006c0cd0
 float RedInterfaceScreen::GetUiScale()
 {
@@ -448,7 +451,7 @@ float RedInterfaceScreen::GetUiScale()
     {
         return DisplayLogic::ShellUiScale(GetScreenHeight());
     }
-    return DisplayLogic::UiScale(GetScreenHeight());
+    return DisplayLogic::LayoutUiScale(GetScreenHeight(), sUiLayoutH);
 }
 
 unsigned int RedInterfaceScreen::GetUiWidth()
@@ -458,7 +461,7 @@ unsigned int RedInterfaceScreen::GetUiWidth()
         return (unsigned int)((float)GetScreenWidth() / GetUiScale() + 0.5f);
     }
     unsigned int uiW, uiH;
-    DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
+    DisplayLogic::LayoutUiSize(GetScreenWidth(), GetScreenHeight(), sUiLayoutH, uiW, uiH);
     return uiW;
 }
 
@@ -469,8 +472,25 @@ unsigned int RedInterfaceScreen::GetUiHeight()
         return (unsigned int)((float)GetScreenHeight() / GetUiScale() + 0.5f);
     }
     unsigned int uiW, uiH;
-    DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
+    DisplayLogic::LayoutUiSize(GetScreenWidth(), GetScreenHeight(), sUiLayoutH, uiW, uiH);
     return uiH;
+}
+
+void RedInterfaceScreen::LockUiLayout()
+{
+    unsigned int uiW, uiH;
+    DisplayLogic::UiSize(GetScreenWidth(), GetScreenHeight(), uiW, uiH);
+    sUiLayoutH = uiH;
+}
+
+void RedInterfaceScreen::ClearUiLayout()
+{
+    sUiLayoutH = 0;
+}
+
+unsigned int RedInterfaceScreen::GetUiLayoutHeight()
+{
+    return RedRenderer::pcIsShellActive() ? 0 : sUiLayoutH;
 }
 
 void RedInterfaceScreen::GetScale(float& fScaleX, float& fScaleY, float& fUnitX, float& fUnitY) const

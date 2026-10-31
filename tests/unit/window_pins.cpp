@@ -9,6 +9,7 @@
 #include "PebbleFL/Common/PblUnicode.h"
 #include "LuaFL/include/lua.h"
 #include "LuaFL/include/lauxlib.h"
+#include "LuaFL/include/lualib.h"
 
 namespace
 {
@@ -754,6 +755,164 @@ TEST_CASE("display menu lua source pins" * doctest::test_suite("unit"))
     CHECK(!Has(sInputBack, "ScriptCB_PopScreen("));
     CHECK(!Has(sInputBack, "this:Exit("));
     CHECK(CountOf(sVideo, "ifs_opt_pcvideo_fnSaveDisplay(") == 4);
+}
+
+TEST_CASE("display menu lua applies the display rows in a match" * doctest::test_suite("unit"))
+{
+    std::string sRaw;
+    REQUIRE(ReadSource("../data/scripts/common/ifs_opt_pcvideo.lua", sRaw));
+    const std::string sVideo = StripCr(sRaw);
+
+    // in a match only the texture rows and the preset that sets them stay hidden
+    // (textures load with the map); retail hid resolution, mode, vsync and AA too
+    const size_t uiHide = sVideo.find("-- hide some options if we're in game");
+    REQUIRE(uiHide != std::string::npos);
+    const size_t uiHideEnd = sVideo.find("SetCurButton(this.CurButton)", uiHide);
+    REQUIRE(uiHideEnd != std::string::npos);
+    const std::string sHide = sVideo.substr(uiHide, uiHideEnd - uiHide);
+    CHECK(Has(sHide, "if(not ScriptCB_GetShellActive()) then"));
+    CHECK(CountOf(sHide, ".hidden = 1") == 3);
+    CHECK(Has(sHide, "customForm.elements[\"texturedetail\"].hidden = 1"));
+    CHECK(Has(sHide, "customForm.elements[\"texturequality\"].hidden = 1"));
+    CHECK(Has(sHide, "generalForm.elements[\"overallquality\"].hidden = 1"));
+
+    // the keep-or-revert prompt, the lists it refills and the vsync lock run in a match too
+    const size_t uiUpdate = sVideo.find("    Update = function(this, fDt)\n");
+    REQUIRE(uiUpdate != std::string::npos);
+    const std::string sUpdate = sVideo.substr(uiUpdate, sVideo.find("\n    end,\n", uiUpdate) - uiUpdate);
+    CHECK(Has(sUpdate, "ifs_opt_pcvideo_fnConfirmUpdate(this)"));
+    CHECK(!Has(sUpdate, "GetShellActive"));
+    const char* apcFunctions[] = { "function ifs_opt_pcvideo_fnConfirmEnded(this)",
+        "function ifs_opt_pcvideo_fnShowRows(this)",
+        "function ifs_opt_pcvideo_fnFillMultisample(this, bKeep)" };
+    for (size_t i = 0; i < sizeof(apcFunctions) / sizeof(apcFunctions[0]); ++i)
+    {
+        const std::string sBody = LuaTopFunction(sVideo, apcFunctions[i]);
+        CAPTURE(apcFunctions[i]);
+        REQUIRE(!sBody.empty());
+        CHECK(!Has(sBody, "GetShellActive"));
+    }
+    // Start (the in-game cancel) waits for the prompt like Accept and Back
+    const size_t uiStart = sVideo.find("\tInput_Start = function(this)\n");
+    REQUIRE(uiStart != std::string::npos);
+    const std::string sStart = sVideo.substr(uiStart, sVideo.find("\n\tend,\n", uiStart) - uiStart);
+    CHECK(Has(sStart, "if(ScriptCB_PollDisplayConfirm() ~= 0) then\n\t\t\treturn"));
+
+    // the real ApplySettings, run with the shell inactive
+    const size_t uiApply = sVideo.find("\tApplySettings = function(this, bCancelable)\n");
+    REQUIRE(uiApply != std::string::npos);
+    const size_t uiApplyEnd = sVideo.find("\n\tend,\n", uiApply);
+    REQUIRE(uiApplyEnd != std::string::npos);
+    const std::string sApply =
+        "ifs_opt_pcvideo." + sVideo.substr(uiApply + 1, uiApplyEnd + 5 - (uiApply + 1)) + "\n";
+    const std::string sSelData = LuaTopFunction(sVideo, "function ifs_opt_pcvideo_fnSelData(form, tag)");
+    REQUIRE(!sSelData.empty());
+
+    lua_State* L = lua_open();
+    REQUIRE(L);
+    luaopen_base(L);
+    lua_settop(L, 0);
+    std::string sError;
+    CAPTURE(sError);
+    REQUIRE(RunLua(L,
+                   std::string(kPcVideoStubs) +
+                       "shell = nil\n"
+                       "function ScriptCB_GetShellActive() return shell end\n"
+                       "function ScriptCB_SetResolution(x, y) note('res ' .. x .. 'x' .. y) end\n"
+                       "function ScriptCB_SetHUDScale(f) end\n"
+                       "function ScriptCB_SetPCVideoOptions(...) windowed = arg[16] vsync = arg[21] end\n"
+                       "function ScriptCB_SetDisplayOptions(t) note('display mode=' .. t.mode .. ' vsync=' .. "
+                       "t.vsync .. ' fps=' .. t.fps .. ' ff=' .. t.futureframes) end\n"
+                       "function ScriptCB_SetPCBrightnessContrast(b, c) end\n"
+                       "function IFObj_fnSetVis(o, v) end\n" +
+                       sSelData + sApply,
+                   sError));
+    REQUIRE(RunLua(L,
+                   "local function el(v) return { selValue = v } end\n"
+                   "local gen = { elements = { hudscale = el(100), displaymode = el(2), vsync = el(2),\n"
+                   "  overallquality = el(4), brightness = el(0.5), contrast = el(0.5), futureframes = el(1),\n"
+                   "  framecap = { selValue = 1, values = { { data = 120 } } } } }\n"
+                   "local cust = { elements = { resolution = { selValue = 2, values = {\n"
+                   "  { data = { resX = 1920, resY = 1080 } }, { data = { resX = 1280, resY = 720 } } } },\n"
+                   "  lightingquality = el(3), texturedetail = el(3), texturequality = el(1), waterquality = el(3),\n"
+                   "  terrainquality = el(3), particlequality = el(3), shadowquality = el(3),\n"
+                   "  specularquality = el(3), lightbloom = el(2), bumpmapping = el(2), motionblur = el(2),\n"
+                   "  distortion = el(2), viewdistance = el(1), loddistance = el(1) } }\n"
+                   "local this = ifs_opt_pcvideo\n"
+                   "this.formcontainergeneral = { form = gen }\n"
+                   "this.formcontainercustom = { form = cust }\n"
+                   "this.iLegacyWindowed = 1\n"
+                   "this.iLegacyVsync = 1\n"
+                   "calls = ''\n"
+                   "this:ApplySettings(true)\n"
+                   "game = calls\n"
+                   "gamewindowed = windowed\n"
+                   "gamevsync = vsync\n"
+                   "calls = ''\n"
+                   "gen.elements.displaymode.selValue = 3\n"
+                   "gen.elements.vsync.selValue = 1\n"
+                   "cust.elements.resolution.values = {}\n"
+                   "this:ApplySettings(true)\n"
+                   "nolist = calls\n"
+                   "nolistwindowed = windowed\n"
+                   "nolistvsync = vsync\n",
+                   sError));
+    CHECK(LuaGlobal(L, "game") == "res 1280x720;display mode=2 vsync=2 fps=120 ff=1;");
+    CHECK(LuaGlobal(L, "gamewindowed") == "2");
+    CHECK(LuaGlobal(L, "gamevsync") == "2");
+    // an empty resolution list skips only the resolution
+    CHECK(LuaGlobal(L, "nolist") == "display mode=3 vsync=1 fps=120 ff=1;");
+    CHECK(LuaGlobal(L, "nolistwindowed") == "1");
+    CHECK(LuaGlobal(L, "nolistvsync") == "1");
+    lua_close(L);
+}
+
+TEST_CASE("ui layout lock source pins" * doctest::test_suite("unit"))
+{
+    std::string sScreenRaw;
+    std::string sMissionRaw;
+    std::string sStateRaw;
+    std::string sChatRaw;
+    if (!ReadSource("../src/RedEngineFL/Interface/RedInterfaceScreen.cpp", sScreenRaw) ||
+        !ReadSource("../src/Battlefront2/Source/LuaCallbacks_Mission.cpp", sMissionRaw) ||
+        !ReadSource("../src/Battlefront2/Source/GameState.cpp", sStateRaw) ||
+        !ReadSource("../src/Battlefront2/Source/ChatMessageDisplay.cpp", sChatRaw))
+    {
+        SkipCase("source files not found");
+    }
+    const std::string sScreen = StripCr(sScreenRaw);
+    const std::string sMission = StripCr(sMissionRaw);
+    const std::string sState = StripCr(sStateRaw);
+    const std::string sChat = StripCr(sChatRaw);
+
+    // the in-game menus lock the UI height they are built at, right before game_interface
+    const size_t uiLock = sMission.find("RedInterfaceScreen::LockUiLayout();");
+    const size_t uiInterface = sMission.find("LuaScript::LoadScript(\"game_interface\");");
+    REQUIRE(uiLock != std::string::npos);
+    REQUIRE(uiInterface != std::string::npos);
+    CHECK(uiLock < uiInterface);
+    CHECK(sMission.find("if (!_stricmp(pcFile, \"ingame.lvl\"))") < uiLock);
+
+    // each state starts unlocked, before its display mode and anything it builds
+    const std::string sPre = FunctionBody(sState, "void GameState::PreStateInit(bool bMission)");
+    REQUIRE(!sPre.empty());
+    const size_t uiClear = sPre.find("RedInterfaceScreen::ClearUiLayout();");
+    REQUIRE(uiClear != std::string::npos);
+    CHECK(uiClear < sPre.find("ApplyPreLoadSettings();"));
+    CHECK(uiClear < sPre.find("HUD::Manager::Open();"));
+
+    // the Lua menus and the HUD-sized C++ groups scale from the locked height
+    const std::string sScale = FunctionBody(sScreen, "float RedInterfaceScreen::GetUiScale()");
+    REQUIRE(!sScale.empty());
+    CHECK(Has(sScale, "return DisplayLogic::LayoutUiScale(GetScreenHeight(), sUiLayoutH);"));
+    CHECK(CountOf(sScreen, "DisplayLogic::LayoutUiSize(GetScreenWidth(), GetScreenHeight(), sUiLayoutH, uiW, uiH);") == 2);
+    const std::string sRender = FunctionBody(sScreen, "void RedInterfaceScreen::Render() const");
+    REQUIRE(!sRender.empty());
+    CHECK(Has(sRender, "GetScreenHeight(), DisplayCfg::gDisplay.uiHudScale, GetUiLayoutHeight());"));
+    CHECK(Has(sChat, "RedInterfaceScreen::GetUiLayoutHeight());"));
+    const std::string sLayout = FunctionBody(sScreen, "unsigned int RedInterfaceScreen::GetUiLayoutHeight()");
+    REQUIRE(!sLayout.empty());
+    CHECK(Has(sLayout, "RedRenderer::pcIsShellActive() ? 0 : sUiLayoutH"));
 }
 
 TEST_CASE("multiplayer: Modern first and by default with a Direct Connect tab and no Join IP button" *
