@@ -2873,7 +2873,8 @@ void __fastcall ParseAutoNetCommandLine(char* pCmdLine)
         return;
     }
     // Retail skipped the server config files when a game name came on the command line;
-    // -dedicated always loads them (the command line still wins, it is parsed afterwards).
+    // -dedicated always loads them (the command line still wins, it is parsed afterwards, except
+    // that /bots keeps each mode's bots a team set here: NetWire::StartModeBots).
     if (strstr(pCmdLine, "/gamename ") && !gDedicatedShorthand)
     {
         return;

@@ -18,6 +18,7 @@
 #include "LuaCallbacks_Options.h"
 #include "NetSetup.h"
 #include "NetGame.h"
+#include "NetWire.h"
 #include "ShellLoop.h"
 #include "PebbleFL/Common/PblHashTable.h"
 #include "PebbleFL/Common/PblUnicode.h"
@@ -916,23 +917,16 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
             bNamed = true;
             break;
         case 0xE181E077:
-            netNumBots =
-                Lua_Callbacks::gASSNumBots[0] =
-                Lua_Callbacks::gASSNumBots[1] =
-                Lua_Callbacks::gASSNumBots[2] =
-                Lua_Callbacks::gASSNumBots[3] =
-                Lua_Callbacks::gELINumBots[0] =
-                Lua_Callbacks::gELINumBots[1] =
-                Lua_Callbacks::gELINumBots[2] =
-                Lua_Callbacks::gELINumBots[3] =
-                Lua_Callbacks::gCTFNumBots[0] =
-                Lua_Callbacks::gCTFNumBots[1] =
-                Lua_Callbacks::gCTFNumBots[2] =
-                Lua_Callbacks::gCTFNumBots[3] =
-                Lua_Callbacks::gCONNumBots[0] =
-                Lua_Callbacks::gCONNumBots[1] =
-                Lua_Callbacks::gCONNumBots[2] =
-                Lua_Callbacks::gCONNumBots[3] = atoi(apcArgv[++i]);
+            // OpenSWBF2: retail's /bots overwrote every mode, so a server's settings file
+            // (/conaiperteam and the like, loaded before this) lost its counts to /bots 64
+            netNumBots = atoi(apcArgv[++i]);
+            for (int iRules = 0; iRules < 4; ++iRules)
+            {
+                Lua_Callbacks::gASSNumBots[iRules] = NetWire::StartModeBots(Lua_Callbacks::gASSNumBots[iRules], netNumBots);
+                Lua_Callbacks::gELINumBots[iRules] = NetWire::StartModeBots(Lua_Callbacks::gELINumBots[iRules], netNumBots);
+                Lua_Callbacks::gCTFNumBots[iRules] = NetWire::StartModeBots(Lua_Callbacks::gCTFNumBots[iRules], netNumBots);
+                Lua_Callbacks::gCONNumBots[iRules] = NetWire::StartModeBots(Lua_Callbacks::gCONNumBots[iRules], netNumBots);
+            }
             break;
         case 0xE3D8AB51:
             netFrameLock = true;

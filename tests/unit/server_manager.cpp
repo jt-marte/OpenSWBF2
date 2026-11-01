@@ -271,6 +271,11 @@ TEST_CASE("a dedicated server's bots never change its clients' character table" 
     CHECK(NetWire::ServerBotCap(32, 64) == 32);
     CHECK(NetWire::ServerBotCap(200, 64) == 64);
     CHECK(NetWire::ServerBotCap(48, 32) == 32);
+    // /bots 64 fills only the modes the settings file left unset: its /ctfaiperteam 20 stays
+    CHECK(NetWire::StartModeBots(-1, 64) == 64);
+    CHECK(NetWire::StartModeBots(20, 64) == 20);
+    CHECK(NetWire::StartModeBots(0, 64) == 0);
+    CHECK(NetWire::StartModeBots(-1, 16) == 16);
     // a class grows with its team, rounding up, so the classes can fill it
     CHECK(NetWire::ServerClassMax(25, 28, 64) == 58);
     CHECK(NetWire::ServerClassMax(4, 32, 64) == 8);
