@@ -8,6 +8,7 @@
 #include "PebbleFL/Common/PblHandle.h"
 #include "PebbleFL/Common/PblList.h"
 #include "PebbleFL/Common/PblListSingle.h"
+#include "NetWire.h"
 
 struct DamageEffectClass
 {
@@ -207,10 +208,10 @@ public:
     float GetCurFloat(int iNetUniqueId, int iIndex);
     float GetPrevFloat(int iNetUniqueId, int iIndex);
 
-    int count[64];
-    PblMatrix mat[2][64];
-    float mFloats[2][3][64];
-    PblVector3 vec[2][64];
+    int count[NetWire::kNetObjSlots];
+    PblMatrix mat[2][NetWire::kNetObjSlots];
+    float mFloats[2][3][NetWire::kNetObjSlots];
+    PblVector3 vec[2][NetWire::kNetObjSlots];
 };
  
 

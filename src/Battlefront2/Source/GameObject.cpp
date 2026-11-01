@@ -624,7 +624,7 @@ GameObjectInterpolator gameObjectInterpolator;
 // FUNCTION: SWBF2 0x00537460
 void GameObjectInterpolator::GetMatrix(int iNetUniqueId, PblMatrix& mMatrix)
 {
-    if ((unsigned int)iNetUniqueId >= 64)
+    if ((unsigned int)iNetUniqueId >= NetWire::kNetObjSlots)
     {
         return;
     }

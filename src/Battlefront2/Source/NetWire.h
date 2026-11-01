@@ -71,10 +71,24 @@ bool IsValidTurnRate(int iDuration, int iTurns);
 // spawn, on the server. With 64 slots a team takes up to kServerTeamCap soldiers, humans and bots,
 // so 64 players leave room for 64 bots in all: host and clients raise the map's unit count alike,
 // since each creates a team's characters up to it (SpawnManager::InitialUpdate).
+// The objects a server keeps each client up to date on, by slot (NetObjStateMap). Retail's
+// window was 64 slots (6-bit ids, 63 = none), picked nearest first each turn; with 64 a team
+// past the nearest 63 soldiers and vehicles stopped updating, so they slid in a frozen pose and
+// vehicles stuttered. 128 slots (7 bits) changes the wire format: kNetVersion says so.
+// The join's protocol version (retail 1): a client and a server that differ refuse the join
+// (JRR_VERSION) instead of misreading each other's updates.
+const unsigned int kNetVersion = 2;
+const int kNetObjSlots = 128;
+const int kNetObjBits = 7;
+const unsigned int kNetObjNone = kNetObjSlots - 1;
 const int kRetailBotSlots = 32;
 const int kMaxBotSlots = 64;
 const int kServerTeamCap = 64;
 int ServerBotSlots(int iStartBots);
+// Datagrams a server's update to a client may fill: two with 64 slots, which has twice the
+// soldiers to keep each client up to date on (the objects take ~800 bytes a datagram), one
+// otherwise, as before
+int UpdateDatagrams(int iSlots);
 // /bots on the command line fills a mode's bots a team only where the server's settings file
 // (loaded first) left it unset (-1): launcher and Docker servers start with /bots 64 for the room
 // and keep each mode's own count from ServerSettings.cfg

@@ -5051,7 +5051,7 @@ void CNetJoinGame::Update()
                 }
                 NetPktGroup group;
                 group.BeginWrite();
-                group.WriteBits(1, 12);
+                group.WriteBits(NetWire::kNetVersion, 12);
                 unsigned int sequence = NetSetup::GetPassword();
                 group.WriteBits(sequence, 32);
                 unsigned int guestCount = 0;
@@ -5465,7 +5465,7 @@ void CNetHostGame::Update()
                     group.EndWrite();
                     NetComm::Send(from, PKT_REJECT, &group);
                 }
-                else if (version != 1)
+                else if (version != NetWire::kNetVersion)
                 {
                     LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=version version=%u",
                         NetCommP::DescribeAddr(from), version);
@@ -6207,7 +6207,7 @@ void CNetPostLoadHostGame::Update()
             group.BeginRead();
             unsigned int value;
             group.ReadBits(value, 12);
-            if (value != 1)
+            if (value != NetWire::kNetVersion)
             {
                 group.EndRead();
                 join->Free();
@@ -6331,7 +6331,7 @@ void CNetPostLoadHostGame::Update()
                     group.EndWrite();
                     NetComm::Send(from, PKT_REJECT, &group);
                 }
-                else if (version != 1)
+                else if (version != NetWire::kNetVersion)
                 {
                     LOG(LogNet, Inform, "OPENSWBF2 NET join rejected from=%s reason=version version=%u",
                         NetCommP::DescribeAddr(from), version);

@@ -1,5 +1,6 @@
 #pragma once
 #include "TargetManager.h"
+#include "NetWire.h"
 
 extern bool netInShell;
 extern bool netEnabled;
@@ -110,6 +111,8 @@ public:
     static bool ServerBots();
     static void StartServerBots(int iStartBots);
     static int ServerBotSlots();
+    // the datagrams an update to a client may fill (NetWire::UpdateDatagrams)
+    static int UpdateDatagrams();
     static void SetServerBotCap(int iBots);
     static int BotsPerTeam();
     // A map's bots (ScriptCB_SetNumBots, registered by both LuaCallbacks_Net and _Options): a
@@ -495,7 +498,7 @@ public:
     static NetObjStateMap* Alloc();
     void Free();
 
-    NetObjState* stateMap[64];
+    NetObjState* stateMap[NetWire::kNetObjSlots];
     NetObjStateMap* next;
     unsigned int turn;
 
@@ -567,7 +570,7 @@ struct NetPlayer
 
     unsigned __int64 mGSPlayerID;
 
-    unsigned char skippedSends[64];
+    unsigned char skippedSends[NetWire::kNetObjSlots];
     int updateWindowSize;
     // OpenSWBF2: up to kUpdateWindowMax updates in flight (retail 2), and a timed-out update
     // keeps its slot until reused so a late ack still feeds the RTT estimate.

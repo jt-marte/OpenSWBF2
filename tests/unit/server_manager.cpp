@@ -288,3 +288,18 @@ TEST_CASE("a dedicated server's bots never change its clients' character table" 
     CHECK(NetWire::CharacterCount(32, 32, false, 64, 16, 7) == 71);
     CHECK(NetWire::CharacterCount(16, 16, true, 64, 16, 7) == 103);
 }
+
+TEST_CASE("a client's object window holds a 64-a-team battle in two datagrams" * doctest::test_suite("unit"))
+{
+    // the slots' ids and the 'none' id all fit the wire's bits, and 'none' is the last slot
+    CHECK(NetWire::kNetObjSlots == (1 << NetWire::kNetObjBits));
+    CHECK(NetWire::kNetObjNone == (unsigned int)NetWire::kNetObjSlots - 1);
+    // room for both teams' 64 nearest soldiers' worth of objects (retail: 63)
+    CHECK(NetWire::kNetObjSlots - 1 > 2 * 63);
+    // retail had version 1; a different window is a different protocol
+    CHECK(NetWire::kNetVersion != 1);
+    // two datagrams of objects only on a 64-slot server
+    CHECK(NetWire::UpdateDatagrams(NetWire::kMaxBotSlots) == 2);
+    CHECK(NetWire::UpdateDatagrams(NetWire::kRetailBotSlots) == 1);
+    CHECK(NetWire::UpdateDatagrams(0) == 1);
+}

@@ -1108,7 +1108,7 @@ bool finishedTimeScale;
 // GLOBAL: SWBF2 0x01fa65fc
 int clientReliableBatchNumber;
 // GLOBAL: SWBF2 0x01fa8720
-bool clientSkipped[64];
+bool clientSkipped[NetWire::kNetObjSlots];
 // GLOBAL: SWBF2 0x01fa8760
 int sendTurnNumber;
 
@@ -1413,7 +1413,7 @@ NetObjStateMap* NetObjStateMap::Alloc()
 // FUNCTION: SWBF2 0x005b4770
 void NetObjStateMap::Free()
 {
-    for (unsigned int i = 0; i < 64; i++)
+    for (unsigned int i = 0; i < NetWire::kNetObjSlots; i++)
     {
         if (stateMap[i])
         {
@@ -2217,7 +2217,7 @@ void NetGame::Create(bool bMission)
 }
 
 // GLOBAL: SWBF2 0x01fa6608
-void* clientObjMap[64];
+void* clientObjMap[NetWire::kNetObjSlots];
 // GLOBAL: SWBF2 0x01e64bd0
 unsigned int suicideChangeCounts[64];
 // GLOBAL: SWBF2 0x01e62fa0
@@ -3937,6 +3937,11 @@ int NetGame::ServerBotSlots()
     return siServerBotSlots;
 }
 
+int NetGame::UpdateDatagrams()
+{
+    return NetWire::UpdateDatagrams(siServerBotSlots);
+}
+
 void NetGame::SetServerBotCap(int iBots)
 {
     siServerBotCap = NetWire::ServerBotCap(iBots, siServerBotSlots ? siServerBotSlots : netNumBots);
@@ -5087,6 +5092,8 @@ unsigned int GetUniqObjectId(const GameObject* pObject);
 GameObject* FindClientObject(unsigned int uId);
 // GLOBAL: SWBF2 0x01e64ef4
 struct HandleToIndex;
+// OpenSWBF2: room for a window's slots, last turn's and this turn's (retail 128 for 64)
+const int kHandleTableSize = 2 * NetWire::kNetObjSlots;
 
 // WriteUpdate's handle-to-index map: a count, then the table. Retail kept it as unsigned
 // int[1 + 2 * 128]; the table's slots are pointer-sized, so on x64 that array was half the size it
@@ -5094,9 +5101,9 @@ struct HandleToIndex;
 struct HandleToIndexMap
 {
     unsigned int count;
-    PblHashTable<HandleToIndex, 128> table;
+    PblHashTable<HandleToIndex, kHandleTableSize> table;
 };
-static_assert(sizeof(void*) != 4 || sizeof(HandleToIndexMap) == 4 * (1 + 2 * 128), "retail layout");
+static_assert(sizeof(void*) != 4 || sizeof(HandleToIndexMap) == 4 * (1 + 2 * kHandleTableSize), "retail layout");
 
 HandleToIndexMap* handleToIndexMapPtr;
 // GLOBAL: SWBF2 0x01fa2513
@@ -5228,7 +5235,7 @@ void WriteObjectPtr(NetPktGroup& group, const GameObject* pObject)
     }
     else
     {
-        group.WriteBits(GetUniqObjectId(pObject), 6);
+        group.WriteBits(GetUniqObjectId(pObject), NetWire::kNetObjBits);
     }
 }
 
@@ -5238,7 +5245,7 @@ GameObject* ReadObjectPtr(NetPktGroup& group)
     bool bSpecial = false;
     group.Read(bSpecial);
     unsigned int uId = 0;
-    group.ReadBits(uId, bSpecial ? 8 : 6);
+    group.ReadBits(uId, bSpecial ? 8 : NetWire::kNetObjBits);
     if (!bSpecial)
     {
         return FindClientObject(uId);
@@ -5302,7 +5309,7 @@ bool NetGame::IsFullState()
 // FUNCTION: SWBF2 0x005c8c30
 GameObject* FindClientObject(unsigned int uId)
 {
-    if (uId == 63)
+    if (uId >= NetWire::kNetObjNone)
     {
         return 0;
     }
@@ -5315,12 +5322,12 @@ unsigned int GetUniqObjectId(const GameObject* pObject)
 {
     if (!pObject)
     {
-        return 63;
+        return NetWire::kNetObjNone;
     }
-    PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
+    PblHashTable<unsigned int, kHandleTableSize>* pTable =
+        (PblHashTable<unsigned int, kHandleTableSize>*)&handleToIndexMapPtr->table;
     unsigned int* pId = pTable->Find(pObject->GetHandleId());
-    return pId ? *pId : 63;
+    return pId ? *pId : NetWire::kNetObjNone;
 }
 
 // FUNCTION: SWBF2 0x005ce480
@@ -6971,7 +6978,7 @@ void NetGame::ReadPreGame(NetPktGroup& group)
 }
 
 // GLOBAL: SWBF2 0x01e64cd8
-GameObject* hostWorldObjects[64];
+GameObject* hostWorldObjects[NetWire::kNetObjSlots];
 
 // FUNCTION: SWBF2 0x005d30d0
 int NetGame::GetHostWorldUniqueId(int index, GameObject* object)
@@ -7028,7 +7035,7 @@ void ClearPressed(ProcessedInputs* inputs)
 // FUNCTION: SWBF2 0x005cc710
 int GetUniqObjectBits()
 {
-    return 6;
+    return NetWire::kNetObjBits;
 }
 
 // FUNCTION: SWBF2 0x005b46a0
@@ -7151,7 +7158,7 @@ Trackable* ReadTrackable(NetPktGroup& group)
     {
         unsigned int id;
         group.ReadBits(id, GetUniqObjectBits());
-        GameObject** entry = id == 63 ? 0 : (GameObject**)clientObjMap[id];
+        GameObject** entry = id >= NetWire::kNetObjNone ? 0 : (GameObject**)clientObjMap[id];
         bool isUnit;
         group.Read(isUnit);
         unsigned int slot;
@@ -8604,8 +8611,8 @@ void ReadLockedTargets(NetPktGroup& group, int player)
         else
         {
             unsigned int index = 0;
-            group.ReadBits(index, 6);
-            if (index != 63)
+            group.ReadBits(index, NetWire::kNetObjBits);
+            if (index < NetWire::kNetObjNone)
             {
                 NetObjState* state = netPlayers[player].lastObjState->stateMap[index];
                 if (state)
@@ -9280,7 +9287,7 @@ void ReadEvent_DestroyTowCable(NetPktGroup& group, ReliableNetEvent& event)
     unsigned int objectIndex = 0;
     group.ReadBits(objectIndex, GetUniqObjectBits());
     GameObject* object = 0;
-    if (objectIndex != 63 && clientObjMap[objectIndex])
+    if (objectIndex < NetWire::kNetObjNone && clientObjMap[objectIndex])
     {
         object = *(GameObject**)clientObjMap[objectIndex];
         data.mOwnerObject = object;
@@ -9330,14 +9337,14 @@ void ReadEvent_ConnectTowCable(NetPktGroup& group, ReliableNetEvent& event)
 
     unsigned int ownerIndex = 0, collideIndex = 0;
     group.ReadBits(ownerIndex, GetUniqObjectBits());
-    if (ownerIndex != 63 && clientObjMap[ownerIndex])
+    if (ownerIndex < NetWire::kNetObjNone && clientObjMap[ownerIndex])
     {
         GameObject* owner = *(GameObject**)clientObjMap[ownerIndex];
         data.mOwnerObject = owner;
         data.mOwnerHandleId = owner ? owner->mHandleId : 0;
     }
     group.ReadBits(collideIndex, GetUniqObjectBits());
-    if (collideIndex != 63 && clientObjMap[collideIndex])
+    if (collideIndex < NetWire::kNetObjNone && clientObjMap[collideIndex])
     {
         data.mCollideWalker = *(GameObject**)clientObjMap[collideIndex];
     }
@@ -9460,7 +9467,7 @@ void ReadNetEvent(NetPktGroup& group)
 
         unsigned int targetIndex;
         group.ReadBits(targetIndex, GetUniqObjectBits());
-        void* target = targetIndex == 63 ? 0 : clientObjMap[targetIndex];
+        void* target = targetIndex >= NetWire::kNetObjNone ? 0 : clientObjMap[targetIndex];
         desc.mTarget = target ? *(GameObject**)target : 0;
 
         desc.mFireWeapon = 0;
@@ -10263,7 +10270,7 @@ void Remove(NetObj* netObj, bool flag)
         ++gDebugCount;
     }
     Unlink(object);
-    if (netObj->uniqId != 63)
+    if (netObj->uniqId < NetWire::kNetObjNone)
     {
         clientObjMap[netObj->uniqId] = 0;
     }
@@ -10309,7 +10316,7 @@ void FindCreateObj(EntityClass* entityClass, int player)
     if (found != -1)
     {
         NetObj* netObj = createPoolPtr[found];
-        netObj->uniqId = 63;
+        netObj->uniqId = NetWire::kNetObjNone;
         Remove(netObj, false);
         createPoolPtr[found] = 0;
     }
@@ -10670,7 +10677,7 @@ GameObject* CreateObject(unsigned int uniqId, EntityClass* entityClass, int init
         netObj->usedTurn = clientHostTurnNumber;
         unsigned int handleId = object->GetHandleId();
         unsigned int index = uniqId;
-        if (index == 63)
+        if (index >= NetWire::kNetObjNone)
         {
             ++gDebugCount;
         }
@@ -10869,8 +10876,8 @@ bool ReadObject(NetPktGroup& group)
         }
         else
         {
-            group.ReadBits(index, 6);
-            if (index == 63)
+            group.ReadBits(index, NetWire::kNetObjBits);
+            if (index >= NetWire::kNetObjNone)
             {
                 return false;
             }
@@ -10881,13 +10888,13 @@ bool ReadObject(NetPktGroup& group)
         NetObjState* last = 0;
         if (!isFullState)
         {
-            last = index == 63 ? 0 : clientLastObjState->stateMap[index];
+            last = index >= NetWire::kNetObjNone ? 0 : clientLastObjState->stateMap[index];
         }
         sLastReadType = object->GetEntityType();
         object->ReadObject(group, last);
         if (!isFullState && saveObjState)
         {
-            NetObjState* state = index == 63 ? 0 : clientNextObjState->stateMap[index];
+            NetObjState* state = index >= NetWire::kNetObjNone ? 0 : clientNextObjState->stateMap[index];
             if (!state)
             {
                 int playerId = -1;
@@ -10920,7 +10927,7 @@ bool ReadObject(NetPktGroup& group)
 // FUNCTION: SWBF2 0x005cdc70
 void ReadObjects(NetPktGroup& group)
 {
-    NetObj* deferred[64];
+    NetObj* deferred[NetWire::kNetObjSlots];
     createPoolPtr = deferred;
     createPoolCount = 0;
     if (clientHostTurnNumber == debugReadHostTurn)
@@ -10929,7 +10936,7 @@ void ReadObjects(NetPktGroup& group)
     }
     if (!isFullState)
     {
-        bool removed[64];
+        bool removed[NetWire::kNetObjSlots];
         memset(removed, 0, sizeof(removed));
         bool hasRemoves;
         group.Read(hasRemoves);
@@ -10938,14 +10945,14 @@ void ReadObjects(NetPktGroup& group)
             for (int i = 0;; ++i)
             {
                 unsigned int index;
-                group.ReadBits(index, 6);
-                if (index == 63)
+                group.ReadBits(index, NetWire::kNetObjBits);
+                if (index >= NetWire::kNetObjNone)
                 {
                     break;
                 }
                 bool flag;
                 group.Read(flag);
-                NetObj* netObj = index == 63 ? 0 : (NetObj*)clientObjMap[index];
+                NetObj* netObj = index >= NetWire::kNetObjNone ? 0 : (NetObj*)clientObjMap[index];
                 if (netObj)
                 {
                     Remove(netObj, flag);
@@ -10954,15 +10961,15 @@ void ReadObjects(NetPktGroup& group)
             }
         }
         unsigned int j;
-        for (j = 0; j < 64; ++j)
+        for (j = 0; j < NetWire::kNetObjSlots; ++j)
         {
-            NetObj* netObj = j == 63 ? 0 : (NetObj*)clientObjMap[j];
+            NetObj* netObj = j >= NetWire::kNetObjNone ? 0 : (NetObj*)clientObjMap[j];
             if (!netObj)
             {
                 continue;
             }
             netObj->obj->GetGameObjectClass();
-            NetObjState* state = j == 63 ? 0 : clientLastObjState->stateMap[j];
+            NetObjState* state = j >= NetWire::kNetObjNone ? 0 : clientLastObjState->stateMap[j];
             if (state && (state->handle == netObj->obj))
             {
                 continue;
@@ -10972,7 +10979,7 @@ void ReadObjects(NetPktGroup& group)
                 netObj->obj->GetEntityType() == ENT_POST_WALKER ||
                 netObj->obj->GetEntityType() == ENT_POST_FLYER)
             {
-                netObj->uniqId = 63;
+                netObj->uniqId = NetWire::kNetObjNone;
                 Remove(netObj, false);
             }
             else
@@ -10987,8 +10994,8 @@ void ReadObjects(NetPktGroup& group)
             for (int i = 0;; ++i)
             {
                 unsigned int index;
-                group.ReadBits(index, 6);
-                if (index == 63)
+                group.ReadBits(index, NetWire::kNetObjBits);
+                if (index >= NetWire::kNetObjNone)
                 {
                     break;
                 }
@@ -11006,18 +11013,18 @@ void ReadObjects(NetPktGroup& group)
             {
                 continue;
             }
-            netObj->uniqId = 63;
+            netObj->uniqId = NetWire::kNetObjNone;
             Remove(netObj, false);
         }
         createPoolCount = 0;
-        for (j = 0; j < 64; ++j)
+        for (j = 0; j < NetWire::kNetObjSlots; ++j)
         {
-            NetObjState* state = j == 63 ? 0 : clientLastObjState->stateMap[j];
+            NetObjState* state = j >= NetWire::kNetObjNone ? 0 : clientLastObjState->stateMap[j];
             if (!state)
             {
                 continue;
             }
-            NetObj* netObj = j == 63 ? 0 : (NetObj*)clientObjMap[j];
+            NetObj* netObj = j >= NetWire::kNetObjNone ? 0 : (NetObj*)clientObjMap[j];
             if (netObj)
             {
                 continue;
@@ -11047,10 +11054,10 @@ void ReadObjects(NetPktGroup& group)
         CheckReadAlign(group);
     }
 
-    for (unsigned int j = 0; j < 64; ++j)
+    for (unsigned int j = 0; j < NetWire::kNetObjSlots; ++j)
     {
         unsigned int index = j;
-        NetObj* netObj = index == 63 ? 0 : (NetObj*)clientObjMap[index];
+        NetObj* netObj = index >= NetWire::kNetObjNone ? 0 : (NetObj*)clientObjMap[index];
         if (!netObj)
         {
             continue;
@@ -11062,7 +11069,7 @@ void ReadObjects(NetPktGroup& group)
         }
         clientSkipped[j] = true;
         GameObject* object = netObj->obj;
-        NetObjState* last = index == 63 ? 0 : clientLastObjState->stateMap[index];
+        NetObjState* last = index >= NetWire::kNetObjNone ? 0 : clientLastObjState->stateMap[index];
         object->SkipReadObject(last);
         if (saveObjState)
         {
@@ -12344,9 +12351,9 @@ int NetGame::GetObjectsInRange(const PblVector3& position, float radius, GameObj
 {
     int count = 0;
     const float radiusSquared = radius * radius;
-    for (int i = 0; i < 64; ++i)
+    for (int i = 0; i < NetWire::kNetObjSlots; ++i)
     {
-        NetObj* entry = i == 63 ? 0 : (NetObj*)clientObjMap[i];
+        NetObj* entry = i >= (int)NetWire::kNetObjNone ? 0 : (NetObj*)clientObjMap[i];
         if (!entry || !entry->obj || entry->obj == (const void*)excluded)
         {
             continue;
@@ -13087,7 +13094,7 @@ void WriteNullObject(NetPktGroup& group)
     }
     else
     {
-        group.WriteBits(63, 6);
+        group.WriteBits(NetWire::kNetObjNone, NetWire::kNetObjBits);
     }
 }
 
@@ -13315,7 +13322,10 @@ void AddSendFull(GameObject* pObject)
     case 1: case 2: case 3: case 5: case 6: case 7: case 8: case 9:
     case 10: case 12: case 13: case 14: case 15: case 20: case 21:
 
-        sendObjList[sendObjCount++] = pObject;
+        if (sendObjCount < NetWire::kNetObjSlots) // OpenSWBF2: retail ran past sends[] with 64+ soldiers
+        {
+            sendObjList[sendObjCount++] = pObject;
+        }
         break;
     default:
         break;
@@ -13646,13 +13656,13 @@ void AdjustClock()
 // FUNCTION: SWBF2 0x005cc600
 void GetLastObjState(GameObject* pObject, NetObjState*& pState, unsigned int& uId)
 {
-    PblHashTable<unsigned int, 128>* pTable =
-        (PblHashTable<unsigned int, 128>*)&handleToIndexMapPtr->table;
+    PblHashTable<unsigned int, kHandleTableSize>* pTable =
+        (PblHashTable<unsigned int, kHandleTableSize>*)&handleToIndexMapPtr->table;
     unsigned int* pEntry = pTable->Find(pObject->GetHandleId());
     uId = *pEntry;
     if (!*((unsigned char*)pEntry + 4))
     {
-        pState = uId == 63 ? 0 :
+        pState = uId >= NetWire::kNetObjNone ? 0 :
             netPlayers[curDst].lastObjState->stateMap[uId];
     }
 }
@@ -13854,7 +13864,18 @@ void WriteLockedTargets(NetPktGroup* pGroup)
         }
         else
         {
-            pGroup->WriteBits(pTarget->GetNetUniqueId(), 6);
+            // OpenSWBF2: an object's slot is only good while the window the server reads it
+            // against (its last state for us, clientLastObjState) still holds that object. With
+            // objects moving in and out of a crowded window a stale slot named another object,
+            // which the server's target tracking then turned the player toward.
+            unsigned int uId = (unsigned int)pTarget->GetNetUniqueId();
+            NetObjState* pState = uId < NetWire::kNetObjNone && clientLastObjState
+                ? clientLastObjState->stateMap[uId] : 0;
+            if (!pState || !(pState->handle == pTarget))
+            {
+                uId = NetWire::kNetObjNone;
+            }
+            pGroup->WriteBits(uId, NetWire::kNetObjBits);
         }
     }
 }
@@ -14641,7 +14662,7 @@ void AddSendBefore(GameObject* pObject, int iBefore)
             return;
         }
     }
-    if (sendObjCount < 64)
+    if (sendObjCount < NetWire::kNetObjSlots)
     {
         ++sendObjCount;
     }
@@ -15173,7 +15194,7 @@ void WriteObject(NetPktGroup& group, GameObject* pObject)
     }
 
     NetObjState* pState = 0;
-    unsigned int uId = 63;
+    unsigned int uId = NetWire::kNetObjNone;
     if (isFullState)
     {
         group.WriteBits(pObject->GetHandleId(), 16);
@@ -15182,12 +15203,12 @@ void WriteObject(NetPktGroup& group, GameObject* pObject)
     else
     {
         GetLastObjState(pObject, pState, uId);
-        group.WriteBits(uId, 6);
+        group.WriteBits(uId, NetWire::kNetObjBits);
     }
     pObject->WriteObject(group, pState);
     if (saveObjState)
     {
-        NetObjState* pStored = uId == 63 ? 0 :
+        NetObjState* pStored = uId >= NetWire::kNetObjNone ? 0 :
             netPlayers[curDst].nextObjState->stateMap[uId];
         const PblMatrix& matrix = pObject->GetMatrix();
         pStored->rotation = PblQuaternion(matrix);
@@ -15225,7 +15246,7 @@ struct HandleToIndex
  
 
 // FUNCTION: SWBF2 0x005d39f0
-template BblList<HandleToIndex, 128>::BblList();
+template BblList<HandleToIndex, kHandleTableSize>::BblList();
 
 // FUNCTION: SWBF2 0x005d3ae0
 template void PblList<NG_ChatMsg>::Remove(PblList<NG_ChatMsg>::Node*);
@@ -15898,7 +15919,7 @@ void WriteNetEvent(NetEvent& event, NetPktGroup& group)
         GameObject* owner = ownerHandle.ptr;
         unsigned int ownerId = GetUniqObjectId(owner);
         WeaponClass* weaponClass = data.mWpnClassIndex < 0xff ? Factory<Weapon, WeaponClass, WeaponDesc>::FindNetIndex(data.mWpnClassIndex) : 0;
-        if (ownerId == 63 && weaponClass &&
+        if (ownerId >= NetWire::kNetObjNone && weaponClass &&
             weaponClass->IsRtti(WeaponMeleeThrowClass::rttiHashWeaponMeleeThrowClass))
         {
             break;
@@ -15947,7 +15968,7 @@ void WriteNetEvent(NetEvent& event, NetPktGroup& group)
         }
         else
         {
-            targetId = 63;
+            targetId = NetWire::kNetObjNone;
         }
         group.WriteBits(targetId, GetUniqObjectBits());
         if (owner && data.mFireWeapon)
@@ -16140,7 +16161,7 @@ void AddSend(GameObject* pObject)
             break;
         }
     }
-    if (sendObjCount < 64)
+    if (sendObjCount < NetWire::kNetObjSlots)
     {
         ++sendObjCount;
     }
@@ -16149,7 +16170,7 @@ void AddSend(GameObject* pObject)
         sendObjList[j] = sendObjList[j - 1];
         sendScoreList[j] = sendScoreList[j - 1];
     }
-    if (i < 64)
+    if (i < NetWire::kNetObjSlots)
     {
         sendObjList[i] = pObject;
         sendScoreList[i] = priority;
@@ -16157,7 +16178,7 @@ void AddSend(GameObject* pObject)
 }
 
 // FUNCTION: SWBF2 0x005bd6a0
-void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
+void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[NetWire::kNetObjSlots], int*)
 {
     int i, j;
     PblHashTable<GameObject, 512> added;
@@ -16167,12 +16188,12 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
     int count = 0;
     if (hasGuest)
     {
-        for (i = 0; i < 64; ++i)
+        for (i = 0; i < NetWire::kNetObjSlots; ++i)
         {
             for (j = 0; j < 2; ++j)
             {
                 GameObject* pObject = ppScopes[j][i];
-                if (pObject && count < 64 && !added.Find((unsigned int)(uintptr_t)pObject))
+                if (pObject && count < NetWire::kNetObjSlots && !added.Find((unsigned int)(uintptr_t)pObject))
                 {
                     ppSends[count++] = pObject;
                     if (added.Store((unsigned int)(uintptr_t)pObject, pObject))
@@ -16207,7 +16228,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
             {
                 sendObjList[j] = sendObjList[i];
             }
-            if (++j >= 63)
+            if (++j >= (int)NetWire::kNetObjNone)
             {
                 break;
             }
@@ -16217,7 +16238,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
 
     int alwaysLeft = 0;
     int alwaysCount = 0;
-    GameObject* always[64];
+    GameObject* always[NetWire::kNetObjSlots];
     memset(always, 0, sizeof(always));
     sendObjList = always;
     sendObjCount = 0;
@@ -16268,7 +16289,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
             {
                 sendObjList[j] = sendObjList[i];
             }
-            if (++j >= 63)
+            if (++j >= (int)NetWire::kNetObjNone)
             {
                 break;
             }
@@ -16278,7 +16299,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
     alwaysLeft = j;
     alwaysCount = j;
 
-    for (i = 0; i < sendCount && i < 64 - alwaysLeft - 1; ++i)
+    for (i = 0; i < sendCount && i < NetWire::kNetObjSlots - alwaysLeft - 1; ++i)
     {
         for (j = 0; j < alwaysCount; ++j)
         {
@@ -16290,7 +16311,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
             }
         }
     }
-    i = Min(sendCount, 64 - alwaysLeft - 1);
+    i = Min(sendCount, NetWire::kNetObjSlots - alwaysLeft - 1);
     for (j = 0; j < alwaysCount; ++j)
     {
         if (always[j])
@@ -16305,7 +16326,7 @@ void FinishSend(GameObject** ppSends, GameObject* (*ppScopes)[64], int*)
 extern int gSoldierLodCount;
 
 // GLOBAL: SWBF2 0x01e62f60
-BblList<HandleToIndex, 128>* handlePoolPtr;
+BblList<HandleToIndex, kHandleTableSize>* handlePoolPtr;
 
 // GLOBAL: SWBF2 0x01e64b44
 unsigned int netHostTraceHandleId;
@@ -16323,11 +16344,11 @@ unsigned int debugWriteObjectTurn = 0x354;
 void WriteObjects(NetPktGroup& group)
 {
     GameObject* nearObjects[512];
-    GameObject* scopes[2][64];
-    unsigned int removed[64];
-    float priorities[64];
-    bool isSoldier[64];
-    GameObject* sends[64];
+    GameObject* scopes[2][NetWire::kNetObjSlots];
+    unsigned int removed[NetWire::kNetObjSlots];
+    float priorities[NetWire::kNetObjSlots];
+    bool isSoldier[NetWire::kNetObjSlots];
+    GameObject* sends[NetWire::kNetObjSlots];
     int scopeCounts[2];
     unsigned int i;
     unsigned int j;
@@ -16411,14 +16432,14 @@ void WriteObjects(NetPktGroup& group)
         FinishSend(sends, scopes, scopeCounts);
 
         NetObjStateMap* lastMap = netPlayers[curDst].lastObjState;
-        PblHashTable<HandleToIndex, 128>* handleMap = &handleToIndexMapPtr->table;
-        for (i = 0; i < 64; ++i)
+        PblHashTable<HandleToIndex, kHandleTableSize>* handleMap = &handleToIndexMapPtr->table;
+        for (i = 0; i < NetWire::kNetObjSlots; ++i)
         {
             NetObjState* state = lastMap->stateMap[i];
             if (state)
             {
-                BblList<HandleToIndex, 128>* pool = handlePoolPtr;
-                BblList<HandleToIndex, 128>::T1* node = &pool->array[pool->nextFree];
+                BblList<HandleToIndex, kHandleTableSize>* pool = handlePoolPtr;
+                BblList<HandleToIndex, kHandleTableSize>::T1* node = &pool->array[pool->nextFree];
                 if (pool->nextFree > pool->lastUsed)
                 {
                     pool->lastUsed = pool->nextFree;
@@ -16448,13 +16469,13 @@ void WriteObjects(NetPktGroup& group)
             HandleToIndex* entry = handleMap->Find(pObject->GetHandleId());
             if (entry)
             {
-                NetObjState* state = entry->index == 63 ? 0 : lastMap->stateMap[entry->index];
+                NetObjState* state = (unsigned int)entry->index >= NetWire::kNetObjNone ? 0 : lastMap->stateMap[entry->index];
                 state->usedTurn = hostTurnNumber;
             }
         }
 
         unsigned int removedCount = 0;
-        for (i = 0; i < 64; ++i)
+        for (i = 0; i < NetWire::kNetObjSlots; ++i)
         {
             NetObjState* state = lastMap->stateMap[i];
             if (state && state->usedTurn != (unsigned int)hostTurnNumber)
@@ -16484,7 +16505,7 @@ void WriteObjects(NetPktGroup& group)
                 if (isSoldier[index])
                 {
                     PblValues::Record(index, PVT_FULL);
-                    group.WriteBits(index, 6);
+                    group.WriteBits(index, NetWire::kNetObjBits);
                     bool deleted = ResolveGameObjectHandle(state->handle) == 0;
                     group.Write(deleted);
                     ++written;
@@ -16497,13 +16518,13 @@ void WriteObjects(NetPktGroup& group)
                 if (!isSoldier[index])
                 {
                     PblValues::Record(index, PVT_FULL);
-                    group.WriteBits(index, 6);
+                    group.WriteBits(index, NetWire::kNetObjBits);
                     bool deleted = ResolveGameObjectHandle(state->handle) == 0;
                     group.Write(deleted);
                     ++written;
                 }
             }
-            group.WriteBits(63, 6);
+            group.WriteBits(NetWire::kNetObjNone, NetWire::kNetObjBits);
         }
 
         bool wroteNew = false;
@@ -16520,7 +16541,7 @@ void WriteObjects(NetPktGroup& group)
             bool isNew = true;
             if (entry)
             {
-                NetObjState* state = entry->index == 63 ? 0 : lastMap->stateMap[entry->index];
+                NetObjState* state = (unsigned int)entry->index >= NetWire::kNetObjNone ? 0 : lastMap->stateMap[entry->index];
                 if ((state->handle == pObject))
                 {
                     isNew = false;
@@ -16542,13 +16563,13 @@ void WriteObjects(NetPktGroup& group)
                     }
                     ++freeIndex;
                 }
-                if (freeIndex >= 63)
+                if (freeIndex >= NetWire::kNetObjNone)
                 {
                     __debugbreak();
                 }
-                group.WriteBits(freeIndex, 6);
-                BblList<HandleToIndex, 128>* pool = handlePoolPtr;
-                BblList<HandleToIndex, 128>::T1* node = &pool->array[pool->nextFree];
+                group.WriteBits(freeIndex, NetWire::kNetObjBits);
+                BblList<HandleToIndex, kHandleTableSize>* pool = handlePoolPtr;
+                BblList<HandleToIndex, kHandleTableSize>::T1* node = &pool->array[pool->nextFree];
                 if (pool->nextFree > pool->lastUsed)
                 {
                     pool->lastUsed = pool->nextFree;
@@ -16582,7 +16603,7 @@ void WriteObjects(NetPktGroup& group)
                 }
                 else
                 {
-                    NetObjState* lastState = entry->index == 63
+                    NetObjState* lastState = (unsigned int)entry->index >= NetWire::kNetObjNone
                         ? 0 : netPlayers[curDst].lastObjState->stateMap[entry->index];
                     state->position = pObject->GetMatrix().GetTranslation();
                     state->team = lastState->team;
@@ -16598,7 +16619,7 @@ void WriteObjects(NetPktGroup& group)
         }
         else
         {
-            group.WriteBits(63, 6);
+            group.WriteBits(NetWire::kNetObjNone, NetWire::kNetObjBits);
         }
 
         unsigned int start = 6;
@@ -16632,7 +16653,7 @@ void WriteObjects(NetPktGroup& group)
             start += 2;
         }
 
-        int maxBytes = netUpdateSize * 800 / 1024;
+        int maxBytes = netUpdateSize * 800 / 1024 * NetGame::UpdateDatagrams();
         if (saiObjectBudget[curDst] > 0 && saiObjectBudget[curDst] < maxBytes)
         {
             maxBytes = saiObjectBudget[curDst]; // OpenSWBF2: see SendUpdate
@@ -16782,7 +16803,7 @@ void WriteUpdate(NetPktGroup& group)
         }
     }
 
-    BblList<HandleToIndex, 128> handlePool;
+    BblList<HandleToIndex, kHandleTableSize> handlePool;
     HandleToIndexMap handleToIndexMap;
     handleToIndexMap.table.Clear();
     handleToIndexMap.count = 0;
@@ -16867,7 +16888,8 @@ void SendNetEvents(NetPktGroup& group)
             }
         }
     }
-    int iLimit = (netUpdateSize < kUpdateEventLimit + 8 ? netUpdateSize : kUpdateEventLimit + 8) - 8;
+    int iLimit = (netUpdateSize < kUpdateEventLimit + 8 ? netUpdateSize : kUpdateEventLimit + 8) *
+        NetGame::UpdateDatagrams() - 8;
     if (hostCommProblems)
     {
         iLimit = 0;
@@ -16925,21 +16947,22 @@ void SendUpdate(int iPlayer)
     int iBytes = group.GetBytes();
     int iBytes2 = group.GetBytes();
     (void)iBytes2;
-    if (iBytes > 1012)
+    const int iDatagramBytes = 1012 * NetGame::UpdateDatagrams();
+    if (iBytes > iDatagramBytes)
     {
         ++suSplitUpdates;
     }
     // shrink this client's object budget by the overshoot when an update needed a second
     // packet, and let it creep back while updates fit
-    const int iFullBudget = netUpdateSize * 800 / 1024;
+    const int iFullBudget = netUpdateSize * 800 / 1024 * NetGame::UpdateDatagrams();
     int& riBudget = saiObjectBudget[curDst];
     if (riBudget <= 0 || riBudget > iFullBudget)
     {
         riBudget = iFullBudget;
     }
-    if (iBytes > 1012)
+    if (iBytes > iDatagramBytes)
     {
-        riBudget -= iBytes - 1012 + 32;
+        riBudget -= iBytes - iDatagramBytes + 32;
         if (riBudget < iFullBudget / 2)
         {
             riBudget = iFullBudget / 2;
@@ -16979,7 +17002,7 @@ void SendToClients()
     {
         for (i = 0; i < 2; ++i)
         {
-            bFull[i] = NetComm::IsPipeFull((PipeType)i, netUpdateSize);
+            bFull[i] = NetComm::IsPipeFull((PipeType)i, netUpdateSize * NetGame::UpdateDatagrams());
         }
         int iBest = -1;
         for (i = 0; i < netCurMaxPlayers; ++i)
