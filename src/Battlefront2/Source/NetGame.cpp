@@ -3914,6 +3914,25 @@ void NetGame::SetAiHeroes(bool bOn)
     siAiHeroesOverride = bOn ? 1 : 0;
 }
 
+// The bots a dedicated server's teams spawn on this map: its mode's setting, which the map's
+// objective script hands to ScriptCB_SetNumBots; -1 until a map or the command line sets it.
+static int siServerBotCap = -1;
+
+bool NetGame::ServerBots()
+{
+    return netIsDedicated && IsEnabled() && IsHost();
+}
+
+void NetGame::SetServerBotCap(int iBots)
+{
+    siServerBotCap = NetWire::ServerBotCap(iBots);
+}
+
+int NetGame::BotsPerTeam()
+{
+    return ServerBots() && siServerBotCap >= 0 ? siServerBotCap : netNumBots;
+}
+
 void NetGame::ReleaseAiHero(const Character* pCharacter)
 {
     for (int iTeam = 0; iTeam < 3; ++iTeam)

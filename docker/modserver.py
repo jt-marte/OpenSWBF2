@@ -992,8 +992,8 @@ TICK_RATES = (30, 60, 120)
 # The game options as the launcher's ServerProfile.OptionCommands sends them: the values the game
 # takes, and a new server's. ServerSettings.cfg lists them in this order.
 OPTIONS = (
-    ("difficulty", range(2, 5), 3), ("conaiperteam", range(0, 33), 16), ("ctfaiperteam", range(0, 33), 16),
-    ("assaiperteam", range(0, 33), 16), ("eliaiperteam", range(0, 33), 16), ("teamdamage", range(0, 2), 1),
+    ("difficulty", range(2, 5), 3), ("conaiperteam", range(0, 65), 32), ("ctfaiperteam", range(0, 65), 32),
+    ("assaiperteam", range(0, 65), 32), ("eliaiperteam", range(0, 65), 32), ("teamdamage", range(0, 2), 1),
     ("shownames", range(0, 2), 1), ("autoassignteams", range(0, 2), 1), ("awards", range(0, 2), 1),
     ("heroes", range(0, 2), 1), ("hrunlock", (3, 5), 3), ("hrunlockvalue", range(0, 121), 10),
     ("hrplayer", (1, 7), 1), ("aiheroes", range(0, 2), 1), ("conreinforcements", range(10, 501), 100),
@@ -1001,7 +1001,8 @@ OPTIONS = (
     ("huntimelimit", range(0, 61), 0), ("huntscorelimit", range(50, 151), 50), ("assscorelimit", range(150, 301), 180),
 )
 OPTION_VALUES = {name: values for name, values, _ in OPTIONS}
-# A new server's settings, until an admin changes them: 8 stock Conquest maps, 16 bots a team, Hard
+# A new server's settings, until an admin changes them: 8 stock Conquest maps, 32 bots a team (the
+# maps' team size; a team takes 64 soldiers, so players push bots out past that), Hard
 DEFAULTS = {
     "name": "OpenSWBF2 Server",
     "joinPassword": "",

@@ -11,6 +11,7 @@
 #include "GameLoop.h"
 #include "GameObject.h"
 #include "NetGame.h"
+#include "NetWire.h"
 #include "PlayerProfile.h"
 #include "Team.h"
 #include "ToolTips.h"
@@ -218,17 +219,10 @@ void SpawnManager::AddPlayerCharacter(int iTeam, int iPlayer)
 // FUNCTION: SWBF2 0x0064e460
 int SpawnManager::GetTotalCharacterCount()
 {
-    int iCount = mMaxUnitCount[1] + mMaxUnitCount[2];
-    if (NetGame::IsEnabled() && netPlayerLimit + 2 * netNumBots > iCount)
-    {
-        iCount = netPlayerLimit + 2 * netNumBots;
-    }
-    iCount += mMaxUnitCount[0] + mMaxUnitCount[3] + mMaxUnitCount[4] + mMaxUnitCount[5] +
-              mMaxUnitCount[6] + mMaxUnitCount[7];
-    if (iCount > 600)
-    {
-        iCount = 600;
-    }
+    const int iCount = NetWire::CharacterCount(
+        mMaxUnitCount[1], mMaxUnitCount[2], NetGame::IsEnabled(), netPlayerLimit, netNumBots,
+        mMaxUnitCount[0] + mMaxUnitCount[3] + mMaxUnitCount[4] + mMaxUnitCount[5] + mMaxUnitCount[6] +
+            mMaxUnitCount[7]);
     if (NetGame::IsEnabled())
     {
         // Host and clients must agree on this exactly: soldier state names characters by index.
