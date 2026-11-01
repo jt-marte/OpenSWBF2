@@ -5,21 +5,25 @@
 
 NetInterpolator netInterpolator;
 
+// OpenSWBF2: interpolated bullets and turret aims, a ring handed out as they come. Retail's 64
+// wrapped every few frames once 128 soldiers were shooting, restarting them mid-flight.
+const int kInterpSlots = 256;
+
 extern "C" PblMatrix* __stdcall D3DXMatrixMultiply(PblMatrix* pOut, const PblMatrix* pM1, const PblMatrix* pM2);
 extern "C" PblQuaternion* __stdcall D3DXQuaternionNormalize(PblQuaternion*, const PblQuaternion*);
 extern "C" PblMatrix* __stdcall D3DXMatrixRotationQuaternion(PblMatrix*, const PblQuaternion*);
 
 // GLOBAL: SWBF2 0x01ead160
-unsigned int interpId[64];
+unsigned int interpId[kInterpSlots];
 // GLOBAL: SWBF2 0x01ead260
-int interpCat[64];
+int interpCat[kInterpSlots];
 // GLOBAL: SWBF2 0x01ead360
 int interpNext;
 // GLOBAL: SWBF2 0x01ead368
-int interpCount[64];
+int interpCount[kInterpSlots];
 
-extern PblVector3 interpPos[2][64];
-extern PblMatrix interpMat[2][64];
+extern PblVector3 interpPos[2][kInterpSlots];
+extern PblMatrix interpMat[2][kInterpSlots];
 
 // FUNCTION: SWBF2 0x005daa90
 bool NetInterpolator::GetIndex(int& iIndex, int iId, unsigned int uHandleId)
@@ -27,7 +31,7 @@ bool NetInterpolator::GetIndex(int& iIndex, int iId, unsigned int uHandleId)
     if (iIndex < 0 || interpCat[iIndex] != iId || interpId[iIndex] != uHandleId)
     {
         iIndex = interpNext;
-        interpNext = interpNext + 1 < 64 ? interpNext + 1 : 0;
+        interpNext = interpNext + 1 < kInterpSlots ? interpNext + 1 : 0;
         interpCount[iIndex] = 0;
         interpCat[iIndex] = iId;
         interpId[iIndex] = uHandleId;
@@ -136,7 +140,7 @@ void NetPredict::SetRenderTime(float fTime)
 {
     renderTime = fTime;
 }
-extern SmoothInfo smoothInfo[64];
+extern SmoothInfo smoothInfo[NetWire::kNetObjSlots];
 
 // FUNCTION: SWBF2 0x005da0a0
 void SmoothInfo::SetRenderMatrix(const PblMatrix& mat)
@@ -353,7 +357,7 @@ void __fastcall SmoothLocal(SmoothInfo* pInfo)
 // GLOBAL: SWBF2 0x01ee8390
 // SYNTHETIC: SWBF2 0x004055f0
 // `dynamic initializer for 'smoothInfo''
-SmoothInfo smoothInfo[64];
+SmoothInfo smoothInfo[NetWire::kNetObjSlots];
 
 // OpenSWBF2 -netstats: how far remote soldiers' predicted positions moved when an update
 // corrected them (metres, under 10), summed and maxed until LogNetStats reads and clears them.
@@ -479,10 +483,10 @@ void SmoothInfo::ResetMat(const PblMatrix& mat)
 // SYNTHETIC: SWBF2 0x00405680
 // `dynamic initializer for 'interpPos''
 
-PblVector3 interpPos[2][64];
+PblVector3 interpPos[2][kInterpSlots];
 
 // GLOBAL: SWBF2 0x01eeff90
 // SYNTHETIC: SWBF2 0x004056a0
 // `dynamic initializer for 'interpMat''
 
-PblMatrix interpMat[2][64];
+PblMatrix interpMat[2][kInterpSlots];
