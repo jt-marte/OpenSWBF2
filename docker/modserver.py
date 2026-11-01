@@ -1001,6 +1001,7 @@ OPTIONS = (
     ("huntimelimit", range(0, 61), 0), ("huntscorelimit", range(50, 151), 50), ("assscorelimit", range(150, 301), 180),
 )
 OPTION_VALUES = {name: values for name, values, _ in OPTIONS}
+BOT_OPTIONS = ("conaiperteam", "ctfaiperteam", "assaiperteam", "eliaiperteam")
 # A new server's settings, until an admin changes them: 8 stock Conquest maps, 32 bots a team (the
 # maps' team size; a team takes 64 soldiers, so players push bots out past that), Hard
 DEFAULTS = {
@@ -1760,8 +1761,8 @@ def main():
     apply = commands.add_parser("apply-pending", help="put uploaded mods in place (the game must be stopped)")
     apply.add_argument("--config", default="/config")
     prepare = commands.add_parser("settings", help="write the settings for the next game start and print its name, "
-                                                   "player limit, tick rate, lobby (1/0), join password and maps, "
-                                                   "a line each (entrypoint.sh)")
+                                                   "player limit, tick rate, lobby (1/0), join password, maps and "
+                                                   "the most bots a team, a line each (entrypoint.sh)")
     prepare.add_argument("--config", default="/config")
     args = parser.parse_args()
 
@@ -1778,6 +1779,8 @@ def main():
         print(1 if effective["lobby"] else 0)
         print(effective["joinPassword"])
         print(" ".join(map_words(effective["maps"])))
+        # /bots: the most bots a team any mode has; above 32 the game makes room for 64 a team
+        print(max(effective["options"][name] for name in BOT_OPTIONS))
         return 0
 
     game_port = env_int("PORT", 3658)

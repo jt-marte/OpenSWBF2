@@ -2339,9 +2339,8 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             const Timer* pTimer = netInShell ? 0 : HUD::GameEvents::GetObjectiveTimer();
             _snprintf(acMsg, 0x200, "Time left   : %d", pTimer ? (int)pTimer->GetTime() : -1);
             PutMsg(acMsg);
-            // the bots a team spawns on this map, and the most soldiers a team takes (NetWire.h)
-            _snprintf(acMsg, 0x200, "Bots/team   : %d of %d", NetGame::BotsPerTeam(),
-                      NetGame::ServerBots() ? NetWire::kServerTeamCap : netNumBots);
+            // the bots a team spawns on this map, and the bot slots a team has (NetWire.h)
+            _snprintf(acMsg, 0x200, "Bots/team   : %d of %d", NetGame::BotsPerTeam(), netNumBots);
             PutMsg(acMsg);
             break;
         }

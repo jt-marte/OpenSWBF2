@@ -64,14 +64,18 @@ const int kDefaultTurnRate = 60;
 int HostTurnRate(int iProfileTurns);
 bool ParseHostPort(const char* pcText, char* pcHost, unsigned int uHostCap, int& iPort, int iDefaultPort);
 bool IsValidTurnRate(int iDuration, int iTurns);
-// A dedicated server's bots. Its character table always counts kServerBotSlots bots a team
-// (netNumBots, sent to clients when they join), so it never changes between maps; each map's
-// mode setting (/conaiperteam ...) only caps how many of them spawn, on the server. A team takes
-// up to kServerTeamCap soldiers, humans and bots, so 64 players leave room for 64 bots in all.
-const int kServerBotSlots = 64;
+// A dedicated server's bots. Its character table counts the same bot slots a team on every map
+// (netNumBots, which clients take when they join), set at start from /bots: 32, which clients
+// before 0.2.6 also end up with (their options clamp to 32), or 64 for more than 32 a team, which
+// takes 0.2.6+ clients. Each map's mode setting (/conaiperteam ...) only caps how many of them
+// spawn, on the server. A team takes up to kServerTeamCap soldiers, humans and bots, as far as the
+// table allows, so 64 players leave room for 64 bots in all.
+const int kRetailBotSlots = 32;
+const int kMaxBotSlots = 64;
 const int kServerTeamCap = 64;
-int ServerBotCap(int iModeBots);
-int ServerTeamUnits(int iMissionUnits);
+int ServerBotSlots(int iStartBots);
+int ServerBotCap(int iModeBots, int iSlots);
+int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots);
 // SpawnManager::GetTotalCharacterCount: host and clients must agree on it exactly
 int CharacterCount(int iUnits1, int iUnits2, bool bNet, int iPlayerLimit, int iBots, int iOthers);
 
