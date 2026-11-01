@@ -1244,7 +1244,11 @@ static int ScriptCB_SetNumBots(lua_State*)
             // clients sized their character tables from netNumBots when they joined, so a new
             // count here would split them from the host at the next map (NetWire.h).
             NetGame::SetServerBotCap(iBots);
-            netNumBots = NetWire::kServerBotSlots;
+        }
+        else if (NetGame::IsEnabled() && NetGame::IsClient())
+        {
+            // OpenSWBF2: a client keeps the host's count from its join; its own mode setting
+            // (clamped to 32 by the options screens) would size another table than the host's
         }
         else
         {

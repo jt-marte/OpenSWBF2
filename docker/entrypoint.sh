@@ -294,11 +294,11 @@ MOD_UPLOADS=$(bool_env MOD_UPLOADS 1)
 # The server's settings for the next game start: what an admin saved, over the defaults (a new
 # server's first start takes an old compose.yaml's values once). Writes ServerSettings.cfg, which
 # the game reads at start, with EXTRA_SETTINGS last. Sets GAME_NAME, GAME_PLAYERS, GAME_TICK,
-# GAME_LOBBY, GAME_JOIN and GAME_MAPS.
+# GAME_LOBBY, GAME_JOIN, GAME_MAPS and GAME_BOTS (the most bots a team any mode has).
 apply_settings() {
     local settings=()
     mapfile -t settings < <(python3 /opt/docker/modserver.py settings --config "$CONFIG")
-    ((${#settings[@]} == 6)) && [[ -n ${settings[0]} && -n ${settings[5]} ]] ||
+    ((${#settings[@]} == 7)) && [[ -n ${settings[0]} && -n ${settings[5]} && -n ${settings[6]} ]] ||
         die "the server's settings couldn't be read (config/settings/admin.json)"
     GAME_NAME=${settings[0]}
     GAME_PLAYERS=${settings[1]}
@@ -306,6 +306,7 @@ apply_settings() {
     GAME_LOBBY=${settings[3]}
     GAME_JOIN=${settings[4]}
     read -r -a GAME_MAPS <<<"${settings[5]}"
+    GAME_BOTS=${settings[6]}
 }
 
 # --- Core lvls: rebuilt from the stock ones for this OpenSWBF2 version, once ------------------
@@ -411,7 +412,8 @@ game_args() {
     ((GAME_LOBBY == 1)) && args+=(-lobby)
     args+=(/configdir 'Z:\config\settings' /gamename "$GAME_NAME")
     [[ -n $GAME_JOIN ]] && args+=(/password "$GAME_JOIN")
-    args+=(/adminpw "$ADMIN_PASSWORD" /playerlimit "$GAME_PLAYERS" /tps "$GAME_TICK" -port "$PORT")
+    # /bots above 32 makes room for 64 a team, which takes players on OpenSWBF2 0.2.6+ too
+    args+=(/adminpw "$ADMIN_PASSWORD" /playerlimit "$GAME_PLAYERS" /bots "$GAME_BOTS" /tps "$GAME_TICK" -port "$PORT")
     args+=(-logcmds 'all Warning, LogNet Inform, LogCore Inform' -log 'Z:\config\logs\server.log')
     if [[ -n ${EXTRA_ARGS:-} ]]; then
         local extra=()

@@ -104,10 +104,12 @@ public:
     // host's setting for this run (rcon /aiheroes), which display.ini never sees.
     static bool AiHeroesOn();
     static void SetAiHeroes(bool bOn);
-    // OpenSWBF2: a dedicated server's bots (NetWire::kServerBotSlots). ServerBots() is true on
-    // its host; BotsPerTeam() is how many bots a team spawns there (the map mode's setting),
-    // and netNumBots elsewhere.
+    // OpenSWBF2: a dedicated server's bots (NetWire.h). ServerBots() is true on its host;
+    // StartServerBots fixes its bot slots from /bots when it becomes dedicated; BotsPerTeam() is
+    // how many bots a team spawns there (the map mode's setting), and netNumBots elsewhere.
     static bool ServerBots();
+    static void StartServerBots(int iStartBots);
+    static int ServerBotSlots();
     static void SetServerBotCap(int iBots);
     static int BotsPerTeam();
     // A bot taken over (by a joining player) gives up its team's hero turn, if it had it.

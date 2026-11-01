@@ -230,30 +230,40 @@ TEST_CASE("a JOIN carries the player's name on x64" * doctest::test_suite("regre
 
 TEST_CASE("a dedicated server's bots never change its clients' character table" * doctest::test_suite("unit"))
 {
-    // The host raises its teams to the server cap; a client keeps the map's own unit count. Both
-    // count kServerBotSlots bots, which the client learnt when it joined.
-    for (int iPlayers = 1; iPlayers <= 64; ++iPlayers)
+    // The host raises its teams; a client keeps the map's own unit count. Both count the server's
+    // bot slots, which the client learnt when it joined.
+    const int aiSlots[] = { NetWire::kRetailBotSlots, NetWire::kMaxBotSlots };
+    for (int iSlots : aiSlots)
     {
-        for (int iMapUnits = 0; iMapUnits <= 160; iMapUnits += 4)
+        for (int iPlayers = 1; iPlayers <= 64; ++iPlayers)
         {
-            const int iHostUnits = NetWire::ServerTeamUnits(iMapUnits);
-            const int iHost = NetWire::CharacterCount(iHostUnits, iHostUnits, true, iPlayers,
-                                                      NetWire::kServerBotSlots, 7);
-            const int iClient = NetWire::CharacterCount(iMapUnits, iMapUnits, true, iPlayers,
-                                                        NetWire::kServerBotSlots, 7);
-            CHECK(iHost == iClient);
+            for (int iMapUnits = 0; iMapUnits <= 160; iMapUnits += 4)
+            {
+                const int iHostUnits = NetWire::ServerTeamUnits(iMapUnits, iPlayers, iSlots);
+                const int iHost = NetWire::CharacterCount(iHostUnits, iHostUnits, true, iPlayers, iSlots, 7);
+                const int iClient = NetWire::CharacterCount(iMapUnits, iMapUnits, true, iPlayers, iSlots, 7);
+                CHECK(iHost == iClient);
+            }
         }
     }
+    // up to 32 bots a team keeps the 32 slots clients before 0.2.6 end up with; more takes 64
+    CHECK(NetWire::ServerBotSlots(16) == 32);
+    CHECK(NetWire::ServerBotSlots(32) == 32);
+    CHECK(NetWire::ServerBotSlots(33) == 64);
+    CHECK(NetWire::ServerBotSlots(64) == 64);
     // 64 players and 64 bots a team: room for everyone, under the 600 the engine allows
-    CHECK(NetWire::CharacterCount(64, 64, true, 64, NetWire::kServerBotSlots, 7) == 199);
+    CHECK(NetWire::CharacterCount(64, 64, true, 64, NetWire::kMaxBotSlots, 7) == 199);
     CHECK(NetWire::CharacterCount(400, 400, true, 64, 64, 7) == 600);
-    // a team takes up to 64 soldiers, more only where the map has more
-    CHECK(NetWire::ServerTeamUnits(32) == 64);
-    CHECK(NetWire::ServerTeamUnits(100) == 100);
-    // a mode's bots: 0 to 64
-    CHECK(NetWire::ServerBotCap(-1) == 0);
-    CHECK(NetWire::ServerBotCap(32) == 32);
-    CHECK(NetWire::ServerBotCap(200) == 64);
+    // a team takes up to 64 soldiers (as far as the table allows), more only where the map has more
+    CHECK(NetWire::ServerTeamUnits(32, 64, 32) == 64);
+    CHECK(NetWire::ServerTeamUnits(32, 64, 64) == 64);
+    CHECK(NetWire::ServerTeamUnits(28, 16, 32) == 40);
+    CHECK(NetWire::ServerTeamUnits(100, 64, 64) == 100);
+    // a mode's bots: 0 up to the slots
+    CHECK(NetWire::ServerBotCap(-1, 64) == 0);
+    CHECK(NetWire::ServerBotCap(32, 64) == 32);
+    CHECK(NetWire::ServerBotCap(200, 64) == 64);
+    CHECK(NetWire::ServerBotCap(48, 32) == 32);
     // retail's count for everything else
     CHECK(NetWire::CharacterCount(32, 32, false, 64, 16, 7) == 71);
     CHECK(NetWire::CharacterCount(16, 16, true, 64, 16, 7) == 103);

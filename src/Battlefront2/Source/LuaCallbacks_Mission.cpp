@@ -197,6 +197,7 @@ public:
 };
 
 extern bool netHeroesEnabled;
+extern int netPlayerLimit;
 extern int netHeroRuleRespawn;
 extern int netHeroRuleRespawnVal;
 extern bool netHeroUnlocked[3];
@@ -936,9 +937,9 @@ int SetUnitCount(lua_State* L)
     {
         // OpenSWBF2: a dedicated server's teams take up to NetWire::kServerTeamCap soldiers;
         // humans push bots out past that (Character::CanSpawn)
-        LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d server=%d", iTeam, iCount,
-            NetWire::ServerTeamUnits(iCount));
-        iCount = NetWire::ServerTeamUnits(iCount);
+        const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, NetGame::ServerBotSlots());
+        LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d server=%d", iTeam, iCount, iUnits);
+        iCount = iUnits;
     }
     SpawnManager::Instance()->SetUnitCount(iTeam, iCount);
     return 0;

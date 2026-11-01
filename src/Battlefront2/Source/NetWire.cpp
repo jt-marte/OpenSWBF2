@@ -341,21 +341,31 @@ int HostTurnRate(int iProfileTurns)
     return iProfileTurns > 255 ? 255 : iProfileTurns;
 }
 
-int ServerBotCap(int iModeBots)
+int ServerBotSlots(int iStartBots)
+{
+    return iStartBots > kRetailBotSlots ? kMaxBotSlots : kRetailBotSlots;
+}
+
+int ServerBotCap(int iModeBots, int iSlots)
 {
     if (iModeBots < 0)
     {
         return 0;
     }
-    return iModeBots > kServerBotSlots ? kServerBotSlots : iModeBots;
+    return iModeBots > iSlots ? iSlots : iModeBots;
 }
 
-// Only ever raised, never lowered: a client keeps the map's own count, and 2 * kServerTeamCap
-// never exceeds the other term of CharacterCount (players + 2 * kServerBotSlots), so both sides
-// still count the same characters.
-int ServerTeamUnits(int iMissionUnits)
+// Only ever raised, never lowered: a client keeps the map's own count, and twice this never
+// exceeds the other term of CharacterCount (players + 2 * slots), so both sides still count the
+// same characters.
+int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots)
 {
-    return iMissionUnits > kServerTeamCap ? iMissionUnits : kServerTeamCap;
+    int iUnits = (iPlayerLimit + 2 * iSlots) / 2;
+    if (iUnits > kServerTeamCap)
+    {
+        iUnits = kServerTeamCap;
+    }
+    return iMissionUnits > iUnits ? iMissionUnits : iUnits;
 }
 
 int CharacterCount(int iUnits1, int iUnits2, bool bNet, int iPlayerLimit, int iBots, int iOthers)
