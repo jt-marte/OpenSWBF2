@@ -368,6 +368,16 @@ int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots)
     return iMissionUnits > iUnits ? iMissionUnits : iUnits;
 }
 
+int ServerClassMax(int iClassMax, int iMissionUnits, int iServerUnits)
+{
+    if (iClassMax <= 0 || iMissionUnits <= 0 || iServerUnits <= iMissionUnits)
+    {
+        return iClassMax;
+    }
+    const long long llMax = ((long long)iClassMax * iServerUnits + iMissionUnits - 1) / iMissionUnits;
+    return llMax > 0x7fffffff ? 0x7fffffff : (int)llMax;
+}
+
 int CharacterCount(int iUnits1, int iUnits2, bool bNet, int iPlayerLimit, int iBots, int iOthers)
 {
     int iCount = iUnits1 + iUnits2;

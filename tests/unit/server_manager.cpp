@@ -264,6 +264,14 @@ TEST_CASE("a dedicated server's bots never change its clients' character table" 
     CHECK(NetWire::ServerBotCap(32, 64) == 32);
     CHECK(NetWire::ServerBotCap(200, 64) == 64);
     CHECK(NetWire::ServerBotCap(48, 32) == 32);
+    // a class grows with its team, rounding up, so the classes can fill it
+    CHECK(NetWire::ServerClassMax(25, 28, 64) == 58);
+    CHECK(NetWire::ServerClassMax(4, 32, 64) == 8);
+    CHECK(NetWire::ServerClassMax(1, 32, 64) == 2);
+    CHECK(NetWire::ServerClassMax(25, 32, 32) == 25); // not raised
+    CHECK(NetWire::ServerClassMax(25, 0, 0) == 25);   // not a server's
+    CHECK(NetWire::ServerClassMax(0, 32, 64) == 0);   // a class the map keeps out
+    CHECK(NetWire::ServerClassMax(0x7fffffff, 32, 64) == 0x7fffffff);
     // retail's count for everything else
     CHECK(NetWire::CharacterCount(32, 32, false, 64, 16, 7) == 71);
     CHECK(NetWire::CharacterCount(16, 16, true, 64, 16, 7) == 103);
