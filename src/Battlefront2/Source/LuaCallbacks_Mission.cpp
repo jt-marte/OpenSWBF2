@@ -950,7 +950,7 @@ int SetUnitCount(lua_State* L)
         // creates a team's characters up to this count; humans push bots out past it
         // (Character::CanSpawn). Retail's 32 slots keep the map's count everywhere. Not
         // NetGame::IsClient(): a client's own host world loads the map with it false.
-        const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, netNumBots);
+        const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, NetGame::TableBots());
         if (iUnits != iCount)
         {
             LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d raised=%d", iTeam, iCount, iUnits);

@@ -3343,6 +3343,8 @@ CNetJoinGame::CNetJoinGame(NetFindGame* find)
     isInSession = true;
     netPlayerLimit = find->GetMaxPlayers();
     netNumBots = find->GetMaxBots();
+    // OpenSWBF2: kept for the session's character tables (NetGame::TableBots)
+    NetGame::SetJoinBots(netNumBots);
 }
 
 // FUNCTION: SWBF2 0x005df820
@@ -6579,7 +6581,7 @@ void PublishNextMissionToLobby()
             group.WriteBits(netAutoAssignTeams != 0, 1);
             group.WriteBits(netTeamDamage != 0, 1);
             group.WriteBits(NetSetup::mPasswordHash != 0, 1);
-            group.WriteBits(netNumBots, 8);
+            group.WriteBits(NetGame::TableBots(), 8);
             group.WriteBits(iReinf0, 11);
             group.WriteBits(iReinf1, 11);
             group.WriteBits(iPlaying, 7);
