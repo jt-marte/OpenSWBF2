@@ -13,6 +13,7 @@ typedef HANDLE(WINAPI* CreateWaitableTimerExFn)(LPSECURITY_ATTRIBUTES, LPCWSTR, 
 const DWORD kHighResolutionFlag = 0x2;
 
 bool sInitDone = false;
+bool sHeadless = false;
 int sKind = kTimerNone;
 HANDLE sTimer = 0;
 bool sPeriodBegun = false;
@@ -94,6 +95,11 @@ __int64 Pace(const FrameOps& ops, const FramePlan& plan, __int64 iOld, __int64& 
             return iDelta;
         }
         const __int64 iRemain = iNeed - iDelta;
+        if (iRemain <= plan.iSlackTicks)
+        {
+            iNowOut = iNow;
+            return iDelta;
+        }
         if (iRemain > plan.iMarginTicks)
         {
             ops.WaitTicks(ops.pCtx, iRemain - plan.iMarginTicks);
@@ -109,6 +115,7 @@ int Init(bool bNoRender)
     }
     sInitDone = true;
     sKind = kTimerNone;
+    sHeadless = bNoRender;
     if (bNoRender)
     {
         return sKind;
@@ -145,6 +152,7 @@ void Shutdown()
     }
     EndPeriod();
     sKind = kTimerNone;
+    sHeadless = false;
     sInitDone = false;
 }
 
@@ -175,25 +183,37 @@ const char* KindName(int iKind)
     }
 }
 
-void BindReal(FrameOps& ops, FramePlan& plan, unsigned int uiFps)
+FramePlan PlanFor(int iKind, bool bHeadless, __int64 iFrequency, unsigned int uiFps)
 {
-    const __int64 iFreq = Frequency();
-    ops.Now = RealNow;
-    ops.WaitTicks = RealWait;
-    ops.pCtx = 0;
-    plan.iMinTicks = MinTicksForFps(iFreq, uiFps);
-    if (sKind == kTimerHires)
+    FramePlan plan;
+    plan.iMinTicks = MinTicksForFps(iFrequency, uiFps);
+    plan.iSlackTicks = 0;
+    if (bHeadless)
     {
-        plan.iMarginTicks = iFreq / 1000;
+        plan.iMarginTicks = 0;
+        plan.iSlackTicks = iFrequency / 1000;
     }
-    else if (sKind == kTimerPeriod)
+    else if (iKind == kTimerHires)
     {
-        plan.iMarginTicks = iFreq * 2 / 1000;
+        plan.iMarginTicks = iFrequency / 1000;
+    }
+    else if (iKind == kTimerPeriod)
+    {
+        plan.iMarginTicks = iFrequency * 2 / 1000;
     }
     else
     {
-        plan.iMarginTicks = iFreq * 20 / 1000;
+        plan.iMarginTicks = iFrequency * 20 / 1000;
     }
+    return plan;
+}
+
+void BindReal(FrameOps& ops, FramePlan& plan, unsigned int uiFps)
+{
+    ops.Now = RealNow;
+    ops.WaitTicks = RealWait;
+    ops.pCtx = 0;
+    plan = PlanFor(sKind, sHeadless, Frequency(), uiFps);
 }
 
 }

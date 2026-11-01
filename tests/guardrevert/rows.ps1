@@ -107,6 +107,8 @@ $GuardRevertRows = @(
     @{ Id = 'MODE-04'; File = $dl; Anchor = 'if (FindOrdinal(pAdapters, uiCount, uiReqOrdinal))'; Replacement = 'if (true)'; Tests = @('display logic adapter fallback') },
     @{ Id = 'MODE-03U'; File = $dl; Anchor = 'if (!bInList && !bIsDesktop)'; Replacement = 'if (false)'; Tests = @('display logic usable uncached') },
     @{ Id = 'PACE-01'; File = $fl; Anchor = 'if (iRemain > plan.iMarginTicks)'; Replacement = 'if (false)'; Tests = @('frame limiter waits then spins above the margin') },
+    @{ Id = 'PACE-03'; File = $fl; Anchor = 'if (iRemain <= plan.iSlackTicks)'; Replacement = 'if (false)'; Tests = @('frame limiter headless sleeps instead of spinning') },
+    @{ Id = 'PACE-04'; File = $fl; Anchor = 'plan.iSlackTicks = iFrequency / 1000;'; Replacement = ''; Tests = @('frame limiter headless sleeps instead of spinning') },
     @{ Id = 'PACE-01B'; File = $fl; Anchor = 'const __int64 iNeed = plan.iMinTicks < 1 ? 1 : plan.iMinTicks;'; Replacement = 'const __int64 iNeed = plan.iMinTicks;'; Tests = @('frame limiter uncapped never returns zero ticks') },
     @{ Id = 'PACE-03'; File = $md; Anchor = 'if (r.uiCount >= uiMaxMsgs)'; Replacement = 'if (false)'; Tests = @('message drain stops at the message bound') },
     @{ Id = 'PACE-03T'; File = $md; Anchor = 'if (iNow - iStart >= iMaxTicks)'; Replacement = 'if (false)'; Tests = @('message drain stops at the time bound') },

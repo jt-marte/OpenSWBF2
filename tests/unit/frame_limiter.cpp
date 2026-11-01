@@ -33,7 +33,9 @@ void FakeWait(void* p, __int64 iTicks)
         c->iFirstWait = iTicks;
     }
     c->iWaits++;
-    c->iNow += iTicks + c->iOvershoot;
+    // a wait that wakes early still moves the clock on
+    const __int64 iAdvance = iTicks + c->iOvershoot;
+    c->iNow += iAdvance > 0 ? iAdvance : 1;
 }
 
 FrameOps Ops(FakeClock& c)
@@ -61,6 +63,7 @@ FramePlan Plan(__int64 iMin, __int64 iMargin)
     FramePlan p;
     p.iMinTicks = iMin;
     p.iMarginTicks = iMargin;
+    p.iSlackTicks = 0;
     return p;
 }
 
@@ -124,13 +127,10 @@ TEST_CASE("frame limiter forward clock jump returns at once" * doctest::test_sui
 
 TEST_CASE("frame limiter without a timer sleeps coarsely only below 50 fps" * doctest::test_suite("unit"))
 {
-    REQUIRE(Init(true) == kTimerNone);
-    FrameOps kOps;
-    FramePlan k80;
-    BindReal(kOps, k80, 80);
-    FramePlan k30;
-    BindReal(kOps, k30, 30);
-    Shutdown();
+    // A rendered run whose timers all failed
+    const FramePlan k80 = PlanFor(kTimerNone, false, 10000000, 80);
+    const FramePlan k30 = PlanFor(kTimerNone, false, 10000000, 30);
+    CHECK(k80.iSlackTicks == 0);
     CHECK(k80.iMinTicks <= k80.iMarginTicks);
     CHECK(k30.iMinTicks > k30.iMarginTicks);
     FakeClock c80 = Clock(0, 1);
@@ -142,4 +142,30 @@ TEST_CASE("frame limiter without a timer sleeps coarsely only below 50 fps" * do
     CHECK(c30.iWaits == 1);
     CHECK(c30.iFirstWait == k30.iMinTicks - k30.iMarginTicks);
     CHECK(iDelta >= k30.iMinTicks);
+}
+
+TEST_CASE("frame limiter headless sleeps instead of spinning" * doctest::test_suite("unit"))
+{
+    REQUIRE(Init(true) == kTimerNone);
+    FrameOps kOps;
+    FramePlan kReal;
+    BindReal(kOps, kReal, 120);
+    Shutdown();
+    CHECK(kReal.iMarginTicks == 0);
+    CHECK(kReal.iSlackTicks > 0);
+    const FramePlan k120 = PlanFor(kTimerNone, true, 10000000, 120);
+    CHECK(k120.iMarginTicks == 0);
+    CHECK(k120.iSlackTicks == 10000);
+    // The frame is one sleep, and a sleep that ends inside the last millisecond ends the frame
+    FakeClock c = Clock(0, 1);
+    c.iOvershoot = -5000;
+    __int64 iOut = 0;
+    __int64 iDelta = Pace(Ops(c), k120, 0, iOut);
+    CHECK(c.iWaits == 1);
+    CHECK(c.iFirstWait == k120.iMinTicks);
+    CHECK(iDelta >= k120.iMinTicks - k120.iSlackTicks);
+    // A rendered run keeps its exact pacing
+    const FramePlan kHires = PlanFor(kTimerHires, false, 10000000, 120);
+    CHECK(kHires.iSlackTicks == 0);
+    CHECK(kHires.iMarginTicks == 10000);
 }
