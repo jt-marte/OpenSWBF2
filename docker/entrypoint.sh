@@ -1,9 +1,10 @@
 #!/usr/bin/env bash
 # OpenSWBF2 dedicated server in a container. Finds the player's game data (a copy mounted at
 # /gamedata, or a download from their own Steam account, made once), builds the core lvls from it
-# (once per OpenSWBF2 version), assembles a game folder of links, writes the server settings from
-# the environment and runs BattlefrontII.exe -dedicated under Wine, next to the mod download
-# service (modserver.py). "steam-login" is the one-time Steam login. See README.md.
+# (once per OpenSWBF2 version), assembles a game folder of links, writes the server's settings
+# (kept in /config/settings, set from the launcher's admin screen) and runs BattlefrontII.exe
+# -dedicated under Wine, next to the mod service (modserver.py). "steam-login" is the one-time
+# Steam login. See README.md.
 set -euo pipefail
 
 APP=/opt/openswbf2
@@ -262,12 +263,10 @@ done
 GAMEDATA_WIN="Z:${GAMEDATA//\//\\}"
 
 # --- Settings ----------------------------------------------------------------------------------
+# Only what the launcher's admin screen can't set comes from compose.yaml. The name, join password,
+# playlist, player limit, tick rate, lobby and game options are the server's own settings, kept in
+# /config/settings and set from the launcher (Server manager > Connect to server as admin).
 PORT=$(int_env PORT 3658 1024 65534)
-SERVER_NAME=${SERVER_NAME:-OpenSWBF2 Server}
-SERVER_NAME=${SERVER_NAME//\"/}
-SERVER_NAME=${SERVER_NAME:0:31}
-JOIN_PASSWORD=${JOIN_PASSWORD:-}
-[[ $JOIN_PASSWORD =~ ^[^[:space:]\"]{0,15}$ ]] || die "JOIN_PASSWORD is at most 15 characters, without spaces or quotes"
 
 ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
 if [[ -z $ADMIN_PASSWORD ]]; then
@@ -281,18 +280,6 @@ if [[ -z $ADMIN_PASSWORD ]]; then
 fi
 [[ $ADMIN_PASSWORD =~ ^[A-Za-z0-9]{6,31}$ ]] || die "ADMIN_PASSWORD must be 6 to 31 letters or digits"
 
-MAPS=${MAPS:-geo1c_con kas2g_con nab2c_con hot1g_con tat2g_con cor1c_con myg1g_con uta1c_con}
-read -r -a MAP_LIST <<<"$MAPS"
-((${#MAP_LIST[@]} > 0)) || die "MAPS is empty"
-for map in "${MAP_LIST[@]}"; do
-    [[ $map =~ ^[A-Za-z0-9_]{1,31}$ ]] || die "MAPS: '$map' is not a mission name (such as geo1c_con)"
-done
-((${#MAPS} <= 1200)) || die "MAPS is too long for the game's command line (1200 characters at most)"
-
-MAX_PLAYERS=$(int_env MAX_PLAYERS 32 2 64)
-TICK_RATE=$(int_env TICK_RATE 60 30 120)
-case $TICK_RATE in 30 | 60 | 120) ;; *) log "TICK_RATE is 30, 60 or 120; using 60"; TICK_RATE=60 ;; esac
-LOBBY=$(bool_env LOBBY 0)
 SCRIPT_MODS=$(bool_env SCRIPT_MODS 0)
 
 # Mod downloads: TCP on the game's port number by default (the game itself only uses UDP)
@@ -301,69 +288,24 @@ MOD_PORT=$(int_env MOD_PORT "$PORT" 1024 65535)
 MOD_RATE=$(int_env MOD_RATE 50 0 100000)
 MOD_UPLOADS=$(bool_env MOD_UPLOADS 1)
 
-BOTS=$(int_env BOTS_PER_TEAM 16 0 32)
-HERO_UNLOCK=$(int_env HERO_UNLOCK 3 3 5)
-[[ $HERO_UNLOCK == 5 ]] || HERO_UNLOCK=3
-if [[ $HERO_UNLOCK == 5 ]]; then
-    HERO_UNLOCK_VALUE=$(int_env HERO_UNLOCK_VALUE 10 0 120)
-else
-    HERO_UNLOCK_VALUE=$(int_env HERO_UNLOCK_VALUE 10 1 50)
-fi
-HERO_PLAYER=$(int_env HERO_PLAYER 1 1 7)
-[[ $HERO_PLAYER == 7 ]] || HERO_PLAYER=1
-
-# compose.yaml's game options as admin commands, one per line, as the launcher's Server manager
-# writes them (ServerProfile.SettingsLines). Before each game start, "modserver.py settings" puts
-# what an admin saved from the launcher over them and writes ServerSettings.cfg, which the game
-# reads at start, with EXTRA_SETTINGS last.
-{
-    printf '/difficulty %s\r\n' "$(int_env DIFFICULTY 3 2 4)"
-    printf '/conaiperteam %s\r\n/ctfaiperteam %s\r\n/assaiperteam %s\r\n/eliaiperteam %s\r\n' "$BOTS" "$BOTS" "$BOTS" "$BOTS"
-    printf '/teamdamage %s\r\n' "$(bool_env TEAM_DAMAGE 1)"
-    printf '/shownames %s\r\n' "$(bool_env SHOW_NAMES 1)"
-    printf '/autoassignteams %s\r\n' "$(bool_env AUTO_ASSIGN_TEAMS 1)"
-    printf '/awards %s\r\n' "$(bool_env AWARDS 1)"
-    printf '/heroes %s\r\n' "$(bool_env HEROES 1)"
-    printf '/hrunlock %s\r\n/hrunlockvalue %s\r\n/hrplayer %s\r\n' "$HERO_UNLOCK" "$HERO_UNLOCK_VALUE" "$HERO_PLAYER"
-    printf '/aiheroes %s\r\n' "$(bool_env AI_HEROES 1)"
-    printf '/conreinforcements %s\r\n' "$(int_env CONQUEST_REINFORCEMENTS 100 10 500)"
-    printf '/contimelimit %s\r\n' "$(int_env CONQUEST_TIME_LIMIT 0 0 60)"
-    printf '/ctfscorelimit %s\r\n' "$(int_env CTF_CAPTURES 5 1 15)"
-    printf '/ctftimelimit %s\r\n' "$(int_env CTF_TIME_LIMIT 0 0 60)"
-    printf '/huntimelimit %s\r\n' "$(int_env HUNT_TIME_LIMIT 0 0 60)"
-    printf '/huntscorelimit %s\r\n' "$(int_env HUNT_SCORE 50 50 150)"
-    printf '/assscorelimit %s\r\n' "$(int_env ASSAULT_SCORE 180 150 300)"
-} >"$CONFIG/settings/compose-settings.cfg"
 # The maps go on the command line, where their tickets stick
 : >"$CONFIG/settings/ServerRotation.cfg"
 
-# The name, player limit, tick rate, maps and ServerSettings.cfg for the next game start: compose.yaml's,
-# with what an admin saved from the launcher's admin screen (the latest change of each setting wins).
-# Sets GAME_NAME, GAME_PLAYERS, GAME_TICK and GAME_MAPS.
+# The server's settings for the next game start: what an admin saved, over the defaults (a new
+# server's first start takes an old compose.yaml's values once). Writes ServerSettings.cfg, which
+# the game reads at start, with EXTRA_SETTINGS last. Sets GAME_NAME, GAME_PLAYERS, GAME_TICK,
+# GAME_LOBBY, GAME_JOIN and GAME_MAPS.
 apply_settings() {
     local settings=()
-    mapfile -t settings < <(COMPOSE_NAME=$SERVER_NAME COMPOSE_PLAYERS=$MAX_PLAYERS COMPOSE_TICK=$TICK_RATE \
-        COMPOSE_MAPS="${MAP_LIST[*]}" python3 /opt/docker/modserver.py settings --config "$CONFIG")
-    if ((${#settings[@]} == 4)) && [[ -n ${settings[0]} && -n ${settings[3]} ]]; then
-        GAME_NAME=${settings[0]}
-        GAME_PLAYERS=${settings[1]}
-        GAME_TICK=${settings[2]}
-        read -r -a GAME_MAPS <<<"${settings[3]}"
-        return 0
-    fi
-    log "Couldn't read the settings an admin saved; using compose.yaml's"
-    GAME_NAME=$SERVER_NAME
-    GAME_PLAYERS=$MAX_PLAYERS
-    GAME_TICK=$TICK_RATE
-    GAME_MAPS=("${MAP_LIST[@]}")
-    {
-        cat "$CONFIG/settings/compose-settings.cfg"
-        if [[ -n ${EXTRA_SETTINGS:-} ]]; then
-            while IFS= read -r line; do
-                [[ -n $line ]] && printf '%s\r\n' "$line"
-            done <<<"$EXTRA_SETTINGS"
-        fi
-    } >"$CONFIG/settings/ServerSettings.cfg"
+    mapfile -t settings < <(python3 /opt/docker/modserver.py settings --config "$CONFIG")
+    ((${#settings[@]} == 6)) && [[ -n ${settings[0]} && -n ${settings[5]} ]] ||
+        die "the server's settings couldn't be read (config/settings/admin.json)"
+    GAME_NAME=${settings[0]}
+    GAME_PLAYERS=${settings[1]}
+    GAME_TICK=${settings[2]}
+    GAME_LOBBY=${settings[3]}
+    GAME_JOIN=${settings[4]}
+    read -r -a GAME_MAPS <<<"${settings[5]}"
 }
 
 # --- Core lvls: rebuilt from the stock ones for this OpenSWBF2 version, once ------------------
@@ -457,7 +399,7 @@ modserver=
 start_modserver() {
     ((MOD_SHARING == 1)) || return 0
     ENTRYPOINT_PID=$$ PORT=$PORT MOD_PORT=$MOD_PORT MOD_RATE=$MOD_RATE MOD_UPLOADS=$MOD_UPLOADS \
-        ADMIN_PASSWORD=$ADMIN_PASSWORD JOIN_PASSWORD=$JOIN_PASSWORD SERVER_NAME=$SERVER_NAME OPENSWBF2_VERSION=$VERSION \
+        ADMIN_PASSWORD=$ADMIN_PASSWORD OPENSWBF2_VERSION=$VERSION \
         python3 /opt/docker/modserver.py serve --addons "$ADDONS" --config "$CONFIG" &
     modserver=$!
 }
@@ -466,9 +408,9 @@ start_modserver() {
 # The game's command line, from apply_settings
 game_args() {
     args=(-dedicated "${GAME_MAPS[@]}")
-    ((LOBBY == 1)) && args+=(-lobby)
+    ((GAME_LOBBY == 1)) && args+=(-lobby)
     args+=(/configdir 'Z:\config\settings' /gamename "$GAME_NAME")
-    [[ -n $JOIN_PASSWORD ]] && args+=(/password "$JOIN_PASSWORD")
+    [[ -n $GAME_JOIN ]] && args+=(/password "$GAME_JOIN")
     args+=(/adminpw "$ADMIN_PASSWORD" /playerlimit "$GAME_PLAYERS" /tps "$GAME_TICK" -port "$PORT")
     args+=(-logcmds 'all Warning, LogNet Inform, LogCore Inform' -log 'Z:\config\logs\server.log')
     if [[ -n ${EXTRA_ARGS:-} ]]; then

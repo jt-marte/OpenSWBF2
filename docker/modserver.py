@@ -13,11 +13,11 @@ is on. Programs are never listed, served or taken, and neither is the unofficial
 
 It also runs the launchers' lobby: players who connect from the launcher's Multiplayer page wait in
 it (POST /lobby/join, GET /status) with their game closed, and Start (POST /admin/match?do=start)
-opens all their games into the server's held lobby (LOBBY=1), then starts the match once they're in.
+opens all their games into the server's held lobby, then starts the match once they're in.
 
-The launcher's admin screen controls the game over rcon itself, and keeps what it applies here
-(PUT /admin/settings): the playlist, game options, name, player limit and tick rate, used at every
-start until compose.yaml's value for that setting changes. GET /missions.json is the server's own
+It keeps the server's settings (PUT /admin/settings): the playlist, game options, name, join
+password, player limit, tick rate and lobby. The launcher's admin screen sets them, and controls the
+game over rcon itself. A new server starts with the defaults. GET /missions.json is the server's own
 map list, so the admin picks maps the server can load.
 """
 import argparse
@@ -293,6 +293,10 @@ class Gate:
     def digest(text):
         # Comparing digests takes the same time whatever the length of the guess
         return hashlib.sha256(text.encode("utf-8", "replace")).digest()
+
+    def set_join(self, join_password):
+        """An admin changed the join password: it counts from the next request."""
+        self.join = self.digest(join_password) if join_password else None
 
     def role(self, header, address):
         """'admin', 'player', None (wrong or missing password) or 'locked'."""
@@ -975,24 +979,47 @@ def apply_pending(root):
     return done
 
 
-# --- Admin settings: what the launcher's admin screen applies, kept for the next game start ----
+# --- Server settings: kept on the server, set from the launcher's admin screen -----------------
 MISSION = re.compile(r"^[A-Za-z0-9_]{1,31}$")
+JOIN_PASSWORD = re.compile(r'^[^\s"]{0,15}$')
 MAX_MAPS_LINE = 1200
 TICK_RATES = (30, 60, 120)
-# The game options as the launcher's ServerProfile.OptionCommands sends them, with the values the
-# entrypoint takes from compose.yaml; ServerSettings.cfg lists them in this order
+# The game options as the launcher's ServerProfile.OptionCommands sends them: the values the game
+# takes, and a new server's. ServerSettings.cfg lists them in this order.
 OPTIONS = (
-    ("difficulty", range(2, 5)), ("conaiperteam", range(0, 33)), ("ctfaiperteam", range(0, 33)),
-    ("assaiperteam", range(0, 33)), ("eliaiperteam", range(0, 33)), ("teamdamage", range(0, 2)),
-    ("shownames", range(0, 2)), ("autoassignteams", range(0, 2)), ("awards", range(0, 2)),
-    ("heroes", range(0, 2)), ("hrunlock", (3, 5)), ("hrunlockvalue", range(0, 121)), ("hrplayer", (1, 7)),
-    ("aiheroes", range(0, 2)), ("conreinforcements", range(10, 501)), ("contimelimit", range(0, 61)),
-    ("ctfscorelimit", range(1, 16)), ("ctftimelimit", range(0, 61)), ("huntimelimit", range(0, 61)),
-    ("huntscorelimit", range(50, 151)), ("assscorelimit", range(150, 301)),
+    ("difficulty", range(2, 5), 3), ("conaiperteam", range(0, 33), 16), ("ctfaiperteam", range(0, 33), 16),
+    ("assaiperteam", range(0, 33), 16), ("eliaiperteam", range(0, 33), 16), ("teamdamage", range(0, 2), 1),
+    ("shownames", range(0, 2), 1), ("autoassignteams", range(0, 2), 1), ("awards", range(0, 2), 1),
+    ("heroes", range(0, 2), 1), ("hrunlock", (3, 5), 3), ("hrunlockvalue", range(0, 121), 10),
+    ("hrplayer", (1, 7), 1), ("aiheroes", range(0, 2), 1), ("conreinforcements", range(10, 501), 100),
+    ("contimelimit", range(0, 61), 0), ("ctfscorelimit", range(1, 16), 5), ("ctftimelimit", range(0, 61), 0),
+    ("huntimelimit", range(0, 61), 0), ("huntscorelimit", range(50, 151), 50), ("assscorelimit", range(150, 301), 180),
 )
-OPTION_VALUES = dict(OPTIONS)
-# Fixed while the game runs: they take a restart
-RESTART_KEYS = ("name", "maxPlayers", "tickRate")
+OPTION_VALUES = {name: values for name, values, _ in OPTIONS}
+# A new server's settings, until an admin changes them: 8 stock Conquest maps, 16 bots a team, Hard
+DEFAULTS = {
+    "name": "OpenSWBF2 Server",
+    "joinPassword": "",
+    "maxPlayers": 32,
+    "tickRate": 60,
+    "lobby": False,
+    "maps": [{"mission": m} for m in "geo1c_con kas2g_con nab2c_con hot1g_con tat2g_con cor1c_con myg1g_con uta1c_con".split()],
+    "options": {name: default for name, _, default in OPTIONS},
+}
+# Fixed while the game runs: they take a restart (the game can't clear its join password live)
+RESTART_KEYS = ("name", "joinPassword", "maxPlayers", "tickRate", "lobby")
+# compose.yaml's variables from before the admin screen set all this (0.2.4): read once, at the
+# first start without saved settings, so an existing server keeps its maps and options
+LEGACY = {
+    "SERVER_NAME": "name", "JOIN_PASSWORD": "joinPassword", "MAX_PLAYERS": "maxPlayers", "TICK_RATE": "tickRate",
+    "LOBBY": "lobby", "MAPS": "maps", "BOTS_PER_TEAM": ("conaiperteam", "ctfaiperteam", "assaiperteam", "eliaiperteam"),
+    "DIFFICULTY": "difficulty", "HEROES": "heroes", "AI_HEROES": "aiheroes", "HERO_UNLOCK": "hrunlock",
+    "HERO_UNLOCK_VALUE": "hrunlockvalue", "HERO_PLAYER": "hrplayer", "TEAM_DAMAGE": "teamdamage",
+    "AUTO_ASSIGN_TEAMS": "autoassignteams", "SHOW_NAMES": "shownames", "AWARDS": "awards",
+    "CONQUEST_REINFORCEMENTS": "conreinforcements", "CONQUEST_TIME_LIMIT": "contimelimit",
+    "CTF_TIME_LIMIT": "ctftimelimit", "HUNT_TIME_LIMIT": "huntimelimit", "CTF_CAPTURES": "ctfscorelimit",
+    "HUNT_SCORE": "huntscorelimit", "ASSAULT_SCORE": "assscorelimit",
+}
 
 
 def is_int(value):
@@ -1029,7 +1056,7 @@ def map_words(maps):
 
 
 def parse_map_words(text):
-    """compose.yaml's MAPS: mission names, each maybe followed by its two ticket numbers."""
+    """An old compose.yaml's MAPS: mission names, each maybe followed by its two ticket numbers."""
     maps = []
     words = text.split()
     i = 0
@@ -1047,7 +1074,7 @@ def clean_settings(body):
     """The settings an admin sent, checked; Refused(400) names the first one that's wrong."""
     if not isinstance(body, dict):
         raise Refused(400, "the body is an object")
-    unknown = sorted(set(body) - {"name", "maxPlayers", "tickRate", "maps", "options"})
+    unknown = sorted(set(body) - set(DEFAULTS))
     if unknown:
         raise Refused(400, f"unknown setting {unknown[0]}")
     settings = {}
@@ -1056,6 +1083,14 @@ def clean_settings(body):
         if not 0 < len(name) <= 31 or '"' in name or any(ord(c) < 32 or ord(c) == 127 for c in name):
             raise Refused(400, "the server name is 1 to 31 characters, without quotes")
         settings["name"] = name
+    if "joinPassword" in body:
+        if not isinstance(body["joinPassword"], str) or not JOIN_PASSWORD.match(body["joinPassword"]):
+            raise Refused(400, "the join password is at most 15 characters, without spaces or quotes")
+        settings["joinPassword"] = body["joinPassword"]
+    if "lobby" in body:
+        if not isinstance(body["lobby"], bool):
+            raise Refused(400, "lobby is true or false")
+        settings["lobby"] = body["lobby"]
     if "maxPlayers" in body:
         if not is_int(body["maxPlayers"]) or not 2 <= body["maxPlayers"] <= 64:
             raise Refused(400, "the player limit is 2 to 64")
@@ -1086,7 +1121,7 @@ def clean_settings(body):
 
 
 def flatten(values):
-    """One key per setting, each game option on its own: the latest change wins setting by setting."""
+    """One key per setting, each game option on its own, so a saved one counts by itself."""
     flat = {key: value for key, value in values.items() if key != "options"}
     for name, value in (values.get("options") or {}).items():
         flat["options." + name] = value
@@ -1094,10 +1129,10 @@ def flatten(values):
 
 
 def unflatten(flat):
-    values = {"options": {}}
+    values = {}
     for key, value in flat.items():
         if key.startswith("options."):
-            values["options"][key[len("options."):]] = value
+            values.setdefault("options", {})[key[len("options."):]] = value
         else:
             values[key] = value
     return values
@@ -1112,25 +1147,64 @@ def describe_keys(keys):
     return ", ".join(named)
 
 
-def merge(saved, compose):
-    """(the settings the next game start uses, the saved ones that still count). A saved setting
-    counts while compose.yaml's value for it is the one it had when the admin saved it; once
-    compose.yaml says something else, someone edited it since, and compose.yaml wins."""
-    now = flatten(compose)
-    values, at_save = flatten(saved["values"]), flatten(saved["compose"])
-    result, kept_values, kept_compose = dict(now), {}, {}
-    for key, value in values.items():
-        if at_save.get(key) == now.get(key):
-            result[key] = value
-            kept_values[key] = value
-            kept_compose[key] = at_save.get(key)
-    return unflatten(result), {"values": unflatten(kept_values), "compose": unflatten(kept_compose)}
+def merge(saved):
+    """The settings a game start uses: the defaults, with what an admin saved over them, setting
+    by setting (each game option on its own)."""
+    return unflatten({**flatten(DEFAULTS), **flatten(saved)})
+
+
+def legacy_settings(env):
+    """(what an old compose.yaml sets, as the admin screen saves it; the variables it sets). Values
+    are taken as the old entrypoint took them (clamped, on/off as 1/true/yes/on); a value the game
+    can't take at all is left out."""
+    def on(text):
+        return text.lower() in ("1", "true", "yes", "on")
+
+    def number(text):
+        return int(text) if re.fullmatch(r"-?[0-9]+", text) else None
+
+    found, flat = [], {}
+    for variable, target in LEGACY.items():
+        raw = (env.get(variable) or "").strip()
+        if not raw:
+            continue
+        found.append(variable)
+        if target == "name":
+            flat["name"] = raw.replace('"', "")[:31].strip()
+        elif target == "joinPassword":
+            flat["joinPassword"] = raw
+        elif target == "lobby":
+            flat["lobby"] = on(raw)
+        elif target == "maps":
+            flat["maps"] = clean_maps(parse_map_words(raw))
+        elif target == "maxPlayers" and number(raw) is not None:
+            flat["maxPlayers"] = min(max(number(raw), 2), 64)
+        elif target == "tickRate":
+            flat["tickRate"] = number(raw)
+        elif target in ("maxPlayers",):
+            continue
+        else:
+            for option in target if isinstance(target, tuple) else (target,):
+                values = OPTION_VALUES[option]
+                if isinstance(values, tuple):  # two choices; anything else is the first, as before
+                    flat["options." + option] = values[1] if number(raw) == values[1] else values[0]
+                elif values == range(0, 2):
+                    flat["options." + option] = 1 if on(raw) else 0
+                elif number(raw) is not None:
+                    flat["options." + option] = min(max(number(raw), values[0]), values[-1])
+    settings = {}
+    for key, value in unflatten({k: v for k, v in flat.items() if v is not None}).items():
+        try:
+            settings.update(clean_settings({key: value}))
+        except Refused:
+            pass
+    return settings, found
 
 
 class Settings:
-    """The playlist, game options, name, player limit and tick rate an admin saved from the
-    launcher (config/settings/admin.json), next to compose.yaml's (compose.json, which the
-    entrypoint writes before each game start) and the running game's (effective.json)."""
+    """The server's settings (config/settings/admin.json): the playlist, game options, name, join
+    password, player limit, tick rate and lobby an admin saved from the launcher's admin screen,
+    over the defaults; and what the running game started with (effective.json)."""
 
     def __init__(self, folder):
         self.folder = folder
@@ -1140,75 +1214,80 @@ class Settings:
     def path(self, name):
         return os.path.join(self.folder, name)
 
-    def compose(self):
-        data = read_json(self.path("compose.json"), {})
-        return data if isinstance(data, dict) else {}
-
     def running(self):
         data = read_json(self.path("effective.json"), None)
         return data if isinstance(data, dict) else None
 
     def saved(self):
-        data = read_json(self.path("admin.json"), {})
+        """What an admin saved, or None before the server's first start set the file up."""
+        data = read_json(self.path("admin.json"), None)
         if not isinstance(data, dict) or data.get("schema") != 1:
-            return {"values": {}, "compose": {}}
-        return {"values": data.get("values") or {}, "compose": data.get("compose") or {}}
-
-    def store(self, saved):
-        if flatten(saved["values"]):
-            write_json(self.path("admin.json"), {"schema": 1, **saved})
-        else:
+            return None
+        values = data.get("values")
+        if not isinstance(values, dict):
+            return {}
+        # Each one checked again, so a hand-edited file can't hand the game a bad value
+        kept = {}
+        for key, value in values.items():
             try:
-                os.remove(self.path("admin.json"))
-            except FileNotFoundError:
+                kept.update(clean_settings({key: value}))
+            except Refused:
                 pass
+        return kept
+
+    def store(self, values):
+        write_json(self.path("admin.json"), {"schema": 1, "values": values})
+
+    def upcoming(self):
+        """The settings the next game start uses."""
+        return merge(self.saved() or {})
 
     def describe(self):
-        """GET /admin/settings: what the next start uses, which of it was saved, compose.yaml's
-        values, and whether the running game needs a restart for the name or limits."""
-        compose = self.compose()
-        upcoming, kept = merge(self.saved(), compose)
+        """GET /admin/settings: what the next start uses, which of it an admin saved, the defaults
+        (the rest), and whether the running game needs a restart for its name or limits."""
+        saved = self.saved() or {}
+        upcoming = merge(saved)
         running = self.running()
         restart = running is not None and any(upcoming.get(key) != running.get(key) for key in RESTART_KEYS)
-        return {"schema": 1, "settings": upcoming, "saved": sorted(flatten(kept["values"])),
-                "compose": compose, "restartNeeded": restart}
+        return {"schema": 1, "settings": upcoming, "saved": sorted(flatten(saved)), "defaults": DEFAULTS,
+                "restartNeeded": restart}
 
     def save(self, body):
-        """PUT /admin/settings: the settings sent, each next to compose.yaml's value for it now."""
+        """PUT /admin/settings: the settings sent, over what was saved before."""
         settings = clean_settings(body)
         with self.lock:
-            saved = self.saved()
-            values, at_save = flatten(saved["values"]), flatten(saved["compose"])
-            now = flatten(self.compose())
-            for key, value in flatten(settings).items():
-                values[key] = value
-                at_save[key] = now.get(key)
-            self.store({"values": unflatten(values), "compose": unflatten(at_save)})
+            self.store(unflatten({**flatten(self.saved() or {}), **flatten(settings)}))
         return self.describe()
 
     def reset(self):
+        """DELETE /admin/settings: back to the defaults (an old compose.yaml isn't read again)."""
         with self.lock:
-            self.store({"values": {}, "compose": {}})
+            self.store({})
         return self.describe()
 
-    def prepare(self, compose, extra=""):
-        """Before each game start: records compose.yaml's values, drops the saved settings
-        compose.yaml has changed since, and writes ServerSettings.cfg (the game options, then
-        EXTRA_SETTINGS, whose lines come last and so win) and effective.json. Returns the
-        settings the game starts with."""
+    def prepare(self, env, extra=""):
+        """Before each game start: on the first, takes an old compose.yaml's settings once; then
+        writes ServerSettings.cfg (the game options, then EXTRA_SETTINGS, whose lines come last
+        and so win) and effective.json. Returns the settings the game starts with."""
         with self.lock:
-            write_json(self.path("compose.json"), compose)
             saved = self.saved()
-            effective, kept = merge(saved, compose)
-            dropped = sorted(set(flatten(saved["values"])) - set(flatten(kept["values"])))
-            if dropped:
-                print(f"[openswbf2] compose.yaml changed {describe_keys(dropped)} since an admin saved "
-                      "them; compose.yaml's values are used", file=sys.stderr)
-                self.store(kept)
-            used = sorted(flatten(kept["values"]))
+            if saved is None:
+                saved, found = legacy_settings(env)
+                self.store(saved)
+                if found:
+                    print(f"[openswbf2] Took {', '.join(found)} from compose.yaml into the server's settings, this once. "
+                          "The launcher's admin screen sets them now (Server manager > Connect to server as admin), "
+                          "so they can go from compose.yaml.", file=sys.stderr)
+            else:
+                found = [variable for variable in LEGACY if (env.get(variable) or "").strip()]
+                if found:
+                    print(f"[openswbf2] compose.yaml still sets {', '.join(found)}: not used any more. The launcher's "
+                          "admin screen sets them (Server manager > Connect to server as admin).", file=sys.stderr)
+            used = sorted(flatten(saved))
             if used:
-                print(f"[openswbf2] Using what an admin saved from the launcher: {describe_keys(used)}", file=sys.stderr)
-            lines = [f"/{name} {effective['options'][name]}" for name, _ in OPTIONS if name in effective["options"]]
+                print(f"[openswbf2] The server's saved settings: {describe_keys(used)} (the rest are the defaults)", file=sys.stderr)
+            effective = merge(saved)
+            lines = [f"/{name} {effective['options'][name]}" for name, _, _ in OPTIONS]
             lines += [line.strip() for line in extra.splitlines() if line.strip()]
             temp = self.path(f"ServerSettings.cfg.{uuid.uuid4().hex}.tmp")
             with open(temp, "w", encoding="utf-8", newline="") as file:
@@ -1218,51 +1297,48 @@ class Settings:
         return effective
 
 
-def compose_settings(env, options_file):
-    """compose.yaml's settings as the entrypoint checked them (COMPOSE_* and the option lines it
-    wrote), in the shape of the admin settings."""
-    options = {}
-    try:
-        with open(options_file, encoding="utf-8") as file:
-            for line in file:
-                parts = line.split()
-                if len(parts) == 2 and parts[0].startswith("/") and parts[1].lstrip("-").isdigit():
-                    options[parts[0][1:]] = int(parts[1])
-    except OSError:
-        pass
-    return {
-        "name": env.get("COMPOSE_NAME", "OpenSWBF2 Server"),
-        "maxPlayers": int(env.get("COMPOSE_PLAYERS") or 32),
-        "tickRate": int(env.get("COMPOSE_TICK") or 60),
-        "maps": parse_map_words(env.get("COMPOSE_MAPS", "")),
-        "options": options,
-    }
-
-
 class ModService:
-    def __init__(self, addons, config, join_password="", admin_password="", server_name="", version="",
+    """join_password: None follows the running game's (the server's settings, as the game started
+    with them), so downloads and joining always take the same one; a string fixes it (tests)."""
+
+    def __init__(self, addons, config, join_password=None, admin_password="", version="",
                  uploads=True, rate=0, restart=None, players=None, game=None, clock=time.monotonic):
         self.uploads_root = os.path.join(config, "addons")
         os.makedirs(self.uploads_root, exist_ok=True)
         self.library = Library([(addons, "server"), (self.uploads_root, "uploaded")],
                                os.path.join(config, "mod-hashes.json"))
-        self.gate = Gate(join_password, admin_password)
+        self.settings = Settings(os.path.join(config, "settings"))
+        self.follow_join = join_password is None
+        self.join_password = self.game_join_password() if self.follow_join else join_password
+        self.gate = Gate(self.join_password, admin_password)
         self.bucket = Bucket(rate)
         self.lobby = Lobby(clock)
         self.watch = GameWatch(game, self.lobby, clock)
         self.restarter = Restarter(restart or (lambda: None), players or self.watch.players)
         self.uploads = Uploads(self.uploads_root, addons)
-        self.settings = Settings(os.path.join(config, "settings"))
-        self.compose_name = server_name
         self.version = version
         self.uploads_on = uploads
 
     @property
     def server_name(self):
         """The name the running game started with, which an admin may have saved."""
-        running = self.settings.running()
-        name = running.get("name") if running else None
-        return name if isinstance(name, str) and name else self.compose_name
+        running = self.settings.running() or self.settings.upcoming()
+        return running.get("name") or DEFAULTS["name"]
+
+    def game_join_password(self):
+        running = self.settings.running() or self.settings.upcoming()
+        password = running.get("joinPassword")
+        return password if isinstance(password, str) else ""
+
+    def follow_game(self):
+        """Before each request: the game restarted with another join password, so downloads and
+        the lobby take that one now."""
+        if not self.follow_join:
+            return
+        password = self.game_join_password()
+        if password != self.join_password:
+            self.join_password = password
+            self.gate.set_join(password)
 
     def missions(self):
         """The server's own map list (the game's -listmissions, which the entrypoint runs once per
@@ -1385,15 +1461,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 self.match(method)
             elif parts == ["admin", "settings"] and method in ("GET", "PUT", "DELETE"):
                 self.who(admin=True)
-                settings = self.service.settings
                 if method == "PUT":
-                    reply = settings.save(self.read_json())
+                    reply = self.service.settings.save(self.read_json())
                     log("an admin saved the server's settings")
                 elif method == "DELETE":
-                    reply = settings.reset()
-                    log("an admin went back to compose.yaml's settings")
+                    reply = self.service.settings.reset()
+                    log("an admin put the server's settings back to the defaults")
                 else:
-                    reply = settings.describe()
+                    reply = self.service.settings.describe()
                 self.send_json(200, reply)
             elif parts == ["missions.json"] and method in ("GET", "HEAD"):
                 self.who()
@@ -1409,6 +1484,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_json(500, {"error": "the server couldn't do that"})
 
     def who(self, admin=False):
+        self.service.follow_game()
         role = self.service.gate.role(self.headers.get("Authorization"), self.client_address[0])
         if role == "locked":
             raise Refused(429, "too many wrong passwords; wait 30 seconds")
@@ -1635,7 +1711,8 @@ def main():
     apply = commands.add_parser("apply-pending", help="put uploaded mods in place (the game must be stopped)")
     apply.add_argument("--config", default="/config")
     prepare = commands.add_parser("settings", help="write the settings for the next game start and print its name, "
-                                                   "player limit, tick rate and maps, a line each (entrypoint.sh)")
+                                                   "player limit, tick rate, lobby (1/0), join password and maps, "
+                                                   "a line each (entrypoint.sh)")
     prepare.add_argument("--config", default="/config")
     args = parser.parse_args()
 
@@ -1645,12 +1722,12 @@ def main():
         return 0
 
     if args.command == "settings":
-        folder = os.path.join(args.config, "settings")
-        compose = compose_settings(os.environ, os.path.join(folder, "compose-settings.cfg"))
-        effective = Settings(folder).prepare(compose, os.environ.get("EXTRA_SETTINGS", ""))
+        effective = Settings(os.path.join(args.config, "settings")).prepare(os.environ, os.environ.get("EXTRA_SETTINGS", ""))
         print(effective["name"])
         print(effective["maxPlayers"])
         print(effective["tickRate"])
+        print(1 if effective["lobby"] else 0)
+        print(effective["joinPassword"])
         print(" ".join(map_words(effective["maps"])))
         return 0
 
@@ -1665,9 +1742,7 @@ def main():
     service = ModService(
         args.addons,
         args.config,
-        join_password=os.environ.get("JOIN_PASSWORD", ""),
         admin_password=admin_password,
-        server_name=os.environ.get("SERVER_NAME", ""),
         version=os.environ.get("OPENSWBF2_VERSION", ""),
         uploads=os.environ.get("MOD_UPLOADS", "1") == "1",
         rate=env_int("MOD_RATE", 50) * 125000,

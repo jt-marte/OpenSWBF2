@@ -10,21 +10,11 @@ services:
     ports:
       - "3658:3658/udp"          # the game and admin; keep in step with PORT below
       - "3658:3658/tcp"          # mod downloads; keep in step with MOD_PORT (PORT unless set)
-    # The launcher's Connect to server as admin can change the name, maps, limits and game options
-    # too; the server keeps those until you edit that same setting here (see README.md, Admin)
+    # The name, join password, maps, players, tick rate and game options are set from the launcher:
+    # Server manager > Connect to server as admin, with this address and the admin password
     environment:
       PORT: "3658"
-      SERVER_NAME: "OpenSWBF2 Server"
       ADMIN_PASSWORD: ""         # 6-31 letters/digits; empty = generated into config/admin-password
-      JOIN_PASSWORD: ""          # empty = anyone can join; admins can change it live with /password
-      MAPS: "geo1c_con kas2g_con nab2c_con hot1g_con tat2g_con cor1c_con myg1g_con uta1c_con"
-      MAX_PLAYERS: "32"
-      TICK_RATE: "60"            # 30, 60 or 120
-      BOTS_PER_TEAM: "16"
-      DIFFICULTY: "3"            # 2 Medium, 3 Hard, 4 Overhaul
-      HEROES: "1"
-      AI_HEROES: "1"
-      LOBBY: "0"                 # 1 = each map waits for Start; launcher players wait in its lobby
       MOD_SHARING: "1"           # players' launchers download the server's mods from it
       MOD_RATE: "50"             # download cap in Mbit/s for everyone together; 0 = none
       MOD_UPLOADS: "1"           # admins can upload mods from the launcher (admin password)

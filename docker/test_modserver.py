@@ -58,8 +58,10 @@ class ServiceCase(unittest.TestCase):
 
     def start(self, **settings):
         settings.setdefault("join_password", self.join_password)
+        if not os.path.exists(os.path.join(self.config, "settings", "admin.json")):
+            modserver.Settings(os.path.join(self.config, "settings")).store({"name": "Test server"})
         self.service = modserver.ModService(
-            self.addons, self.config, admin_password=ADMIN, server_name="Test server", version="0.2.2",
+            self.addons, self.config, admin_password=ADMIN, version="0.2.2",
             restart=lambda: self.restarts.append(time.monotonic()), players=lambda: self.players[0], **settings)
         self.server = modserver.Server(("127.0.0.1", 0), self.service)
         self.port = self.server.server_address[1]
@@ -653,20 +655,20 @@ class LobbyTests(ServiceCase):
         self.assertIsNone(self.service.watch.players())
 
 
-COMPOSE = {
-    "name": "Test server", "maxPlayers": 32, "tickRate": 60,
-    "maps": [{"mission": "geo1c_con"}, {"mission": "kas2g_con"}],
-    "options": {"difficulty": 3, "conaiperteam": 16, "heroes": 1},
-}
+def cfg_lines(**changed):
+    """ServerSettings.cfg for the defaults with some game options changed."""
+    options = dict(modserver.DEFAULTS["options"], **changed)
+    return "".join(f"/{name} {options[name]}\r\n" for name, _, _ in modserver.OPTIONS)
 
 
 class SettingsTests(ServiceCase):
-    """What the launcher's admin screen saves, against compose.yaml's values (the latest change wins)."""
+    """The server's settings: the defaults, with what the launcher's admin screen saved over them.
+    The fixture saved the name "Test server"."""
 
     def setUp(self):
         super().setUp()
         self.settings = self.service.settings
-        self.settings.prepare(COMPOSE)
+        self.settings.prepare({})
 
     def put(self, body, password=ADMIN):
         status, _, data = self.request("PUT", "/admin/settings", body, password=password)
@@ -687,44 +689,78 @@ class SettingsTests(ServiceCase):
         self.assertEqual(status, 200, reply)
         self.assertEqual(reply["settings"]["maps"],
                          [{"mission": "tat2g_con", "tickets1": 150, "tickets2": 150}, {"mission": "geo1c_con"}])
-        self.assertEqual(reply["settings"]["options"], {"difficulty": 4, "conaiperteam": 16, "heroes": 1})
-        self.assertEqual(reply["saved"], ["maps", "options.difficulty"])
+        self.assertEqual(reply["settings"]["options"], dict(modserver.DEFAULTS["options"], difficulty=4))
+        self.assertEqual(reply["saved"], ["maps", "name", "options.difficulty"])
+        self.assertEqual(reply["defaults"], modserver.DEFAULTS)
         self.assertFalse(reply["restartNeeded"])
 
-        effective = self.settings.prepare(COMPOSE, "/bots 3\n\n/awards 0")
+        effective = self.settings.prepare({}, "/bots 3\n\n/awards 0")
         self.assertEqual(modserver.map_words(effective["maps"]), ["tat2g_con", "150", "150", "geo1c_con"])
-        self.assertEqual(self.read_cfg(), "/difficulty 4\r\n/conaiperteam 16\r\n/heroes 1\r\n/bots 3\r\n/awards 0\r\n")
-        self.assertEqual(self.get()["saved"], ["maps", "options.difficulty"])
+        self.assertEqual(self.read_cfg(), cfg_lines(difficulty=4) + "/bots 3\r\n/awards 0\r\n")
+        self.assertEqual(self.get()["saved"], ["maps", "name", "options.difficulty"])
 
-    def test_a_compose_edit_takes_over_that_setting_only(self):
-        self.put({"maps": [{"mission": "tat2g_con"}], "options": {"difficulty": 4, "heroes": 0}})
-        edited = dict(COMPOSE, maps=[{"mission": "nab2c_con"}], options=dict(COMPOSE["options"], heroes=0))
-        effective = self.settings.prepare(edited)
-        self.assertEqual(effective["maps"], [{"mission": "nab2c_con"}])
-        self.assertEqual(effective["options"], {"difficulty": 4, "conaiperteam": 16, "heroes": 0})
-        # compose.yaml changed the maps and heroes, so those saved values are gone for good
-        self.assertEqual(self.get()["saved"], ["options.difficulty"])
-        effective = self.settings.prepare(COMPOSE)
-        self.assertEqual(effective["maps"], COMPOSE["maps"])
-        self.assertEqual(effective["options"]["difficulty"], 4)
+    def test_a_new_server_starts_with_the_defaults(self):
+        settings = modserver.Settings(os.path.join(self.dir, "fresh"))
+        self.assertIsNone(settings.saved())
+        effective = settings.prepare({})
+        self.assertEqual(effective, modserver.DEFAULTS)
+        self.assertEqual(modserver.map_words(effective["maps"])[:2], ["geo1c_con", "kas2g_con"])
+        self.assertEqual((effective["options"]["conaiperteam"], effective["options"]["difficulty"]), (16, 3))
+        self.assertEqual(settings.saved(), {})
 
-    def test_name_and_limits_wait_for_a_restart(self):
-        status, reply = self.put({"name": "  Friday Night  ", "maxPlayers": 16, "tickRate": 120})
+    def test_an_old_compose_yaml_is_taken_once(self):
+        settings = modserver.Settings(os.path.join(self.dir, "upgraded"))
+        old = {"SERVER_NAME": 'My "box"', "MAPS": "tat2g_con 150 150 hot1g_con", "BOTS_PER_TEAM": "8",
+               "LOBBY": "yes", "DIFFICULTY": "9", "HERO_UNLOCK": "4", "TICK_RATE": "45", "MAX_PLAYERS": "99",
+               "JOIN_PASSWORD": "pw", "HEROES": "off", "MOD_RATE": "10"}
+        effective = settings.prepare(old)
+        self.assertEqual((effective["name"], effective["lobby"], effective["joinPassword"]), ("My box", True, "pw"))
+        self.assertEqual(modserver.map_words(effective["maps"]), ["tat2g_con", "150", "150", "hot1g_con"])
+        # As the old entrypoint took them: clamped, on/off, the first choice for anything else
+        self.assertEqual(effective["maxPlayers"], 64)
+        self.assertEqual(effective["tickRate"], 60)
+        options = effective["options"]
+        self.assertEqual([options[n] for n in ("conaiperteam", "ctfaiperteam", "assaiperteam", "eliaiperteam")], [8] * 4)
+        self.assertEqual((options["difficulty"], options["hrunlock"], options["heroes"]), (4, 3, 0))
+        # Later, compose.yaml is only named in the log
+        again = settings.prepare(dict(old, MAPS="nab2c_con"))
+        self.assertEqual(again["maps"], effective["maps"])
+
+    def test_name_limits_and_lobby_wait_for_a_restart(self):
+        status, reply = self.put({"name": "  Friday Night  ", "maxPlayers": 16, "tickRate": 120, "lobby": True})
         self.assertEqual(status, 200, reply)
         self.assertTrue(reply["restartNeeded"])
         self.assertEqual(self.manifest()["server"], "Test server")
-        effective = self.settings.prepare(COMPOSE)
-        self.assertEqual((effective["name"], effective["maxPlayers"], effective["tickRate"]), ("Friday Night", 16, 120))
+        effective = self.settings.prepare({})
+        self.assertEqual((effective["name"], effective["maxPlayers"], effective["tickRate"], effective["lobby"]),
+                         ("Friday Night", 16, 120, True))
         self.assertFalse(self.get()["restartNeeded"])
         self.assertEqual(self.manifest()["server"], "Friday Night")
 
-    def test_back_to_compose(self):
+    def test_downloads_take_the_running_games_join_password(self):
+        self.stop()
+        self.start(join_password=None)  # follows the game's, as in the container
+        self.assertEqual(self.request("GET", "/mods.json", password=None)[0], 200)
+        status, reply = self.put({"joinPassword": "fresh1"})
+        self.assertEqual((status, reply["settings"]["joinPassword"], reply["restartNeeded"]), (200, "fresh1", True))
+        # Not until the game restarts with it: players couldn't join with it before then
+        self.assertEqual(self.request("GET", "/mods.json", password=None)[0], 200)
+        self.settings.prepare({})
+        self.assertEqual(self.request("GET", "/mods.json", password=None)[0], 401)
+        self.assertEqual(self.request("GET", "/mods.json", password="fresh1")[0], 200)
+        self.assertEqual(self.request("DELETE", "/admin/settings", password=ADMIN)[0], 200)
+        self.settings.prepare({})
+        self.assertEqual(self.request("GET", "/mods.json", password=None)[0], 200)
+
+    def test_back_to_the_defaults(self):
         self.put({"options": {"difficulty": 2}})
         status, _, data = self.request("DELETE", "/admin/settings", password=ADMIN)
         self.assertEqual(status, 200, data)
         self.assertEqual(json.loads(data)["saved"], [])
-        self.assertFalse(os.path.exists(self.settings.path("admin.json")))
-        self.assertEqual(self.settings.prepare(COMPOSE)["options"]["difficulty"], 3)
+        # The file stays, so an old compose.yaml isn't taken again
+        effective = self.settings.prepare({"DIFFICULTY": "4"})
+        self.assertEqual(effective["options"]["difficulty"], 3)
+        self.assertEqual(effective["name"], "OpenSWBF2 Server")
 
     def test_refuses_what_the_game_cant_take(self):
         long_list = [{"mission": "a" * 31} for _ in range(40)]
@@ -732,11 +768,19 @@ class SettingsTests(ServiceCase):
                      {"tickRate": 50}, {"maps": []}, {"maps": [{"mission": "bad name!"}]},
                      {"maps": [{"mission": "geo1c_con", "tickets1": "5"}]}, {"maps": long_list},
                      {"options": {"bots": 3}}, {"options": {"difficulty": 9}}, {"options": {"hrunlock": 4}},
-                     {"options": {"heroes": True}}, {"port": 3700}, ["maps"]):
+                     {"options": {"heroes": True}}, {"joinPassword": "two words"}, {"joinPassword": "x" * 16},
+                     {"lobby": 1}, {"port": 3700}, ["maps"]):
             status, reply = self.put(body)
             self.assertEqual(status, 400, body)
             self.assertIn("error", reply)
-        self.assertEqual(self.get()["saved"], [])
+        self.assertEqual(self.get()["saved"], ["name"])
+
+    def test_a_hand_edited_file_cant_hand_the_game_a_bad_value(self):
+        modserver.write_json(self.settings.path("admin.json"),
+                             {"schema": 1, "values": {"maxPlayers": 500, "maps": "geo1c_con; rm -rf /", "tickRate": 30}})
+        effective = self.settings.prepare({})
+        self.assertEqual((effective["maxPlayers"], effective["tickRate"]), (32, 30))
+        self.assertEqual(effective["maps"], modserver.DEFAULTS["maps"])
 
     def test_needs_the_admin_password(self):
         self.assertEqual(self.request("GET", "/admin/settings")[0], 403)
@@ -761,25 +805,30 @@ class SettingsTests(ServiceCase):
 
 
 class SettingsCommandTests(unittest.TestCase):
-    def test_prints_the_next_start_from_compose_and_the_saved_settings(self):
+    def run_settings(self, config, **env):
+        import subprocess
+        variables = {k: v for k, v in os.environ.items() if k not in modserver.LEGACY}
+        result = subprocess.run([sys.executable, "-I", modserver.__file__, "settings", "--config", config],
+                                env=dict(variables, **env), capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        return result
+
+    def test_prints_the_next_start(self):
         config = tempfile.mkdtemp(prefix="modserver-settings-")
         self.addCleanup(shutil.rmtree, config, True)
-        folder = os.path.join(config, "settings")
-        os.makedirs(folder)
-        with open(os.path.join(folder, "compose-settings.cfg"), "w", newline="") as file:
-            file.write("/difficulty 3\r\n/conaiperteam 16\r\n")
-        modserver.Settings(folder).store({"values": {"name": "Saved", "options": {"difficulty": 4}},
-                                          "compose": {"name": "Box", "options": {"difficulty": 3}}})
-        env = dict(os.environ, COMPOSE_NAME="Box", COMPOSE_PLAYERS="20", COMPOSE_TICK="30",
-                   COMPOSE_MAPS="geo1c_con 150 150 kas2g_con", EXTRA_SETTINGS="/awards 0")
-        import subprocess
-        result = subprocess.run([sys.executable, "-I", modserver.__file__, "settings", "--config", config],
-                                env=env, capture_output=True, text=True, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines(), ["Saved", "20", "30", "geo1c_con 150 150 kas2g_con"])
-        self.assertIn("Using what an admin saved from the launcher: name, 1 game option", result.stderr)
-        with open(os.path.join(folder, "ServerSettings.cfg"), "rb") as file:
-            self.assertEqual(file.read(), b"/difficulty 4\r\n/conaiperteam 16\r\n/awards 0\r\n")
+        # First start of a server upgraded from an old compose.yaml
+        result = self.run_settings(config, SERVER_NAME="Box", MAPS="geo1c_con 150 150 kas2g_con", EXTRA_SETTINGS="/awards 0")
+        self.assertEqual(result.stdout.splitlines(), ["Box", "32", "60", "0", "", "geo1c_con 150 150 kas2g_con"])
+        self.assertIn("Took SERVER_NAME, MAPS from compose.yaml into the server's settings, this once", result.stderr)
+        with open(os.path.join(config, "settings", "ServerSettings.cfg"), "rb") as file:
+            self.assertEqual(file.read().decode(), cfg_lines() + "/awards 0\r\n")
+        # An admin saved some, and compose.yaml still sets MAPS
+        settings = modserver.Settings(os.path.join(config, "settings"))
+        settings.save({"joinPassword": "pw", "lobby": True, "maxPlayers": 20, "options": {"difficulty": 4}})
+        result = self.run_settings(config, MAPS="nab2c_con")
+        self.assertEqual(result.stdout.splitlines(), ["Box", "20", "60", "1", "pw", "geo1c_con 150 150 kas2g_con"])
+        self.assertIn("compose.yaml still sets MAPS: not used any more", result.stderr)
+        self.assertIn("The server's saved settings: joinPassword, lobby, maps, maxPlayers, name, 1 game option", result.stderr)
 
     def test_map_words(self):
         maps = modserver.parse_map_words("geo1c_con 150 150 kas2g_con nab2c_con 5")
