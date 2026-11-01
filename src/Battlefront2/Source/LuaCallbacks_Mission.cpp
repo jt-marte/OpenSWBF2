@@ -30,6 +30,7 @@
 #include "MapCamera.h"
 #include "MissionPlayList.h"
 #include "NetGame.h"
+#include "NetWire.h"
 #include "OdfValue.h"
 #include "PlayerProfile.h"
 #include "PlayerStats.h"
@@ -930,6 +931,14 @@ int SetUnitCount(lua_State* L)
     if (AIDebug::OnlyOneAI())
     {
         iCount = iTeam < 3;
+    }
+    if (NetGame::ServerBots() && (iTeam == 1 || iTeam == 2))
+    {
+        // OpenSWBF2: a dedicated server's teams take up to NetWire::kServerTeamCap soldiers;
+        // humans push bots out past that (Character::CanSpawn)
+        LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d server=%d", iTeam, iCount,
+            NetWire::ServerTeamUnits(iCount));
+        iCount = NetWire::ServerTeamUnits(iCount);
     }
     SpawnManager::Instance()->SetUnitCount(iTeam, iCount);
     return 0;

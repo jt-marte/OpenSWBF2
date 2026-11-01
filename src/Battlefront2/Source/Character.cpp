@@ -670,7 +670,7 @@ bool Character::Update(float fDeltaTime)
 
     if (mPlayerId < 0 && !mHeroFlag && !GameLoop::mbHistoricalRules && !GameLoop::AreMetagameRulesOn())
     {
-        if (!AIUtil::IsUberMode() && iAIAlive >= netNumBots)
+        if (!AIUtil::IsUberMode() && iAIAlive >= NetGame::BotsPerTeam())
         {
             mDelayTimer = 5.0f;
             return true;

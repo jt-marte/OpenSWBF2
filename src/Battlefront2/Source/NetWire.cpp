@@ -341,6 +341,34 @@ int HostTurnRate(int iProfileTurns)
     return iProfileTurns > 255 ? 255 : iProfileTurns;
 }
 
+int ServerBotCap(int iModeBots)
+{
+    if (iModeBots < 0)
+    {
+        return 0;
+    }
+    return iModeBots > kServerBotSlots ? kServerBotSlots : iModeBots;
+}
+
+// Only ever raised, never lowered: a client keeps the map's own count, and 2 * kServerTeamCap
+// never exceeds the other term of CharacterCount (players + 2 * kServerBotSlots), so both sides
+// still count the same characters.
+int ServerTeamUnits(int iMissionUnits)
+{
+    return iMissionUnits > kServerTeamCap ? iMissionUnits : kServerTeamCap;
+}
+
+int CharacterCount(int iUnits1, int iUnits2, bool bNet, int iPlayerLimit, int iBots, int iOthers)
+{
+    int iCount = iUnits1 + iUnits2;
+    if (bNet && iPlayerLimit + 2 * iBots > iCount)
+    {
+        iCount = iPlayerLimit + 2 * iBots;
+    }
+    iCount += iOthers;
+    return iCount > 600 ? 600 : iCount;
+}
+
 // Any unicast IPv4 a LAN-transport peer can use: private, VPN (100.64/10), public and loopback.
 // Retail accepted only 10/8, 172.16/12 and 192.168/16, which kept Direct and VPN play out.
 bool IsUsableIPv4(unsigned long ulNetOrder)

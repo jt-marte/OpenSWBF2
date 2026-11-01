@@ -100,7 +100,9 @@ is the server's own (see [Admin](#admin)).
 A new server starts with:
 - the name "OpenSWBF2 Server", no join password, up to 32 players and 60 turns a second;
 - the 8 stock Conquest maps (Geonosis, Kashyyyk, Naboo, Hoth, Tatooine, Coruscant, Mygeeto, Utapau);
-- 16 bots a team, Hard AI, heroes on, and the game's usual limits;
+- 32 bots a team in every mode (the team size the maps were made for), Hard AI, heroes on, and the
+  game's usual limits. A team takes up to 64 soldiers, so players push bots out only past that: a
+  full server of 64 players keeps 64 bots;
 - no lobby: each map starts at once.
 
 Change any of it from the launcher's admin screen.

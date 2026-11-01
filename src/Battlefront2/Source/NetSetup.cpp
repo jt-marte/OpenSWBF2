@@ -618,10 +618,19 @@ void NetSetup::SetAsClient()
     NetComm::SetHost(false);
 }
 
+extern int netNumBots;
+
 // FUNCTION: SWBF2 0x005db8a0
 void NetSetup::SetAsDedicated(bool bDedicated)
 {
     netIsDedicated = bDedicated;
+    // OpenSWBF2: a dedicated server counts NetWire::kServerBotSlots bots a team on every map; the
+    // bots it was started with (/bots) cap the spawns until a map's mode setting does
+    if (bDedicated && netNumBots != NetWire::kServerBotSlots)
+    {
+        NetGame::SetServerBotCap(netNumBots);
+        netNumBots = NetWire::kServerBotSlots;
+    }
 }
 
 // FUNCTION: SWBF2 0x005db8b0

@@ -227,3 +227,34 @@ TEST_CASE("a JOIN carries the player's name on x64" * doctest::test_suite("regre
     CHECK(Has(sSetup, "bool bActive = pInput->IsControllerBound(j);"));
     CHECK(Has(sInput, "static_assert(offsetof(FLInputManager, mActiveControllers) == 0x2e6c"));
 }
+
+TEST_CASE("a dedicated server's bots never change its clients' character table" * doctest::test_suite("unit"))
+{
+    // The host raises its teams to the server cap; a client keeps the map's own unit count. Both
+    // count kServerBotSlots bots, which the client learnt when it joined.
+    for (int iPlayers = 1; iPlayers <= 64; ++iPlayers)
+    {
+        for (int iMapUnits = 0; iMapUnits <= 160; iMapUnits += 4)
+        {
+            const int iHostUnits = NetWire::ServerTeamUnits(iMapUnits);
+            const int iHost = NetWire::CharacterCount(iHostUnits, iHostUnits, true, iPlayers,
+                                                      NetWire::kServerBotSlots, 7);
+            const int iClient = NetWire::CharacterCount(iMapUnits, iMapUnits, true, iPlayers,
+                                                        NetWire::kServerBotSlots, 7);
+            CHECK(iHost == iClient);
+        }
+    }
+    // 64 players and 64 bots a team: room for everyone, under the 600 the engine allows
+    CHECK(NetWire::CharacterCount(64, 64, true, 64, NetWire::kServerBotSlots, 7) == 199);
+    CHECK(NetWire::CharacterCount(400, 400, true, 64, 64, 7) == 600);
+    // a team takes up to 64 soldiers, more only where the map has more
+    CHECK(NetWire::ServerTeamUnits(32) == 64);
+    CHECK(NetWire::ServerTeamUnits(100) == 100);
+    // a mode's bots: 0 to 64
+    CHECK(NetWire::ServerBotCap(-1) == 0);
+    CHECK(NetWire::ServerBotCap(32) == 32);
+    CHECK(NetWire::ServerBotCap(200) == 64);
+    // retail's count for everything else
+    CHECK(NetWire::CharacterCount(32, 32, false, 64, 16, 7) == 71);
+    CHECK(NetWire::CharacterCount(16, 16, true, 64, 16, 7) == 103);
+}

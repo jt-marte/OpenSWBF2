@@ -728,7 +728,7 @@ class SettingsTests(ServiceCase):
         effective = settings.prepare({})
         self.assertEqual(effective, modserver.DEFAULTS)
         self.assertEqual(modserver.map_words(effective["maps"])[:2], ["geo1c_con", "kas2g_con"])
-        self.assertEqual((effective["options"]["conaiperteam"], effective["options"]["difficulty"]), (16, 3))
+        self.assertEqual((effective["options"]["conaiperteam"], effective["options"]["difficulty"]), (32, 3))
         self.assertEqual(settings.saved(), {})
 
     def test_an_old_compose_yaml_is_taken_once(self):
@@ -792,11 +792,18 @@ class SettingsTests(ServiceCase):
                      {"maps": [{"mission": "geo1c_con", "tickets1": "5"}]}, {"maps": long_list},
                      {"options": {"bots": 3}}, {"options": {"difficulty": 9}}, {"options": {"hrunlock": 4}},
                      {"options": {"heroes": True}}, {"joinPassword": "two words"}, {"joinPassword": "x" * 16},
-                     {"lobby": 1}, {"port": 3700}, ["maps"]):
+                     {"options": {"conaiperteam": 65}}, {"lobby": 1}, {"port": 3700}, ["maps"]):
             status, reply = self.put(body)
             self.assertEqual(status, 400, body)
             self.assertIn("error", reply)
         self.assertEqual(self.get()["saved"], ["name"])
+
+    def test_a_team_takes_up_to_64_bots(self):
+        status, reply = self.put({"options": {"conaiperteam": 64, "ctfaiperteam": 0, "assaiperteam": 40}})
+        self.assertEqual(status, 200, reply)
+        options = self.settings.prepare({})["options"]
+        self.assertEqual([options[n] for n in ("conaiperteam", "ctfaiperteam", "assaiperteam", "eliaiperteam")],
+                         [64, 0, 40, 32])
 
     def test_a_hand_edited_file_cant_hand_the_game_a_bad_value(self):
         modserver.write_json(self.settings.path("admin.json"),
