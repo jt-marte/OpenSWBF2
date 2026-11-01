@@ -1237,23 +1237,8 @@ static int ScriptCB_SetNumBots(lua_State*)
 {
     if (lua_isnumber(LuaHelper::mState, 1))
     {
-        const int iBots = (int)luaL_checknumber(LuaHelper::mState, 1);
-        if (NetGame::ServerBots())
-        {
-            // OpenSWBF2: on a dedicated server the map's mode setting only caps the spawns. Its
-            // clients sized their character tables from netNumBots when they joined, so a new
-            // count here would split them from the host at the next map (NetWire.h).
-            NetGame::SetServerBotCap(iBots);
-        }
-        else if (NetGame::IsEnabled() && NetGame::IsClient())
-        {
-            // OpenSWBF2: a client keeps the host's count from its join; its own mode setting
-            // (clamped to 32 by the options screens) would size another table than the host's
-        }
-        else
-        {
-            netNumBots = iBots;
-        }
+        // OpenSWBF2: a dedicated server's cap, or nothing on a client (NetGame::SetMapBots)
+        NetGame::SetMapBots((int)luaL_checknumber(LuaHelper::mState, 1));
     }
     return 0;
 }

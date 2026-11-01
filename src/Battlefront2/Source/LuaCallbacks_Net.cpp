@@ -934,7 +934,9 @@ int ScriptCB_SetNumBots(lua_State* L)
 {
     if (lua_gettop(LuaHelper::mState) == 1 && lua_isnumber(LuaHelper::mState, 1))
     {
-        netNumBots = (int)luaL_checknumber(LuaHelper::mState, 1);
+        // OpenSWBF2: a dedicated server's cap, or nothing on a client (NetGame::SetMapBots).
+        // LuaCallbacks_Options registers the same name; whichever comes last wins, so both go there.
+        NetGame::SetMapBots((int)luaL_checknumber(LuaHelper::mState, 1));
     }
     return 0;
 }
