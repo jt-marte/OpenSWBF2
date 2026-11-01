@@ -264,6 +264,10 @@ LRESULT __stdcall WindowProc(HWND__* hWnd, UINT Msg, WPARAM wParam, LPARAM lPara
             Snd::Engine::SetSpeakerConfig(GameSoundEngine::gDefaultSpeakerConfig);
         }
         CloseJournal();
+        // OpenSWBF2: leave a net game as the quit menu does (GameLoop's sQuitRequested path);
+        // without it a client's cleanup waited on a server that kept sending, and Alt+F4 in an
+        // online match hung the game
+        NetSetup::CancelPostLoad();
         GameLoop::Cleanup();
 
         GameState::PostStateCleanup(GameState::GetState() != 0x11E1FC01);

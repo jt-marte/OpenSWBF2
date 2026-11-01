@@ -2478,6 +2478,18 @@ void CNetPostLoadJoinGame::Cancel()
     canceled = true;
 }
 
+void NetSetup::CancelPostLoad()
+{
+    if (postLoadHostGame)
+    {
+        postLoadHostGame->Cancel();
+    }
+    else if (postLoadJoinGame)
+    {
+        postLoadJoinGame->Cancel();
+    }
+}
+
 // FUNCTION: SWBF2 0x005df390
 const char* CNetFindGame::GetEra()
 {
@@ -3437,6 +3449,10 @@ CNetPostLoadJoinGame::~CNetPostLoadJoinGame()
     NetComm::AdvanceTime(true);
     float now = NetComm::GetTime();
     float finishTime = now + 0.5f;
+    // OpenSWBF2: each update from the host pushes the end 3 s on, so a host that never went quiet
+    // (a player leaving mid-match) kept this loop going for good; a map change's drain ends well
+    // inside the cap
+    const float giveUpTime = now + 10.0f;
     for (;;)
     {
         SetupSleep();
@@ -3451,7 +3467,7 @@ CNetPostLoadJoinGame::~CNetPostLoadJoinGame()
             outgoing.EndWrite();
             NetComm::Send(64, 19, &outgoing);
         }
-        if (now > finishTime)
+        if (now > finishTime || now > giveUpTime)
         {
             break;
         }

@@ -697,6 +697,9 @@ public:
     static void SetLoginName(int iViewport, char const* pcName);
     static bool InNetGame();
     static bool SetInNetGame(bool bInGame);
+    // OpenSWBF2: closing the window leaves a net game the way the quit menu does, so a client's
+    // ~CNetPostLoadJoinGame disconnects at once instead of draining a host that keeps sending
+    static void CancelPostLoad();
     static bool IsLoginError();
     static bool IsGameError();
     static void GetLoginError(char const*& pcError, int& iSeverity);
