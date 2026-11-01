@@ -102,14 +102,44 @@ the server itself when they join (see [Mod downloads](#mod-downloads)).
 | `MOD_PORT` | `PORT` | TCP port for mod downloads. Map the same number in `ports`, as `/tcp`. |
 | `MOD_RATE` | `50` | Download speed cap in Mbit/s, for all downloads together. 0 = none. |
 | `MOD_UPLOADS` | `1` | Admins can upload mods from the launcher. 0 = off. |
-| `EXTRA_SETTINGS` | | More admin commands for `ServerSettings.cfg`, one per line. |
+| `EXTRA_SETTINGS` | | More admin commands for `ServerSettings.cfg`, one per line. They come last, so they win over the options above and over what an admin saved. |
 | `EXTRA_ARGS` | | More game switches. |
 
 XL and Uber missions are single player only: their 320-560 soldiers overload players' connections.
 
+An admin can change the playlist, the game options, the name, the player limit and the tick rate
+from the launcher, and the server keeps those changes (see [Admin](#admin)). `PORT`, the passwords
+and the rest stay as compose.yaml says.
+
 ## Admin
 
-From the server, with the `rcon` tool in the image:
+### From the launcher
+
+**Server manager > Connect to server as admin**, with the server's address and admin password, opens
+the same screen as **Host a server**:
+- the playlist, built from the server's own map list (mods included, even ones you don't have);
+- Start match, End match, Next map, Restart map, Back to lobby, and ▶ on a map to play it now;
+- the players, to message, move to the other team or kick;
+- chat, and the game options;
+- the server's mods.
+
+Admin commands travel over UDP on the game port, like the game. The mod service, on TCP at the same port
+number, keeps what you apply and lists the maps.
+
+What you apply is used at every start. Playlist and options also take effect at once. Name, player limit
+and tick rate take a restart of the game: **Restart now** or **Restart when empty**.
+
+**The latest change wins, setting by setting.** Once you edit a setting in compose.yaml (`MAPS`,
+`BOTS_PER_TEAM`, `SERVER_NAME`...) and recreate the container, compose.yaml's new value is used for it,
+and what an admin saved for that one setting is dropped. Everything else an admin saved stays.
+**Use compose.yaml's settings** on the admin screen drops all of it.
+
+The saved settings are in `config/settings/admin.json`. The server's map list is `config/settings/missions.json`.
+The game writes that list at the first start, and again whenever the mods change. It takes a few seconds.
+
+### From the command line
+
+With the `rcon` tool in the image:
 
 ```bash
 docker exec openswbf2 rcon /status
@@ -118,8 +148,8 @@ docker exec openswbf2 rcon "/changemap nab2c_con" "/kick 3" "/maplist"
 ```
 
 In the game, type in chat: `/admin /login <ADMIN_PASSWORD>`, then commands such as
-`/admin /password secret`. Changes made this way last until the container restarts; the
-environment settings apply again then.
+`/admin /password secret`. Changes made this way last until the game restarts. Only the launcher's
+admin screen saves its changes.
 
 ## Mod downloads
 
@@ -152,9 +182,10 @@ Only the game restarts; the container and the downloads keep running. Uploaded m
 the same way. The ones in your `addons` folder can't: change those on the host.
 
 An upload is a mod folder with an `addme.script`, up to 2 GB a file and 8 GB in all, with no
-programs, and never the 1.3 patch. A new mod's maps still have to be in the rotation: add them to
-`MAPS`, or over rcon with `/appendmap`. `MOD_UPLOADS=0` turns uploads off and `MOD_SHARING=0` the
-whole service.
+programs, and never the 1.3 patch. A new mod's maps still have to be in the rotation. After the
+restart, they show up in the admin screen's map list, to drag into the playlist. `MOD_UPLOADS=0`
+turns uploads off. `MOD_SHARING=0` turns off the whole service. The admin screen then still controls
+the game, but it can't save anything or read the server's map list.
 
 ### The launcher's lobby
 

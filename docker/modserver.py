@@ -3,6 +3,7 @@
 
   modserver.py serve            the HTTP service; entrypoint.sh starts it next to the game
   modserver.py apply-pending    puts uploaded mods in place; entrypoint.sh runs it before each game start
+  modserver.py settings         writes the next game start's settings; entrypoint.sh runs it before each
 
 Players' launchers read GET /mods.json (every mod folder, with each file's size and SHA-256) and fetch
 what they lack from GET /mods/<folder>/<path>, which takes ranges, so downloads resume. Reading needs
@@ -13,6 +14,11 @@ is on. Programs are never listed, served or taken, and neither is the unofficial
 It also runs the launchers' lobby: players who connect from the launcher's Multiplayer page wait in
 it (POST /lobby/join, GET /status) with their game closed, and Start (POST /admin/match?do=start)
 opens all their games into the server's held lobby (LOBBY=1), then starts the match once they're in.
+
+The launcher's admin screen controls the game over rcon itself, and keeps what it applies here
+(PUT /admin/settings): the playlist, game options, name, player limit and tick rate, used at every
+start until compose.yaml's value for that setting changes. GET /missions.json is the server's own
+map list, so the admin picks maps the server can load.
 """
 import argparse
 import hashlib
@@ -969,6 +975,270 @@ def apply_pending(root):
     return done
 
 
+# --- Admin settings: what the launcher's admin screen applies, kept for the next game start ----
+MISSION = re.compile(r"^[A-Za-z0-9_]{1,31}$")
+MAX_MAPS_LINE = 1200
+TICK_RATES = (30, 60, 120)
+# The game options as the launcher's ServerProfile.OptionCommands sends them, with the values the
+# entrypoint takes from compose.yaml; ServerSettings.cfg lists them in this order
+OPTIONS = (
+    ("difficulty", range(2, 5)), ("conaiperteam", range(0, 33)), ("ctfaiperteam", range(0, 33)),
+    ("assaiperteam", range(0, 33)), ("eliaiperteam", range(0, 33)), ("teamdamage", range(0, 2)),
+    ("shownames", range(0, 2)), ("autoassignteams", range(0, 2)), ("awards", range(0, 2)),
+    ("heroes", range(0, 2)), ("hrunlock", (3, 5)), ("hrunlockvalue", range(0, 121)), ("hrplayer", (1, 7)),
+    ("aiheroes", range(0, 2)), ("conreinforcements", range(10, 501)), ("contimelimit", range(0, 61)),
+    ("ctfscorelimit", range(1, 16)), ("ctftimelimit", range(0, 61)), ("huntimelimit", range(0, 61)),
+    ("huntscorelimit", range(50, 151)), ("assscorelimit", range(150, 301)),
+)
+OPTION_VALUES = dict(OPTIONS)
+# Fixed while the game runs: they take a restart
+RESTART_KEYS = ("name", "maxPlayers", "tickRate")
+
+
+def is_int(value):
+    return isinstance(value, int) and not isinstance(value, bool)
+
+
+def clean_maps(maps):
+    """[{mission, tickets1, tickets2}] with both tickets or neither (a lone one counts for both, as
+    the launcher's PlaylistEntry.Tickets does), or None when an entry is wrong."""
+    if not isinstance(maps, list) or not maps:
+        return None
+    entries = []
+    for entry in maps:
+        if not isinstance(entry, dict) or not isinstance(entry.get("mission"), str) or not MISSION.match(entry["mission"]):
+            return None
+        first, second = entry.get("tickets1"), entry.get("tickets2")
+        if any(t is not None and not is_int(t) for t in (first, second)):
+            return None
+        first = first if first is not None else second
+        second = second if second is not None else first
+        tickets = {} if first is None else {"tickets1": min(max(first, 1), 9999), "tickets2": min(max(second, 1), 9999)}
+        entries.append({"mission": entry["mission"], **tickets})
+    return entries
+
+
+def map_words(maps):
+    """The game's command line for a playlist: geo1c_con 150 150 kas2g_con."""
+    words = []
+    for entry in maps:
+        words.append(entry["mission"])
+        if "tickets1" in entry:
+            words += [str(entry["tickets1"]), str(entry["tickets2"])]
+    return words
+
+
+def parse_map_words(text):
+    """compose.yaml's MAPS: mission names, each maybe followed by its two ticket numbers."""
+    maps = []
+    words = text.split()
+    i = 0
+    while i < len(words):
+        entry = {"mission": words[i]}
+        if i + 2 < len(words) and words[i + 1].isdigit() and words[i + 2].isdigit():
+            entry["tickets1"], entry["tickets2"] = int(words[i + 1]), int(words[i + 2])
+            i += 2
+        maps.append(entry)
+        i += 1
+    return maps
+
+
+def clean_settings(body):
+    """The settings an admin sent, checked; Refused(400) names the first one that's wrong."""
+    if not isinstance(body, dict):
+        raise Refused(400, "the body is an object")
+    unknown = sorted(set(body) - {"name", "maxPlayers", "tickRate", "maps", "options"})
+    if unknown:
+        raise Refused(400, f"unknown setting {unknown[0]}")
+    settings = {}
+    if "name" in body:
+        name = body["name"].strip() if isinstance(body["name"], str) else ""
+        if not 0 < len(name) <= 31 or '"' in name or any(ord(c) < 32 or ord(c) == 127 for c in name):
+            raise Refused(400, "the server name is 1 to 31 characters, without quotes")
+        settings["name"] = name
+    if "maxPlayers" in body:
+        if not is_int(body["maxPlayers"]) or not 2 <= body["maxPlayers"] <= 64:
+            raise Refused(400, "the player limit is 2 to 64")
+        settings["maxPlayers"] = body["maxPlayers"]
+    if "tickRate" in body:
+        if not is_int(body["tickRate"]) or body["tickRate"] not in TICK_RATES:
+            raise Refused(400, "the tick rate is 30, 60 or 120")
+        settings["tickRate"] = body["tickRate"]
+    if "maps" in body:
+        maps = clean_maps(body["maps"])
+        if maps is None:
+            raise Refused(400, "the playlist is a list of missions such as geo1c_con, with optional tickets")
+        if len(" ".join(map_words(maps))) > MAX_MAPS_LINE:
+            raise Refused(400, f"the playlist is too long for the game's command line ({MAX_MAPS_LINE} characters at most)")
+        settings["maps"] = maps
+    if "options" in body:
+        options = body["options"]
+        if not isinstance(options, dict):
+            raise Refused(400, "options is an object of game options")
+        settings["options"] = {}
+        for name, value in options.items():
+            if name not in OPTION_VALUES:
+                raise Refused(400, f"unknown game option {name}")
+            if not is_int(value) or value not in OPTION_VALUES[name]:
+                raise Refused(400, f"{name} can't be {value}")
+            settings["options"][name] = value
+    return settings
+
+
+def flatten(values):
+    """One key per setting, each game option on its own: the latest change wins setting by setting."""
+    flat = {key: value for key, value in values.items() if key != "options"}
+    for name, value in (values.get("options") or {}).items():
+        flat["options." + name] = value
+    return flat
+
+
+def unflatten(flat):
+    values = {"options": {}}
+    for key, value in flat.items():
+        if key.startswith("options."):
+            values["options"][key[len("options."):]] = value
+        else:
+            values[key] = value
+    return values
+
+
+def describe_keys(keys):
+    """'maps, name, 3 game options' for the log."""
+    options = [key for key in keys if key.startswith("options.")]
+    named = [key for key in keys if not key.startswith("options.")]
+    if options:
+        named.append(f"{len(options)} game option{'' if len(options) == 1 else 's'}")
+    return ", ".join(named)
+
+
+def merge(saved, compose):
+    """(the settings the next game start uses, the saved ones that still count). A saved setting
+    counts while compose.yaml's value for it is the one it had when the admin saved it; once
+    compose.yaml says something else, someone edited it since, and compose.yaml wins."""
+    now = flatten(compose)
+    values, at_save = flatten(saved["values"]), flatten(saved["compose"])
+    result, kept_values, kept_compose = dict(now), {}, {}
+    for key, value in values.items():
+        if at_save.get(key) == now.get(key):
+            result[key] = value
+            kept_values[key] = value
+            kept_compose[key] = at_save.get(key)
+    return unflatten(result), {"values": unflatten(kept_values), "compose": unflatten(kept_compose)}
+
+
+class Settings:
+    """The playlist, game options, name, player limit and tick rate an admin saved from the
+    launcher (config/settings/admin.json), next to compose.yaml's (compose.json, which the
+    entrypoint writes before each game start) and the running game's (effective.json)."""
+
+    def __init__(self, folder):
+        self.folder = folder
+        self.lock = threading.Lock()
+        os.makedirs(folder, exist_ok=True)
+
+    def path(self, name):
+        return os.path.join(self.folder, name)
+
+    def compose(self):
+        data = read_json(self.path("compose.json"), {})
+        return data if isinstance(data, dict) else {}
+
+    def running(self):
+        data = read_json(self.path("effective.json"), None)
+        return data if isinstance(data, dict) else None
+
+    def saved(self):
+        data = read_json(self.path("admin.json"), {})
+        if not isinstance(data, dict) or data.get("schema") != 1:
+            return {"values": {}, "compose": {}}
+        return {"values": data.get("values") or {}, "compose": data.get("compose") or {}}
+
+    def store(self, saved):
+        if flatten(saved["values"]):
+            write_json(self.path("admin.json"), {"schema": 1, **saved})
+        else:
+            try:
+                os.remove(self.path("admin.json"))
+            except FileNotFoundError:
+                pass
+
+    def describe(self):
+        """GET /admin/settings: what the next start uses, which of it was saved, compose.yaml's
+        values, and whether the running game needs a restart for the name or limits."""
+        compose = self.compose()
+        upcoming, kept = merge(self.saved(), compose)
+        running = self.running()
+        restart = running is not None and any(upcoming.get(key) != running.get(key) for key in RESTART_KEYS)
+        return {"schema": 1, "settings": upcoming, "saved": sorted(flatten(kept["values"])),
+                "compose": compose, "restartNeeded": restart}
+
+    def save(self, body):
+        """PUT /admin/settings: the settings sent, each next to compose.yaml's value for it now."""
+        settings = clean_settings(body)
+        with self.lock:
+            saved = self.saved()
+            values, at_save = flatten(saved["values"]), flatten(saved["compose"])
+            now = flatten(self.compose())
+            for key, value in flatten(settings).items():
+                values[key] = value
+                at_save[key] = now.get(key)
+            self.store({"values": unflatten(values), "compose": unflatten(at_save)})
+        return self.describe()
+
+    def reset(self):
+        with self.lock:
+            self.store({"values": {}, "compose": {}})
+        return self.describe()
+
+    def prepare(self, compose, extra=""):
+        """Before each game start: records compose.yaml's values, drops the saved settings
+        compose.yaml has changed since, and writes ServerSettings.cfg (the game options, then
+        EXTRA_SETTINGS, whose lines come last and so win) and effective.json. Returns the
+        settings the game starts with."""
+        with self.lock:
+            write_json(self.path("compose.json"), compose)
+            saved = self.saved()
+            effective, kept = merge(saved, compose)
+            dropped = sorted(set(flatten(saved["values"])) - set(flatten(kept["values"])))
+            if dropped:
+                print(f"[openswbf2] compose.yaml changed {describe_keys(dropped)} since an admin saved "
+                      "them; compose.yaml's values are used", file=sys.stderr)
+                self.store(kept)
+            used = sorted(flatten(kept["values"]))
+            if used:
+                print(f"[openswbf2] Using what an admin saved from the launcher: {describe_keys(used)}", file=sys.stderr)
+            lines = [f"/{name} {effective['options'][name]}" for name, _ in OPTIONS if name in effective["options"]]
+            lines += [line.strip() for line in extra.splitlines() if line.strip()]
+            temp = self.path(f"ServerSettings.cfg.{uuid.uuid4().hex}.tmp")
+            with open(temp, "w", encoding="utf-8", newline="") as file:
+                file.write("".join(line + "\r\n" for line in lines))
+            os.replace(temp, self.path("ServerSettings.cfg"))
+            write_json(self.path("effective.json"), effective)
+        return effective
+
+
+def compose_settings(env, options_file):
+    """compose.yaml's settings as the entrypoint checked them (COMPOSE_* and the option lines it
+    wrote), in the shape of the admin settings."""
+    options = {}
+    try:
+        with open(options_file, encoding="utf-8") as file:
+            for line in file:
+                parts = line.split()
+                if len(parts) == 2 and parts[0].startswith("/") and parts[1].lstrip("-").isdigit():
+                    options[parts[0][1:]] = int(parts[1])
+    except OSError:
+        pass
+    return {
+        "name": env.get("COMPOSE_NAME", "OpenSWBF2 Server"),
+        "maxPlayers": int(env.get("COMPOSE_PLAYERS") or 32),
+        "tickRate": int(env.get("COMPOSE_TICK") or 60),
+        "maps": parse_map_words(env.get("COMPOSE_MAPS", "")),
+        "options": options,
+    }
+
+
 class ModService:
     def __init__(self, addons, config, join_password="", admin_password="", server_name="", version="",
                  uploads=True, rate=0, restart=None, players=None, game=None, clock=time.monotonic):
@@ -982,9 +1252,26 @@ class ModService:
         self.watch = GameWatch(game, self.lobby, clock)
         self.restarter = Restarter(restart or (lambda: None), players or self.watch.players)
         self.uploads = Uploads(self.uploads_root, addons)
-        self.server_name = server_name
+        self.settings = Settings(os.path.join(config, "settings"))
+        self.compose_name = server_name
         self.version = version
         self.uploads_on = uploads
+
+    @property
+    def server_name(self):
+        """The name the running game started with, which an admin may have saved."""
+        running = self.settings.running()
+        name = running.get("name") if running else None
+        return name if isinstance(name, str) and name else self.compose_name
+
+    def missions(self):
+        """The server's own map list (the game's -listmissions, which the entrypoint runs once per
+        version and set of mods), or None."""
+        try:
+            with open(self.settings.path("missions.json"), "rb") as file:
+                return file.read()
+        except OSError:
+            return None
 
     def manifest(self, admin):
         reply = {
@@ -997,6 +1284,7 @@ class ModService:
         }
         if admin:
             reply["pending"] = self.uploads.describe_pending()
+            reply["settings"] = True
         return reply
 
     def status(self, token=None):
@@ -1095,6 +1383,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
             elif parts == ["admin", "match"] and method in ("POST", "DELETE"):
                 self.who(admin=True)
                 self.match(method)
+            elif parts == ["admin", "settings"] and method in ("GET", "PUT", "DELETE"):
+                self.who(admin=True)
+                settings = self.service.settings
+                if method == "PUT":
+                    reply = settings.save(self.read_json())
+                    log("an admin saved the server's settings")
+                elif method == "DELETE":
+                    reply = settings.reset()
+                    log("an admin went back to compose.yaml's settings")
+                else:
+                    reply = settings.describe()
+                self.send_json(200, reply)
+            elif parts == ["missions.json"] and method in ("GET", "HEAD"):
+                self.who()
+                self.send_missions(head=method == "HEAD")
             else:
                 raise Refused(404, "not found")
         except Refused as refused:
@@ -1219,6 +1522,18 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if not head:
             self.wfile.write(data)
 
+    def send_missions(self, head):
+        data = self.service.missions()
+        if data is None:
+            raise Refused(404, "the server has no map list yet")
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Length", str(len(data)))
+        self.send_header("Cache-Control", "no-store")
+        self.end_headers()
+        if not head:
+            self.wfile.write(data)
+
     def send_file(self, folder, path, head):
         entry = self.service.library.lookup(folder, path)
         if entry is None:
@@ -1319,11 +1634,24 @@ def main():
     serve.add_argument("--config", default="/config")
     apply = commands.add_parser("apply-pending", help="put uploaded mods in place (the game must be stopped)")
     apply.add_argument("--config", default="/config")
+    prepare = commands.add_parser("settings", help="write the settings for the next game start and print its name, "
+                                                   "player limit, tick rate and maps, a line each (entrypoint.sh)")
+    prepare.add_argument("--config", default="/config")
     args = parser.parse_args()
 
     if args.command == "apply-pending":
         for change in apply_pending(os.path.join(args.config, "addons")):
             log(change)
+        return 0
+
+    if args.command == "settings":
+        folder = os.path.join(args.config, "settings")
+        compose = compose_settings(os.environ, os.path.join(folder, "compose-settings.cfg"))
+        effective = Settings(folder).prepare(compose, os.environ.get("EXTRA_SETTINGS", ""))
+        print(effective["name"])
+        print(effective["maxPlayers"])
+        print(effective["tickRate"])
+        print(" ".join(map_words(effective["maps"])))
         return 0
 
     game_port = env_int("PORT", 3658)

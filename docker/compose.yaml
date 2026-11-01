@@ -10,6 +10,8 @@ services:
     ports:
       - "3658:3658/udp"          # the game and admin; keep in step with PORT below
       - "3658:3658/tcp"          # mod downloads; keep in step with MOD_PORT (PORT unless set)
+    # The launcher's Connect to server as admin can change the name, maps, limits and game options
+    # too; the server keeps those until you edit that same setting here (see README.md, Admin)
     environment:
       PORT: "3658"
       SERVER_NAME: "OpenSWBF2 Server"

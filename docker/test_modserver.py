@@ -653,6 +653,142 @@ class LobbyTests(ServiceCase):
         self.assertIsNone(self.service.watch.players())
 
 
+COMPOSE = {
+    "name": "Test server", "maxPlayers": 32, "tickRate": 60,
+    "maps": [{"mission": "geo1c_con"}, {"mission": "kas2g_con"}],
+    "options": {"difficulty": 3, "conaiperteam": 16, "heroes": 1},
+}
+
+
+class SettingsTests(ServiceCase):
+    """What the launcher's admin screen saves, against compose.yaml's values (the latest change wins)."""
+
+    def setUp(self):
+        super().setUp()
+        self.settings = self.service.settings
+        self.settings.prepare(COMPOSE)
+
+    def put(self, body, password=ADMIN):
+        status, _, data = self.request("PUT", "/admin/settings", body, password=password)
+        return status, json.loads(data)
+
+    def get(self):
+        status, _, data = self.request("GET", "/admin/settings", password=ADMIN)
+        self.assertEqual(status, 200, data)
+        return json.loads(data)
+
+    def read_cfg(self):
+        with open(self.settings.path("ServerSettings.cfg"), "rb") as file:
+            return file.read().decode()
+
+    def test_saved_settings_are_used_at_the_next_start(self):
+        status, reply = self.put({"maps": [{"mission": "tat2g_con", "tickets1": 150}, {"mission": "geo1c_con"}],
+                                  "options": {"difficulty": 4}})
+        self.assertEqual(status, 200, reply)
+        self.assertEqual(reply["settings"]["maps"],
+                         [{"mission": "tat2g_con", "tickets1": 150, "tickets2": 150}, {"mission": "geo1c_con"}])
+        self.assertEqual(reply["settings"]["options"], {"difficulty": 4, "conaiperteam": 16, "heroes": 1})
+        self.assertEqual(reply["saved"], ["maps", "options.difficulty"])
+        self.assertFalse(reply["restartNeeded"])
+
+        effective = self.settings.prepare(COMPOSE, "/bots 3\n\n/awards 0")
+        self.assertEqual(modserver.map_words(effective["maps"]), ["tat2g_con", "150", "150", "geo1c_con"])
+        self.assertEqual(self.read_cfg(), "/difficulty 4\r\n/conaiperteam 16\r\n/heroes 1\r\n/bots 3\r\n/awards 0\r\n")
+        self.assertEqual(self.get()["saved"], ["maps", "options.difficulty"])
+
+    def test_a_compose_edit_takes_over_that_setting_only(self):
+        self.put({"maps": [{"mission": "tat2g_con"}], "options": {"difficulty": 4, "heroes": 0}})
+        edited = dict(COMPOSE, maps=[{"mission": "nab2c_con"}], options=dict(COMPOSE["options"], heroes=0))
+        effective = self.settings.prepare(edited)
+        self.assertEqual(effective["maps"], [{"mission": "nab2c_con"}])
+        self.assertEqual(effective["options"], {"difficulty": 4, "conaiperteam": 16, "heroes": 0})
+        # compose.yaml changed the maps and heroes, so those saved values are gone for good
+        self.assertEqual(self.get()["saved"], ["options.difficulty"])
+        effective = self.settings.prepare(COMPOSE)
+        self.assertEqual(effective["maps"], COMPOSE["maps"])
+        self.assertEqual(effective["options"]["difficulty"], 4)
+
+    def test_name_and_limits_wait_for_a_restart(self):
+        status, reply = self.put({"name": "  Friday Night  ", "maxPlayers": 16, "tickRate": 120})
+        self.assertEqual(status, 200, reply)
+        self.assertTrue(reply["restartNeeded"])
+        self.assertEqual(self.manifest()["server"], "Test server")
+        effective = self.settings.prepare(COMPOSE)
+        self.assertEqual((effective["name"], effective["maxPlayers"], effective["tickRate"]), ("Friday Night", 16, 120))
+        self.assertFalse(self.get()["restartNeeded"])
+        self.assertEqual(self.manifest()["server"], "Friday Night")
+
+    def test_back_to_compose(self):
+        self.put({"options": {"difficulty": 2}})
+        status, _, data = self.request("DELETE", "/admin/settings", password=ADMIN)
+        self.assertEqual(status, 200, data)
+        self.assertEqual(json.loads(data)["saved"], [])
+        self.assertFalse(os.path.exists(self.settings.path("admin.json")))
+        self.assertEqual(self.settings.prepare(COMPOSE)["options"]["difficulty"], 3)
+
+    def test_refuses_what_the_game_cant_take(self):
+        long_list = [{"mission": "a" * 31} for _ in range(40)]
+        for body in ({"name": 'Say "hi"'}, {"name": "   "}, {"name": "x" * 32}, {"maxPlayers": 99}, {"maxPlayers": True},
+                     {"tickRate": 50}, {"maps": []}, {"maps": [{"mission": "bad name!"}]},
+                     {"maps": [{"mission": "geo1c_con", "tickets1": "5"}]}, {"maps": long_list},
+                     {"options": {"bots": 3}}, {"options": {"difficulty": 9}}, {"options": {"hrunlock": 4}},
+                     {"options": {"heroes": True}}, {"port": 3700}, ["maps"]):
+            status, reply = self.put(body)
+            self.assertEqual(status, 400, body)
+            self.assertIn("error", reply)
+        self.assertEqual(self.get()["saved"], [])
+
+    def test_needs_the_admin_password(self):
+        self.assertEqual(self.request("GET", "/admin/settings")[0], 403)
+        self.assertEqual(self.put({"maxPlayers": 8}, password=JOIN)[0], 403)
+        self.assertEqual(self.request("DELETE", "/admin/settings", password=None)[0], 401)
+
+    def test_admins_see_that_the_server_saves_settings(self):
+        self.assertTrue(self.manifest(ADMIN)["settings"])
+        self.assertNotIn("settings", self.manifest())
+
+    def test_the_servers_map_list(self):
+        status, _, data = self.request("GET", "/missions.json")
+        self.assertEqual((status, json.loads(data)), (404, {"error": "the server has no map list yet"}))
+        listing = b'{"format": 1, "maps": []}'
+        with open(self.settings.path("missions.json"), "wb") as file:
+            file.write(listing)
+        status, headers, data = self.request("GET", "/missions.json")
+        self.assertEqual((status, data, headers["Content-Type"]), (200, listing, "application/json"))
+        status, headers, data = self.request("HEAD", "/missions.json")
+        self.assertEqual((status, data, headers["Content-Length"]), (200, b"", str(len(listing))))
+        self.assertEqual(self.request("GET", "/missions.json", password=None)[0], 401)
+
+
+class SettingsCommandTests(unittest.TestCase):
+    def test_prints_the_next_start_from_compose_and_the_saved_settings(self):
+        config = tempfile.mkdtemp(prefix="modserver-settings-")
+        self.addCleanup(shutil.rmtree, config, True)
+        folder = os.path.join(config, "settings")
+        os.makedirs(folder)
+        with open(os.path.join(folder, "compose-settings.cfg"), "w", newline="") as file:
+            file.write("/difficulty 3\r\n/conaiperteam 16\r\n")
+        modserver.Settings(folder).store({"values": {"name": "Saved", "options": {"difficulty": 4}},
+                                          "compose": {"name": "Box", "options": {"difficulty": 3}}})
+        env = dict(os.environ, COMPOSE_NAME="Box", COMPOSE_PLAYERS="20", COMPOSE_TICK="30",
+                   COMPOSE_MAPS="geo1c_con 150 150 kas2g_con", EXTRA_SETTINGS="/awards 0")
+        import subprocess
+        result = subprocess.run([sys.executable, "-I", modserver.__file__, "settings", "--config", config],
+                                env=env, capture_output=True, text=True, timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.splitlines(), ["Saved", "20", "30", "geo1c_con 150 150 kas2g_con"])
+        self.assertIn("Using what an admin saved from the launcher: name, 1 game option", result.stderr)
+        with open(os.path.join(folder, "ServerSettings.cfg"), "rb") as file:
+            self.assertEqual(file.read(), b"/difficulty 4\r\n/conaiperteam 16\r\n/awards 0\r\n")
+
+    def test_map_words(self):
+        maps = modserver.parse_map_words("geo1c_con 150 150 kas2g_con nab2c_con 5")
+        self.assertEqual(maps, [{"mission": "geo1c_con", "tickets1": 150, "tickets2": 150},
+                                {"mission": "kas2g_con"}, {"mission": "nab2c_con"}, {"mission": "5"}])
+        self.assertEqual(modserver.clean_maps([{"mission": "geo1c_con", "tickets2": 0}]),
+                         [{"mission": "geo1c_con", "tickets1": 1, "tickets2": 1}])
+
+
 class RconParsingTests(unittest.TestCase):
     def test_state(self):
         line = "state=lobby hold=1 players=1/2/4 time=-1 tickets=0/0 scores=0/0 map=BS1g_con next=geo1c_con"

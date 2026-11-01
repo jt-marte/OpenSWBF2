@@ -312,8 +312,10 @@ fi
 HERO_PLAYER=$(int_env HERO_PLAYER 1 1 7)
 [[ $HERO_PLAYER == 7 ]] || HERO_PLAYER=1
 
-# The game options as admin commands, one per line, as the launcher's Server manager writes them
-# (ServerProfile.SettingsLines); the game reads ServerSettings.cfg at start
+# compose.yaml's game options as admin commands, one per line, as the launcher's Server manager
+# writes them (ServerProfile.SettingsLines). Before each game start, "modserver.py settings" puts
+# what an admin saved from the launcher over them and writes ServerSettings.cfg, which the game
+# reads at start, with EXTRA_SETTINGS last.
 {
     printf '/difficulty %s\r\n' "$(int_env DIFFICULTY 3 2 4)"
     printf '/conaiperteam %s\r\n/ctfaiperteam %s\r\n/assaiperteam %s\r\n/eliaiperteam %s\r\n' "$BOTS" "$BOTS" "$BOTS" "$BOTS"
@@ -331,14 +333,38 @@ HERO_PLAYER=$(int_env HERO_PLAYER 1 1 7)
     printf '/huntimelimit %s\r\n' "$(int_env HUNT_TIME_LIMIT 0 0 60)"
     printf '/huntscorelimit %s\r\n' "$(int_env HUNT_SCORE 50 50 150)"
     printf '/assscorelimit %s\r\n' "$(int_env ASSAULT_SCORE 180 150 300)"
-    if [[ -n ${EXTRA_SETTINGS:-} ]]; then
-        while IFS= read -r line; do
-            [[ -n $line ]] && printf '%s\r\n' "$line"
-        done <<<"$EXTRA_SETTINGS"
-    fi
-} >"$CONFIG/settings/ServerSettings.cfg"
+} >"$CONFIG/settings/compose-settings.cfg"
 # The maps go on the command line, where their tickets stick
 : >"$CONFIG/settings/ServerRotation.cfg"
+
+# The name, player limit, tick rate, maps and ServerSettings.cfg for the next game start: compose.yaml's,
+# with what an admin saved from the launcher's admin screen (the latest change of each setting wins).
+# Sets GAME_NAME, GAME_PLAYERS, GAME_TICK and GAME_MAPS.
+apply_settings() {
+    local settings=()
+    mapfile -t settings < <(COMPOSE_NAME=$SERVER_NAME COMPOSE_PLAYERS=$MAX_PLAYERS COMPOSE_TICK=$TICK_RATE \
+        COMPOSE_MAPS="${MAP_LIST[*]}" python3 /opt/docker/modserver.py settings --config "$CONFIG")
+    if ((${#settings[@]} == 4)) && [[ -n ${settings[0]} && -n ${settings[3]} ]]; then
+        GAME_NAME=${settings[0]}
+        GAME_PLAYERS=${settings[1]}
+        GAME_TICK=${settings[2]}
+        read -r -a GAME_MAPS <<<"${settings[3]}"
+        return 0
+    fi
+    log "Couldn't read the settings an admin saved; using compose.yaml's"
+    GAME_NAME=$SERVER_NAME
+    GAME_PLAYERS=$MAX_PLAYERS
+    GAME_TICK=$TICK_RATE
+    GAME_MAPS=("${MAP_LIST[@]}")
+    {
+        cat "$CONFIG/settings/compose-settings.cfg"
+        if [[ -n ${EXTRA_SETTINGS:-} ]]; then
+            while IFS= read -r line; do
+                [[ -n $line ]] && printf '%s\r\n' "$line"
+            done <<<"$EXTRA_SETTINGS"
+        fi
+    } >"$CONFIG/settings/ServerSettings.cfg"
+}
 
 # --- Core lvls: rebuilt from the stock ones for this OpenSWBF2 version, once ------------------
 LVL=$CONFIG/lvl/$VERSION
@@ -400,6 +426,32 @@ assemble() {
     return 0
 }
 
+# The maps this server can load, mods included, for the launcher's admin screen (GET /missions.json):
+# the game lists them itself (-listmissions), again only when the version or the mods change
+list_missions() {
+    ((MOD_SHARING == 1)) || return 0
+    local key dir out=$CONFIG/settings/missions.json
+    key=$({
+        echo "$VERSION"
+        for dir in "$GAME"/AddOn/*/; do
+            [[ -d $dir ]] || continue
+            dir=${dir%/}
+            echo "${dir##*/}:$(stat -L -c %Y "$dir/addme.script" 2>/dev/null)"
+        done
+    } | sha256sum | cut -d' ' -f1)
+    [[ -s $out && -f $out.key && $(<"$out.key") == "$key" ]] && return 0
+    log "Listing the server's maps for the launcher's admin screen"
+    rm -f "$out" "$out.key"
+    if wine_to_file 180 "$CONFIG/logs/missions-wine.log" BattlefrontII.exe -listmissions 'Z:\config\settings\missions.json' \
+        -lang 0 -log 'Z:\config\logs\missions.log' && [[ -s $out ]]; then
+        echo "$key" >"$out.key"
+    else
+        log "Couldn't list the maps (config/logs/missions.log); the admin screen offers the admin's own maps instead"
+    fi
+    wineserver -k >/dev/null 2>&1
+    return 0
+}
+
 # --- Mod downloads -----------------------------------------------------------------------------
 modserver=
 start_modserver() {
@@ -411,16 +463,20 @@ start_modserver() {
 }
 
 # --- Run ---------------------------------------------------------------------------------------
-args=(-dedicated "${MAP_LIST[@]}")
-((LOBBY == 1)) && args+=(-lobby)
-args+=(/configdir 'Z:\config\settings' /gamename "$SERVER_NAME")
-[[ -n $JOIN_PASSWORD ]] && args+=(/password "$JOIN_PASSWORD")
-args+=(/adminpw "$ADMIN_PASSWORD" /playerlimit "$MAX_PLAYERS" /tps "$TICK_RATE" -port "$PORT")
-args+=(-logcmds 'all Warning, LogNet Inform, LogCore Inform' -log 'Z:\config\logs\server.log')
-if [[ -n ${EXTRA_ARGS:-} ]]; then
-    read -r -a extra <<<"$EXTRA_ARGS"
-    args+=("${extra[@]}")
-fi
+# The game's command line, from apply_settings
+game_args() {
+    args=(-dedicated "${GAME_MAPS[@]}")
+    ((LOBBY == 1)) && args+=(-lobby)
+    args+=(/configdir 'Z:\config\settings' /gamename "$GAME_NAME")
+    [[ -n $JOIN_PASSWORD ]] && args+=(/password "$JOIN_PASSWORD")
+    args+=(/adminpw "$ADMIN_PASSWORD" /playerlimit "$GAME_PLAYERS" /tps "$GAME_TICK" -port "$PORT")
+    args+=(-logcmds 'all Warning, LogNet Inform, LogCore Inform' -log 'Z:\config\logs\server.log')
+    if [[ -n ${EXTRA_ARGS:-} ]]; then
+        local extra=()
+        read -r -a extra <<<"$EXTRA_ARGS"
+        args+=("${extra[@]}")
+    fi
+}
 
 child=
 restart=0
@@ -446,10 +502,11 @@ stop() {
     exit 0
 }
 
-# The mod service asks for this to load mods an admin uploaded (or to unload removed ones)
+# The mod service asks for this to load mods an admin uploaded (or to unload removed ones), and the
+# name, player limit and tick rate an admin saved
 restart_game() {
     restart=1
-    log "Restarting the game for the mod changes"
+    log "Restarting the game, as an admin asked"
     stop_game
 }
 trap stop TERM INT
@@ -457,15 +514,21 @@ trap restart_game USR1
 
 set +e
 cd "$GAME"
-start_modserver
 while true; do
     python3 /opt/docker/modserver.py apply-pending --config "$CONFIG" || log "Couldn't put the uploaded mods in place"
+    apply_settings
     assemble
+    list_missions
     if ((MOD_SHARING == 1)); then
-        kill -0 "$modserver" 2>/dev/null || start_modserver
+        [[ -n $modserver ]] && kill -0 "$modserver" 2>/dev/null || start_modserver
         log "Mod downloads on TCP $MOD_PORT ($( ((MOD_RATE > 0)) && echo "up to $MOD_RATE Mbit/s" || echo "no speed cap"))"
     fi
-    log "Starting \"$SERVER_NAME\" on UDP $PORT: ${#MAP_LIST[@]} maps, up to $MAX_PLAYERS players, $TICK_RATE turns a second"
+    game_args
+    maps=0
+    for word in "${GAME_MAPS[@]}"; do
+        [[ $word =~ ^[0-9]+$ ]] || maps=$((maps + 1))
+    done
+    log "Starting \"$GAME_NAME\" on UDP $PORT: $maps maps, up to $GAME_PLAYERS players, $GAME_TICK turns a second"
     restart=0
     # On the virtual screen start_display made; $child is the game's own process
     wine BattlefrontII.exe "${args[@]}" </dev/null &
