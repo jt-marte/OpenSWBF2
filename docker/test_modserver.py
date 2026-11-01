@@ -848,7 +848,7 @@ class SettingsCommandTests(unittest.TestCase):
         self.addCleanup(shutil.rmtree, config, True)
         # First start of a server upgraded from an old compose.yaml
         result = self.run_settings(config, SERVER_NAME="Box", MAPS="geo1c_con 150 150 kas2g_con", EXTRA_SETTINGS="/awards 0")
-        self.assertEqual(result.stdout.splitlines(), ["Box", "32", "60", "0", "", "geo1c_con 150 150 kas2g_con", "32"])
+        self.assertEqual(result.stdout.splitlines(), ["Box", "32", "60", "0", "", "geo1c_con 150 150 kas2g_con"])
         self.assertIn("Took SERVER_NAME, MAPS from compose.yaml into the server's settings, this once", result.stderr)
         with open(os.path.join(config, "settings", "ServerSettings.cfg"), "rb") as file:
             self.assertEqual(file.read().decode(), cfg_lines() + "/awards 0\r\n")
@@ -856,7 +856,7 @@ class SettingsCommandTests(unittest.TestCase):
         settings = modserver.Settings(os.path.join(config, "settings"))
         settings.save({"joinPassword": "pw", "lobby": True, "maxPlayers": 20, "options": {"difficulty": 4}})
         result = self.run_settings(config, MAPS="nab2c_con")
-        self.assertEqual(result.stdout.splitlines(), ["Box", "20", "60", "1", "pw", "geo1c_con 150 150 kas2g_con", "32"])
+        self.assertEqual(result.stdout.splitlines(), ["Box", "20", "60", "1", "pw", "geo1c_con 150 150 kas2g_con"])
         self.assertIn("compose.yaml still sets MAPS: not used any more", result.stderr)
         self.assertIn("The server's saved settings: joinPassword, lobby, maps, maxPlayers, name, 1 game option", result.stderr)
 
