@@ -924,6 +924,11 @@ int SetTeamAsFriend(lua_State* L)
     return 0;
 }
 
+// OpenSWBF2: a dedicated server's teams as this map set them and as the server raised them
+// (SetUnitCount), so AddUnitClass grows the classes' maxima with them; 0 where nothing was raised
+static int siMapUnits[3];
+static int siServerUnits[3];
+
 // FUNCTION: SWBF2 0x0058b9c0
 int SetUnitCount(lua_State* L)
 {
@@ -933,12 +938,18 @@ int SetUnitCount(lua_State* L)
     {
         iCount = iTeam < 3;
     }
+    if (iTeam == 1 || iTeam == 2)
+    {
+        siMapUnits[iTeam] = siServerUnits[iTeam] = 0;
+    }
     if (NetGame::ServerBots() && (iTeam == 1 || iTeam == 2))
     {
         // OpenSWBF2: a dedicated server's teams take up to NetWire::kServerTeamCap soldiers;
         // humans push bots out past that (Character::CanSpawn)
         const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, NetGame::ServerBotSlots());
         LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d server=%d", iTeam, iCount, iUnits);
+        siMapUnits[iTeam] = iCount;
+        siServerUnits[iTeam] = iUnits;
         iCount = iUnits;
     }
     SpawnManager::Instance()->SetUnitCount(iTeam, iCount);
@@ -1106,6 +1117,11 @@ int AddUnitClass(lua_State* L)
             iMinUnits = 0;
             iMaxUnits = 0;
         }
+    }
+    if (NetGame::ServerBots() && (iTeam == 1 || iTeam == 2))
+    {
+        // OpenSWBF2: the classes grow with a team the server raised, or they couldn't fill it
+        iMaxUnits = NetWire::ServerClassMax(iMaxUnits, siMapUnits[iTeam], siServerUnits[iTeam]);
     }
     Team* pTeam = Team::sTeams[iTeam];
     int iSlot = -1;

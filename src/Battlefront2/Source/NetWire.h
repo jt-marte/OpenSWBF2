@@ -76,6 +76,8 @@ const int kServerTeamCap = 64;
 int ServerBotSlots(int iStartBots);
 int ServerBotCap(int iModeBots, int iSlots);
 int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots);
+// A unit class's most at once (AddUnitClass), grown with its team so the classes can fill it
+int ServerClassMax(int iClassMax, int iMissionUnits, int iServerUnits);
 // SpawnManager::GetTotalCharacterCount: host and clients must agree on it exactly
 int CharacterCount(int iUnits1, int iUnits2, bool bNet, int iPlayerLimit, int iBots, int iOthers);
 
