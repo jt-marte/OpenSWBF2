@@ -346,6 +346,11 @@ int ServerBotSlots(int iStartBots)
     return iStartBots > kRetailBotSlots ? kMaxBotSlots : kRetailBotSlots;
 }
 
+int StartModeBots(int iModeBots, int iStartBots)
+{
+    return iModeBots < 0 ? iStartBots : iModeBots;
+}
+
 int ServerBotCap(int iModeBots, int iSlots)
 {
     if (iModeBots < 0)

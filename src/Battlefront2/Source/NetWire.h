@@ -75,6 +75,10 @@ const int kRetailBotSlots = 32;
 const int kMaxBotSlots = 64;
 const int kServerTeamCap = 64;
 int ServerBotSlots(int iStartBots);
+// /bots on the command line fills a mode's bots a team only where the server's settings file
+// (loaded first) left it unset (-1): launcher and Docker servers start with /bots 64 for the room
+// and keep each mode's own count from ServerSettings.cfg
+int StartModeBots(int iModeBots, int iStartBots);
 int ServerBotCap(int iModeBots, int iSlots);
 int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots);
 // A unit class's most at once (AddUnitClass), grown with its team so the classes can fill it
