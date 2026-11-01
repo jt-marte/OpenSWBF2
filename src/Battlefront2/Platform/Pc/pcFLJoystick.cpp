@@ -6,6 +6,7 @@
 #include "Battlefront2/Source/FLInputManager.h"
 #include "Battlefront2/Source/GameMovie.h"
 #include "Battlefront2/Source/GameState.h"
+#include "Battlefront2/Source/HUDElementMap.h"
 #include "Battlefront2/Source/NetGame.h"
 #include "Battlefront2/Source/PauseMenu.h"
 #include "Battlefront2/Source/PlayerProfile.h"
@@ -1171,6 +1172,22 @@ void RawControllerInputs::PadDefaultsProcess()
             {
                 ProcessRawAction(iAction, (unsigned char)iPort, iSlot);
             }
+        }
+
+        // Back (View; Create on a Sony pad), in both layouts: tap for the player list, hold for the
+        // map. While the map is open (Select returns from it, as on the console) a press only closes it.
+        static XInputPad::HoldTap sHoldBack[10];
+        const HUD::ElementMap* pMap = HUD::ElementMap::FindByPlayerIndex(0);
+        const bool bMapOpen = pMap && pMap->GetMode() == HUD::ElementMap::mode_Large;
+        switch (XInputPad::BackStep(sHoldBack[iPort], mRawInputFloat[iPort][XInputPad::kBitBack] >= 0.5f,
+                                    bMapOpen, GetTickCount()))
+        {
+        case XInputPad::kBackPlayerList:
+            mProcessDestination->Set(ePROCESSEDINPUT_playerList, bLocked, 1.0f, 0.0f);
+            break;
+        case XInputPad::kBackMap:
+            mProcessDestination->Set(ePROCESSEDINPUT_Map, bLocked, 1.0f, 0.0f);
+            break;
         }
 
         if (bModern)

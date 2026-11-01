@@ -393,7 +393,10 @@ TEST_CASE("xinput modern layout aims on LT and throws on RB" * doctest::test_sui
     CHECK(DefaultSlot(kLayoutModern, 0, kActSprint) == kBitLS);
     CHECK(DefaultSlot(kLayoutModern, 0, kActView) == kBitDPadDown);
     CHECK(DefaultSlot(kLayoutModern, 0, kActSquadCommand) == kBitDPadUp);
-    CHECK(DefaultSlot(kLayoutModern, 0, kActPlayerList) == kBitBack);
+    // the player list and the map come from Back's tap/hold, in both layouts
+    CHECK(DefaultSlot(kLayoutModern, 0, kActPlayerList) == -1);
+    CHECK(DefaultSlot(kLayoutLegacy, 1, kActPlayerList) == -1);
+    CHECK(DefaultSlot(kLayoutLegacy, 0, kActMap) == -1);
     // heroes keep their exclusions
     CHECK(DefaultSlot(kLayoutModern, 3, kActZoom) == -1);
     CHECK(DefaultSlot(kLayoutModern, 3, kActPrimaryNext) == -1);
@@ -468,6 +471,45 @@ TEST_CASE("xinput modern x taps reload and holds use" * doctest::test_suite("uni
     CHECK(HoldTapStep(x, true, 2000 + kUseHoldMs + 400) == kHoldNone);
     CHECK(HoldTapStep(x, false, 3000) == kHoldNone);
     CHECK(kUseHoldMs == 500);
+}
+
+TEST_CASE("xinput back taps the player list and holds the map" * doctest::test_suite("unit"))
+{
+    for (int iLayout = 0; iLayout < kLayoutCount; ++iLayout)
+    {
+        for (int iMode = 0; iMode < kModeCount; ++iMode)
+        {
+            CHECK(strcmp(ActionLabel(iLayout, iMode, kActPlayerList), "Tap Back") == 0);
+            CHECK(strcmp(ActionLabel(iLayout, iMode, kActMap), "Hold Back (Back closes it)") == 0);
+            CHECK(ActionGlyph(iLayout, iMode, kActPlayerList) == kGlyphBack);
+            CHECK(ActionGlyph(iLayout, iMode, kActMap) == kGlyphBack);
+            // nothing else is on Back
+            for (int iAction = 0; iAction < kActionCount; ++iAction)
+            {
+                CHECK(DefaultSlot(iLayout, iMode, iAction) != kBitBack);
+            }
+        }
+    }
+
+    HoldTap back = {};
+    // a tap: the player list on release
+    CHECK(BackStep(back, true, false, 1000) == kBackNone);
+    CHECK(BackStep(back, false, false, 1200) == kBackPlayerList);
+    // a hold: the map once at the hold time, nothing on release
+    CHECK(BackStep(back, true, false, 2000) == kBackNone);
+    CHECK(BackStep(back, true, false, 2000 + kUseHoldMs) == kBackMap);
+    CHECK(BackStep(back, true, true, 2000 + kUseHoldMs + 300) == kBackNone); // the map is up now
+    CHECK(BackStep(back, false, true, 3000) == kBackNone);
+    // with the map open a press closes it at once, and its release is no player list
+    CHECK(BackStep(back, true, true, 4000) == kBackMap);
+    CHECK(BackStep(back, false, false, 4100) == kBackNone);
+    // held while closing: still just the one map toggle
+    CHECK(BackStep(back, true, true, 5000) == kBackMap);
+    CHECK(BackStep(back, true, false, 5000 + kUseHoldMs * 2) == kBackNone);
+    CHECK(BackStep(back, false, false, 7000) == kBackNone);
+    // closed again: a tap is the player list
+    CHECK(BackStep(back, true, false, 8000) == kBackNone);
+    CHECK(BackStep(back, false, false, 8100) == kBackPlayerList);
 }
 
 TEST_CASE("xinput modern hold to aim drives the zoom toggle" * doctest::test_suite("unit"))

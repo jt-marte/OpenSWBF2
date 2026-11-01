@@ -274,7 +274,7 @@ int DefaultSlot(int iLayout, int iMode, int iAction)
     case kActDeclineHero:   return kBitDPadLeft;
     case kActPrimaryNext:   return bJedi ? -1 : (bModern ? kBitY : kBitRB);
     case kActSecondaryNext: return kBitLB;
-    case kActPlayerList:    return kBitBack;
+    // Back is the player list on a tap and the map on a hold (pcFLJoystick's PadDefaultsProcess)
     default:                return -1;
     }
 }
@@ -334,6 +334,14 @@ const char* ActionLabel(int iLayout, int iMode, int iAction)
     if (iAction == kActRoll)
     {
         return bOnFoot ? "Double-tap B + move" : 0;
+    }
+    if (iAction == kActPlayerList)
+    {
+        return "Tap Back";
+    }
+    if (iAction == kActMap)
+    {
+        return "Hold Back (Back closes it)";
     }
     return SlotLabel(DefaultSlot(iLayout, iMode, iAction));
 }
@@ -397,6 +405,10 @@ int ActionGlyph(int iLayout, int iMode, int iAction)
     if (iAction == kActRoll)
     {
         return (iMode == 0 || iMode == 3) ? kGlyphB : -1;
+    }
+    if (iAction == kActPlayerList || iAction == kActMap)
+    {
+        return kGlyphBack;
     }
     return GlyphForSlot(DefaultSlot(iLayout, iMode, iAction));
 }
@@ -561,6 +573,26 @@ int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs)
         }
     }
     return kHoldNone;
+}
+
+int BackStep(HoldTap& rState, bool bDown, bool bMapOpen, unsigned int uiNowMs)
+{
+    if (bDown && !rState.bDown && bMapOpen)
+    {
+        rState.bDown = true;
+        rState.bFired = true;
+        rState.uiDownMs = uiNowMs;
+        return kBackMap;
+    }
+    switch (HoldTapStep(rState, bDown, uiNowMs))
+    {
+    case kHoldTap:
+        return kBackPlayerList;
+    case kHoldHeld:
+        return kBackMap;
+    default:
+        return kBackNone;
+    }
 }
 
 bool AimZoomPress(AimZoom& rState, bool bAimHeld, bool bSecondPressed, bool bAiming, bool bTwoLevel)
