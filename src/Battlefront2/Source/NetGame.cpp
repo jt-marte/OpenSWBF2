@@ -3947,6 +3947,22 @@ int NetGame::BotsPerTeam()
     return ServerBots() && siServerBotCap >= 0 ? siServerBotCap : netNumBots;
 }
 
+void NetGame::SetMapBots(int iBots)
+{
+    if (ServerBots())
+    {
+        // Its clients sized their character tables from netNumBots when they joined, so a new
+        // count here would split them from the host at this map (NetWire.h)
+        SetServerBotCap(iBots);
+    }
+    else if (!IsEnabled() || !IsClient())
+    {
+        // A client's own mode setting (clamped to 32 by the options screens) would size another
+        // table than the host's, so only the rest take it
+        netNumBots = iBots;
+    }
+}
+
 void NetGame::ReleaseAiHero(const Character* pCharacter)
 {
     for (int iTeam = 0; iTeam < 3; ++iTeam)

@@ -112,6 +112,10 @@ public:
     static int ServerBotSlots();
     static void SetServerBotCap(int iBots);
     static int BotsPerTeam();
+    // A map's bots (ScriptCB_SetNumBots, registered by both LuaCallbacks_Net and _Options): a
+    // dedicated server's cap, nothing on a client, which keeps the host's count from its join,
+    // and netNumBots anywhere else.
+    static void SetMapBots(int iBots);
     // A bot taken over (by a joining player) gives up its team's hero turn, if it had it.
     static void ReleaseAiHero(const Character* pCharacter);
     static const char* GetPlayerName(int iPlayer);
