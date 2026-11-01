@@ -241,7 +241,8 @@ extern int gPadPromptMode;
 bool PadPromptsActive();
 
 // Modern X: a tap (released within kUseHoldMs) reloads, a hold uses (get in
-// or out of a vehicle). Each press gives one result.
+// or out of a vehicle). Back, in both layouts: a tap is the player list, a
+// hold the map. Each press gives one result.
 const unsigned int kUseHoldMs = 500;
 enum HoldTapResult
 {
@@ -256,6 +257,17 @@ struct HoldTap
     unsigned int uiDownMs;
 };
 int HoldTapStep(HoldTap& rState, bool bDown, unsigned int uiNowMs);
+
+// Back: kBackPlayerList on a tap, kBackMap (the map toggle) on a hold. While the
+// map is open, a press closes it at once and is used up: no player list on its
+// release and no hold.
+enum BackResult
+{
+    kBackNone = 0,
+    kBackPlayerList = 1,
+    kBackMap = 2
+};
+int BackStep(HoldTap& rState, bool bDown, bool bMapOpen, unsigned int uiNowMs);
 
 // Modern hold-to-aim on top of the game's zoom toggle (Weapon::CycleZoom:
 // off -> min -> max on two-level scopes -> off). Gives one zoom press, never

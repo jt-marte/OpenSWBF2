@@ -20,7 +20,8 @@ for the Steam or GOG copy you already own.
   Video → Frame cap sets one). Vulkan through [DXVK](https://github.com/doitsujin/dxvk) by
   default, falling back to DirectX 9 (Options → Video, or `-vulkan` / `-d3d9`).
 - **Controllers:** Xbox (XInput) and PS4/PS5 pads with no binding. A Modern layout (LT aim, RB
-  throw, click RS to lock on) or the Legacy one.
+  throw, click RS to lock on) or the Legacy one. In both, tap Back (Create on PlayStation) for the
+  player list, or hold it for the map.
 - **Overhaul AI:** a difficulty above Elite, for both teams. Bots aim at and pick targets among
   humans and bots alike, chase, grenade enemies in cover, fall back when hurt and spread over
   command posts. It's host-side, so stock players need nothing.
