@@ -444,6 +444,7 @@ bool LoadUtil::ReadDataFileOnHeap(char const* pName, int iHeap,
         pcLvlName[j] = '\0';
     }
 
+    bool bBasePath = false;
     if (!_stricmp(pcFileName, "mission.lvl") && DownloadableContent::IsDownloadableContent())
     {
         strlcpy(pcFullName, DownloadableContent::GetContentDirectory(), 0x100);
@@ -464,6 +465,7 @@ bool LoadUtil::ReadDataFileOnHeap(char const* pName, int iHeap,
     {
         strlcpy(pcFullName, "data\\_lvl_pc\\", 0x100);
         strlcat(pcFullName, pcFileName, 0x100);
+        bBasePath = true;
     }
 
     int iOldHeap = 0;
@@ -473,6 +475,17 @@ bool LoadUtil::ReadDataFileOnHeap(char const* pName, int iHeap,
     }
     PblFile::SetBlockCallback(FileBlockCallback);
     bool bOpened = file.Open(pcFullName, true, false, true);
+    // OpenSWBF2: a mod mission's plain path that the base game lacks is read from the mod's own
+    // folder. Mod installers put such files in the base GameData (the BF1 Conversion Pack's
+    // SIDE\swbf1.lvl, every Classic Conquest side), but a server or a copied game has only the
+    // addon folder, and without them a team got no classes: nobody spawned, clients crashed.
+    if (!bOpened && bBasePath && DownloadableContent::IsDownloadableContent())
+    {
+        strlcpy(pcFullName, DownloadableContent::GetContentDirectory(), 0x100);
+        strlcat(pcFullName, "\\Data\\_lvl_pc\\", 0x100);
+        strlcat(pcFullName, pcFileName, 0x100);
+        bOpened = file.Open(pcFullName, true, false, true);
+    }
     if (iHeap != -1)
     {
         RedSetCurrentHeap(iOldHeap);
