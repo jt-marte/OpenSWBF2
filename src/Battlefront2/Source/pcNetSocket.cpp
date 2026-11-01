@@ -102,7 +102,10 @@ int NetSocket::OpenDirectSocket(bool bHost)
     int iPort = hostshort;
     if (!bHost)
     {
-        ++iPort;
+        // OpenSWBF2: a client takes any free port. Retail's (the host's + 1) gave a game started
+        // again after a crash the old one's address, which the server still streamed the old
+        // player's game to: the new game choked on it and never got back in.
+        iPort = 0;
     }
     if ((SOCKET)netDirectSocket == INVALID_SOCKET)
     {
