@@ -3955,10 +3955,11 @@ void NetGame::SetMapBots(int iBots)
         // count here would split them from the host at this map (NetWire.h)
         SetServerBotCap(iBots);
     }
-    else if (!IsEnabled() || !IsClient())
+    else if (!IsEnabled() || netIsHost)
     {
         // A client's own mode setting (clamped to 32 by the options screens) would size another
-        // table than the host's, so only the rest take it
+        // table than the host's, so only the rest take it. A client process is the one that isn't
+        // the host: IsClient() is false in its own host world, which runs the map's scripts.
         netNumBots = iBots;
     }
 }
