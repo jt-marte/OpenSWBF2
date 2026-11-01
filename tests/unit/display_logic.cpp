@@ -1158,6 +1158,24 @@ TEST_CASE("display logic effective fps cap" * doctest::test_suite("unit"))
     CHECK(EffectiveFpsCap(0, false) == 0);
 }
 
+TEST_CASE("display logic start fps cap" * doctest::test_suite("unit"))
+{
+    // A player: no cap unless one is set
+    CHECK(StartFpsCap(0, false, false, false, 60) == 0);
+    CHECK(StartFpsCap(144, true, false, false, 60) == 144);
+    // Headless: 120, unless -fps or display.ini set the cap (0 included)
+    CHECK(StartFpsCap(0, false, true, false, 60) == 120);
+    CHECK(StartFpsCap(0, true, true, false, 60) == 0);
+    CHECK(StartFpsCap(30, true, true, false, 60) == 30);
+    // A dedicated server: twice its turn rate and at least 120; a set cap is only raised
+    CHECK(StartFpsCap(0, false, true, true, 30) == 120);
+    CHECK(StartFpsCap(0, false, true, true, 60) == 120);
+    CHECK(StartFpsCap(0, false, true, true, 120) == 240);
+    CHECK(StartFpsCap(80, true, true, true, 60) == 120);
+    CHECK(StartFpsCap(300, true, true, true, 120) == 300);
+    CHECK(StartFpsCap(0, true, true, true, 60) == 0);
+}
+
 TEST_CASE("display logic present watch" * doctest::test_suite("unit"))
 {
     PresentWatch w;

@@ -104,7 +104,7 @@ TEST_CASE("display settings defaults" * doctest::test_suite("unit"))
     DisplaySettings kSettings;
     SetDefaults(kSettings);
     CHECK(kSettings.uiVsync == 1);
-    CHECK(kSettings.uiFps == 80);
+    CHECK(kSettings.uiFps == 0);
     CHECK(kSettings.uiRefresh == 0);
     CHECK(kSettings.uiAdapter == 0);
     CHECK(!kSettings.bBorderless);
@@ -181,7 +181,7 @@ TEST_CASE("display settings missing ini is silent" * doctest::test_suite("unit")
     LoadIni(kSettings, IniPath());
     CHECK(!capture.Contains("display:"));
     CHECK(kSettings.uiSet == 0);
-    CHECK(kSettings.uiFps == 80);
+    CHECK(kSettings.uiFps == 0);
 }
 
 TEST_CASE("display settings ini loads values" * doctest::test_suite("unit"))
@@ -218,7 +218,7 @@ TEST_CASE("display settings garbage ini loads nothing" * doctest::test_suite("un
     LoadIni(kSettings, IniPath());
     Cleanup();
     CHECK(kSettings.uiSet == 0);
-    CHECK(kSettings.uiFps == 80);
+    CHECK(kSettings.uiFps == 0);
 }
 
 TEST_CASE("display settings bad ini keys warn and keep defaults" * doctest::test_suite("unit"))
@@ -238,7 +238,7 @@ TEST_CASE("display settings bad ini keys warn and keep defaults" * doctest::test
     CHECK(capture.Contains("display: bad Fps 'abc'"));
     CHECK(capture.Contains("display: bad Adapter '99'"));
     CHECK(kSettings.uiSet == 0);
-    CHECK(kSettings.uiFps == 80);
+    CHECK(kSettings.uiFps == 0);
 }
 
 TEST_CASE("display settings merge precedence" * doctest::test_suite("unit"))
@@ -319,7 +319,7 @@ TEST_CASE("display settings save round trips and leaves no temp" * doctest::test
     CHECK(kLoaded.uiVsync == 2);
     CHECK(strcmp(kLoaded.acAdapterName, "\\\\.\\DISPLAY3") == 0);
     CHECK(kLoaded.bBorderless);
-    CHECK(kLoaded.uiFps == 80);
+    CHECK(kLoaded.uiFps == 0);
 }
 
 TEST_CASE("display settings save skips command line values" * doctest::test_suite("unit"))

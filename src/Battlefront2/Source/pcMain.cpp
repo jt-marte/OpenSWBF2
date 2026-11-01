@@ -527,15 +527,9 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
         // timer resolution held headless runs to 64 frames, and so 64 updates, a second.
         timeBeginPeriod(1);
     }
-    if (gDedicatedShorthand)
-    {
-        // Frame cap of twice the turn rate, so updates follow 60 and 120+ turns.
-        const unsigned int uiWantFps = netFPS * 2 > 80 ? (unsigned int)netFPS * 2 : 80u;
-        if (DisplayCfg::gDisplay.uiFps != 0 && DisplayCfg::gDisplay.uiFps < uiWantFps)
-        {
-            DisplayCfg::gDisplay.uiFps = uiWantFps;
-        }
-    }
+    DisplayCfg::gDisplay.uiFps = DisplayLogic::StartFpsCap(
+        DisplayCfg::gDisplay.uiFps, (DisplayCfg::gDisplay.uiSet & DisplayCfg::kFps) != 0, g_bNoRender,
+        gDedicatedShorthand, netFPS > 0 ? (unsigned int)netFPS : 0u);
     XInputPad::gPadLayout =
         DisplayCfg::gDisplay.uiPadLayout ? XInputPad::kLayoutLegacy : XInputPad::kLayoutModern;
     XInputPad::gPadLookLevel = (int)DisplayCfg::gDisplay.uiPadLookSpeed;
@@ -593,7 +587,7 @@ int __stdcall GameWinMain(HINSTANCE hInstance, HINSTANCE, char* lpCmdLine, int)
     {
         if (uiPaceFps == 0)
         {
-            LOG(LogCore, Warning, "pacing: fps cap is uncapped, frame-count effects are not fixed yet");
+            LOG(LogCore, Inform, "pacing: no fps cap, as in the retail game; frame-count effects are not fixed yet");
         }
         else
         {
