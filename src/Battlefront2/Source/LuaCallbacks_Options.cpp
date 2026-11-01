@@ -995,14 +995,17 @@ int ScriptCB_GetNetGameDefaults(lua_State* L)
     LuaHelper::TableWriteVal("iDMMult", gDMReinforcementMult[gCurRules]);
     LuaHelper::TableWriteVal("iCONMult", gCONReinforcementMult[gCurRules]);
 
+    // OpenSWBF2: a dedicated server (headless, its options never on screen) keeps up to 64 a
+    // team through this round trip; the menus' sliders stop at 32
+    const int iMaxModeBots = g_bNoRender ? NetWire::kMaxBotSlots : 32;
     int iBots = (unsigned int)gCurRules <= eGAMERULES_METAGAME ? gCONNumBots[gCurRules] : netNumBots;
-    LuaHelper::TableWriteVal("iCONNumBots", iBots < 32 ? iBots : 32);
+    LuaHelper::TableWriteVal("iCONNumBots", iBots < iMaxModeBots ? iBots : iMaxModeBots);
     iBots = (unsigned int)gCurRules <= eGAMERULES_METAGAME ? gCTFNumBots[gCurRules] : netNumBots;
-    LuaHelper::TableWriteVal("iCTFNumBots", iBots < 32 ? iBots : 32);
+    LuaHelper::TableWriteVal("iCTFNumBots", iBots < iMaxModeBots ? iBots : iMaxModeBots);
     iBots = (unsigned int)gCurRules <= eGAMERULES_METAGAME ? gELINumBots[gCurRules] : netNumBots;
-    LuaHelper::TableWriteVal("iELINumBots", iBots < 32 ? iBots : 32);
+    LuaHelper::TableWriteVal("iELINumBots", iBots < iMaxModeBots ? iBots : iMaxModeBots);
     iBots = (unsigned int)gCurRules <= eGAMERULES_METAGAME ? gASSNumBots[gCurRules] : netNumBots;
-    LuaHelper::TableWriteVal("iASSNumBots", iBots < 32 ? iBots : 32);
+    LuaHelper::TableWriteVal("iASSNumBots", iBots < iMaxModeBots ? iBots : iMaxModeBots);
 
     LuaHelper::TableWriteVal("iASSScoreLimit", gSpaceAssaultScoreLimit[gCurRules]);
     LuaHelper::TableWriteVal("iCTFScore", gCTFScore[gCurRules]);
