@@ -3947,6 +3947,27 @@ int NetGame::BotsPerTeam()
     return ServerBots() && siServerBotCap >= 0 ? siServerBotCap : netNumBots;
 }
 
+// A client's bots a team from its join (the host's netNumBots, as advertised); -1 before one
+static int siJoinBots = -1;
+
+void NetGame::SetJoinBots(int iBots)
+{
+    siJoinBots = iBots;
+}
+
+int NetGame::TableBots()
+{
+    if (ServerBots() && siServerBotSlots)
+    {
+        return siServerBotSlots;
+    }
+    if (IsEnabled() && !netIsHost && siJoinBots >= 0)
+    {
+        return siJoinBots;
+    }
+    return netNumBots;
+}
+
 void NetGame::SetMapBots(int iBots)
 {
     if (ServerBots())

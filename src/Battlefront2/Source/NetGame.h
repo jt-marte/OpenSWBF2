@@ -116,6 +116,12 @@ public:
     // dedicated server's cap, nothing on a client, which keeps the host's count from its join,
     // and netNumBots anywhere else.
     static void SetMapBots(int iBots);
+    // The bots a team the character table counts (SpawnManager::GetTotalCharacterCount): a
+    // dedicated server's slots, a client's count from its join (SetJoinBots), and netNumBots
+    // elsewhere. Pinned, since the shell rewrites netNumBots on its way between maps
+    // (Lua_Callbacks::_SetGameRules) and host and clients must keep counting alike.
+    static int TableBots();
+    static void SetJoinBots(int iBots);
     // A bot taken over (by a joining player) gives up its team's hero turn, if it had it.
     static void ReleaseAiHero(const Character* pCharacter);
     static const char* GetPlayerName(int iPlayer);

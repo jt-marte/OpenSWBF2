@@ -2356,7 +2356,7 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             _snprintf(acMsg, 0x200, "Time left   : %d", pTimer ? (int)pTimer->GetTime() : -1);
             PutMsg(acMsg);
             // the bots a team spawns on this map, and the bot slots a team has (NetWire.h)
-            _snprintf(acMsg, 0x200, "Bots/team   : %d of %d", NetGame::BotsPerTeam(), netNumBots);
+            _snprintf(acMsg, 0x200, "Bots/team   : %d of %d", NetGame::BotsPerTeam(), NetGame::TableBots());
             PutMsg(acMsg);
             // soldiers alive on each team, players and bots
             _snprintf(acMsg, 0x200, "Soldiers    : %d/%d", netInShell ? 0 : AliveSoldiers(1),

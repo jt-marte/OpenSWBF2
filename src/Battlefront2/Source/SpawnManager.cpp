@@ -220,13 +220,14 @@ void SpawnManager::AddPlayerCharacter(int iTeam, int iPlayer)
 int SpawnManager::GetTotalCharacterCount()
 {
     const int iCount = NetWire::CharacterCount(
-        mMaxUnitCount[1], mMaxUnitCount[2], NetGame::IsEnabled(), netPlayerLimit, netNumBots,
+        mMaxUnitCount[1], mMaxUnitCount[2], NetGame::IsEnabled(), netPlayerLimit, NetGame::TableBots(),
         mMaxUnitCount[0] + mMaxUnitCount[3] + mMaxUnitCount[4] + mMaxUnitCount[5] + mMaxUnitCount[6] +
             mMaxUnitCount[7]);
     if (NetGame::IsEnabled())
     {
         // Host and clients must agree on this exactly: soldier state names characters by index.
-        LOG(LogNet, Inform, "OPENSWBF2 NET characters total=%d players=%d bots=%d", iCount, netPlayerLimit, netNumBots);
+        LOG(LogNet, Inform, "OPENSWBF2 NET characters total=%d players=%d bots=%d", iCount, netPlayerLimit,
+            NetGame::TableBots());
     }
     return iCount;
 }
