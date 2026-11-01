@@ -943,12 +943,13 @@ int SetUnitCount(lua_State* L)
     {
         siMapUnits[iTeam] = siServerUnits[iTeam] = 0;
     }
-    if ((NetGame::ServerBots() || (NetGame::IsEnabled() && NetGame::IsClient())) && (iTeam == 1 || iTeam == 2))
+    if (NetGame::IsEnabled() && (iTeam == 1 || iTeam == 2))
     {
-        // OpenSWBF2: a dedicated server with 64 bot slots raises its teams to
-        // NetWire::kServerTeamCap soldiers, and its clients alike (they know the slots from their
-        // join), since each side creates a team's characters up to this count; humans push bots
-        // out past it (Character::CanSpawn). Retail's 32 slots keep the map's count everywhere.
+        // OpenSWBF2: a server with 64 bot slots raises its teams to NetWire::kServerTeamCap
+        // soldiers, and its clients alike (they know the slots from their join), since each side
+        // creates a team's characters up to this count; humans push bots out past it
+        // (Character::CanSpawn). Retail's 32 slots keep the map's count everywhere. Not
+        // NetGame::IsClient(): a client's own host world loads the map with it false.
         const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, netNumBots);
         if (iUnits != iCount)
         {
