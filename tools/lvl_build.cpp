@@ -170,6 +170,100 @@ static std::vector<Entry> read_index(const std::string& path)
     return entries;
 }
 
+// The stock lvls this build rebuilds from. GOG's v1.1 (installer build 10935) differs from Steam's
+// only in model vertex data, textures and script bodies, and its shell.lvl lacks two scripts. Its
+// mission.lvl is Steam's. tools\package-release.ps1 reads this table for the release manifest.
+struct Stock {
+    std::string lvl, store, sha256;
+    std::set<std::string> missing;
+};
+
+static const Stock known_stock[] = {
+    {"shell", "steam", "82335ab55e17689cd620ba174568e6a5481d4523b821549aa153a6b88a831009", {}},
+    {"common", "steam", "60dfca80aaa21a01744eeddd4e2f71a5e732b492b5def9decca78e4b4afe9a58", {}},
+    {"ingame", "steam", "cc78b5dfd6f4a082cb5a5da8cdfd67de5d45a092e25f57c47ad55c41499182dc", {}},
+    {"mission", "steam", "f1000a76ec8d642b5e531833a6d53b9b5f37dbc0a3bbb4bfe605710fc66da10b", {}},
+    {"shell", "gog", "7cde6a5fcb121653d4f647ce7a2b158305e88bad01bf55d14cfabcd4d0b3d00b", {"ifs_trailer", "ifs_mpgs_galaxylogin"}},
+    {"common", "gog", "7a6c9a52a76e5ba7e30ac7a9b5d3e2a1fbbd0f4567c4684361b138c0ce68b2f1", {}},
+    {"ingame", "gog", "338b9d1db70383b2eeed26b600b987f8e0bb6d9a4151c79eef6848edabecdbdd", {}},
+};
+
+static const Stock* find_stock(const std::string& lvl, const std::string& hash)
+{
+    for (size_t i = 0; i < sizeof(known_stock) / sizeof(known_stock[0]); ++i)
+        if (known_stock[i].lvl == lvl && (hash.empty() || known_stock[i].sha256 == hash)) return &known_stock[i];
+    return NULL;
+}
+
+static void put_chunk(std::string& out, const char* tag, const std::string& payload)
+{
+    out += tag;
+    put_word(out, static_cast<uint32_t>(payload.size()));
+    out += payload;
+    out.append((4 - out.size() % 4) % 4, '\0');
+}
+
+static std::string script_name(const Node& node, const std::string& input)
+{
+    for (size_t i = 0; i < node.children.size(); ++i)
+        if (node.children[i].tag == "NAME") {
+            const Node& child = node.children[i];
+            std::string raw = input.substr(child.payload, child.finish - child.payload);
+            return raw.substr(0, raw.find('\0'));
+        }
+    return std::string();
+}
+
+static void add_script(std::string& payload, const std::string& name, size_t& added)
+{
+    std::string script;
+    put_chunk(script, "NAME", name + '\0');
+    put_chunk(script, "INFO", std::string(1, '\1'));
+    put_chunk(script, "BODY", std::string());
+    payload.append((4 - payload.size() % 4) % 4, '\0');
+    put_chunk(payload, "scr_", script);
+    ++added;
+}
+
+// Adds the scripts a stock copy lacks, each right after the script before it in the index, which
+// is where Steam's copy has it. The BODY is left empty for emit to fill from our source.
+static std::string add_missing(const std::string& input, const Node& root, const std::string& lvl,
+                               const std::vector<Entry>& entries, const std::set<std::string>& missing)
+{
+    // Keyed by the script each one follows; "" is before the first script
+    std::map<std::string, std::vector<std::string> > after;
+    std::string previous;
+    for (size_t i = 0; i < entries.size(); ++i) {
+        if (entries[i].lvl != lvl) continue;
+        if (missing.find(entries[i].name) == missing.end()) { previous = entries[i].name; continue; }
+        if (entries[i].source.empty()) fail("missing script " + lvl + ":" + entries[i].name + " has no source");
+        after[previous].push_back(entries[i].name);
+    }
+    std::string payload;
+    size_t added = 0;
+    bool first = true;
+    for (size_t i = 0; i < root.children.size(); ++i) {
+        const Node& child = root.children[i];
+        bool script = child.tag == "scr_";
+        std::map<std::string, std::vector<std::string> >::const_iterator it;
+        if (script && first) {
+            first = false;
+            if ((it = after.find("")) != after.end())
+                for (size_t n = 0; n < it->second.size(); ++n) add_script(payload, it->second[n], added);
+        }
+        payload += input.substr(child.start, child.next - child.start);
+        if (script && (it = after.find(script_name(child, input))) != after.end())
+            for (size_t n = 0; n < it->second.size(); ++n) add_script(payload, it->second[n], added);
+    }
+    size_t wanted = 0;
+    for (std::map<std::string, std::vector<std::string> >::const_iterator it = after.begin(); it != after.end(); ++it)
+        wanted += it->second.size();
+    if (added != wanted) fail("cannot place the missing scripts in " + lvl);
+    std::string result;
+    put_chunk(result, "ucfb", payload);
+    return result;
+}
+
 static std::string emit(const Node& node, const std::string& input,
                         const std::map<std::string, std::string>& bodies,
                         const std::set<std::string>& expected,
@@ -319,19 +413,14 @@ int build_lvls(int argc, char** argv)
             if (entries.size() != 167 || unexpected_pending)
                 fail("canonical index must contain 167 records and no undeclared pending names");
         }
-        const std::map<std::string, std::string> known = {
-            {"shell", "82335ab55e17689cd620ba174568e6a5481d4523b821549aa153a6b88a831009"},
-            {"common", "60dfca80aaa21a01744eeddd4e2f71a5e732b492b5def9decca78e4b4afe9a58"},
-            {"ingame", "cc78b5dfd6f4a082cb5a5da8cdfd67de5d45a092e25f57c47ad55c41499182dc"},
-            {"mission", "f1000a76ec8d642b5e531833a6d53b9b5f37dbc0a3bbb4bfe605710fc66da10b"}
-        };
         ensure_dir(out_dir);
         for (std::map<std::string, std::string>::const_iterator input = inputs.begin(); input != inputs.end(); ++input) {
             std::string lvl = input->first;
-            if (known.find(lvl) == known.end()) fail("unknown lvl " + lvl);
+            if (!find_stock(lvl, "")) fail("unknown lvl " + lvl);
             std::string original = read_file(input->second);
             std::string original_hash = sha256(original);
-            if (!mismatch && original_hash != known.find(lvl)->second) fail("unknown input SHA-256 for " + lvl + ": " + original_hash);
+            const Stock* stock = find_stock(lvl, original_hash);
+            if (!mismatch && !stock) fail("unknown input SHA-256 for " + lvl + ": " + original_hash);
             Node root = parse(original, 0, original.size());
             if (root.tag != "ucfb" || root.next != original.size()) fail("invalid root ucfb");
             std::map<std::string, std::string> bodies;
@@ -366,6 +455,12 @@ int build_lvls(int argc, char** argv)
                 if (compiled.empty()) fail("compiler returned empty bytecode");
                 compiled += '\0';
                 bodies[entries[i].name] = compiled;
+            }
+            if (stock && !stock->missing.empty()) {
+                original = add_missing(original, root, lvl, entries, stock->missing);
+                root = parse(original, 0, original.size());
+                printf("%s: added %u scripts the %s copy lacks\n", lvl.c_str(),
+                       static_cast<unsigned>(stock->missing.size()), stock->store.c_str());
             }
             std::set<std::string> seen;
             bool changed = false;
