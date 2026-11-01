@@ -618,6 +618,8 @@ void NetSetup::SetAsClient()
     NetComm::SetHost(false);
 }
 
+extern int netNumBots;
+
 // FUNCTION: SWBF2 0x005db8a0
 void NetSetup::SetAsDedicated(bool bDedicated)
 {
