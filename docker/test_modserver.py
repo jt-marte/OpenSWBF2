@@ -355,6 +355,29 @@ class UploadTests(ServiceCase):
         self.assertEqual(self.request("GET", "/mods/NEW/data/_lvl_pc/new.lvl")[2], self.NEW["data/_lvl_pc/new.lvl"])
         self.assertEqual(self.manifest(ADMIN)["pending"], [])
 
+    def test_a_refused_body_still_gets_its_reply(self):
+        # Closing with the body unread made the client's TCP reset the connection, often before it
+        # read the reply. A small body is dropped and the connection stays usable.
+        for _ in range(20):
+            connection = http.client.HTTPConnection("127.0.0.1", self.port, timeout=10)
+            try:
+                connection.request("PUT", "/upload/NEW/addme.script", body=os.urandom(200000),
+                                   headers={"Authorization": "Bearer " + JOIN, "X-Sha256": "0" * 64})
+                response = connection.getresponse()
+                self.assertEqual((response.status, json.loads(response.read())),
+                                 (403, {"error": "that needs the admin password"}))
+                connection.request("GET", "/mods.json", headers={"Authorization": "Bearer " + JOIN})
+                response = connection.getresponse()
+                self.assertEqual(response.status, 200)
+                response.read()
+            finally:
+                connection.close()
+        # A body too big to drop: the reply comes first, then the connection closes
+        status, headers, data = self.request("PUT", "/upload/NEW/big.lvl", os.urandom(3 << 20), password=JOIN,
+                                             headers={"X-Sha256": "0" * 64})
+        self.assertEqual((status, json.loads(data)), (403, {"error": "that needs the admin password"}))
+        self.assertEqual(headers["Connection"], "close")
+
     def test_begin_reports_files_already_there(self):
         listing = {"files": [{"path": p, "size": len(d), "sha256": sha(d)} for p, d in self.NEW.items()]}
         self.request("PUT", "/upload/NEW/addme.script", self.NEW["addme.script"], password=ADMIN,

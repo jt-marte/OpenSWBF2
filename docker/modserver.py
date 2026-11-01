@@ -29,6 +29,7 @@ import os
 import re
 import shutil
 import signal
+import socket
 import sys
 import threading
 import time
@@ -52,6 +53,10 @@ MAX_FILES = 50000
 MAX_JSON = 16 << 20
 SPARE = 1 << 30
 CHUNK = 64 << 10
+# A refused request's body up to this size is read and dropped, so the connection stays usable;
+# past it the reply goes out and the connection closes after a short drain
+DRAIN = 1 << 20
+LINGER = 2.0
 
 
 def log(text):
@@ -1432,6 +1437,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def route(self, method):
         self.body_read = False
+        self.body_started = False  # an upload read part of it: how much is left is unknown
         try:
             parts = split_url(self.path)
             if parts is None:
@@ -1523,6 +1529,7 @@ class Handler(http.server.BaseHTTPRequestHandler):
         uploads = self.service.uploads
         if method == "PUT" and rest:
             length = self.length()
+            self.body_started = True
             reply = uploads.put(folder, "/".join(rest), length, self.headers.get("X-Sha256"), self.rfile)
             self.body_read = True
         elif method == "POST" and rest == ["begin"]:
@@ -1584,8 +1591,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
 
     def send_json(self, status, body, head=False):
         data = json.dumps(body).encode("utf-8")
-        if status >= 400 and not self.body_read and (self.headers.get("Content-Length") or "0") != "0":
-            self.close_connection = True  # the unread body would be taken for the next request
+        linger = False
+        if status >= 400 and not self.body_read:
+            linger = not self.drop_body()
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self.send_header("Content-Length", str(len(data)))
@@ -1597,6 +1605,46 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         if not head:
             self.wfile.write(data)
+        if linger:
+            self.linger()
+
+    def drop_body(self):
+        """Read and drop the unread body of a request being refused. Closing with it unread makes
+        the client's TCP stack reset the connection, and the client loses the reply. Returns False
+        when the body is too big to drop here; the connection then closes after linger()."""
+        try:
+            length = int(self.headers.get("Content-Length") or 0)
+        except ValueError:
+            length = -1
+        if length == 0:
+            return True
+        self.close_connection = True  # whatever is left would be taken for the next request
+        if 0 < length <= DRAIN and not self.body_started:
+            try:
+                while length > 0:
+                    data = self.rfile.read(min(length, CHUNK))
+                    if not data:
+                        break
+                    length -= len(data)
+                self.body_read = True
+                self.close_connection = False
+                return True
+            except OSError:
+                return True
+        return False
+
+    def linger(self):
+        """After the reply to a refused large upload: stop sending, then read and drop what the
+        client still sends for a moment, so the reply reaches it before the connection closes."""
+        try:
+            self.wfile.flush()
+            self.connection.shutdown(socket.SHUT_WR)
+            self.connection.settimeout(LINGER)
+            deadline = time.monotonic() + LINGER
+            while time.monotonic() < deadline and self.connection.recv(CHUNK):
+                pass
+        except OSError:
+            pass
 
     def send_missions(self, head):
         data = self.service.missions()
