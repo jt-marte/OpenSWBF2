@@ -802,7 +802,7 @@ TEST_CASE("xinput controller page names each layout's actions" * doctest::test_s
     // sticks, and what the pad leaves unbound
     CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActMoveAxis), "Left stick (up/down)") == 0);
     CHECK(strcmp(ActionLabel(kLayoutLegacy, 2, kActTurnAxis), "Right stick (left/right)") == 0);
-    CHECK(!ActionLabel(kLayoutModern, 0, 28)); // map
+    CHECK(strcmp(ActionLabel(kLayoutModern, 0, kActMap), "Hold Back (Back closes it)") == 0); // Back's hold
     CHECK(!ActionLabel(kLayoutModern, 3, kActZoom)); // jedi
 }
 
@@ -832,7 +832,7 @@ TEST_CASE("xinput prompts show each layout's button for a console token" * docte
     CHECK(TokenGlyph("btnmisc", kLayoutModern, 2) == kGlyphRS);
     // unbound on the pad, or unknown
     CHECK(TokenGlyph("btnmisc", kLayoutLegacy, 0) == -1);
-    CHECK(TokenGlyph("Map", kLayoutModern, 0) == -1);
+    CHECK(TokenGlyph("Map", kLayoutModern, 0) == kGlyphBack); // Back's hold
     CHECK(TokenGlyph("nosuchtoken", kLayoutModern, 0) == -1);
     CHECK(TokenGlyph(0, kLayoutModern, 0) == -1);
     // every token has a name, and every glyph a label (the D-pad is drawn)
