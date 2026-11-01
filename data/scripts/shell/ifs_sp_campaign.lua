@@ -38,6 +38,14 @@ ifs_sp_campaign_vbutton_layout = {
 --	rotY = 35,
 }
 
+-- GOG's copy has no trailer movie
+if ScriptCB_IsFileExist("movies\\trailer.mvs") == 0 then
+	local buttons = ifs_sp_campaign_vbutton_layout.buttonlist
+	for i = table.getn(buttons), 1, -1 do
+		if buttons[i].tag == "trailer" then table.remove(buttons, i) end
+	end
+end
+
 ifs_sp_gc_vbutton_layout = {
 --	yTop = -70,
 	xWidth = 300,

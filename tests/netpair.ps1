@@ -10,12 +10,14 @@ param(
     [string]$ClientArgs = '',
     [string]$OutDir,
     [ValidateSet('Win32','x64')][string]$Platform = 'Win32',
-    [ValidateSet('Win32','x64')][string]$ClientPlatform
+    [ValidateSet('Win32','x64')][string]$ClientPlatform,
+    [string]$ClientExeDir
 )
 # Paired network run: a headless dedicated LAN server plus headless autonet clients on this PC,
 # each in its own worker folder (-Direct: clients join 127.0.0.1 by address instead of LAN
 # discovery, and every socket listens on loopback only, so Windows Firewall never prompts).
-# -ClientPlatform runs the clients on the other build (mixed Win32/x64 games).
+# -ClientPlatform runs the clients on the other build (mixed Win32/x64 games). -ClientExeDir runs
+# them from another game folder, such as an OpenBattlefront install built from a GOG copy.
 # Reads the OPENSWBF2 NET markers and -netstats lines from every
 # run.log and prints one [PASS]/[FAIL] line per profile. See tests\README.md, "Network pair runs".
 $ErrorActionPreference = 'Stop'
@@ -31,7 +33,7 @@ $skip = Get-SmokePrecheck $gameData $exeDir
 if (-not $ClientPlatform) { $ClientPlatform = $Platform }
 Set-SmokePlatform $ClientPlatform
 $ClientPlatform = $script:SmokePlatform
-$clientExeDir = Get-GameExeDir $root $Configuration
+$clientExeDir = if ($ClientExeDir) { $ClientExeDir } else { Get-GameExeDir $root $Configuration }
 if (-not $skip) { $skip = Get-SmokePrecheck $gameData $clientExeDir }
 Set-SmokePlatform $Platform
 if (-not $skip) {

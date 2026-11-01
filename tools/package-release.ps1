@@ -43,8 +43,11 @@ $retail = '\.(lvl|mvs|bik|bnk|str|sfx|tex|msh|zaa|zaf|ini|orig|profile)$|(^|/)(b
 function Get-StockLvlHashes {
     $src = Get-Content -Raw (Join-Path $root 'tools\lvl_build.cpp')
     $known = [ordered]@{}
-    foreach ($m in [regex]::Matches($src, '\{"(shell|common|ingame|mission)",\s*"([0-9a-f]{64})"\}')) {
-        $known[$m.Groups[1].Value] = @($m.Groups[2].Value)
+    # Steam's and GOG's copies, from lvl_build.cpp's known_stock table
+    foreach ($m in [regex]::Matches($src, '\{"(shell|common|ingame|mission)",\s*"(steam|gog)",\s*"([0-9a-f]{64})"')) {
+        $lvl = $m.Groups[1].Value
+        if (-not $known.Contains($lvl)) { $known[$lvl] = @() }
+        $known[$lvl] += $m.Groups[3].Value
     }
     if ($known.Count -ne 4) { throw 'Could not read the stock lvl hashes from tools\lvl_build.cpp.' }
     return $known

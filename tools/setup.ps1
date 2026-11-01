@@ -201,8 +201,11 @@ function Install-Dxvk([string]$dir) {
 function Get-KnownLvlHashes {
     $src = Get-Content -Raw (Join-Path $root 'tools\lvl_build.cpp')
     $known = @{}
-    foreach ($m in [regex]::Matches($src, '\{"(shell|common|ingame|mission)",\s*"([0-9a-f]{64})"\}')) {
-        $known[$m.Groups[1].Value] = $m.Groups[2].Value.ToUpper()
+    # Steam's and GOG's copies, from lvl_build.cpp's known_stock table
+    foreach ($m in [regex]::Matches($src, '\{"(shell|common|ingame|mission)",\s*"(steam|gog)",\s*"([0-9a-f]{64})"')) {
+        $lvl = $m.Groups[1].Value
+        if (-not $known.ContainsKey($lvl)) { $known[$lvl] = @() }
+        $known[$lvl] += $m.Groups[3].Value.ToUpper()
     }
     if ($known.Count -ne 4) { throw 'Could not read the stock lvl hashes from tools\lvl_build.cpp.' }
     return $known
@@ -213,7 +216,7 @@ function Get-ModdedLvls([string]$gameData, $known) {
     foreach ($lvl in ($known.Keys | Sort-Object)) {
         $file = Join-Path $gameData "data\_lvl_pc\$lvl.lvl"
         if (Test-Path "$file.orig") { $file = "$file.orig" }
-        if (-not (Test-Path $file) -or (Get-FileHash $file -Algorithm SHA256).Hash -ne $known[$lvl]) { $bad += "$lvl.lvl" }
+        if (-not (Test-Path $file) -or (Get-FileHash $file -Algorithm SHA256).Hash -notin $known[$lvl]) { $bad += "$lvl.lvl" }
     }
     return $bad
 }
