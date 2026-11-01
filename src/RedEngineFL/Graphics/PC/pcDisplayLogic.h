@@ -269,6 +269,13 @@ void FakeMultisampleLevels(unsigned int* auiLevels);
 
 unsigned int EffectiveFpsCap(unsigned int uiFps, bool bPresentThrottled);
 
+// OpenSWBF2: the frame cap a run starts with. Players have none unless they set one, as in the
+// retail game. A headless run keeps 120 (a dedicated server's at the default 60 turns) and a
+// dedicated server at least twice its turn rate, so neither spins a core; a cap set by -fps or
+// display.ini (bSet) is kept, raised only to that.
+const unsigned int kHeadlessFps = 120;
+unsigned int StartFpsCap(unsigned int uiFps, bool bSet, bool bHeadless, bool bDedicated, unsigned int uiTurnRate);
+
 // OpenSWBF2: the scope overlay art (and its blur mask) is drawn for a 4:3
 // screen, so wider screens stretched the lens into an oval. ScopeBox gives the
 // centred 4:3 box it is drawn in (the whole width at 4:3 or narrower) and the

@@ -16,7 +16,8 @@ for the Steam or GOG copy you already own.
 ## ✨ Features
 
 - **Graphics:** sharp text and menus at 1440p and 4K, HUD scale and FOV sliders, resolution and
-  display mode in the in-match options. Vulkan through [DXVK](https://github.com/doitsujin/dxvk) by
+  display mode in the in-match options. No frame cap by default, as in the retail game (Options →
+  Video → Frame cap sets one). Vulkan through [DXVK](https://github.com/doitsujin/dxvk) by
   default, falling back to DirectX 9 (Options → Video, or `-vulkan` / `-d3d9`).
 - **Controllers:** Xbox (XInput) and PS4/PS5 pads with no binding. A Modern layout (LT aim, RB
   throw, click RS to lock on) or the Legacy one.

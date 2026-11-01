@@ -81,7 +81,8 @@ void SetDefaults(DisplaySettings& kSettings)
 {
     memset(&kSettings, 0, sizeof(kSettings));
     kSettings.uiVsync = 1;
-    kSettings.uiFps = 80;
+    // No frame cap, as in the retail game; headless runs get one (DisplayLogic::StartFpsCap)
+    kSettings.uiFps = 0;
     kSettings.bNoWaitQuery = true;
     kSettings.uiPadLookSpeed = XInputPad::kLookSpeedDefaultLevel;
     kSettings.uiHudScale = DisplayLogic::kHudScaleDefault;

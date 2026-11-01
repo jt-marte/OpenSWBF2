@@ -932,6 +932,25 @@ unsigned int EffectiveFpsCap(unsigned int uiFps, bool bPresentThrottled)
     return bPresentThrottled ? 0 : uiFps;
 }
 
+unsigned int StartFpsCap(unsigned int uiFps, bool bSet, bool bHeadless, bool bDedicated, unsigned int uiTurnRate)
+{
+    if (bDedicated)
+    {
+        // Twice the turn rate, so updates follow 60 and 120+ turns
+        const unsigned int uiWant = uiTurnRate * 2 > kHeadlessFps ? uiTurnRate * 2 : kHeadlessFps;
+        if (uiFps == 0 ? !bSet : uiFps < uiWant)
+        {
+            return uiWant;
+        }
+        return uiFps;
+    }
+    if (bHeadless && uiFps == 0 && !bSet)
+    {
+        return kHeadlessFps;
+    }
+    return uiFps;
+}
+
 void ScopeBox(unsigned int uiW, unsigned int uiH, unsigned int& uiBoxW, unsigned int& uiBarW)
 {
     // even, so the box splits into two equal halves about the centre
