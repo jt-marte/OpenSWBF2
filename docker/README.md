@@ -60,6 +60,9 @@ the `./gamedata` line in `compose.yaml`, then from your Windows PC:
 scp -r "C:\Program Files (x86)\Steam\steamapps\common\Star Wars Battlefront II Classic\GameData\data" user@server:~/openswbf2/gamedata/
 ```
 
+A GOG copy's is in `C:\GOG Games\Star Wars - Battlefront 2\GameData\data`. GOG and Steam players
+can share a server whichever copy it has.
+
 The server finds `data/_lvl_pc` even a folder or two deeper than that (a whole `GameData` copied
 in, say) and says where it found it. Script mods in it (`user_script_*`, `custom_gc_*`) are left
 out unless `SCRIPT_MODS=1`.
