@@ -823,6 +823,22 @@ void __fastcall GetAdminScorePair(int* pi1, int* pi2)
     *pi2 = 0;
 }
 
+// OpenSWBF2: a team's members with a unit in the world, players and bots (rcon /state)
+static int AliveSoldiers(int iTeam)
+{
+    const Team* pTeam = Team::sTeams[iTeam];
+    int iAlive = 0;
+    for (int i = 0; pTeam && i < pTeam->mMemberCount; ++i)
+    {
+        const Character* pMember = pTeam->GetMemberPtr(i);
+        if (pMember && pMember->mUnit)
+        {
+            ++iAlive;
+        }
+    }
+    return iAlive;
+}
+
 // FUNCTION: SWBF2 0x005af030
 void __fastcall GetAdminTicketPair(int* pi1, int* pi2)
 {
@@ -2341,6 +2357,10 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             PutMsg(acMsg);
             // the bots a team spawns on this map, and the bot slots a team has (NetWire.h)
             _snprintf(acMsg, 0x200, "Bots/team   : %d of %d", NetGame::BotsPerTeam(), netNumBots);
+            PutMsg(acMsg);
+            // soldiers alive on each team, players and bots
+            _snprintf(acMsg, 0x200, "Soldiers    : %d/%d", netInShell ? 0 : AliveSoldiers(1),
+                      netInShell ? 0 : AliveSoldiers(2));
             PutMsg(acMsg);
             break;
         }
