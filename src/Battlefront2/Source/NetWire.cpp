@@ -355,11 +355,14 @@ int ServerBotCap(int iModeBots, int iSlots)
     return iModeBots > iSlots ? iSlots : iModeBots;
 }
 
-// Only ever raised, never lowered: a client keeps the map's own count, and twice this never
-// exceeds the other term of CharacterCount (players + 2 * slots), so both sides still count the
-// same characters.
+// Retail's slots keep the map's count; 64 raise it, never lower it, and twice this never exceeds
+// the other term of CharacterCount (players + 2 * slots), so the table's size doesn't change.
 int ServerTeamUnits(int iMissionUnits, int iPlayerLimit, int iSlots)
 {
+    if (iSlots <= kRetailBotSlots)
+    {
+        return iMissionUnits;
+    }
     int iUnits = (iPlayerLimit + 2 * iSlots) / 2;
     if (iUnits > kServerTeamCap)
     {

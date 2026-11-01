@@ -198,6 +198,7 @@ public:
 
 extern bool netHeroesEnabled;
 extern int netPlayerLimit;
+extern int netNumBots;
 extern int netHeroRuleRespawn;
 extern int netHeroRuleRespawnVal;
 extern bool netHeroUnlocked[3];
@@ -942,14 +943,22 @@ int SetUnitCount(lua_State* L)
     {
         siMapUnits[iTeam] = siServerUnits[iTeam] = 0;
     }
-    if (NetGame::ServerBots() && (iTeam == 1 || iTeam == 2))
+    if ((NetGame::ServerBots() || (NetGame::IsEnabled() && NetGame::IsClient())) && (iTeam == 1 || iTeam == 2))
     {
-        // OpenSWBF2: a dedicated server's teams take up to NetWire::kServerTeamCap soldiers;
-        // humans push bots out past that (Character::CanSpawn)
-        const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, NetGame::ServerBotSlots());
-        LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d server=%d", iTeam, iCount, iUnits);
-        siMapUnits[iTeam] = iCount;
-        siServerUnits[iTeam] = iUnits;
+        // OpenSWBF2: a dedicated server with 64 bot slots raises its teams to
+        // NetWire::kServerTeamCap soldiers, and its clients alike (they know the slots from their
+        // join), since each side creates a team's characters up to this count; humans push bots
+        // out past it (Character::CanSpawn). Retail's 32 slots keep the map's count everywhere.
+        const int iUnits = NetWire::ServerTeamUnits(iCount, netPlayerLimit, netNumBots);
+        if (iUnits != iCount)
+        {
+            LOG(LogNet, Inform, "OPENSWBF2 NET units team=%d map=%d raised=%d", iTeam, iCount, iUnits);
+        }
+        if (NetGame::ServerBots())
+        {
+            siMapUnits[iTeam] = iCount;
+            siServerUnits[iTeam] = iUnits;
+        }
         iCount = iUnits;
     }
     SpawnManager::Instance()->SetUnitCount(iTeam, iCount);
