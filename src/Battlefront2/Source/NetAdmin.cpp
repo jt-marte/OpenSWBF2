@@ -687,6 +687,7 @@ AdminCommandEntry adminCommands[] = {
     { AC(97), "maplist" },                { AC(98), "clearmaps" },
     { AC(99), "appendmap" },              { AC(100), "movemap" },
     { AC(101), "removemap" },             { AC(102), "aiheroes" },
+    { AC(103), "hrrespawnvalue" },
 };
 
 #undef AC
@@ -938,6 +939,7 @@ extern int netHeroRuleUnlock;
 extern int netHeroRuleUnlockVal;
 extern int netHeroRulePlayer;
 extern int netHeroRuleRespawn;
+extern int netHeroRuleRespawnVal;
 extern int netWindowSize;
 extern int netPlayerLimit;
 extern int netHostedPlayerLimit;
@@ -2821,6 +2823,26 @@ bool NetAdmin::ParseLineRemote(int iPlayer, unsigned short* pusLine, bool bConso
             else
             {
                 PutAdminNumber(NetGame::AiHeroesOn() ? 1 : 0);
+            }
+            break;
+
+        case 103: // hrrespawnvalue [seconds]: how long after a hero dies one can be taken again
+                  // (0 right away), or -1 never. Retail took it only on the command line
+                  // (/hrrespawnvalue), so ServerSettings.cfg and rcon couldn't set it.
+            if (GetNextArg(pusLine, acToken, 32))
+            {
+                int iSeconds = atoi(acToken);
+                iSeconds = iSeconds < 0 ? -1 : (iSeconds > 511 ? 511 : iSeconds); // 9 bits in the join
+                netHeroRuleRespawnVal = iSeconds;
+                netHeroRuleRespawn = iSeconds < 0 ? 1 : 2; // never, or after the time
+                Lua_Callbacks::gHeroRuleRespawnVal[0] = netHeroRuleRespawnVal;
+                Lua_Callbacks::gHeroRuleRespawnVal[1] = netHeroRuleRespawnVal;
+                Lua_Callbacks::gHeroRuleRespawn[0] = netHeroRuleRespawn;
+                Lua_Callbacks::gHeroRuleRespawn[1] = netHeroRuleRespawn;
+            }
+            else
+            {
+                PutAdminNumber(netHeroRuleRespawn == 1 ? -1 : netHeroRuleRespawnVal);
             }
             break;
 
