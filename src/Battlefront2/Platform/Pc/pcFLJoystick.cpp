@@ -1205,7 +1205,7 @@ void RawControllerInputs::PadDefaultsProcess()
                 break;
             }
 
-            // Hold-to-aim inputs for PlayerController (XInputPad::AimZoomPress).
+            // Hold-to-aim inputs (XInputPad::AimZoomPress, after the loop).
             XInputPad::gPadAimActive = true;
             XInputPad::gPadAimHeld =
                 XInputPad::gPadAimHeld || mRawInputFloat[iPort][XInputPad::kSlotLeftTrigger] >= 0.5f;
@@ -1240,6 +1240,26 @@ void RawControllerInputs::PadDefaultsProcess()
             }
         }
     }
+
+    if (!mProcessDestination)
+    {
+        return;
+    }
+    // Modern: LT held aims (the soldier's zoom is a toggle), RS steps two-level scopes. The press
+    // goes into the inputs themselves, so online the host zooms with the player; worked out in
+    // PlayerController, it never left this game and the host kept the soldier unzoomed.
+    static XInputPad::AimZoom sAimZoom;
+    if (XInputPad::gPadAimActive && (mMode == 0 || mMode == 3) && mProcessDestination->bits.mMouseMode == 0 &&
+        XInputPad::AimZoomPress(sAimZoom, XInputPad::gPadAimHeld, XInputPad::gPadSecondZoom,
+                                XInputPad::gPadLocalAiming, XInputPad::gPadLocalTwoLevel))
+    {
+        mProcessDestination->Set(ePROCESSEDINPUT_zoomButtonDown, bLocked, 1.0f, 0.0f);
+    }
+    // The pad's look, for this game and the host alike (ProcessedInputs::mPadLookLevel).
+    mProcessDestination->mPadLookLevel =
+        XInputPad::gPadLookActive ? (unsigned char)XInputPad::gPadLookLevel : (unsigned char)0;
+    mProcessDestination->mPadBoost =
+        XInputPad::gPadLookActive ? XInputPad::BoostStep(XInputPad::TurnBoost(XInputPad::gPadLookMag)) : (unsigned char)0;
 }
 
 // FUNCTION: SWBF2 0x00415750

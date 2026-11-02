@@ -201,6 +201,31 @@ TEST_CASE("xinput look curve is finer near the centre" * doctest::test_suite("un
     CHECK(kLookGain == 2.7f);
 }
 
+TEST_CASE("xinput look travels with each move in a few bits" * doctest::test_suite("unit"))
+{
+    CHECK(kBoostSteps == (1 << kBoostBits) - 1);
+    CHECK(BoostStep(0.0f) == 0);
+    CHECK(BoostStep(-1.0f) == 0);
+    CHECK(BoostStep(1.0f) == kBoostSteps);
+    CHECK(BoostStep(2.0f) == kBoostSteps);
+    CHECK(BoostFromStep(0) == 0.0f);
+    CHECK(BoostFromStep((unsigned char)kBoostSteps) == 1.0f);
+    // each step reads back as itself, so the player's game and the host turn alike
+    for (int i = 0; i <= kBoostSteps; ++i)
+    {
+        CHECK(BoostStep(BoostFromStep((unsigned char)i)) == i);
+    }
+    // and stands within half a step of the boost it carries
+    for (int i = 0; i <= 100; ++i)
+    {
+        const float fBoost = (float)i / 100.0f;
+        CHECK(fabsf(BoostFromStep(BoostStep(fBoost)) - fBoost) <= 0.5f / (float)kBoostSteps + 1e-6f);
+    }
+    // the look level goes in 4 bits, 0 meaning no pad
+    CHECK(kLookSpeedMinLevel > 0);
+    CHECK(kLookSpeedMaxLevel < 16);
+}
+
 TEST_CASE("xinput turn boost follows stick tilt with no wind-up" * doctest::test_suite("unit"))
 {
     CHECK(TurnBoost(0.0f) == 0.0f);

@@ -106,6 +106,12 @@ public:
     float mFloatInputs[4];
     CntBitFields bits;
     bool mJoyUsage;
+    // OpenSWBF2: looking with an XInput pad, which turns at its own rates (XInputPad::PadYawRate
+    // and the rest). They travel with every move, so a host turns the soldier exactly as the
+    // player's own game does: the controller look level (1-10; 0 when not looking with a pad)
+    // and the turn boost from the stick's tilt (XInputPad::BoostStep). In retail's padding.
+    unsigned char mPadLookLevel;
+    unsigned char mPadBoost;
 };
  
  

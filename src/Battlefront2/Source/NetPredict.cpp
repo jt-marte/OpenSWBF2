@@ -364,6 +364,9 @@ SmoothInfo smoothInfo[NetWire::kNetObjSlots];
 float gNetCorrSum;
 float gNetCorrMax;
 unsigned int gNetCorrCount;
+float gNetLocalTurnSum;
+float gNetLocalTurnMax;
+unsigned int gNetLocalTurnCount;
 
 // FUNCTION: SWBF2 0x005d9c00
 SmoothInfo& NetPredict::GetSmoothInfo(int iIndex)
@@ -433,6 +436,21 @@ void SmoothInfo::SetMat(const PblMatrix& mat, float fParam1, float fParam2)
         gNetCorrSum += fCorr;
         gNetCorrMax = fCorr > gNetCorrMax ? fCorr : gNetCorrMax;
         ++gNetCorrCount;
+    }
+    if (bLocal && fCorr < 10.0f)
+    {
+        // OpenSWBF2: how far the host's state turned the local player from where it was drawn
+        // (the view dragged by a correction), for the client's -netstats line
+        const float fDot = rendered.m[2][0] * mat.m[2][0] + rendered.m[2][1] * mat.m[2][1] + rendered.m[2][2] * mat.m[2][2];
+        const float fLen = sqrtf((rendered.m[2][0] * rendered.m[2][0] + rendered.m[2][1] * rendered.m[2][1] +
+                                  rendered.m[2][2] * rendered.m[2][2]) *
+                                 (mat.m[2][0] * mat.m[2][0] + mat.m[2][1] * mat.m[2][1] + mat.m[2][2] * mat.m[2][2]));
+        float fCos = fLen > 0.0f ? fDot / fLen : 1.0f;
+        fCos = fCos > 1.0f ? 1.0f : (fCos < -1.0f ? -1.0f : fCos);
+        const float fDegrees = acosf(fCos) * 57.29578f;
+        gNetLocalTurnSum += fDegrees;
+        gNetLocalTurnMax = fDegrees > gNetLocalTurnMax ? fDegrees : gNetLocalTurnMax;
+        ++gNetLocalTurnCount;
     }
     PblVector3 vFrontErr(rendered.m[2][0] - mat.m[2][0], rendered.m[2][1] - mat.m[2][1],
                          rendered.m[2][2] - mat.m[2][2]);

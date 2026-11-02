@@ -17,6 +17,8 @@ int gPadLayout = kLayoutModern;
 bool gPadAimActive;
 bool gPadAimHeld;
 bool gPadSecondZoom;
+bool gPadLocalAiming;
+bool gPadLocalTwoLevel;
 bool gPadScopeStepsZoom;
 
 static const float kStickMax = 32767.0f;
@@ -84,6 +86,24 @@ float TurnBoost(float fLookMag)
         return 1.0f;
     }
     return (fLookMag - kBoostStart) / (kBoostFull - kBoostStart);
+}
+
+unsigned char BoostStep(float fBoost)
+{
+    if (!(fBoost > 0.0f))
+    {
+        return 0;
+    }
+    if (fBoost >= 1.0f)
+    {
+        return (unsigned char)kBoostSteps;
+    }
+    return (unsigned char)(fBoost * (float)kBoostSteps + 0.5f);
+}
+
+float BoostFromStep(unsigned char ucStep)
+{
+    return ucStep >= kBoostSteps ? 1.0f : (float)ucStep / (float)kBoostSteps;
 }
 
 int gPadLookLevel = kLookSpeedDefaultLevel;

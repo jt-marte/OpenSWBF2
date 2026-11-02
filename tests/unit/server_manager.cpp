@@ -296,8 +296,9 @@ TEST_CASE("a client's object window holds a 64-a-team battle in two datagrams" *
     CHECK(NetWire::kNetObjNone == (unsigned int)NetWire::kNetObjSlots - 1);
     // room for both teams' 64 nearest soldiers' worth of objects (retail: 63)
     CHECK(NetWire::kNetObjSlots - 1 > 2 * 63);
-    // retail had version 1; a different window is a different protocol
-    CHECK(NetWire::kNetVersion != 1);
+    // retail had version 1; a different window is a different protocol (2), and so are moves
+    // that carry the pad's look (3)
+    CHECK(NetWire::kNetVersion >= 3);
     // two datagrams of objects only on a 64-slot server
     CHECK(NetWire::UpdateDatagrams(NetWire::kMaxBotSlots) == 2);
     CHECK(NetWire::UpdateDatagrams(NetWire::kRetailBotSlots) == 1);

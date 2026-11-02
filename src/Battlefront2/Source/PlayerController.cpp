@@ -319,12 +319,13 @@ void PlayerController::Update(float dt)
 
     if (!(bMouseMode && bIsSoldier))
     {
-        if (XInputPad::gPadLookActive && !bMouseMode)
+        if (mJoystick->mPadLookLevel && !bMouseMode)
         {
             // OpenSWBF2: on an XInput pad the turn boost follows how far the
             // stick is pushed, not how long it has been held, so full tilt
-            // turns at full speed straight away (XInputPad::TurnBoost).
-            const float fBoost = XInputPad::TurnBoost(XInputPad::gPadLookMag);
+            // turns at full speed straight away (XInputPad::TurnBoost). It comes
+            // with the move, so a host and a replayed turn use the same value.
+            const float fBoost = XInputPad::BoostFromStep(mJoystick->mPadBoost);
             mOwner->SetTurnBuildup(fBoost);
             mOwner->SetPitchBuildup(fBoost);
         }
@@ -489,31 +490,31 @@ void PlayerController::Update(float dt)
 
     mOwner->mControlSpecialMove.Update(dt, (mJoystick->bits.mBoolInputs & 0x20000000) != 0);
     mOwner->mControlSprint.Update(dt, mJoystick->IsSprintButtonDown());
-    bool bZoom = mJoystick->IsZoomButtonDown();
     // OpenSWBF2: the Modern pad layout aims while LT is held (the soldier's
-    // zoom is a toggle), RS steps two-level scopes. See XInputPad::AimZoomPress.
-    // While such a scope is up RS is the next zoom, otherwise lock-on
-    // (XInputPad::RsLockTarget), which the input layer reads from this player.
+    // zoom is a toggle), RS steps two-level scopes: the input layer makes the
+    // zoom presses (XInputPad::AimZoomPress) from the local soldier's state,
+    // published here. While such a scope is up RS is the next zoom, otherwise
+    // lock-on (XInputPad::RsLockTarget).
     const bool bLocalPlayer = NetGame::IsEnabled() ? NetGame::GetJoystickIndex(mOwner->mPlayerId) >= 0
                                                    : mOwner->mPlayerId >= 0;
-    bool bScopeStepsZoom = false;
-    if (XInputPad::gPadAimActive && !bMouseMode && bIsSoldier)
-    {
-        EntitySoldier* pSoldier = static_cast<EntitySoldier*>(mOwner->GetEntity());
-        const Weapon* pWeapon =
-            pSoldier->mActiveIndex >= 0 ? pSoldier->mWeapon[pSoldier->mActiveIndex] : 0;
-        const bool bTwoLevel = pWeapon && pWeapon->mClass->mZoomMin != pWeapon->mClass->mZoomMax &&
-                               pWeapon->mClass->mZoomRate == 0.0f;
-        static XInputPad::AimZoom sAimZoom;
-        bZoom = XInputPad::AimZoomPress(sAimZoom, XInputPad::gPadAimHeld, XInputPad::gPadSecondZoom,
-                                        mOwner->mTargetInfo.mIsAiming, bTwoLevel);
-        bScopeStepsZoom = bTwoLevel && mOwner->mTargetInfo.mIsAiming;
-    }
     if (bLocalPlayer)
     {
-        XInputPad::gPadScopeStepsZoom = bScopeStepsZoom;
+        bool bAiming = false;
+        bool bTwoLevel = false;
+        if (XInputPad::gPadAimActive && !bMouseMode && bIsSoldier)
+        {
+            EntitySoldier* pSoldier = static_cast<EntitySoldier*>(mOwner->GetEntity());
+            const Weapon* pWeapon =
+                pSoldier->mActiveIndex >= 0 ? pSoldier->mWeapon[pSoldier->mActiveIndex] : 0;
+            bTwoLevel = pWeapon && pWeapon->mClass->mZoomMin != pWeapon->mClass->mZoomMax &&
+                        pWeapon->mClass->mZoomRate == 0.0f;
+            bAiming = mOwner->mTargetInfo.mIsAiming;
+        }
+        XInputPad::gPadLocalAiming = bAiming;
+        XInputPad::gPadLocalTwoLevel = bTwoLevel;
+        XInputPad::gPadScopeStepsZoom = bTwoLevel && bAiming;
     }
-    mOwner->mControlZoom.Update(dt, bZoom);
+    mOwner->mControlZoom.Update(dt, mJoystick->IsZoomButtonDown());
     mOwner->mControlView.Update(dt, mJoystick->IsViewButtonDown());
     mOwner->mControlSquadCommand.Update(dt, mJoystick->IsSquadCommandButtonDown());
     mOwner->mControlLockTarget.Update(dt, mJoystick->IsLockTargetButtonPressed());
