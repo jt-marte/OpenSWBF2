@@ -6072,12 +6072,17 @@ int Play(VOType eType, const GameObject* pSpeaker, const GameObject* pTarget,
 }
 }
 
-// OpenSWBF2: the soldier is the local player looking with an XInput pad
-// (XInputPad::PadYawRate / PadPitchRate / PadTurnFactor apply).
-static bool IsLocalPadLook(int iPlayerId)
+// OpenSWBF2: the soldier's player looks with an XInput pad (XInputPad::PadYawRate / PadPitchRate /
+// PadTurnFactor apply), at this look level (1-10), or 0. It comes with the player's moves
+// (ProcessedInputs::mPadLookLevel), so a host turns the soldier as the player's own game does; with
+// the host on retail rates every correction dragged a pad player's view.
+static int PadLookLevel(int iPlayerId)
 {
-    return XInputPad::gPadLookActive && iPlayerId >= 0 && iPlayerId == NetGame::GetLocalIndex(0) &&
-           !NetGame::IsMouseMode(iPlayerId);
+    if (iPlayerId < 0 || NetGame::IsMouseMode(iPlayerId))
+    {
+        return 0;
+    }
+    return NetGame::GetJoystick(iPlayerId)->mPadLookLevel;
 }
 
 // FUNCTION: SWBF2 0x004e8920
@@ -6720,10 +6725,10 @@ bool EntitySoldier::Update(float fDeltaTime)
     }
 
     float fPitchRate = bMouse ? GetClassMaxTurnSpeed() : mClass->mMaxPitchSpeed;
-    if (IsLocalPadLook(mPlayerId))
+    if (PadLookLevel(mPlayerId))
     {
         fPitchRate = XInputPad::PadPitchRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mPitchBuildup,
-                                             XInputPad::LookSpeedScale(XInputPad::gPadLookLevel));
+                                             XInputPad::LookSpeedScale(PadLookLevel(mPlayerId)));
     }
     if (mTargetInfo.mIsAiming && pWeapon)
     {
@@ -7121,7 +7126,7 @@ bool EntitySoldier::Update(float fDeltaTime)
         // OpenSWBF2: the local XInput pad player keeps full turn speed while
         // sprinting (XInputPad::PadTurnFactor).
         float fSprintTurn = pClass->mTurnFactor[3];
-        if (IsLocalPadLook(mPlayerId))
+        if (PadLookLevel(mPlayerId))
         {
             fSprintTurn = XInputPad::PadTurnFactor(fSprintTurn);
         }
@@ -7196,7 +7201,7 @@ bool EntitySoldier::Update(float fDeltaTime)
             // OpenSWBF2: and while jumping or falling (not when blasted into
             // the air, FLY).
             float fAirTurn = mClass->mTurnFactor[iFactor];
-            if (iFactor == 4 && IsLocalPadLook(mPlayerId))
+            if (iFactor == 4 && PadLookLevel(mPlayerId))
             {
                 fAirTurn = XInputPad::PadTurnFactor(fAirTurn);
             }
@@ -7293,7 +7298,7 @@ bool EntitySoldier::Update(float fDeltaTime)
         // OpenSWBF2: the local XInput pad player keeps full turn speed while
         // rolling (XInputPad::PadTurnFactor).
         float fRollTurn = mClass->mTurnFactor[5];
-        if (IsLocalPadLook(mPlayerId))
+        if (PadLookLevel(mPlayerId))
         {
             fRollTurn = XInputPad::PadTurnFactor(fRollTurn);
         }
@@ -8328,10 +8333,10 @@ float EntitySoldier::GetOmega(float fTurn) const
     }
 
     float fOmega;
-    if (IsLocalPadLook(mPlayerId))
+    if (PadLookLevel(mPlayerId))
     {
         fOmega = XInputPad::PadYawRate(mClass->mMaxPitchSpeed, GetClassMaxTurnSpeed(), mTurnBuildup,
-                                       XInputPad::LookSpeedScale(XInputPad::gPadLookLevel));
+                                       XInputPad::LookSpeedScale(PadLookLevel(mPlayerId)));
     }
     else if (mPlayerId >= 0 && !bMouse)
     {

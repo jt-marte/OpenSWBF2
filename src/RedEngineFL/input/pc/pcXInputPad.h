@@ -120,6 +120,14 @@ const float kBoostStart = 0.45f;
 const float kBoostFull = 0.9f;
 float TurnBoost(float fLookMag);
 
+// Online the boost travels with each move (ProcessedInputs::mPadBoost) in kBoostBits bits, and
+// the player's own game and the host both turn with the value that was sent: BoostStep on the
+// player's side, BoostFromStep everywhere.
+const int kBoostBits = 5;
+const int kBoostSteps = (1 << kBoostBits) - 1;
+unsigned char BoostStep(float fBoost);
+float BoostFromStep(unsigned char ucStep);
+
 // A soldier state's turn factor for the local pad player. Mouse turn input
 // runs to +-16, so the class's per-state factors (roll 0.6, sprint 0.2, jump
 // 0.5 by default) barely slow a mouse; a pad tops out at 1 and was crippled.
@@ -291,13 +299,17 @@ struct RsLock
 };
 bool RsLockTarget(RsLock& rState, bool bRSDown, bool bScopeStepsZoom);
 
-// Published by the input layer each frame for PlayerController: Modern is in
-// effect on a connected XInput pad, LT is held, RS was pressed this frame.
+// Set by the input layer each frame: Modern is in effect on a connected XInput pad, LT is held,
+// RS was pressed this frame. The input layer turns them into zoom presses (AimZoomPress) in the
+// player's own inputs, so a host gets the same presses with the moves.
 extern bool gPadAimActive;
 extern bool gPadAimHeld;
 extern bool gPadSecondZoom;
-// Published by PlayerController for the local player: aiming a weapon with a two-level scope,
-// so RS steps the zoom rather than locking on.
+// Published by PlayerController for the local player on foot: aiming (zoomed in), and the
+// weapon has a two-level scope. Aiming with such a scope (gPadScopeStepsZoom) RS steps the zoom
+// rather than locking on.
+extern bool gPadLocalAiming;
+extern bool gPadLocalTwoLevel;
 extern bool gPadScopeStepsZoom;
 
 // Menu (eGUIINPUT value) for a raw pad slot, or -1.

@@ -35,6 +35,7 @@
 #include "NetClock.h"
 #include "LocalLimits.h"
 #include "RedEngineFL/Util/RedLog.h"
+#include "RedEngineFL/input/pc/pcXInputPad.h"
 #include "RedEngineFL/Util/RedWarning.h"
 #include "TreeGrid.h"
 #include "EntityItem.h"
@@ -4443,6 +4444,9 @@ int NetGame::GetRandomHeroTeam()
 extern float gNetCorrSum;
 extern float gNetCorrMax;
 extern unsigned int gNetCorrCount;
+extern float gNetLocalTurnSum;
+extern float gNetLocalTurnMax;
+extern unsigned int gNetLocalTurnCount;
 
 // -netstats: once a second, log the numbers the QOS display shows (ping, updates, kbit/s,
 // loss, lag in turns, timescale) so test runs can read them from the log. OpenSWBF2 adds, per
@@ -4497,14 +4501,18 @@ static void LogNetStats()
         const int iLocal = NetComm::GetLocalIndex(0);
         NetGame::GetPlayerQOS(iLocal, uUpdates, uFills, iLoss);
         const float fCorrAvg = gNetCorrCount ? gNetCorrSum / (float)gNetCorrCount : 0.0f;
+        const float fTurnAvg = gNetLocalTurnCount ? gNetLocalTurnSum / (float)gNetLocalTurnCount : 0.0f;
         LOG(LogNet, Inform,
             "OPENSWBF2 NET STATS client player=%d ping=%d updates=%d in=%d out=%d loss=%d lag=%d ts=%.2f "
-            "corr=%.2f/%.2f steer=%d locked=%d stable=%d",
+            "corr=%.2f/%.2f steer=%d locked=%d stable=%d turn=%.2f/%.2f",
             iLocal, NetComm::GetPing(iLocal), iUpdates, iInKbit, iOutKbit, iLoss, iLag, NetGame::GetTimeScale(),
-            fCorrAvg, gNetCorrMax, clientLag, timeLocked ? 1 : 0, timeStableCount);
+            fCorrAvg, gNetCorrMax, clientLag, timeLocked ? 1 : 0, timeStableCount, fTurnAvg, gNetLocalTurnMax);
         gNetCorrSum = 0.0f;
         gNetCorrMax = 0.0f;
         gNetCorrCount = 0;
+        gNetLocalTurnSum = 0.0f;
+        gNetLocalTurnMax = 0.0f;
+        gNetLocalTurnCount = 0;
         return;
     }
 
@@ -5756,6 +5764,30 @@ static void NetTestPlayerMove(ProcessedInputs& rInputs)
     // aim moves every turn, as a mouse does, so a repeated guess is rarely right
     rInputs.mFloatInputs[2] = 0.4f * sinf(fTime * 3.1f);  // turn
     rInputs.mFloatInputs[3] = 0.15f * sinf(fTime * 1.7f); // pitch
+    if (gNetTestPad)
+    {
+        // looking around on a pad: a flick to one side (the stick past the boost), a pause, a
+        // slow pan (no boost), the other side; the input layer's values (after deadzone, curve
+        // and gain, so the turn axis clamps at 1 while the boost follows the tilt)
+        const float fPhase = fmodf(fTime, 3.0f);
+        const float fSide = fmodf(fTime, 6.0f) < 3.0f ? 1.0f : -1.0f;
+        float fTilt = 0.0f;
+        if (fPhase < 0.6f)
+        {
+            fTilt = 0.95f;
+        }
+        else if (fPhase >= 1.2f && fPhase < 2.4f)
+        {
+            fTilt = 0.4f;
+        }
+        const float fCurved = XInputPad::LookCurve(fTilt);
+        const float fAxis = fCurved * XInputPad::kLookGain;
+        rInputs.mFloatInputs[2] = fSide * (fAxis > 1.0f ? 1.0f : fAxis);
+        rInputs.mFloatInputs[3] = 0.0f;
+        rInputs.bits.mMouseMode = 0;
+        rInputs.mPadLookLevel = (unsigned char)XInputPad::kLookSpeedDefaultLevel;
+        rInputs.mPadBoost = XInputPad::BoostStep(XInputPad::TurnBoost(fCurved));
+    }
     unsigned int uBits = 0;
     if (fmodf(fTime, 1.2f) < 0.5f)
     {
@@ -6781,6 +6813,10 @@ bool IsSame(ProcessedInputs* first, ProcessedInputs* second)
         return false;
     }
     if (first->bits.mBoolInputs != second->bits.mBoolInputs)
+    {
+        return false;
+    }
+    if (first->mPadLookLevel != second->mPadLookLevel || first->mPadBoost != second->mPadBoost)
     {
         return false;
     }
@@ -8942,6 +8978,8 @@ void ReadPlayerMoves(NetPktGroup& group)
         group.ReadBits(buttons, 4);
         move.bits.mBoolInputs = buttons;
         move.bits.mMouseMode = NetComm::GetArch(player) == NET_ARCH_PC ? 1 : 0;
+        move.mPadLookLevel = 0;
+        move.mPadBoost = 0;
     }
 }
 
@@ -9070,6 +9108,15 @@ bool ReadMove(NetPktGroup& group, const ProcessedInputs& previous, ProcessedInpu
     group.ReadBits(highBits, 2);
     unsigned int* buttonWord = (unsigned int*)&current.bits;
     *buttonWord = (lowBits & 0x3fffffffu) | ((highBits & 3u) << 30);
+    unsigned int uPadLevel = 0;
+    unsigned int uPadBoost = 0;
+    group.ReadBits(uPadLevel, 4);
+    if (uPadLevel)
+    {
+        group.ReadBits(uPadBoost, XInputPad::kBoostBits);
+    }
+    current.mPadLookLevel = (unsigned char)uPadLevel;
+    current.mPadBoost = (unsigned char)uPadBoost;
     return true;
 }
 
@@ -14497,6 +14544,12 @@ void WriteMove(NetPktGroup* pGroup, ProcessedInputs* pPrev, ProcessedInputs* pCu
     const unsigned int bits = *(const unsigned int*)&pCur->bits;
     pGroup->WriteBits(bits & 0x3fffffff, 30);
     pGroup->WriteBits(bits >> 30, 2);
+    // OpenSWBF2 (NetWire::kNetVersion 3): the pad's look, so the host turns as the player does
+    pGroup->WriteBits(pCur->mPadLookLevel, 4);
+    if (pCur->mPadLookLevel)
+    {
+        pGroup->WriteBits(pCur->mPadBoost, XInputPad::kBoostBits);
+    }
 }
 
 // FUNCTION: SWBF2 0x005d0e10
@@ -17354,3 +17407,4 @@ int debugPredictClientTurn = 1181;
 int debugPredictStepCount = 4;
 // GLOBAL: SWBF2 0x01e62ed4
 float spHeroSelectedTime[3] = { 0.0f, 0.0f, 0.0f };
+

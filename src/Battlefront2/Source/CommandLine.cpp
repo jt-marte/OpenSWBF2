@@ -76,6 +76,7 @@ bool gNetLoopback;
 bool gAIStatsLog;
 bool gAITestHuman;
 bool gNetTestPlayer;
+bool gNetTestPad;
 bool gLogStdout;
 bool gLogConsole;
 // Set by GameWinMain when "-dedicated" expanded into the autonet dedicated switches.
@@ -411,6 +412,13 @@ void ParseCommandLine(int iArgc, char** const apcArgv)
         if (_stricmp(pcArg + 1, "nettestplayer") == 0)
         {
             gNetTestPlayer = true;
+            continue;
+        }
+
+        if (_stricmp(pcArg + 1, "nettestpad") == 0)
+        {
+            gNetTestPlayer = true;
+            gNetTestPad = true;
             continue;
         }
 

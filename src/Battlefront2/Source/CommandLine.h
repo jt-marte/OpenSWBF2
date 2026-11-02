@@ -33,6 +33,9 @@ extern bool gAIStatsLog;
 extern bool gAITestHuman;
 // -nettestplayer: a client spawns by itself and plays a fixed pattern of moves (NetGame.cpp)
 extern bool gNetTestPlayer;
+// -nettestpad: the same, looking with an XInput pad: flicks of the look stick at changing tilt
+// (ProcessedInputs::mPadLookLevel / mPadBoost), as a pad player looks around
+extern bool gNetTestPad;
 extern bool gLogStdout;
 extern bool gLogConsole;
 extern bool gDedicatedShorthand;
