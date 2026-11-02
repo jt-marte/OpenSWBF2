@@ -8,6 +8,7 @@
 #include "Battlefront2/Source/Character.h"
 #include "Battlefront2/Source/Controllable.h"
 #include "Battlefront2/Source/CommandPost.h"
+#include "Battlefront2/Source/CommandPostManager.h"
 #include "Battlefront2/Source/Damageable.h"
 #include "Battlefront2/Source/EventManager_Character.h"
 #include "Battlefront2/Source/EntityDroideka.h"
@@ -1498,6 +1499,37 @@ void SpawnDisplay::SendSpawnReadyMessage()
     }
 }
 
+// OpenSWBF2: the post iStep places on from pCurrent (+1 next, -1 previous) among the posts
+// iTeam can spawn at, in the command post list's order and wrapping; pCurrent when there is
+// none.
+static CommandPost* StepSpawnPost(CommandPost* pCurrent, int iTeam, int iStep)
+{
+    CommandPost* posts[64];
+    int iCount = 0;
+    int iCurrent = -1;
+    for (CommandPostItor itor = CommandPostManager::Instance()->GetItor(); itor && iCount < 64; ++itor)
+    {
+        CommandPost* pPost = NetGame::ConvertCP(*itor);
+        if (pPost && pPost->CanTeamSpawnHere(iTeam))
+        {
+            if (pPost == pCurrent)
+            {
+                iCurrent = iCount;
+            }
+            posts[iCount++] = pPost;
+        }
+    }
+    if (iCount == 0)
+    {
+        return pCurrent;
+    }
+    if (iCurrent < 0)
+    {
+        return posts[iStep > 0 ? 0 : iCount - 1];
+    }
+    return posts[XInputPad::WrapIndex(iCurrent, iStep, iCount)];
+}
+
 // FUNCTION: SWBF2 0x0042b0c0
 void SpawnDisplay::UpdateInput()
 {
@@ -1509,8 +1541,8 @@ void SpawnDisplay::UpdateInput()
 
     // OpenSWBF2: this screen is mouse hotspots only. While a pad drives the
     // menus (cursor hidden) it works like console instead: up/down (D-pad or
-    // left stick) pick the class, A spawns, B goes back. The hidden cursor
-    // then hovers nothing, so it can't light up a second class.
+    // left stick) pick the class, LB/RB the spawn point, A spawns, B goes back.
+    // The hidden cursor then hovers nothing, so it can't light up a second class.
     const bool bPad = XInputPad::gPadOwnsCursor;
 
     for (int i = 0; i < 10; ++i)
@@ -1560,6 +1592,19 @@ void SpawnDisplay::UpdateInput()
     int iClass;
     if (bPad)
     {
+        // Keyboard 3 and 4 send the same menu events as LB and RB, and pick a class here, so
+        // only the pad's own bumpers step the spawn point.
+        if (XInputPad::gBumperDown && (pInputs->IsLeftTriggerPressed() || pInputs->IsRightTriggerPressed()) &&
+            mMode != eSIDESELECT)
+        {
+            CommandPost* pPost = StepSpawnPost(mCommandPost, mTeamNumber, pInputs->IsRightTriggerPressed() ? 1 : -1);
+            if (pPost && pPost != mCommandPost)
+            {
+                SelectPost(pPost);
+            }
+            return;
+        }
+
         int iStep = XInputPad::GuiStickStep(pInputs->mProcessedGUIInputs[eGUIINPUT_yAxis], sbPadStickHeld);
         if (pInputs->IsDPadUpPressed())
         {
