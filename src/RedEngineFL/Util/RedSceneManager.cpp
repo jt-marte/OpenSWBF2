@@ -510,10 +510,16 @@ void RedSceneAABox::RenderBox(int iDepth, bool bSiblings)
 
 // OpenSWBF2: the far scene draws everything at its lowest detail, but a soldier (LOD class 2)
 // there in low detail shares one of three run loops and read as frozen in a 64-a-team battle:
-// soldiers stay in full detail at any distance.
+// soldiers stay in full detail at any distance. Win32 has 50 full-detail animators for its near
+// soldiers (SoldierAnimatorClass::NUM_ANIMATORS), so its far ones stay low detail.
 static unsigned char FarLod(const RedSceneObject* p)
 {
+#ifdef _WIN64
     return p->_pLodData->_LodClass == 2 ? 0 : 3;
+#else
+    (void)p;
+    return 3;
+#endif
 }
 
 // FUNCTION: SWBF2 0x006e2ed0

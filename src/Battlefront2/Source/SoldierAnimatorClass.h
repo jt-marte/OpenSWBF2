@@ -96,7 +96,12 @@ public:
     // Full-detail animators, handed out least recently used first. Retail had 50 for at most 9
     // full-detail soldiers a view; OpenSWBF2 draws every soldier in full detail (FLRenderer::Init),
     // up to 128 a match, and one taken from a soldier made it hold a frozen pose while it restarted.
+    // Win32 keeps retail's 50 (and 50 full-detail soldiers): its retail-sized arena has no room.
+#ifdef _WIN64
     static const int NUM_ANIMATORS = 160;
+#else
+    static const int NUM_ANIMATORS = 50;
+#endif
 
     struct AnimationMap
     {
