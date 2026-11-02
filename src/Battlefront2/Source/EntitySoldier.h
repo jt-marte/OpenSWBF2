@@ -793,7 +793,15 @@ public:
     GameMusic mAISoldierMusic;
     unsigned char mNetJustChangedState;
     EntityCloth* mClothPiece[8];
+    // OpenSWBF2: where and when the soldier was last drawn, and how fast it moved on screen
+    // (m/s; below 0 when unknown). A client's remote soldier runs or stands in low detail by
+    // this (SoldierAnimatorLowRes), not by a velocity that lags the host's corrections.
+    PblVector3 mDrawnPos;
+    double mDrawnTime;
+    float mDrawnSpeed;
 public:
+    // OpenSWBF2: the speed the low-detail animator picks run or stand by (see mDrawnSpeed), squared
+    float GetLowResSpeedSq() const;
     static bool sEnableAnnouncementVO;
     static bool sEnableMusic;
 };

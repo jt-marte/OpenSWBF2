@@ -658,8 +658,8 @@ SoldierAnimatorLowRes* SoldierAnimatorLowResClass::GetAnimatorLocal(const Entity
         float fMinSpeed =
             (soldier.mSoldierAnimatorLowRes && soldier.mSoldierAnimatorLowRes->m_eAnimPool == ANIMPOOL_MOVE) ? 0.2f
                                                                                                                  : 0.3f;
-        const PblVector3& vVelocity = soldier.GetVelocity();
-        if (vVelocity.x * vVelocity.x + vVelocity.z * vVelocity.z > fMinSpeed * fMinSpeed)
+        // OpenSWBF2: on a client, how the soldier moves on screen (EntitySoldier::GetLowResSpeedSq)
+        if (soldier.GetLowResSpeedSq() > fMinSpeed * fMinSpeed)
         {
             ePose = POSE_ANIMPOOL;
             eAnimPool = ANIMPOOL_MOVE;
@@ -672,8 +672,7 @@ SoldierAnimatorLowRes* SoldierAnimatorLowResClass::GetAnimatorLocal(const Entity
     }
     case SoldierState::CROUCH:
     {
-        const PblVector3& vVelocity = soldier.GetVelocity();
-        ePose = vVelocity.x * vVelocity.x + vVelocity.z * vVelocity.z > 0.09f ? POSE_CROUCH : POSE_CROUCH_TAKEKNEE;
+        ePose = soldier.GetLowResSpeedSq() > 0.09f ? POSE_CROUCH : POSE_CROUCH_TAKEKNEE;
         break;
     }
     case SoldierState::PRONE:

@@ -93,6 +93,10 @@ public:
     static const int NUM_SOLDIER_ANIMATIONS_TOTAL = 292;
     static const int ANIMATION_MAP_SIZE = 302;
     static const int MAX_ANIMATION_BANK_FILES = 18;
+    // Full-detail animators, handed out least recently used first. Retail had 50 for at most 9
+    // full-detail soldiers a view; OpenSWBF2 draws every soldier in full detail (FLRenderer::Init),
+    // up to 128 a match, and one taken from a soldier made it hold a frozen pose while it restarted.
+    static const int NUM_ANIMATORS = 160;
 
     struct AnimationMap
     {

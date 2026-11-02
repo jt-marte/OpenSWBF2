@@ -1,3 +1,4 @@
+#include <windows.h>
 #include "RedEngineFL/Util/RedCommandConsole.h"
 
 #include <float.h>
@@ -988,6 +989,9 @@ EntitySoldier::EntitySoldier(EntitySoldierClass* pClass, const EntityDesc& desc)
     mSoldierAnimator = 0;
     mSoldierAnimatorLowRes = 0;
     mModelLowRes = pClass->mModelLowRes;
+    mDrawnPos = PblVector3(0.0f, 0.0f, 0.0f);
+    mDrawnTime = 0.0;
+    mDrawnSpeed = -1.0f;
 
     int iCamera = (mState == SoldierState::SPRINT) ? 3 : mStanceIndex;
     mEyePoint = (&mClass->mCameraSettings[0][0])[iCamera * 2 + mTargetInfo.mIsAiming].CalcEyePoint(mMatrix);
@@ -1309,6 +1313,33 @@ bool IsNeverDies(EntityType eType);
 
 bool gLowResModelsEnabled;
 
+// OpenSWBF2: a steady clock in seconds for mDrawnSpeed
+static double DrawClock()
+{
+    static LARGE_INTEGER sFrequency;
+    if (!sFrequency.QuadPart)
+    {
+        QueryPerformanceFrequency(&sFrequency);
+    }
+    LARGE_INTEGER now;
+    QueryPerformanceCounter(&now);
+    return (double)now.QuadPart / (double)sFrequency.QuadPart;
+}
+
+float EntitySoldier::GetLowResSpeedSq() const
+{
+    // A client draws a remote soldier where the host's updates put it, smoothed, while its
+    // velocity follows the last update. With updates far apart at 64 a team the velocity often
+    // read standing while the soldier slid on, and it slid frozen in the standing pose. The legs
+    // follow what is drawn, as the full-detail animator's already do (SoldierAnimator::SetAction).
+    if (NetGame::IsEnabled() && !NetGame::IsHost() && mDrawnSpeed >= 0.0f && NetGame::GetJoystickIndex(mPlayerId) < 0)
+    {
+        return mDrawnSpeed * mDrawnSpeed;
+    }
+    const PblVector3& vVelocity = GetVelocity();
+    return vVelocity.x * vVelocity.x + vVelocity.z * vVelocity.z;
+}
+
 // FUNCTION: SWBF2 0x004e23d0
 void EntitySoldier::Render(unsigned char ucLod, float fFade, unsigned int uiFlags)
 {
@@ -1463,6 +1494,29 @@ void EntitySoldier::Render(unsigned char ucLod, float fFade, unsigned int uiFlag
     {
         gameObjectInterpolator.GetMatrix(mNetUniqueId, mWorld);
         gameObjectInterpolator.GetVector(mNetUniqueId, vAim);
+    }
+
+    // OpenSWBF2: how fast the soldier moves on screen (mDrawnSpeed), from samples at least
+    // 1/30 s apart; drawn again after a gap it is unknown until the next sample
+    {
+        const double dNow = DrawClock();
+        const double dElapsed = dNow - mDrawnTime;
+        const PblVector3& vDrawn = mWorld.GetTranslation();
+        if (mDrawnTime <= 0.0 || dElapsed > 0.5)
+        {
+            mDrawnSpeed = -1.0f;
+            mDrawnPos = vDrawn;
+            mDrawnTime = dNow;
+        }
+        else if (dElapsed >= 1.0 / 30.0)
+        {
+            const float fX = vDrawn.x - mDrawnPos.x;
+            const float fZ = vDrawn.z - mDrawnPos.z;
+            const float fSpeed = sqrtf(fX * fX + fZ * fZ) / (float)dElapsed;
+            mDrawnSpeed = fSpeed < 30.0f ? fSpeed : -1.0f; // faster is a respawn or a teleport
+            mDrawnPos = vDrawn;
+            mDrawnTime = dNow;
+        }
     }
     PblMatrix mCamera = RedRenderer::GetCamera()->GetMatrix();
 

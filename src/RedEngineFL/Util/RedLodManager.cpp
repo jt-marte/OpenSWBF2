@@ -160,8 +160,11 @@ void Render(unsigned int uiFlags)
                         fNextDensity = pLodData->GetCost(iNextLod) * fInvSize;
                     }
 
-                    bool bCompare = bShowMissingLOD ||
-                                    ((pLodData->mLowRezFlags & 1) && iNextLod != 4);
+                    // OpenSWBF2: soldiers (class 2) stay in full detail while the class budget lasts,
+                    // however small on screen: a low-detail soldier shares one of three run loops and
+                    // read as frozen in a 64-a-team battle
+                    bool bCompare = iClass != 2 && (bShowMissingLOD ||
+                                    ((pLodData->mLowRezFlags & 1) && iNextLod != 4));
 
                     if (fDensity < 0.001f)
                     {
