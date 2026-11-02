@@ -93,4 +93,10 @@ TEST_CASE("the host hands an unclaimed hero to a bot" * doctest::test_suite("reg
     CHECK(Has(sAdmin, "{ AC(102), \"aiheroes\" }"));
     CHECK(Has(sAdmin, "NetGame::SetAiHeroes(atoi(acToken) != 0);"));
     CHECK(Has(sAdmin, "\"AI heroes   : %s\""));
+
+    // /hrrespawnvalue [seconds|-1] for ServerSettings.cfg and rcon (retail had it on the command
+    // line only); -1 is never, and it sets the rule with the time
+    CHECK(Has(sAdmin, "{ AC(103), \"hrrespawnvalue\" }"));
+    CHECK(Has(sAdmin, "netHeroRuleRespawn = iSeconds < 0 ? 1 : 2;"));
+    CHECK(Has(sAdmin, "PutAdminNumber(netHeroRuleRespawn == 1 ? -1 : netHeroRuleRespawnVal);"));
 }

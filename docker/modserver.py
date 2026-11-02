@@ -995,8 +995,9 @@ OPTIONS = (
     ("difficulty", range(2, 5), 3), ("conaiperteam", range(0, 65), 32), ("ctfaiperteam", range(0, 65), 32),
     ("assaiperteam", range(0, 65), 32), ("eliaiperteam", range(0, 65), 32), ("teamdamage", range(0, 2), 1),
     ("shownames", range(0, 2), 1), ("autoassignteams", range(0, 2), 1), ("awards", range(0, 2), 1),
-    ("heroes", range(0, 2), 1), ("hrunlock", (3, 5), 3), ("hrunlockvalue", range(0, 121), 10),
-    ("hrplayer", (1, 7), 1), ("aiheroes", range(0, 2), 1), ("conreinforcements", range(10, 501), 100),
+    ("heroes", range(0, 2), 1), ("hrunlock", (3, 5), 3), ("hrunlockvalue", range(0, 301), 10),
+    ("hrplayer", (1, 7), 1), ("hrrespawnvalue", range(-1, 301), 120), ("aiheroes", range(0, 2), 1),
+    ("conreinforcements", range(10, 501), 100),
     ("contimelimit", range(0, 61), 0), ("ctfscorelimit", range(1, 16), 5), ("ctftimelimit", range(0, 61), 0),
     ("huntimelimit", range(0, 61), 0), ("huntscorelimit", range(50, 151), 50), ("assscorelimit", range(150, 301), 180),
 )

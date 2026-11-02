@@ -6613,7 +6613,8 @@ void PublishNextMissionToLobby()
             if (netHeroesEnabled)
             {
                 group.WriteBits(netHeroRuleUnlock, 4);
-                group.WriteBits(netHeroRuleUnlockVal, 8);
+                // OpenSWBF2: an unlock timer goes up to 5 minutes; the listing's 8 bits show 255 for it
+                group.WriteBits(netHeroRuleUnlockVal > 255 ? 255 : netHeroRuleUnlockVal, 8);
                 group.WriteBits(netHeroRuleTeam, 3);
                 group.WriteBits(netHeroRulePlayer, 4);
                 group.WriteBits(netHeroRuleRespawn, 2);

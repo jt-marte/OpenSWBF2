@@ -792,11 +792,20 @@ class SettingsTests(ServiceCase):
                      {"maps": [{"mission": "geo1c_con", "tickets1": "5"}]}, {"maps": long_list},
                      {"options": {"bots": 3}}, {"options": {"difficulty": 9}}, {"options": {"hrunlock": 4}},
                      {"options": {"heroes": True}}, {"joinPassword": "two words"}, {"joinPassword": "x" * 16},
-                     {"options": {"conaiperteam": 65}}, {"lobby": 1}, {"port": 3700}, ["maps"]):
+                     {"options": {"conaiperteam": 65}}, {"lobby": 1}, {"port": 3700}, ["maps"],
+                     {"options": {"hrunlockvalue": 301}}, {"options": {"hrrespawnvalue": -2}},
+                     {"options": {"hrrespawnvalue": 301}}):
             status, reply = self.put(body)
             self.assertEqual(status, 400, body)
             self.assertIn("error", reply)
         self.assertEqual(self.get()["saved"], ["name"])
+
+    def test_hero_timers_go_to_five_minutes_and_respawn_can_be_never(self):
+        status, reply = self.put({"options": {"hrunlock": 5, "hrunlockvalue": 300, "hrrespawnvalue": -1}})
+        self.assertEqual(status, 200, reply)
+        options = self.settings.prepare({})["options"]
+        self.assertEqual((options["hrunlockvalue"], options["hrrespawnvalue"]), (300, -1))
+        self.assertEqual(modserver.DEFAULTS["options"]["hrrespawnvalue"], 120)  # the game's own default
 
     def test_a_team_takes_up_to_64_bots(self):
         status, reply = self.put({"options": {"conaiperteam": 64, "ctfaiperteam": 0, "assaiperteam": 40}})
