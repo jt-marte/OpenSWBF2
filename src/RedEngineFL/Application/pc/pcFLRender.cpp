@@ -382,7 +382,9 @@ void FLRenderer::Init(bool bUberMode)
     RedSceneManager::Init();
 
     RedLodManager::Init(4);
-    RedLodManager::SetClassMaxCost(2, 100, 18000, 0, 1000, 40000);
+    // OpenSWBF2: soldiers (class 2, 2000 each) in full detail up to 160 a view, not retail's 9;
+    // past those, at 64 a team most of a battle was low-poly soldiers sharing three run loops
+    RedLodManager::SetClassMaxCost(2, 160, 2000 * 160, 0, 1000, 40000);
     RedLodManager::SetFadeSpeed(2, 10.0f);
     RedLodManager::SetClassLodHint(2, 100, 0, 0);
     RedLodManager::SetClassMaxCost(1, 600, 100000, 22000, 22000, 40000);

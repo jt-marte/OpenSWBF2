@@ -113,7 +113,7 @@ SoldierAnimatorClass::~SoldierAnimatorClass()
 {
     if (mSoldierAnimators)
     {
-        for (int i = 0; i < 50; ++i)
+        for (int i = 0; i < NUM_ANIMATORS; ++i)
         {
             PblList<SoldierAnimator>::Node& node = mSoldierAnimators[i].GetLRUNode();
             if (node.IsInList())
@@ -2383,10 +2383,10 @@ void SoldierAnimatorClass::_PostLoad()
 
     SoldierAnimationData::DiscardLoadTimeData();
 
-    mSoldierAnimators = new SoldierAnimator[50];
+    mSoldierAnimators = new SoldierAnimator[NUM_ANIMATORS];
     if (mSoldierAnimators)
     {
-        for (int i = 0; i < 50; ++i)
+        for (int i = 0; i < NUM_ANIMATORS; ++i)
         {
             mSoldierAnimators[i].Initialize(mZephyrSkeletonShared);
             mLRU_List.Add(&mSoldierAnimators[i].GetLRUNode(), &mSoldierAnimators[i]);

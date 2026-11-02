@@ -508,6 +508,14 @@ void RedSceneAABox::RenderBox(int iDepth, bool bSiblings)
     }
 }
 
+// OpenSWBF2: the far scene draws everything at its lowest detail, but a soldier (LOD class 2)
+// there in low detail shares one of three run loops and read as frozen in a 64-a-team battle:
+// soldiers stay in full detail at any distance.
+static unsigned char FarLod(const RedSceneObject* p)
+{
+    return p->_pLodData->_LodClass == 2 ? 0 : 3;
+}
+
 // FUNCTION: SWBF2 0x006e2ed0
 void RenderFarObjects()
 {
@@ -524,7 +532,9 @@ void RenderFarObjects()
     {
         iMax = sMaxNumFarObjects;
     }
-    int iClass2Budget = 10;
+    // OpenSWBF2: far soldiers drawn, retail 10 (the rest of a 64-a-team battle vanished past the
+    // near scene)
+    int iClass2Budget = 128;
     sMaxNumFarObjects = iMax;
     float fMinRatio = fMinScreenSize * fMinScreenSize / 798720.0f;
 
@@ -582,12 +592,12 @@ void RenderFarObjects()
                     {
                         continue;
                     }
-                    p->Render(3, 1.0f, p->_uiRenderFlags | 0x20000);
+                    p->Render(FarLod(p), 1.0f, p->_uiRenderFlags | 0x20000);
                 }
             }
             else if (fFadeStart < fDist)
             {
-                p->Render(3, 1.0f, p->_uiRenderFlags | 0x20000);
+                p->Render(FarLod(p), 1.0f, p->_uiRenderFlags | 0x20000);
             }
         }
         objects[i] = 0;
@@ -615,7 +625,7 @@ void RenderFarObjects()
         {
             fAlpha = (fLimit - fDist) * fAlpha / 20.0f;
         }
-        p->Render(3, fAlpha, p->_uiRenderFlags | 0x20000);
+        p->Render(FarLod(p), fAlpha, p->_uiRenderFlags | 0x20000);
     }
 }
 
